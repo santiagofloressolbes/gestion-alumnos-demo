@@ -1,16 +1,20 @@
 // Arranque de la app: rutas por "#", barra inferior, sin zoom y service worker.
-import { getMasters } from './data/index.js';
 import { pintarInicio } from './vistas/inicio.js';
-import { el, plural } from './util/dom.js';
+import { pintarMaster } from './vistas/master.js';
+import { pintarAlumno } from './vistas/alumno.js';
 
 const $ = s => document.querySelector(s);
 let inicioPintado = false;
 
 function rutaActual() {
   const h = location.hash.replace(/^#\/?/, '');
-  if (h.startsWith('master/')) return { vista: 'master', master: decodeURIComponent(h.slice(7)), pestana: 'inicio' };
-  if (h === 'buscar') return { vista: 'buscar', pestana: 'buscar' };
-  return { vista: 'inicio', pestana: 'inicio' };
+  let m;
+  try {
+    if ((m = h.match(/^master\/(.+)$/))) return { vista: 'master', valor: decodeURIComponent(m[1]), pestana: 'inicio', titulo: decodeURIComponent(m[1]) };
+    if ((m = h.match(/^alumno\/(.+)$/))) return { vista: 'alumno', valor: decodeURIComponent(m[1]), pestana: 'inicio', titulo: 'Ficha' };
+  } catch { /* dirección mal escrita: se vuelve al inicio */ }
+  if (h === 'buscar') return { vista: 'buscar', pestana: 'buscar', titulo: 'Buscar' };
+  return { vista: 'inicio', pestana: 'inicio', titulo: 'Alumnos LBS' };
 }
 
 async function pintar() {
@@ -20,25 +24,12 @@ async function pintar() {
     if (a.dataset.tab === r.pestana) a.setAttribute('aria-current', 'page');
     else a.removeAttribute('aria-current');
   }
-  $('#titulo').textContent = r.vista === 'buscar' ? 'Buscar' : r.vista === 'master' ? r.master : 'Alumnos LBS';
+  $('#titulo').textContent = r.titulo;
   $('#main').scrollTop = 0;
 
   if (r.vista === 'inicio' && !inicioPintado) { inicioPintado = true; await pintarInicio($('#v-inicio')); }
-  if (r.vista === 'master') await pintarMaster(r.master);
-}
-
-// Provisional: la lista de alumnos llega en el paso 4.
-async function pintarMaster(nombre) {
-  const raiz = $('#v-master');
-  let existe = false, n = 0;
-  try {
-    const m = (await getMasters()).find(x => x.nombre === nombre);
-    existe = !!m; n = m ? m.alumnos : 0;
-  } catch { /* se muestra "no encontrado" */ }
-  raiz.replaceChildren(el('div', { class: 'card' },
-    el('h2', {}, existe ? nombre : 'Máster no encontrado'),
-    el('p', { class: 'sub' }, existe ? `${plural(n, 'alumno', 'alumnos')}. La lista llega en el paso 4.` : 'Vuelve al inicio y elige uno de la lista.'),
-    el('a', { class: 'secondary', href: '#/' }, 'Volver al inicio')));
+  if (r.vista === 'master') await pintarMaster($('#v-master'), r.valor);
+  if (r.vista === 'alumno') await pintarAlumno($('#v-alumno'), r.valor);
 }
 
 window.addEventListener('hashchange', pintar);
