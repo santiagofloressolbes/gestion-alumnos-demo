@@ -32,9 +32,9 @@ export async function pintarBuscar(raiz) {
   const situaciones = opciones(listas.situaciones, ['situacionTrabajo']);
   const disponibilidades = opciones(listas.disponibilidades, ['disponibilidad']);
 
-  const campoSelect = (id, etiqueta, valores, clave, todas) => {
+  const campoSelect = (id, etiqueta, valores, clave, todas, nombreOpcion = v => v) => {
     const s = el('select', { id, onchange: () => { e[clave] = s.value; pintarResultados(); } },
-      el('option', { value: '' }, todas), valores.map(v => el('option', { value: v }, v)));
+      el('option', { value: '' }, todas), valores.map(v => el('option', { value: v }, nombreOpcion(v))));
     return el('div', { class: 'campo-form' }, el('label', { for: id }, etiqueta), s);
   };
 
@@ -69,7 +69,8 @@ export async function pintarBuscar(raiz) {
         el('div', { class: 'opciones', role: 'group', 'aria-labelledby': 'l-area-en' }, botonesArea)),
       campoSelect('f-nac', 'Nacionalidad (principal o secundaria)', nacionalidades, 'nacionalidad', 'Todas las nacionalidades'),
       campoSelect('f-sit', 'Situación de trabajo en España', situaciones, 'situacion', 'Todas las situaciones'),
-      campoSelect('f-disp', 'Disponibilidad', disponibilidades, 'disponibilidad', 'Prácticas, empleo o ambas')));
+      campoSelect('f-disp', 'Disponibilidad', disponibilidades, 'disponibilidad', 'Prácticas, empleo o ambas',
+        v => (v === 'Ambas' ? 'Ambas (prácticas y empleo)' : `${v} (incluye Ambas)`))));
 
   function pintarResultados() {
     const res = filtrar(alumnos, e);

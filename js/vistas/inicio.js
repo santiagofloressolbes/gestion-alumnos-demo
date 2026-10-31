@@ -26,7 +26,7 @@ export async function pintarInicio(raiz) {
   raiz.replaceChildren(...[
     el('h2', { class: 'seccion' }, 'Elige un máster'),
     el('nav', { class: 'masters', 'aria-label': 'Másteres' }, botones),
-    el('p', { class: 'estado' }, `${plural(masters.length, 'máster', 'másteres')} · ${plural(total, 'alumno', 'alumnos')} · datos de prueba`),
+    el('p', { class: 'estado' }, `${plural(masters.length, 'máster', 'másteres')} · ${plural(total, 'alumno', 'alumnos')} · datos ficticios`),
     estado.respaldo && el('p', { class: 'aviso', role: 'status' },
       'No se ha podido leer el Google Sheet; se muestran los datos de respaldo de la app. ',
       el('small', {}, 'Motivo: ' + (estado.motivo === 'Failed to fetch' || /abort/i.test(estado.motivo) ? 'sin conexión o Google no responde.' : estado.motivo) + ' '),

@@ -1,0 +1,19 @@
+# Nunca subir claves ni datos reales
+Code.gs
+.env
+.env.*
+*.key
+*.pem
+*.bak
+*.xlsx
+*.xls
+
+# Datos reales de alumnos (solo se versionan los de prueba de datos-mock/)
+datos-reales/
+
+# Basura del sistema y de herramientas
+.DS_Store
+Thumbs.db
+node_modules/
+Captura*
+Screenshot*

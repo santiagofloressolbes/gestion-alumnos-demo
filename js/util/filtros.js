@@ -21,6 +21,9 @@ function textoDe(a) {
 const porArea = (a, area, en) =>
   (en !== 'destino' && a.areaExperiencia === area) || (en !== 'experiencia' && a.areaDestino === area);
 
+// "Prácticas" y "Empleo" incluyen también a quien tiene "Ambas". "Ambas" muestra solo a los de Ambas.
+const disponible = (valor, buscado) => valor === buscado || (valor === 'Ambas' && buscado !== 'Ambas');
+
 export function filtrar(alumnos, e) {
   const palabras = norm(e.texto).split(/\s+/).filter(Boolean);   // todas deben aparecer
   return alumnos
@@ -28,6 +31,6 @@ export function filtrar(alumnos, e) {
     .filter(a => !e.area || porArea(a, e.area, e.areaEn))
     .filter(a => !e.nacionalidad || a.nacionalidadPrincipal === e.nacionalidad || a.nacionalidadSecundaria === e.nacionalidad)
     .filter(a => !e.situacion || a.situacionTrabajo === e.situacion)
-    .filter(a => !e.disponibilidad || a.disponibilidad === e.disponibilidad)   // valor exacto: Prácticas, Empleo o Ambas
+    .filter(a => !e.disponibilidad || disponible(a.disponibilidad, e.disponibilidad))
     .sort((x, y) => `${x.apellidos} ${x.nombre}`.localeCompare(`${y.apellidos} ${y.nombre}`, 'es'));
 }

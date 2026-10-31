@@ -18,7 +18,7 @@ function rutaActual() {
     if ((m = h.match(/^alumno\/(.+)$/))) return { vista: 'alumno', valor: decodeURIComponent(m[1]), pestana: 'inicio', titulo: 'Ficha' };
   } catch { /* dirección mal escrita: se vuelve al inicio */ }
   if (h === 'buscar') return { vista: 'buscar', pestana: 'buscar', titulo: 'Buscar' };
-  return { vista: 'inicio', pestana: 'inicio', titulo: 'Alumnos LBS' };
+  return { vista: 'inicio', pestana: 'inicio', titulo: 'Gestión de alumnos (demo)' };
 }
 
 async function pintar() {

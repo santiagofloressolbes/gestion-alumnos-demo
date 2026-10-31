@@ -1,5 +1,7 @@
 # Decisiones del proyecto
 
+> **Proyecto personal de demostración. Datos ficticios. No afiliado a LaLiga ni a LaLiga Business School.**
+
 Última actualización: 2026-10-31. Fase 1: solo lectura, solo datos de prueba (ficticios).
 
 ## Decididas
@@ -11,16 +13,17 @@
 | Tecnología | HTML, CSS y JavaScript puros, sin instalar ni compilar nada. Módulos JS. Sin librerías ni CDN. | Lo más simple; se publica tal cual en GitHub Pages. |
 | Rutas | Con `#` (por ejemplo `#/master/MBA en inglés`). | GitHub Pages no entiende rutas de servidor. |
 | Acceso a datos | Todo pasa por `js/data/` (`getAlumnos`, `getOfertas`, `getListas`, `getMasters`). Las pantallas nunca leen archivos ni Google directamente. | Migrar a Microsoft Graph tocando pocas piezas: un archivo nuevo en `js/data/` y una línea en `config.js`. |
-| Fuente actual | Google Sheet "Alumnos LBS – MOCK" publicado como CSV (una hoja por enlace). Si falla, datos de respaldo de `datos-mock/`, con aviso en pantalla. | No necesita claves; vale solo con datos de prueba. |
+| Fuente actual | Google Sheet de prueba publicado como CSV (una hoja por enlace). Si falla, datos de respaldo de `datos-mock/`, con aviso en pantalla. | No necesita claves; vale solo con datos de prueba. |
 | Solo lectura | La app no edita nada. | Alcance de la Fase 1. |
-| Diseño | Tema LaLiga con los mismos valores que la app de gastos. Open Sans en el repo. Márgenes de 24 px, tarjetas de 24 px de radio, botones de 44 px como mínimo. | Coherencia con tu app de gastos. |
+| Diseño | Tema oscuro con acento rojo, con los mismos valores que la app de gastos. Open Sans en el repo. Márgenes de 24 px, tarjetas de 24 px de radio, botones de 44 px como mínimo. | Coherencia con tu app de gastos. |
 | Contraste | El rojo `#D63B45` solo como fondo (con texto blanco, 4,59:1). Como texto de color se usa `#FF6B73`. | Como texto sobre tarjeta el rojo da 3,44:1 y no pasa 4,5:1. |
 | Sin zoom | Se cancelan los gestos de pellizco y se usa `touch-action: manipulation`. El viewport no lleva `user-scalable`. | Igual que gastos; comprobado en iPhone. |
 | Textos de los datos | Siempre se escriben como texto (nunca `innerHTML`). | Una celda con código no puede ejecutarse. |
 | Buscadores | `noindex` en `index.html` y `robots.txt`. | Evita que salga en Google. No hace la app privada. |
 | Caché | Cada cambio en archivos de la app: subir `CACHE` en `sw.js`. Los datos van primero por red. | Que el móvil cargue siempre la versión nueva. |
 | CV de ejemplo | Los enlaces `example.com/cv/…` se desvían a una página "CV de ejemplo" dentro de la app (Paso 5), sin tocar el Sheet. | Pedido por Santiago. |
-| Disponibilidad | Tres valores: Prácticas, Empleo, Ambas. | Ya estaban en los datos de prueba. |
+| Disponibilidad | Tres valores: Prácticas, Empleo, Ambas. En el filtro, "Prácticas" y "Empleo" incluyen también a los de "Ambas"; "Ambas" muestra solo a los de Ambas. | Quien busca prácticas también acepta a quien admite las dos. |
+| Marca | Nombre público "Gestión de alumnos (demo)"; en el icono del móvil, "Alumnos (demo)". Sin logos ni siglas de LaLiga ni de la escuela. Icono genérico (silueta). Aviso visible al final de cada pantalla y en el README. Los nombres de los másteres se mantienen. | Que no parezca una app oficial. Nombre corto porque iOS recorta los nombres largos bajo el icono. |
 
 ## Pendiente (sin código todavía): Sheet privado y acceso con clave
 
@@ -55,7 +58,7 @@
 - **Móvil perdido:** la clave está en el móvil.
 - **CV y fotos:** la clave no los protege. Sus enlaces tendrían que ser privados (Fase 2).
 - **Historial de Git:** los enlaces del Sheet publicado ya están en el historial público. Dejan de funcionar al detener la publicación.
-- **Microsoft:** el destino correcto es un inicio de sesión individual (Entra ID) con SharePoint o Excel, con permisos por persona y registro. Requiere a IT de LaLiga. La capa de datos ya lo permite; cambiaría la pantalla de Acceso.
+- **Microsoft:** el destino correcto es un inicio de sesión individual (Entra ID) con SharePoint o Excel, con permisos por persona y registro. Requiere al departamento de IT de la organización. La capa de datos ya lo permite; cambiaría la pantalla de Acceso.
 
 **Recomendación:** usar este mecanismo solo con datos de prueba. Para datos reales, pasar a Microsoft con inicio de sesión, no a una clave compartida en una cuenta personal.
 

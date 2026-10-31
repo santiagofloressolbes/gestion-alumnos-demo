@@ -1,7 +1,7 @@
 {
-  "name": "Alumnos LBS",
-  "short_name": "Alumnos LBS",
-  "description": "Consulta de alumnos de LaLiga Business School (datos de prueba)",
+  "name": "Gestión de alumnos (demo)",
+  "short_name": "Alumnos (demo)",
+  "description": "Proyecto personal de demostración. Datos ficticios. No afiliado a LaLiga ni a LaLiga Business School.",
   "start_url": "./",
   "scope": "./",
   "display": "standalone",
