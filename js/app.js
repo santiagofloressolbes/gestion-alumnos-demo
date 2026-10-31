@@ -2,6 +2,7 @@
 import { pintarInicio } from './vistas/inicio.js';
 import { pintarMaster } from './vistas/master.js';
 import { pintarAlumno } from './vistas/alumno.js';
+import { pintarCV } from './vistas/cv.js';
 
 const $ = s => document.querySelector(s);
 let inicioPintado = false;
@@ -11,6 +12,7 @@ function rutaActual() {
   let m;
   try {
     if ((m = h.match(/^master\/(.+)$/))) return { vista: 'master', valor: decodeURIComponent(m[1]), pestana: 'inicio', titulo: decodeURIComponent(m[1]) };
+    if ((m = h.match(/^cv\/(.+)$/))) return { vista: 'cv', valor: decodeURIComponent(m[1]), pestana: 'inicio', titulo: 'CV de ejemplo' };
     if ((m = h.match(/^alumno\/(.+)$/))) return { vista: 'alumno', valor: decodeURIComponent(m[1]), pestana: 'inicio', titulo: 'Ficha' };
   } catch { /* dirección mal escrita: se vuelve al inicio */ }
   if (h === 'buscar') return { vista: 'buscar', pestana: 'buscar', titulo: 'Buscar' };
@@ -30,6 +32,7 @@ async function pintar() {
   if (r.vista === 'inicio' && !inicioPintado) { inicioPintado = true; await pintarInicio($('#v-inicio')); }
   if (r.vista === 'master') await pintarMaster($('#v-master'), r.valor);
   if (r.vista === 'alumno') await pintarAlumno($('#v-alumno'), r.valor);
+  if (r.vista === 'cv') await pintarCV($('#v-cv'), r.valor);
 }
 
 window.addEventListener('hashchange', pintar);
