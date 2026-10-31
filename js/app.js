@@ -3,9 +3,11 @@ import { pintarInicio } from './vistas/inicio.js';
 import { pintarMaster } from './vistas/master.js';
 import { pintarAlumno } from './vistas/alumno.js';
 import { pintarCV } from './vistas/cv.js';
+import { pintarBuscar } from './vistas/buscar.js';
 
 const $ = s => document.querySelector(s);
 let inicioPintado = false;
+let vistaPrevia = null, scrollBuscar = 0;   // para volver a la búsqueda en el mismo punto
 
 function rutaActual() {
   const h = location.hash.replace(/^#\/?/, '');
@@ -21,6 +23,8 @@ function rutaActual() {
 
 async function pintar() {
   const r = rutaActual();
+  // Antes de ocultar la búsqueda (al ocultarla el scroll vuelve a 0), se apunta en qué punto estaba.
+  if (vistaPrevia === 'buscar' && r.vista !== 'buscar') scrollBuscar = $('#main').scrollTop;
   for (const v of document.querySelectorAll('.view')) v.classList.toggle('on', v.id === 'v-' + r.vista);
   for (const a of document.querySelectorAll('#tabs a')) {
     if (a.dataset.tab === r.pestana) a.setAttribute('aria-current', 'page');
@@ -33,6 +37,8 @@ async function pintar() {
   if (r.vista === 'master') await pintarMaster($('#v-master'), r.valor);
   if (r.vista === 'alumno') await pintarAlumno($('#v-alumno'), r.valor);
   if (r.vista === 'cv') await pintarCV($('#v-cv'), r.valor);
+  if (r.vista === 'buscar') { await pintarBuscar($('#v-buscar')); if (vistaPrevia === 'alumno') $('#main').scrollTop = scrollBuscar; }
+  vistaPrevia = r.vista;
 }
 
 window.addEventListener('hashchange', pintar);

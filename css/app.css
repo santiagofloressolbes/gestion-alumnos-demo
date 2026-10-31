@@ -116,3 +116,22 @@ main{flex:1;min-height:0;overflow-y:auto;overflow-x:hidden;-webkit-overflow-scro
 .cv-bloque h3{font:700 .875rem/1.3 var(--sans);margin:0 0 .25rem;color:var(--tab-on);text-transform:uppercase;letter-spacing:.04em}
 .cv-bloque p{margin:0;line-height:1.5}
 .aviso{margin:0 0 1rem}
+
+/* ---------- Buscar y filtros ---------- */
+.buscador{padding:1.5rem}
+.campo-form{margin:0 0 1rem}
+.campo-form label,.campo-form .etiqueta{display:block;font-size:.875rem;font-weight:600;color:var(--cmuted);margin:0 0 .25rem}
+.campo-form input,.campo-form select{display:block;width:100%;min-height:3rem;padding:0 1rem;border-radius:1rem;border:1.5px solid var(--line);background:var(--inp);color:var(--cink);font-size:1rem}   /* 16 px: el iPhone no amplía al enfocar */
+.campo-form input::placeholder{color:var(--cmuted)}
+.campo-form select{-webkit-appearance:none;appearance:none;padding-right:2.5rem;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23A1A1AA' stroke-width='2.2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right .75rem center;background-size:1.5rem}
+.filtros summary{display:flex;align-items:center;justify-content:space-between;min-height:2.75rem;font-weight:700;cursor:pointer;list-style:none}
+.filtros summary::-webkit-details-marker{display:none}
+.filtros summary::after{content:"";width:.625rem;height:.625rem;border-right:2.2px solid var(--tab-on);border-bottom:2.2px solid var(--tab-on);transform:rotate(45deg);margin-right:.5rem;transition:transform .15s}
+.filtros[open] summary::after{transform:rotate(-135deg)}
+.filtros-cuerpo{padding-top:1rem}
+.filtros-cuerpo .campo-form:last-child{margin-bottom:0}
+.opciones{display:flex;flex-wrap:wrap;gap:.5rem}
+.opcion{min-height:2.75rem;padding:0 1rem;border-radius:6.1875rem;background:var(--inp);color:var(--cink);border:1.5px solid var(--line);font-size:.9375rem;font-weight:600}
+.opcion[aria-pressed=true]{background:var(--act-bg);border-color:var(--act-bg);color:var(--act-fg)}
+#v-buscar > .secondary{margin-top:1rem}
+.cuenta{margin:1rem 0}

@@ -2,6 +2,7 @@
 import { getAlumnos, getMasters } from '../data/index.js';
 import { el, svgFlecha, plural } from '../util/dom.js';
 import { avatar } from '../util/avatar.js';
+import { navegacion } from '../util/navegacion.js';
 
 export const volver = () => el('a', { class: 'volver', href: '#/' }, 'Inicio');
 
@@ -29,17 +30,18 @@ export async function pintarMaster(raiz, nombre) {
     volver(),
     el('h2', { class: 'seccion' }, plural(lista.length, 'alumno', 'alumnos')),
     lista.length
-      ? el('ul', { class: 'alumnos', 'aria-label': 'Alumnos de ' + nombre }, lista.map(fila))
+      ? el('ul', { class: 'alumnos', 'aria-label': 'Alumnos de ' + nombre }, lista.map(a => fila(a, 'master')))
       : el('div', { class: 'card' }, el('p', { class: 'sub' }, 'Este máster todavía no tiene alumnos.')));
 }
 
-// Dato breve: a qué área quiere ir y si busca prácticas o empleo.
-function fila(a) {
+// Dato breve: a qué área quiere ir y si busca prácticas o empleo. En la búsqueda se añade el máster.
+export function fila(a, origen, conMaster = false) {
   const breve = [a.areaDestino, a.disponibilidad].filter(Boolean).join(' · ');
-  return el('li', {}, el('a', { class: 'alumno', href: '#/alumno/' + encodeURIComponent(a.id) },
+  return el('li', {}, el('a', { class: 'alumno', href: '#/alumno/' + encodeURIComponent(a.id), onclick: () => { navegacion.origen = origen; } },
     avatar(a),
     el('span', { class: 'alumno-texto' },
       el('b', {}, `${a.nombre} ${a.apellidos}`.trim()),
-      breve && el('span', { class: 'sub' }, breve)),
+      breve && el('span', { class: 'sub' }, breve),
+      conMaster && el('span', { class: 'sub' }, a.master)),
     svgFlecha()));
 }

@@ -3,6 +3,7 @@ import { getAlumnos } from '../data/index.js';
 import { el } from '../util/dom.js';
 import { avatar } from '../util/avatar.js';
 import { enlaceCV } from '../util/cv.js';
+import { navegacion } from '../util/navegacion.js';
 
 const MESES = ['enero', 'febrero', 'marzo', 'abril', 'mayo', 'junio', 'julio', 'agosto', 'septiembre', 'octubre', 'noviembre', 'diciembre'];
 
@@ -45,7 +46,9 @@ export async function pintarAlumno(raiz, id) {
   const cv = enlaceCV(a);
 
   raiz.replaceChildren(
-    el('a', { class: 'volver', href: '#/master/' + encodeURIComponent(a.master) }, a.master),
+    navegacion.origen === 'buscar'
+      ? el('a', { class: 'volver', href: '#/buscar' }, 'Buscar')
+      : el('a', { class: 'volver', href: '#/master/' + encodeURIComponent(a.master) }, a.master),
 
     el('section', { class: 'card cabecera', 'aria-label': 'Alumno' },
       avatar(a, true),
