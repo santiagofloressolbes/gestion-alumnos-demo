@@ -1,5 +1,7 @@
 # Nunca subir claves ni datos reales
 Code.gs
+# Excepción: la plantilla pública sin claves SÍ se versiona
+!docs/apps-script/Code.gs
 .env
 .env.*
 *.key
