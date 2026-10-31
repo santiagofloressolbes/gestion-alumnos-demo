@@ -1,0 +1,11 @@
+﻿ID oferta,Empresa,Tipo de organización,Área,Título del puesto,Tipo,Ubicación,Requisito de nacionalidad,Requisito de permiso de trabajo,Fecha de recepción,Estado de la oferta,Enlace o descripción
+O001,Liga mock A,Liga,Antipiratería y seguridad,Analista de antipiratería,Empleo,Madrid,,Permiso de trabajo en vigor,2026-10-05,Abierta,https://example.com/oferta/O001
+O002,Club mock B,Equipo,Comercial y patrocinio,Becario/a de patrocinio,Prácticas,Barcelona,,No requerido,2026-10-08,Abierta,https://example.com/oferta/O002
+O003,Startup mock C,Startup,Producto y tecnología,Product manager junior,Empleo,Madrid,,Permiso de trabajo en vigor,2026-10-10,Abierta,https://example.com/oferta/O003
+O004,Federación mock D,Federación,Operaciones y eventos,Becario/a de eventos,Prácticas,Madrid,,No requerido,2026-10-12,Abierta,https://example.com/oferta/O004
+O005,Agencia mock E,Agencia,Marketing y comunicación,Coordinador/a de comunicación,Empleo,Valencia,,Permiso de trabajo en vigor,2026-10-14,Abierta,https://example.com/oferta/O005
+O006,Medio mock F,Medio,Marketing y comunicación,Becario/a de redacción,Prácticas,Madrid,,No requerido,2026-10-15,Cerrada,https://example.com/oferta/O006
+O007,Liga mock G (EE. UU.),Liga,Análisis de datos,Analista de datos deportivos,Empleo,Remoto,Estados Unidos,No requerido,2026-10-18,Abierta,https://example.com/oferta/O007
+O008,Club mock H,Equipo,Dirección deportiva y scouting,Becario/a de scouting,Prácticas,Sevilla,,No requerido,2026-10-20,Abierta,https://example.com/oferta/O008
+O009,Otra mock I,Otra,Recursos Humanos,Becario/a de People & Culture,Prácticas,Madrid,,No requerido,2026-10-22,Abierta,https://example.com/oferta/O009
+O010,Despacho mock J,Otra,Derecho y compliance,Asociado/a junior de derecho deportivo,Empleo,Madrid,,Permiso de trabajo en vigor,2026-10-25,Cerrada,https://example.com/oferta/O010

@@ -1,0 +1,75 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="referrer" content="no-referrer">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#17171B">
+<meta name="color-scheme" content="dark">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="Alumnos LBS">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
+<link rel="icon" href="icons/icon-192.png">
+<link rel="stylesheet" href="css/app.css">
+<title>Alumnos LBS</title>
+</head>
+<body>
+<div id="app">
+  <header>
+    <h1 id="titulo">Alumnos LBS</h1>
+  </header>
+
+  <main id="main" tabindex="-1">
+    <section class="view" id="v-inicio" aria-labelledby="titulo">
+      <div class="card">
+        <h2>Base lista</h2>
+        <p class="sub">Esta pantalla es de prueba del diseño. En el siguiente paso aquí irán los botones de cada máster.</p>
+        <div class="stack">
+          <button class="primary" type="button">Botón principal</button>
+          <button class="secondary" type="button">Botón secundario</button>
+        </div>
+      </div>
+      <div class="card">
+        <h2>Muestra de perfil</h2>
+        <div class="row-item">
+          <span class="avatar" style="--av:#D63B45" aria-hidden="true">AB</span>
+          <div class="row-text">
+            <b>Nombre Apellidos</b>
+            <span class="sub">Dato breve del perfil</span>
+          </div>
+        </div>
+        <div class="chips" role="list">
+          <span class="chip on" role="listitem">Marketing</span>
+          <span class="chip" role="listitem">Finanzas</span>
+          <span class="chip" role="listitem">Datos</span>
+        </div>
+      </div>
+    </section>
+
+    <section class="view" id="v-buscar" aria-label="Buscar">
+      <div class="card">
+        <h2>Buscar</h2>
+        <p class="sub">Aquí irán la búsqueda y los filtros (paso 6).</p>
+      </div>
+    </section>
+  </main>
+
+  <nav id="tabs" class="tabs" aria-label="Principal">
+    <a href="#/" data-tab="inicio" aria-current="page">
+      <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 11l9-8 9 8"/><path d="M5 10v10h14V10"/></svg>
+      <span>Inicio</span>
+    </a>
+    <a href="#/buscar" data-tab="buscar">
+      <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="M20 20l-4-4"/></svg>
+      <span>Buscar</span>
+    </a>
+  </nav>
+
+  <div id="upd" hidden>Hay una versión nueva. <button type="button" id="updBtn" class="secondary">Actualizar</button></div>
+</div>
+<script type="module" src="js/app.js"></script>
+</body>
+</html>
