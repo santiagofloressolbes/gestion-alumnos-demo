@@ -38,7 +38,7 @@ main{flex:1;min-height:0;overflow-y:auto;overflow-x:hidden;-webkit-overflow-scro
 .view{display:none} .view.on{display:block}
 
 /* barra inferior */
-.tabs{flex:none;display:grid;grid-template-columns:repeat(2,1fr);background:var(--tab-bg);border-top:1px solid var(--tab-line);padding:2px 1rem calc(var(--sab) + 2px)}
+.tabs{flex:none;display:grid;grid-template-columns:repeat(3,1fr);background:var(--tab-bg);border-top:1px solid var(--tab-line);padding:2px 1rem calc(var(--sab) + 2px)}
 .tabs a{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;min-height:3rem;font-size:.75rem;font-weight:600;color:var(--tab-ink);text-decoration:none;border-radius:1rem}
 .tabs svg{width:1.5rem;height:1.5rem;stroke:currentColor;fill:none;stroke-width:1.9;stroke-linecap:round;stroke-linejoin:round}
 .tabs a[aria-current=page]{color:var(--ink);font-weight:700}
@@ -135,6 +135,16 @@ main{flex:1;min-height:0;overflow-y:auto;overflow-x:hidden;-webkit-overflow-scro
 .opcion[aria-pressed=true]{background:var(--act-bg);border-color:var(--act-bg);color:var(--act-fg)}
 #v-buscar > .secondary{margin-top:1rem}
 .cuenta{margin:1rem 0}
+
+/* ---------- Ofertas ---------- */
+.insignia{display:inline-flex;align-items:center;min-height:1.75rem;padding:0 .75rem;border-radius:6.1875rem;background:var(--inp);color:var(--cink);border:1.5px solid var(--line);font-size:.8125rem;font-weight:700}
+.insignia.abierta{border-color:var(--tab-on);color:var(--tab-on)}   /* el rojo solo como texto/borde, nunca texto sobre rojo */
+.alumno.oferta{align-items:flex-start}
+.oferta .alumno-texto{gap:.125rem}
+.oferta-pie{display:flex;flex-wrap:wrap;align-items:center;gap:.5rem;margin-top:.5rem}
+.oferta-pie .sub{margin:0}
+.cabecera-oferta .chips{margin:0}
+.cabecera-oferta .chips + .primary{margin-top:1.5rem}
 
 /* Aviso legal visible al final de cada pantalla */
 .legal{margin:1.5rem 0 0;padding:1rem 1.5rem;border-radius:1.5rem;border:1.5px solid var(--line);font-size:.8125rem;line-height:1.5;color:var(--muted);text-align:center}

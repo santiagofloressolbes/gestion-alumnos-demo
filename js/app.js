@@ -5,12 +5,13 @@ import { pintarAlumno } from './vistas/alumno.js';
 import { pintarCV } from './vistas/cv.js';
 import { pintarBuscar } from './vistas/buscar.js';
 import { pintarAcceso } from './vistas/acceso.js';
+import { pintarOfertas, pintarOferta } from './vistas/ofertas.js';
 import { getModo } from './data/index.js';
 
 const $ = s => document.querySelector(s);
 let inicioPintado = false;
-let vistaPrevia = null, scrollBuscar = 0;   // para volver a la búsqueda en el mismo punto
-
+let vistaPrevia = null;
+const scrollLista = { buscar: 0, ofertas: 0 };   // para volver a la búsqueda o a las ofertas en el mismo punto
 function rutaActual() {
   const h = location.hash.replace(/^#\/?/, '');
   let m;
@@ -19,7 +20,11 @@ function rutaActual() {
     if ((m = h.match(/^cv\/(.+)$/))) return { vista: 'cv', valor: decodeURIComponent(m[1]), pestana: 'inicio', titulo: 'CV de ejemplo' };
     if ((m = h.match(/^alumno\/(.+)$/))) return { vista: 'alumno', valor: decodeURIComponent(m[1]), pestana: 'inicio', titulo: 'Ficha' };
   } catch { /* dirección mal escrita: se vuelve al inicio */ }
+  try {
+    if ((m = h.match(/^oferta\/(.+)$/))) return { vista: 'oferta', valor: decodeURIComponent(m[1]), pestana: 'ofertas', titulo: 'Oferta' };
+  } catch { /* dirección mal escrita: se vuelve al inicio */ }
   if (h === 'buscar') return { vista: 'buscar', pestana: 'buscar', titulo: 'Buscar' };
+  if (h === 'ofertas') return { vista: 'ofertas', pestana: 'ofertas', titulo: 'Ofertas' };
   if (h === 'acceso') return { vista: 'acceso', pestana: '', titulo: 'Acceso' };
   return { vista: 'inicio', pestana: 'inicio', titulo: 'Gestión de alumnos (demo)' };
 }
@@ -31,7 +36,7 @@ async function pintar() {
   $('#app').classList.toggle('acceso', r.vista === 'acceso');
   $('#demo').hidden = modo !== 'demo';
   // Antes de ocultar la búsqueda (al ocultarla el scroll vuelve a 0), se apunta en qué punto estaba.
-  if (vistaPrevia === 'buscar' && r.vista !== 'buscar') scrollBuscar = $('#main').scrollTop;
+  if ((vistaPrevia === 'buscar' || vistaPrevia === 'ofertas') && r.vista !== vistaPrevia) scrollLista[vistaPrevia] = $('#main').scrollTop;
   for (const v of document.querySelectorAll('.view')) v.classList.toggle('on', v.id === 'v-' + r.vista);
   for (const a of document.querySelectorAll('#tabs a')) {
     if (a.dataset.tab === r.pestana) a.setAttribute('aria-current', 'page');
@@ -45,7 +50,9 @@ async function pintar() {
   if (r.vista === 'master') await pintarMaster($('#v-master'), r.valor);
   if (r.vista === 'alumno') await pintarAlumno($('#v-alumno'), r.valor);
   if (r.vista === 'cv') await pintarCV($('#v-cv'), r.valor);
-  if (r.vista === 'buscar') { await pintarBuscar($('#v-buscar')); if (vistaPrevia === 'alumno') $('#main').scrollTop = scrollBuscar; }
+  if (r.vista === 'buscar') { await pintarBuscar($('#v-buscar')); if (vistaPrevia === 'alumno') $('#main').scrollTop = scrollLista.buscar; }
+  if (r.vista === 'oferta') await pintarOferta($('#v-oferta'), r.valor);
+  if (r.vista === 'ofertas') { await pintarOfertas($('#v-ofertas')); if (vistaPrevia === 'oferta') $('#main').scrollTop = scrollLista.ofertas; }
   vistaPrevia = r.vista;
 }
 

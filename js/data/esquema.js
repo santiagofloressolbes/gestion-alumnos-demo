@@ -21,4 +21,5 @@ export const LISTAS = {
   'Máster': 'masters', 'Área': 'areas', 'Tipo de organización': 'tiposOrganizacion',
   'Nacionalidad': 'nacionalidades', 'Situación de trabajo en España': 'situaciones',
   'Tipo de oferta': 'tiposOferta', 'Estado de la oferta': 'estadosOferta', 'Disponibilidad': 'disponibilidades',
+  'Requisito de permiso': 'requisitosPermiso',
 };
