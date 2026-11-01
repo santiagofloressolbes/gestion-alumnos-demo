@@ -17,6 +17,7 @@ Web publicada: https://santiagofloressolbes.github.io/gestion-alumnos-demo/
 | `datos-mock/` | Los 3 CSV de prueba (Alumnos, Ofertas, Listas). Son los datos del **modo demo**. |
 | `docs/apps-script/` | `Code.gs` (el script, sin claves) y `GUIA.md` (cómo ponerlo en marcha). |
 | `tests/apps-script/` | Simulador de Google y 128 comprobaciones del script. |
+| `tests/app/` | Pruebas de la app en un navegador real contra ese simulador. |
 | `fonts/`, `icons/` | Tipografía Open Sans e iconos, guardados en el repo (sin CDN). |
 | `sw.js`, `manifest.webmanifest` | Permiten instalar la app y abrirla sin conexión. |
 | `DECISIONES.md` | Qué se decidió y por qué, los riesgos y cómo migrar a Microsoft. |
@@ -30,7 +31,10 @@ Web publicada: https://santiagofloressolbes.github.io/gestion-alumnos-demo/
 
 No se puede abrir `index.html` con doble clic: los navegadores bloquean así los módulos de JavaScript.
 
-Para repetir las pruebas del script: `node tests/apps-script/pruebas.mjs` (necesita Node.js; deben salir 128 de 128).
+Pruebas (necesitan Node.js; solo para desarrollo, la app no usa npm):
+
+- **El script:** `node tests/apps-script/pruebas.mjs`. Deben salir 128 de 128.
+- **La app en un navegador real:** `cd tests/app`, `npm install` (una vez) y `npm test`. Usa Microsoft Edge; con `NAVEGADOR=chromium` usa el Chromium de Playwright (hay que instalarlo con `npx playwright install chromium`). Todo es simulado: no hay claves ni direcciones reales.
 
 ## Publicar un cambio (GitHub Pages)
 

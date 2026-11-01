@@ -161,3 +161,8 @@ main{flex:1;min-height:0;overflow-y:auto;overflow-x:hidden;-webkit-overflow-scro
 .conflicto h3{margin:0 0 .25rem;font-size:1rem}
 .conflicto .campos{margin-bottom:1rem}
 .campo-form input[type=date]{-webkit-appearance:none;appearance:none}
+
+/* iPhone (Safari): el texto del campo de fecha se quedaba pegado arriba. Se centra y se garantiza la altura táctil. */
+.campo-form input[type=date]{display:flex;align-items:center;min-height:3rem;line-height:1.5;text-align:left}
+.campo-form input[type=date]::-webkit-date-and-time-value{display:flex;align-items:center;min-height:1.5em;margin:0;text-align:left}
+.campo-form input[type=date]::-webkit-datetime-edit{padding:0}

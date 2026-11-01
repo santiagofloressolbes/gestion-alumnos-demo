@@ -2,7 +2,7 @@
 
 > **Proyecto personal de demostración. Datos ficticios. No afiliado a LaLiga ni a LaLiga Business School.**
 
-Última actualización: 2026-11-01. Fase 1 (lectura) y Fase 2 (acceso con clave y notas de entrevista) terminadas. Solo datos de prueba (ficticios).
+Última actualización: 2026-11-01. Fase 1 (lectura) terminada. Fase 2 en curso: hecho el primer bloque (acceso con clave y notas de entrevista); faltan ofertas, rondas y aplicaciones, match y compartir perfiles. Solo datos de prueba (ficticios).
 
 ## Decididas
 
@@ -15,7 +15,7 @@
 | Acceso a datos | Todo pasa por `js/data/` (`getAlumnos`, `getOfertas`, `getListas`, `getMasters`, `guardarEntrevista`). Las pantallas nunca leen archivos ni Google directamente. | Migrar a Microsoft Graph tocando pocas piezas (ver "Al migrar a Microsoft"). |
 | Fuentes | Dos: **script** (Google Apps Script con clave sobre un Sheet privado) y **demo** (`datos-mock/`). No hay vuelta automática a la demo si el script falla: se muestra el error. | No mezclar sin avisar datos de prueba con la demo. |
 | Modo demo | Se elige a mano en la pantalla Acceso. Banner fijo "MODO DEMO" en todas las pantallas. No permite guardar nada. | Que nunca se confunda con los datos del Sheet. |
-| Escritura | Antes (Fase 1): la app no editaba nada. **Ahora (Fase 2):** solo se escriben 2 campos, "Notas de entrevista" y "Fecha última entrevista", de un alumno cada vez, y solo en modo script. No se crean ni borran filas ni se toca otra celda. Lo imponen **a la vez** el script y la app. | Guardar notas desde el móvil sin abrir el resto de datos a cambios. |
+| Escritura | Antes (Fase 1): la app no editaba nada. **Ahora (Fase 2, bloque 1):** solo se escriben 2 campos, "Notas de entrevista" y "Fecha última entrevista", de un alumno cada vez, y solo en modo script. No se crean ni borran filas ni se toca otra celda. Lo imponen **a la vez** el script y la app. | Guardar notas desde el móvil sin abrir el resto de datos a cambios. |
 | Notas | Una nota editable por alumno, hasta 2.000 caracteres, sin HTML. Fecha por defecto hoy, editable, sin fechas futuras. Si empieza por `-`, `=`, `+` o `@` se le añade un espacio delante (no se rechaza). Borrar = dejar nota vacía y confirmar. | El espacio evita que Google Sheets o Excel la lean como una fórmula. |
 | Conflictos | Si otra persona cambió la entrevista mientras se editaba, el script devuelve `conflicto` y la app enseña lo que hay ahora. Nunca se pisa en silencio. La app lee las notas sin recortar para no inventar conflictos. | Varias personas pueden usar la misma clave. |
 | Borradores | Lo que se escribe no se guarda en el móvil. Los datos de los alumnos tampoco: solo están en memoria. | Notas delicadas; un móvil perdido no debe llevar notas dentro. |
@@ -34,7 +34,8 @@
 | Marca | Nombre público "Gestión de alumnos (demo)"; en el icono del móvil, "Alumnos (demo)". Sin logos ni siglas de LaLiga ni de la escuela. Icono genérico. Aviso visible al final de cada pantalla y en el README. Los nombres de los másteres se mantienen. | Que no parezca una app oficial. |
 | Repositorio | Se llama `gestion-alumnos-demo` (antes tenía "laliga" en el nombre). Las rutas de la app son relativas, así que no dependen del nombre. | Marca neutra; cambiar el nombre cambia la dirección pública. |
 | Plantilla del script | `docs/apps-script/Code.gs` se versiona (sin claves). Cualquier otro `Code.gs` está en `.gitignore`. | Que una copia con una clave nunca se suba por error. |
-| Pruebas | `tests/apps-script/`: simulador de Google y 128 comprobaciones del `Code.gs` (`node tests/apps-script/pruebas.mjs`). | Probar el mismo código que se pega en Apps Script, sin tocar ningún Sheet real. |
+| Pruebas | `tests/apps-script/`: simulador de Google y 128 comprobaciones del `Code.gs`. `tests/app/`: pruebas de la app en un navegador real contra ese simulador (sin claves ni direcciones reales). | Probar el mismo código que se pega en Apps Script, sin tocar ningún Sheet real. |
+| Historial de Git | No se reescribe. Los enlaces antiguos del Sheet que siguen en él ya no funcionan (401) y no hay claves. | Decisión de Santiago: no cambiar un repositorio público ya publicado sin un beneficio real de seguridad. |
 
 ## Mecanismo actual: Google Apps Script (puente temporal)
 
