@@ -24,7 +24,10 @@ function mensaje(codigo, extra = {}) {
     case 'caracteres': return 'La nota tiene caracteres de control que no se admiten.';
     case 'fecha': return 'Elige una fecha válida.';
     case 'fecha-futura': return 'La fecha no puede ser futura.';
-    case 'conflicto': return 'Otra persona ha cambiado esta entrevista mientras la editabas.';
+    case 'requerido': return 'Falta un dato obligatorio.';
+    case 'lista': return 'Un valor no está en las listas de la hoja Listas del Sheet.';
+    case 'enlace': return 'El enlace no puede empezar por http:, javascript:… Usa https://.';
+    case 'conflicto': return extra.oferta ? 'Otra persona ha cambiado esta oferta mientras la editabas.' : 'Otra persona ha cambiado esta entrevista mientras la editabas.';
     case 'no-encontrado': return 'Este alumno ya no está en el Sheet.';
     case 'id-duplicado': return 'El ID de este alumno está repetido en el Sheet.';
     case 'peticion': case 'accion': return 'El script no entiende la petición. Actualiza Code.gs (mira la guía).';
@@ -80,6 +83,7 @@ export function crearFuenteAppsScript(acceso, esquemas) {
         ofertas: aObjetos('Ofertas', j.ofertas, esquemas.OFERTA),
         listas: aListas(j.listas, esquemas.LISTAS),
         puedeEscribir: j.puedeEscribir === true,
+        soporta: Array.isArray(j.soporta) ? j.soporta.filter(x => typeof x === 'string') : [],   // un script antiguo no lo envía
       };
     },
   };

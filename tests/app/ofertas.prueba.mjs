@@ -139,7 +139,7 @@ for (const modo of ['demo', 'script']) {
   chk(await a.getAttribute('target') === '_blank' && await a.getAttribute('rel') === 'noopener noreferrer', 'se abre en otra pestaña, sin enviar el origen');
   for (const id of ['O002', 'O003', 'O004', 'O005']) {
     await pg.goto(BASE + '#/oferta/' + id); await pg.waitForSelector('#v-oferta .cabecera');
-    chk(await pg.locator('#v-oferta a:not(.volver)').count() === 0, id + ': ningún enlace pulsable');
+    chk(await pg.locator('#v-oferta a:not(.volver):not(#of-editar)').count() === 0, id + ': ningún enlace pulsable de la oferta');
   }
   await pg.goto(BASE + '#/oferta/O003'); await pg.waitForSelector('#v-oferta .cabecera');
   chk(/javascript:alert\(1\)/.test(await pg.innerText('#v-oferta')), 'javascript: se ve como texto');

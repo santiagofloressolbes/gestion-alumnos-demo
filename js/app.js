@@ -6,6 +6,8 @@ import { pintarCV } from './vistas/cv.js';
 import { pintarBuscar } from './vistas/buscar.js';
 import { pintarAcceso } from './vistas/acceso.js';
 import { pintarOfertas, pintarOferta } from './vistas/ofertas.js';
+import { pintarFormOferta } from './vistas/oferta-form.js';
+import { navegacion } from './util/navegacion.js';
 import { getModo } from './data/index.js';
 
 const $ = s => document.querySelector(s);
@@ -21,7 +23,9 @@ function rutaActual() {
     if ((m = h.match(/^alumno\/(.+)$/))) return { vista: 'alumno', valor: decodeURIComponent(m[1]), pestana: 'inicio', titulo: 'Ficha' };
   } catch { /* dirección mal escrita: se vuelve al inicio */ }
   try {
-    if ((m = h.match(/^oferta\/(.+)$/))) return { vista: 'oferta', valor: decodeURIComponent(m[1]), pestana: 'ofertas', titulo: 'Oferta' };
+    if (h === 'oferta/nueva') return { vista: 'oferta-form', valor: null, pestana: 'ofertas', titulo: 'Nueva oferta' };
+    if ((m = h.match(/^oferta\/([^/]+)\/editar$/))) return { vista: 'oferta-form', valor: decodeURIComponent(m[1]), pestana: 'ofertas', titulo: 'Editar oferta' };
+    if ((m = h.match(/^oferta\/([^/]+)$/))) return { vista: 'oferta', valor: decodeURIComponent(m[1]), pestana: 'ofertas', titulo: 'Oferta' };
   } catch { /* dirección mal escrita: se vuelve al inicio */ }
   if (h === 'buscar') return { vista: 'buscar', pestana: 'buscar', titulo: 'Buscar' };
   if (h === 'ofertas') return { vista: 'ofertas', pestana: 'ofertas', titulo: 'Ofertas' };
@@ -52,11 +56,23 @@ async function pintar() {
   if (r.vista === 'cv') await pintarCV($('#v-cv'), r.valor);
   if (r.vista === 'buscar') { await pintarBuscar($('#v-buscar')); if (vistaPrevia === 'alumno') $('#main').scrollTop = scrollLista.buscar; }
   if (r.vista === 'oferta') await pintarOferta($('#v-oferta'), r.valor);
+  if (r.vista === 'oferta-form') await pintarFormOferta($('#v-oferta-form'), r.valor);
   if (r.vista === 'ofertas') { await pintarOfertas($('#v-ofertas')); if (vistaPrevia === 'oferta') $('#main').scrollTop = scrollLista.ofertas; }
   vistaPrevia = r.vista;
 }
 
-window.addEventListener('hashchange', pintar);
+// Un formulario con cambios sin guardar pregunta antes de salir (tocar otra pestaña, "atrás"...). Si se cancela, se vuelve a la dirección anterior.
+let hashPrevio = location.hash, restaurando = false;
+window.addEventListener('hashchange', () => {
+  if (restaurando) { restaurando = false; return; }
+  if (navegacion.sinGuardar && !confirm('Tienes cambios sin guardar. ¿Salir y descartarlos?')) {
+    restaurando = true; location.hash = hashPrevio; return;
+  }
+  navegacion.sinGuardar = false;
+  hashPrevio = location.hash;
+  pintar();
+});
+window.addEventListener('beforeunload', e => { if (navegacion.sinGuardar) { e.preventDefault(); e.returnValue = ''; } });
 pintar();
 
 // Sin pellizco para ampliar (el iPhone ignora user-scalable=no): se cancelan los gestos de zoom.

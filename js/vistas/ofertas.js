@@ -1,5 +1,6 @@
 // Pestaña Ofertas: lista (más recientes primero) con filtros, y ficha de una oferta. Solo lectura.
-import { getOfertas, getListas, recargar } from '../data/index.js';
+import { getOfertas, getListas, recargar, puedeEscribirOfertas, estadoEscrituraOfertas } from '../data/index.js';
+import { navegacion } from '../util/navegacion.js';
 import { el, svgFlecha, plural } from '../util/dom.js';
 import { filtrar, estadoVacio, filtrosActivos, hayAlgo, enlaceOferta } from '../util/ofertas.js';
 import { fechaLarga } from './entrevista.js';
@@ -79,7 +80,13 @@ export async function pintarOfertas(raiz) {
     lista.replaceChildren(...res.map(fila));
   }
 
-  raiz.replaceChildren(
+  const aviso = navegacion.aviso; navegacion.aviso = '';
+  // replaceChildren convierte un false o un texto vacío en texto visible: los elementos opcionales se filtran antes.
+  raiz.replaceChildren(...[
+    aviso && el('p', { class: 'ok', role: 'status' }, aviso),
+    puedeEscribirOfertas() && el('a', { class: 'primary nueva-oferta', href: '#/oferta/nueva' }, 'Nueva oferta'),
+    estadoEscrituraOfertas() === 'script-antiguo' && el('p', { class: 'aviso', role: 'note' },
+      'El script de Google es de una versión anterior y no sabe guardar ofertas. Actualiza Code.gs (guía, "Actualizar a la versión con ofertas").'),
     el('div', { class: 'card buscador', role: 'search' },
       el('div', { class: 'campo-form' }, el('label', { for: 'of-q' }, 'Buscar oferta'), q),
       el('div', { class: 'campo-form' },
@@ -88,7 +95,7 @@ export async function pintarOfertas(raiz) {
       filtros),
     limpiar, cuenta,
     el('div', { class: 'card', hidden: ofertas.length > 0 }, el('h2', {}, 'Todavía no hay ofertas'), el('p', { class: 'sub' }, 'Cuando haya ofertas en el Sheet aparecerán aquí.')),
-    vacio, lista);
+    vacio, lista].filter(Boolean));
   pintarResultados();
 }
 
@@ -128,9 +135,11 @@ export async function pintarOferta(raiz, id) {
   }
 
   const enlace = enlaceOferta(o.enlace);
+  const aviso = navegacion.aviso; navegacion.aviso = '';
   // replaceChildren convierte un null en el texto "null": los apartados opcionales se filtran antes.
   raiz.replaceChildren(...[
     volverAOfertas(),
+    aviso && el('p', { class: 'ok aviso-ok', role: 'status' }, aviso),
 
     el('section', { class: 'card cabecera cabecera-oferta', 'aria-label': 'Oferta' },
       el('h2', { class: 'nombre' }, o.titulo || '(sin título)'),
@@ -160,5 +169,7 @@ export async function pintarOferta(raiz, id) {
       el('h2', {}, enlace.tipo === 'enlace' ? 'Enlace' : 'Descripción'),
       el('dl', { class: 'campos' },
         campo(enlace.tipo === 'ejemplo' ? 'Enlace de ejemplo (no se abre)' : enlace.tipo === 'enlace' ? 'Dirección' : 'Texto', enlace.texto, { texto: true }))),
+
+    puedeEscribirOfertas() && el('a', { class: 'secondary', id: 'of-editar', href: `#/oferta/${encodeURIComponent(o.id)}/editar` }, 'Editar oferta'),
   ].filter(Boolean));
 }

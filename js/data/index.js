@@ -11,15 +11,15 @@ export { getModo, urlGuardada, urlValida };
 
 let carga = null;
 let enMemoria = null;   // los datos ya cargados (solo en memoria; nunca se guardan en el móvil)
-let estado = { modo: '', puedeEscribir: false };
+let estado = { modo: '', puedeEscribir: false, soporta: [] };
 
 async function cargarTodo() {
   const modo = getModo();
   if (!modo) throw errorDatos('sin-acceso');
   const fuente = modo === 'demo' ? crearFuenteCSV(esquemas) : crearFuenteAppsScript(accesoGuardado(), esquemas);
   try {
-    const { puedeEscribir, ...datos } = await fuente.cargar();
-    estado = { modo, puedeEscribir };
+    const { puedeEscribir, soporta = [], ...datos } = await fuente.cargar();
+    estado = { modo, puedeEscribir, soporta };
     enMemoria = datos;
     return datos;
   } catch (e) {
@@ -60,7 +60,7 @@ export async function conectar(url, clave) {
   if (!guardarAcceso(url, clave)) throw errorDatos('almacenamiento');
 }
 export function usarDemo() { if (!guardarDemo()) throw errorDatos('almacenamiento'); }
-export function olvidarAcceso() { olvidarTodo(); carga = null; enMemoria = null; estado = { modo: '', puedeEscribir: false }; }
+export function olvidarAcceso() { olvidarTodo(); carga = null; enMemoria = null; estado = { modo: '', puedeEscribir: false, soporta: [] }; }
 
 /* ---- Escritura: solo la entrevista (notas y fecha) ---- */
 
@@ -90,3 +90,44 @@ export function aplicarEntrevista(id, notas, fecha) {
   if (a) { a.notasEntrevista = notas; a.fechaUltimaEntrevista = fecha; }
 }
 export const puedeEscribir = () => estado.modo === 'script' && estado.puedeEscribir;
+
+/* ---- Escritura: ofertas (alta y edición; nunca se borran: se cierran cambiando el estado) ---- */
+
+const CAMPOS_OFERTA = Object.values(esquemas.OFERTA).filter(k => k !== 'id');
+// ¿Esta conexión sabe guardar ofertas? Un script antiguo no lo anuncia: entonces no se enseñan los botones.
+export const puedeEscribirOfertas = () => puedeEscribir() && estado.soporta.includes('guardarOferta');
+// 'conectado' | 'script-antiguo' | 'solo-lectura' (demo): para explicar por qué no hay botones.
+export const estadoEscrituraOfertas = () => (puedeEscribirOfertas() ? 'conectado' : estado.modo === 'script' && estado.puedeEscribir ? 'script-antiguo' : 'solo-lectura');
+
+// Crea (id vacío) o edita una oferta. "anteriores" = lo que se cree que hay ahora en el Sheet (al editar);
+// el script lo compara y, si alguien lo cambió, devuelve 'conflicto' con lo que hay.
+export async function guardarOferta(id, oferta, anteriores) {
+  const { ofertas } = await datos();
+  if (!puedeEscribirOfertas()) throw errorDatos('solo-lectura');
+  const peticion = { oferta };
+  if (id) {
+    if (!ofertas.some(x => x.id === id)) throw errorDatos('no-encontrado');
+    peticion.id = id;
+    peticion.anteriores = anteriores;
+  }
+  let r;
+  try {
+    r = await llamarScript(accesoGuardado(), 'guardarOferta', peticion);
+  } catch (e) {
+    if (e.codigo === 'clave') borrarClave();
+    throw e;
+  }
+  if (typeof r.id !== 'string' || !r.id || !r.oferta || typeof r.oferta !== 'object') throw errorDatos('respuesta');
+  aplicarOferta(r.id, r.oferta);
+  return { id: r.id, creada: r.creada === true };
+}
+
+// Pone en memoria lo que hay ahora en el Sheet (tras guardar, o al descartar un cambio propio por un conflicto).
+export function aplicarOferta(id, oferta) {
+  if (!enMemoria) return;
+  const limpio = { id };
+  for (const k of CAMPOS_OFERTA) limpio[k] = String(oferta[k] ?? '').trim();
+  const i = enMemoria.ofertas.findIndex(x => x.id === id);
+  if (i >= 0) Object.assign(enMemoria.ofertas[i], limpio);
+  else enMemoria.ofertas.push(limpio);
+}

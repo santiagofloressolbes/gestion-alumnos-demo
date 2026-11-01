@@ -42,6 +42,7 @@ export async function terminar() {
 // Un "móvil" nuevo con su Google simulado.
 //   modo: 'normal' | 'caido' (sin conexión con Google) | 'html' (Google responde una página en vez del script)
 //   ctrl.abortar / ctrl.perderRespuesta: fallan solo la siguiente petición de guardar.
+//   ctrl.alResponder(j, accion): cambia la respuesta del script antes de entregarla (devuelve el nuevo objeto).
 export async function nuevo({ modo = 'normal' } = {}) {
   const mundo = crearMundo();
   mundo.reloj.t = Date.now();
@@ -57,12 +58,13 @@ export async function nuevo({ modo = 'normal' } = {}) {
     log.peticiones.push({ url: req.url(), metodo: req.method(), cuerpo: req.postData(), tipo: req.headers()['content-type'] });
     const cors = { 'access-control-allow-origin': '*' };
     const accion = req.postData() ? JSON.parse(req.postData()).action : '';
-    if (ctrl.abortar && accion === 'guardarEntrevista') { ctrl.abortar = false; return r.abort('failed'); }
+    if (ctrl.abortar && /^guardar/.test(accion)) { ctrl.abortar = false; return r.abort('failed'); }
     if (modo === 'caido') return r.abort('failed');
     if (modo === 'html') return r.fulfill({ status: 200, headers: { ...cors, 'content-type': 'text/html' }, body: '<html>Inicia sesión</html>' });
     if (req.method() !== 'POST') return r.fulfill({ status: 200, headers: cors, body: 'x' });
-    const j = mundo.llamar(req.postData());
-    if (ctrl.perderRespuesta && accion === 'guardarEntrevista') { ctrl.perderRespuesta = false; return r.abort('failed'); }
+    let j = mundo.llamar(req.postData());
+    if (ctrl.perderRespuesta && /^guardar/.test(accion)) { ctrl.perderRespuesta = false; return r.abort('failed'); }
+    if (ctrl.alResponder) j = ctrl.alResponder(j, accion) ?? j;   // para simular un script antiguo o una respuesta rara
     r.fulfill({ status: 200, headers: { ...cors, 'content-type': 'application/json' }, body: JSON.stringify(j) });
   });
   await pg.route('https://script.googleusercontent.com/**', r => r.abort());

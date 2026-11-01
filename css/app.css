@@ -143,6 +143,11 @@ main{flex:1;min-height:0;overflow-y:auto;overflow-x:hidden;-webkit-overflow-scro
 .oferta .alumno-texto{gap:.125rem}
 .oferta-pie{display:flex;flex-wrap:wrap;align-items:center;gap:.5rem;margin-top:.5rem}
 .oferta-pie .sub{margin:0}
+.nueva-oferta{margin:0 0 1rem}
+.aviso-ok{margin:0 0 1rem}
+#v-oferta > .secondary{margin-top:1rem}
+.campo-form .ayuda{margin:.5rem 0 0;font-size:.8125rem}
+#v-oferta-form form .primary{margin-top:.5rem}
 .cabecera-oferta .chips{margin:0}
 .cabecera-oferta .chips + .primary{margin-top:1.5rem}
 
