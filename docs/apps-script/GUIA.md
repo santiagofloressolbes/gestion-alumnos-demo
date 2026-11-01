@@ -45,9 +45,9 @@ El script es un "portero" que vive dentro de tu Google Sheet de prueba. La app l
    - Pulsa "Implementar" y copia la **URL de la aplicación web** (termina en `/exec`). Guárdala tú; no me la pegues.
 7. **Comprueba la dirección.** Pégala en una pestaña nueva del navegador. Debe salir solo el texto "Puente de datos de prueba. Usa la app para conectarte." Si sale una página de error o te pide iniciar sesión, algo del paso 6 está mal.
 8. **Comprueba que el Sheet sigue privado.** En el Sheet, botón Compartir: debe poner "Restringido" (solo tú). **No** actives "Publicar en la web" para nada.
-9. **Avísame de que has llegado hasta aquí**, sin pegarme la clave ni la dirección. En el siguiente paso la app aprenderá a conectarse.
+9. **Conecta la app.** En la app, pantalla Acceso: escribe la dirección y la clave y pulsa "Conectar". Deben salir los másteres y el Sheet no se toca. Nunca pegues la dirección ni la clave en chats.
 
-**Sobre "Publicar en la web":** el Sheet ya no debe estar publicado. Mientras la app no sepa conectarse al script (siguiente paso del proyecto), seguirá mostrando los datos de respaldo de `datos-mock/`. Es normal.
+**Sobre "Publicar en la web":** el Sheet no debe estar publicado. La app ya no lo necesita: solo habla con el script. Si dejas de usar el script, la app no cambia sola a la demo; la demo se elige a mano en Acceso.
 
 ## Mantenimiento
 
