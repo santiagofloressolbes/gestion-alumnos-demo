@@ -19,6 +19,17 @@ function mensaje(codigo, extra = {}) {
     case 'tiempo': return 'Google tarda demasiado en responder. Inténtalo otra vez.';
     case 'respuesta': return 'La dirección no responde como el script. Revisa que esté bien copiada y que se implementó con acceso «Cualquier usuario».';
     case 'version': return 'El script es de una versión que esta app no entiende. Actualiza Code.gs (mira la guía).';
+    case 'largo': return 'La nota supera los 2.000 caracteres.';
+    case 'html': return 'La nota parece llevar código HTML (un «<» seguido de una letra o una barra). Cámbialo y vuelve a guardar.';
+    case 'caracteres': return 'La nota tiene caracteres de control que no se admiten.';
+    case 'fecha': return 'Elige una fecha válida.';
+    case 'fecha-futura': return 'La fecha no puede ser futura.';
+    case 'conflicto': return 'Otra persona ha cambiado esta entrevista mientras la editabas.';
+    case 'no-encontrado': return 'Este alumno ya no está en el Sheet.';
+    case 'id-duplicado': return 'El ID de este alumno está repetido en el Sheet.';
+    case 'peticion': case 'accion': return 'El script no entiende la petición. Actualiza Code.gs (mira la guía).';
+    case 'solo-lectura': return 'Esta conexión no permite guardar.';
+    case 'sin-notas': return 'Escribe una nota.';
     case 'direccion': return 'La dirección no es válida. Debe empezar por https://script.google.com/macros/s/ y terminar en /exec.';
     case 'sin-clave': return 'Escribe la clave.';
     case 'sin-acceso': return 'Todavía no hay acceso configurado.';
