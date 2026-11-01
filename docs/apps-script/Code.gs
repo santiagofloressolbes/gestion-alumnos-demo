@@ -5,8 +5,11 @@
  *
  * Qué hace:
  *   - Lee las hojas Alumnos, Ofertas y Listas y las devuelve a la app.
- *   - Escribe SOLO en la hoja Alumnos, en 2 columnas ("Notas de entrevista" y "Fecha última entrevista"),
- *     y solo en la fila del alumno indicado. No crea ni borra filas, ni toca ninguna otra celda.
+ *   - Hoja Alumnos: escribe SOLO 2 columnas ("Notas de entrevista" y "Fecha última entrevista"),
+ *     y solo en la fila del alumno indicado. No crea ni borra filas de alumnos.
+ *   - Hoja Ofertas: da de alta una oferta (añade una fila al final) o edita las 11 columnas de una oferta.
+ *     Nunca borra filas. El ID de una oferta nueva lo pone este script (O011, O012...).
+ *   - No toca ninguna otra hoja ni columna (la hoja Listas solo se lee).
  *
  * La CLAVE no está en este archivo: se guarda en Configuración del proyecto > Propiedades del script
  * (nombre: CLAVE). Este archivo es público y no debe contener nunca ninguna clave.
@@ -19,6 +22,26 @@ const HOJA_ALUMNOS = 'Alumnos';
 const COL_ID = 'ID alumno';
 const COL_NOTAS = 'Notas de entrevista';
 const COL_FECHA = 'Fecha última entrevista';
+
+const HOJA_OFERTAS = 'Ofertas';
+const COL_ID_OFERTA = 'ID oferta';
+// Funciones de escritura que ofrece este script (la app las consulta para saber qué puede hacer).
+const SOPORTA = ['guardarEntrevista', 'guardarOferta'];
+
+// Columnas de una oferta que la app puede escribir. "lista" = el valor debe existir en esa columna de la hoja Listas.
+const CAMPOS_OFERTA = [
+  { col: 'Empresa', clave: 'empresa', max: 100, obligatorio: true },
+  { col: 'Tipo de organización', clave: 'tipoOrganizacion', lista: 'Tipo de organización', obligatorio: true },
+  { col: 'Área', clave: 'area', lista: 'Área', obligatorio: true },
+  { col: 'Título del puesto', clave: 'titulo', max: 120, obligatorio: true },
+  { col: 'Tipo', clave: 'tipo', lista: 'Tipo de oferta', obligatorio: true },
+  { col: 'Ubicación', clave: 'ubicacion', max: 100, obligatorio: true },
+  { col: 'Requisito de nacionalidad', clave: 'requisitoNacionalidad', lista: 'Nacionalidad', obligatorio: false },
+  { col: 'Requisito de permiso de trabajo', clave: 'requisitoPermiso', lista: 'Requisito de permiso', obligatorio: true },
+  { col: 'Fecha de recepción', clave: 'fechaRecepcion', fecha: true, obligatorio: true },
+  { col: 'Estado de la oferta', clave: 'estado', lista: 'Estado de la oferta', obligatorio: true },
+  { col: 'Enlace o descripción', clave: 'enlace', max: 500, enlace: true, obligatorio: false },
+];
 
 const MAX_NOTAS = 2000;                 // caracteres
 const MAX_CUERPO = 10000;               // tamaño máximo de una petición
@@ -43,9 +66,10 @@ function doPost(e) {
     try { candado.waitLock(20000); } catch (x) { throw fallo('ocupado'); }
     comprobarAcceso(c.key);
     switch (c.action) {
-      case 'ping': return salida({ ok: true, version: VERSION });
-      case 'data': return salida(Object.assign({ ok: true, version: VERSION, puedeEscribir: true }, leerTodo()));
+      case 'ping': return salida({ ok: true, version: VERSION, soporta: SOPORTA });
+      case 'data': return salida(Object.assign({ ok: true, version: VERSION, soporta: SOPORTA, puedeEscribir: true }, leerTodo()));
       case 'guardarEntrevista': return salida(guardarEntrevista(c));
+      case 'guardarOferta': return salida(guardarOferta(c));
       default: throw fallo('accion');
     }
   } catch (err) {
@@ -159,6 +183,130 @@ function guardarEntrevista(c) {
   return { ok: true, notas: notas, fecha: fecha };
 }
 
+/* ------------------------------------------------------------ escritura: ofertas */
+
+// Alta (sin "id") o edición (con "id") de una oferta. La petición lleva:
+//   oferta: { empresa, tipoOrganizacion, area, titulo, tipo, ubicacion, requisitoNacionalidad, requisitoPermiso, fechaRecepcion, estado, enlace }
+//   anteriores (solo al editar): los mismos campos tal como la app los conocía, para detectar cambios ajenos.
+function guardarOferta(c) {
+  const crear = c.id === undefined || c.id === null || c.id === '';
+  // 1) Forma de la petición
+  if (!crear && (typeof c.id !== 'string' || !c.id.trim() || c.id.length > 40)) throw fallo('peticion');
+  if (!objetoPlano(c.oferta)) throw fallo('peticion');
+  if (!crear && !objetoPlano(c.anteriores)) throw fallo('peticion');
+  CAMPOS_OFERTA.forEach(function (f) {
+    if (typeof c.oferta[f.clave] !== 'string') throw fallo('peticion');
+    if (!crear && typeof c.anteriores[f.clave] !== 'string') throw fallo('peticion');
+  });
+
+  // 2) Validación del contenido (las listas se leen de la hoja Listas)
+  const listas = leerListas();
+  const nuevo = {};
+  CAMPOS_OFERTA.forEach(function (f) { nuevo[f.clave] = validarCampoOferta(f, c.oferta[f.clave], listas); });
+
+  // 3) Localizar la hoja y las columnas por su nombre
+  const h = hoja(HOJA_OFERTAS);
+  const valores = h.getDataRange().getValues();
+  const cab = (valores[0] || []).map(function (x) { return valorTexto(x).trim(); });
+  const cId = cab.indexOf(COL_ID_OFERTA);
+  if (cId < 0) throw fallo('columna', { columna: COL_ID_OFERTA });
+  const cols = {};
+  CAMPOS_OFERTA.forEach(function (f) {
+    cols[f.clave] = cab.indexOf(f.col);
+    if (cols[f.clave] < 0) throw fallo('columna', { columna: f.col });
+  });
+
+  let id, fila, escribir;
+  if (crear) {
+    // 4a) Alta: ID nuevo (el siguiente libre) y una fila al final
+    id = siguienteIdOferta(valores, cId);
+    fila = valores.length + 1;
+    escribir = CAMPOS_OFERTA.map(function (f) { return f.clave; });
+  } else {
+    // 4b) Edición: la fila tiene que existir una sola vez y no haber cambiado desde que la app la leyó
+    id = c.id.trim();
+    const filas = [];
+    for (let i = 1; i < valores.length; i++) if (valorTexto(valores[i][cId]).trim() === id) filas.push(i);
+    if (!filas.length) throw fallo('no-encontrado');
+    if (filas.length > 1) throw fallo('id-duplicado');
+    const i = filas[0];
+    const actual = {};
+    CAMPOS_OFERTA.forEach(function (f) { actual[f.clave] = valorTexto(valores[i][cols[f.clave]]).trim(); });
+    const cambioAjeno = CAMPOS_OFERTA.some(function (f) { return actual[f.clave] !== c.anteriores[f.clave].trim(); });
+    if (cambioAjeno) throw fallo('conflicto', { id: id, oferta: actual });
+    fila = i + 1;
+    escribir = CAMPOS_OFERTA.filter(function (f) { return actual[f.clave] !== nuevo[f.clave].trim(); }).map(function (f) { return f.clave; });
+  }
+
+  // 5) Escribir SOLO las celdas necesarias de esa fila, como texto plano (sin fórmulas)
+  if (crear) {
+    const celdaId = h.getRange(fila, cId + 1);
+    celdaId.setNumberFormat('@');
+    celdaId.setValue(id);
+  }
+  escribir.forEach(function (clave) {
+    const celda = h.getRange(fila, cols[clave] + 1);
+    celda.setNumberFormat('@');
+    celda.setValue(nuevo[clave]);
+  });
+  SpreadsheetApp.flush();
+  return { ok: true, id: id, creada: crear, oferta: nuevo };
+}
+
+function objetoPlano(o) { return Object.prototype.toString.call(o) === '[object Object]'; }
+
+// Valida un campo y devuelve el texto que se guardará (sin espacios sobrantes, y sin poder ser una fórmula).
+function validarCampoOferta(f, bruto, listas) {
+  const v = normalizarTexto(bruto).trim();
+  if (!v) {
+    if (f.obligatorio) throw fallo('requerido', { campo: f.clave });
+    return '';
+  }
+  if (/[\u0000-\u001F\u007F]/.test(v)) throw fallo('caracteres', { campo: f.clave });   // también rechaza saltos de línea: son campos de una línea
+  if (/<[\/!?a-zA-Z]/.test(v)) throw fallo('html', { campo: f.clave });
+  if (f.max && v.length > f.max) throw fallo('largo', { campo: f.clave });
+  if (f.lista) {
+    if (!listas[f.lista]) throw fallo('columna', { columna: f.lista });
+    if (listas[f.lista].indexOf(v) < 0) throw fallo('lista', { campo: f.clave });
+    return v;
+  }
+  if (f.fecha) {
+    if (!fechaValida(v)) throw fallo('fecha', { campo: f.clave });
+    if (v > hoyTexto()) throw fallo('fecha-futura', { campo: f.clave });
+    return v;
+  }
+  if (f.enlace && /^(javascript|data|vbscript|file|http):/i.test(v)) throw fallo('enlace', { campo: f.clave });
+  return /^[=+\-@]/.test(v) ? ' ' + v : v;
+}
+
+// { "Nombre de la columna": [valores sin repetir] } de la hoja Listas. Solo lectura.
+function leerListas() {
+  const t = leerTabla('Listas');
+  const out = {};
+  t.cabecera.forEach(function (nombre, i) {
+    if (!nombre) return;
+    const vals = [];
+    t.filas.forEach(function (f) { const x = (f[i] || '').trim(); if (x && vals.indexOf(x) < 0) vals.push(x); });
+    out[nombre] = vals;
+  });
+  return out;
+}
+
+// O001, O002... -> el siguiente número libre (con al menos 3 cifras).
+function siguienteIdOferta(valores, cId) {
+  let max = 0;
+  const usados = {};
+  for (let i = 1; i < valores.length; i++) {
+    const v = valorTexto(valores[i][cId]).trim();
+    usados[v.toUpperCase()] = true;
+    const m = /^O(\d+)$/i.exec(v);
+    if (m && +m[1] > max) max = +m[1];
+  }
+  let n = max + 1, id = 'O' + ('000' + n).slice(-Math.max(3, String(n).length));
+  while (usados[id]) { n++; id = 'O' + ('000' + n).slice(-Math.max(3, String(n).length)); }
+  return id;
+}
+
 /* ------------------------------------------------- funciones solo para el editor */
 // Se ejecutan a mano desde el editor de Apps Script (botón "Ejecutar"). La app no puede llamarlas.
 
@@ -183,6 +331,14 @@ function comprobarConfiguracion() {
   const cab = h ? h.getDataRange().getValues()[0].map(function (x) { return valorTexto(x).trim(); }) : [];
   informe.columnas = {};
   [COL_ID, COL_NOTAS, COL_FECHA].forEach(function (n) { informe.columnas[n] = cab.indexOf(n) >= 0 ? 'ok' : 'FALTA'; });
+  const ho = SpreadsheetApp.getActive().getSheetByName(HOJA_OFERTAS);
+  const cabO = ho ? ho.getDataRange().getValues()[0].map(function (x) { return valorTexto(x).trim(); }) : [];
+  informe.columnasOfertas = {};
+  [COL_ID_OFERTA].concat(CAMPOS_OFERTA.map(function (f) { return f.col; })).forEach(function (n) { informe.columnasOfertas[n] = cabO.indexOf(n) >= 0 ? 'ok' : 'FALTA'; });
+  const hl = SpreadsheetApp.getActive().getSheetByName('Listas');
+  const cabL = hl ? hl.getDataRange().getValues()[0].map(function (x) { return valorTexto(x).trim(); }) : [];
+  informe.listas = {};
+  CAMPOS_OFERTA.filter(function (f) { return f.lista; }).forEach(function (f) { informe.listas[f.lista] = cabL.indexOf(f.lista) >= 0 ? 'ok' : 'FALTA LA COLUMNA EN LISTAS'; });
   const hasta = Number(props.getProperty(P_BLOQUEO)) || 0;
   informe.bloqueado = ahora().getTime() < hasta;
   console.log(JSON.stringify(informe, null, 2));
@@ -236,7 +392,7 @@ function fallo(codigo, detalle) {
 // Solo salen códigos cortos y estos datos concretos; nunca el texto de un error interno.
 function respuestaError(err) {
   const r = { ok: false, error: err.codigo };
-  ['segundos', 'hoja', 'columna', 'notas', 'fecha'].forEach(function (k) { if (err.detalle[k] !== undefined) r[k] = err.detalle[k]; });
+  ['segundos', 'hoja', 'columna', 'notas', 'fecha', 'campo', 'id', 'oferta'].forEach(function (k) { if (err.detalle[k] !== undefined) r[k] = err.detalle[k]; });
   return r;
 }
 

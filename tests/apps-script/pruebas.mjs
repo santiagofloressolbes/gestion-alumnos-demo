@@ -217,12 +217,147 @@ m = crearMundo();
 const inf = m.sandbox.comprobarConfiguracion();
 ok(inf.clave.startsWith('ok (') && !JSON.stringify(inf).includes(m.clave), 'informa de que la clave existe, sin mostrarla');
 igual([inf.hojas.Alumnos, inf.hojas.Ofertas, inf.hojas.Listas], ['30 filas', '10 filas', '17 filas'], 'cuenta las filas de cada hoja');
+ok(Object.values(inf.columnasOfertas).every(x => x === 'ok') && Object.values(inf.listas).every(x => x === 'ok'), 'comprueba también las columnas de Ofertas y las listas que usa (incluida "Requisito de permiso")');
+ok(Object.values(crearMundo({ ajustar: h => { h.Listas.m[0][h.Listas.m[0].indexOf('Requisito de permiso')] = 'x'; } }).sandbox.comprobarConfiguracion().listas).includes('FALTA LA COLUMNA EN LISTAS'), 'avisa si falta la columna "Requisito de permiso" en Listas');
 ok(Object.values(inf.columnas).every(x => x === 'ok') && inf.bloqueado === false, 'columnas ok y sin bloqueo');
 ok(/^FALTA$/.test(crearMundo({ sinClave: true }).sandbox.comprobarConfiguracion().clave), 'avisa si falta la clave');
 
-titulo('13. Que no se escape la clave');
+titulo('13. Ofertas: alta y edición');
+const OFERTA = () => ({ empresa: 'Club mock Z', tipoOrganizacion: 'Equipo', area: 'Comercial y patrocinio', titulo: 'Becario/a de ventas', tipo: 'Prácticas',
+  ubicacion: 'Bilbao', requisitoNacionalidad: '', requisitoPermiso: 'No requerido', fechaRecepcion: '2026-10-30', estado: 'Abierta', enlace: 'https://example.com/oferta/Z' });
+const guardarOf = (m, id, oferta, anteriores, extra = {}) => m.llamar(base(m, { action: 'guardarOferta', ...(id ? { id } : {}), oferta, ...(anteriores ? { anteriores } : {}), ...extra }));
+const cabOf = m => m.hojas.Ofertas.m[0];
+const filaOf = (m, id) => { const f = m.hojas.Ofertas.m.find(r => r[0] === id); return f && Object.fromEntries(cabOf(m).map((c, i) => [c, f[i]])); };
+const soloOfertas = (m, antes) => m.celdasCambiadas(antes, m.foto()).every(c => c.startsWith('Ofertas!'));
+
 m = crearMundo();
-m.llamar(base(m, { action: 'data' })); m.llamar({ key: 'mala', action: 'data' }); m.llamar('xx'); guardar(m, 'A002', '<b>', '2026-10-30'); guardar(m, 'A999', 'x', '2026-10-30');
+ok(JSON.stringify(m.llamar(base(m, { action: 'ping' })).soporta) === '["guardarEntrevista","guardarOferta"]', 'ping y data avisan de que el script sabe guardar ofertas (la app lo comprueba)');
+antes = m.foto();
+r = guardarOf(m, null, OFERTA());
+ok(r.ok === true && r.id === 'O011' && r.creada === true, 'alta: el script pone el ID siguiente (O011)');
+ok(m.hojas.Ofertas.m.length === 12 && filaOf(m, 'O011').Empresa === 'Club mock Z' && filaOf(m, 'O011')['Fecha de recepción'] === '2026-10-30', 'alta: la fila nueva está al final con sus valores');
+igual(m.celdasCambiadas(antes, m.foto()).sort(), Array.from({ length: 12 }, (_, i) => `Ofertas!12,${i + 1}`).sort(), 'alta: solo se escriben las 12 celdas de la fila nueva (ninguna otra celda, ni de Ofertas)');
+ok(m.celdasCambiadas(antes, m.foto()).every(c => c.startsWith('Ofertas!12,')), '... ni Alumnos ni Listas');
+ok(m.registro.escrituras.filter(e => e.tipo === 'formato').length === 12 && m.registro.escrituras.filter(e => e.tipo === 'formato').every(e => e.valor === '@'), 'alta: las 12 celdas se escriben como texto plano');
+r = guardarOf(m, null, { ...OFERTA(), empresa: 'Otra empresa' });
+ok(r.id === 'O012' && m.hojas.Ofertas.m.length === 13, 'dos altas seguidas: IDs distintos (O011, O012)');
+m.hojas.Ofertas.m.push(['O050', 'x', 'x', 'x', 'x', 'x', 'x', '', 'x', '', 'x', '']);
+ok(guardarOf(m, null, OFERTA()).id === 'O051', 'con huecos, sigue desde el mayor (O051)');
+m.hojas.Ofertas.m.push(['ABC', 'x']);
+ok(guardarOf(m, null, OFERTA()).id === 'O052', 'un ID raro en la hoja no rompe el contador');
+m.hojas.Ofertas.m.push(['O1000', 'x']);
+ok(guardarOf(m, null, OFERTA()).id === 'O1001', 'pasa de 3 a 4 cifras sin repetir');
+
+titulo('14. Ofertas: edición y conflictos');
+m = crearMundo();
+const o1 = () => ({ empresa: 'Liga mock A', tipoOrganizacion: 'Liga', area: 'Antipiratería y seguridad', titulo: 'Analista de antipiratería', tipo: 'Empleo', ubicacion: 'Madrid',
+  requisitoNacionalidad: '', requisitoPermiso: 'Permiso de trabajo en vigor', fechaRecepcion: '2026-10-05', estado: 'Abierta', enlace: 'https://example.com/oferta/O001' });
+antes = m.foto();
+r = guardarOf(m, 'O001', { ...o1(), estado: 'Cerrada' }, o1());
+ok(r.ok === true && r.creada === false && filaOf(m, 'O001')['Estado de la oferta'] === 'Cerrada', 'editar: cambia el estado');
+igual(m.celdasCambiadas(antes, m.foto()), ['Ofertas!2,11'], 'editar un campo escribe UNA sola celda');
+antes = m.foto(); const nEsc = m.registro.escrituras.length;
+r = guardarOf(m, 'O001', { ...o1(), estado: 'Cerrada' }, { ...o1(), estado: 'Cerrada' });
+ok(r.ok === true && m.registro.escrituras.length === nEsc && m.celdasCambiadas(antes, m.foto()).length === 0, 'guardar sin cambios no escribe nada');
+antes = m.foto();
+r = guardarOf(m, 'O001', { ...o1(), titulo: 'Mi título' }, o1());
+ok(r.error === 'conflicto' && r.oferta.estado === 'Cerrada' && r.id === 'O001' && m.celdasCambiadas(antes, m.foto()).length === 0, 'si alguien cambió la oferta: conflicto, con lo que hay ahora, sin escribir');
+r = guardarOf(m, 'O001', { ...o1(), titulo: 'Mi título', estado: 'Cerrada' }, { ...o1(), estado: 'Cerrada' });
+ok(r.ok === true && filaOf(m, 'O001')['Título del puesto'] === 'Mi título', 'con lo último en la mano, guarda');
+const o2 = () => ({ empresa: 'Club mock B', tipoOrganizacion: 'Equipo', area: 'Comercial y patrocinio', titulo: 'Becario/a de patrocinio', tipo: 'Prácticas', ubicacion: 'Barcelona',
+  requisitoNacionalidad: '', requisitoPermiso: 'No requerido', fechaRecepcion: '2026-10-08', estado: 'Abierta', enlace: 'https://example.com/oferta/O002' });
+m.hojas.Ofertas.m[2][4] = '  Becario/a de patrocinio  ';   // escrito a mano con espacios sobrantes
+r = guardarOf(m, 'O002', { ...o2(), estado: 'Cerrada' }, o2());
+ok(r.ok === true, 'la comparación ignora espacios sobrantes (no hay falsos conflictos)');
+m.hojas.Ofertas.m[3][9] = new Date(Date.UTC(2026, 9, 10));   // una fecha que Google guarda como fecha real
+const o3 = () => ({ empresa: 'Startup mock C', tipoOrganizacion: 'Startup', area: 'Producto y tecnología', titulo: 'Product manager junior', tipo: 'Empleo', ubicacion: 'Madrid',
+  requisitoNacionalidad: '', requisitoPermiso: 'Permiso de trabajo en vigor', fechaRecepcion: '2026-10-10', estado: 'Abierta', enlace: 'https://example.com/oferta/O003' });
+r = guardarOf(m, 'O003', { ...o3(), estado: 'Cerrada' }, o3());
+ok(r.ok === true, 'una fecha real de Google se compara como AAAA-MM-DD');
+igual(guardarOf(m, 'O999', o1(), o1()).error, 'no-encontrado', 'editar una oferta que no existe');
+m.hojas.Ofertas.m.push(['O001', 'copia']);
+igual(guardarOf(m, 'O001', o1(), o1()).error, 'id-duplicado', 'ID repetido en la hoja: se niega');
+
+titulo('15. Ofertas: validaciones');
+const malo = (campos, esperado, nombre, campo) => {
+  const mm = crearMundo(); const a = mm.foto();
+  const rr = guardarOf(mm, null, { ...OFERTA(), ...campos });
+  ok(rr.error === esperado && (campo === undefined || rr.campo === campo) && mm.celdasCambiadas(a, mm.foto()).length === 0 && mm.registro.escrituras.length === 0, `${nombre}: "${esperado}"${campo ? ' en ' + campo : ''}, sin escribir`);
+};
+malo({ empresa: '' }, 'requerido', 'empresa vacía', 'empresa');
+malo({ titulo: '   ' }, 'requerido', 'título en blanco', 'titulo');
+malo({ ubicacion: '' }, 'requerido', 'ubicación vacía', 'ubicacion');
+malo({ fechaRecepcion: '' }, 'requerido', 'sin fecha', 'fechaRecepcion');
+malo({ empresa: MAS(101) }, 'largo', 'empresa de 101', 'empresa');
+malo({ titulo: MAS(121) }, 'largo', 'título de 121', 'titulo');
+malo({ ubicacion: MAS(101) }, 'largo', 'ubicación de 101', 'ubicacion');
+malo({ enlace: MAS(501) }, 'largo', 'enlace de 501', 'enlace');
+malo({ tipo: 'Becas' }, 'lista', 'tipo que no está en Listas', 'tipo');
+malo({ area: 'Cocina' }, 'lista', 'área que no está en Listas', 'area');
+malo({ tipoOrganizacion: 'Circo' }, 'lista', 'tipo de organización inventado', 'tipoOrganizacion');
+malo({ estado: 'Pendiente' }, 'lista', 'estado inventado', 'estado');
+malo({ requisitoNacionalidad: 'Narnia' }, 'lista', 'nacionalidad inventada', 'requisitoNacionalidad');
+malo({ requisitoPermiso: 'Cualquiera' }, 'lista', 'permiso inventado', 'requisitoPermiso');
+malo({ tipo: '' }, 'requerido', 'tipo vacío', 'tipo');
+malo({ empresa: 'Club <b>mock</b>' }, 'html', 'HTML en la empresa', 'empresa');
+malo({ titulo: '<!-- x -->' }, 'html', 'comentario HTML', 'titulo');
+malo({ titulo: 'línea 1\nlínea 2' }, 'caracteres', 'salto de línea en un campo de una línea', 'titulo');
+malo({ empresa: 'a\u0007b' }, 'caracteres', 'carácter de control', 'empresa');
+malo({ fechaRecepcion: '2026-13-01' }, 'fecha', 'mes 13', 'fechaRecepcion');
+malo({ fechaRecepcion: '31/10/2026' }, 'fecha', 'fecha en otro formato', 'fechaRecepcion');
+malo({ fechaRecepcion: '1999-01-01' }, 'fecha', 'fecha anterior a 2000', 'fechaRecepcion');
+malo({ fechaRecepcion: '2026-11-01' }, 'fecha-futura', 'fecha futura (hoy es 31/10 en el simulador)', 'fechaRecepcion');
+malo({ enlace: 'javascript:alert(1)' }, 'enlace', 'enlace javascript:', 'enlace');
+malo({ enlace: 'JavaScript:alert(1)' }, 'enlace', 'enlace JavaScript: en mayúsculas', 'enlace');
+malo({ enlace: 'http://example.com' }, 'enlace', 'enlace sin https', 'enlace');
+malo({ enlace: 'data:text/html;base64,AAAA' }, 'enlace', 'enlace data:', 'enlace');
+m = crearMundo();
+r = guardarOf(m, null, { ...OFERTA(), enlace: 'Ver la web de la empresa', requisitoNacionalidad: 'Estados Unidos', ubicacion: '  Remoto  ' });
+ok(r.ok === true && filaOf(m, r.id)['Enlace o descripción'] === 'Ver la web de la empresa' && filaOf(m, r.id)['Ubicación'] === 'Remoto' && filaOf(m, r.id)['Requisito de nacionalidad'] === 'Estados Unidos', 'texto libre como descripción, nacionalidad de la lista y espacios recortados: válidos');
+r = guardarOf(m, null, { ...OFERTA(), enlace: '' });
+ok(r.ok === true && filaOf(m, r.id)['Enlace o descripción'] === '', 'el enlace es opcional');
+for (const ini of ['=', '+', '-', '@']) {
+  const mm = crearMundo(); const txt = ini + 'HYPERLINK("http://evil","x")';
+  const rr = guardarOf(mm, null, { ...OFERTA(), empresa: txt, enlace: txt });
+  ok(rr.ok === true && filaOf(mm, rr.id).Empresa === ' ' + txt && filaOf(mm, rr.id)['Enlace o descripción'] === ' ' + txt && mm.registro.formulas.length === 0, `texto que empieza por "${ini}": se guarda con un espacio delante y nunca como fórmula`);
+}
+m = crearMundo({ ajustar: h => { h.Listas.m[0][h.Listas.m[0].indexOf('Requisito de permiso')] = 'Otra cosa'; } });
+r = guardarOf(m, null, OFERTA());
+ok(r.error === 'columna' && r.columna === 'Requisito de permiso' && m.registro.escrituras.length === 0, 'si en Listas falta la columna "Requisito de permiso", lo dice (y no escribe)');
+m = crearMundo({ ajustar: h => { h.Ofertas.m[0][h.Ofertas.m[0].indexOf('Estado de la oferta')] = 'Estado'; } });
+r = guardarOf(m, null, OFERTA());
+ok(r.error === 'columna' && r.columna === 'Estado de la oferta' && m.registro.escrituras.length === 0, 'si en Ofertas falta una columna, lo dice (y no escribe)');
+m = crearMundo({ ajustar: h => { h.Ofertas.m[0][0] = 'Identificador'; } });
+ok(guardarOf(m, null, OFERTA()).error === 'columna' && m.registro.escrituras.length === 0, 'sin columna "ID oferta": no escribe');
+
+titulo('16. Ofertas: forma de la petición y acceso');
+const rotas = [['sin oferta', m2 => guardarOf(m2, null, undefined)], ['oferta es una lista', m2 => guardarOf(m2, null, [])], ['oferta es texto', m2 => guardarOf(m2, null, 'x')],
+  ['oferta null', m2 => guardarOf(m2, null, null)], ['falta un campo', m2 => { const o = OFERTA(); delete o.titulo; return guardarOf(m2, null, o); }],
+  ['un campo es número', m2 => guardarOf(m2, null, { ...OFERTA(), tipo: 5 })], ['un campo es objeto', m2 => guardarOf(m2, null, { ...OFERTA(), empresa: { a: 1 } })],
+  ['editar sin anteriores', m2 => guardarOf(m2, 'O001', OFERTA())], ['anteriores es lista', m2 => guardarOf(m2, 'O001', OFERTA(), [])],
+  ['anteriores incompletos', m2 => guardarOf(m2, 'O001', OFERTA(), { empresa: 'x' })], ['ID numérico', m2 => guardarOf(m2, 5, OFERTA(), OFERTA())],
+  ['ID larguísimo', m2 => guardarOf(m2, MAS(41, 'O'), OFERTA(), OFERTA())], ['ID en blanco con espacios', m2 => guardarOf(m2, '   ', OFERTA(), OFERTA())]];
+for (const [nombre, f] of rotas) { const mm = crearMundo(); const a = mm.foto(); const rr = f(mm); ok(rr.error === 'peticion' && mm.celdasCambiadas(a, mm.foto()).length === 0, `petición mal formada (${nombre}): "peticion"`); }
+for (const [nombre, k] of [['sin clave', undefined], ['mala', 'mala'], ['vacía', '']]) {
+  const mm = crearMundo(); const rr = mm.llamar({ key: k, action: 'guardarOferta', oferta: OFERTA() });
+  ok(rr.error === 'clave' && mm.registro.escrituras.length === 0, `clave ${nombre}: no puede crear ofertas`);
+}
+m = crearMundo();
+for (let i = 0; i < 5; i++) m.llamar({ key: 'mala', action: 'guardarOferta', oferta: OFERTA() });
+igual(guardarOf(m, null, OFERTA()).error, 'bloqueado', 'tras 5 fallos al guardar ofertas, bloqueo también para la clave buena');
+m = crearMundo({ bloqueoOcupado: true });
+ok(guardarOf(m, null, OFERTA()).error === 'ocupado' && m.registro.escrituras.length === 0, 'script ocupado: no escribe');
+m = crearMundo();
+antes = m.foto();
+guardarOf(m, null, OFERTA()); guardarOf(m, 'O002', { ...OFERTA(), empresa: 'Club mock B' }, OFERTA());   // este último es un conflicto
+ok(soloOfertas(m, antes), 'todo lo anterior solo ha tocado la hoja Ofertas (Alumnos y Listas intactas)');
+m = crearMundo({ ajustar: h => { h.Ofertas.rompe = true; } });
+const roto = guardarOf(m, null, OFERTA());
+ok(roto.error === 'servidor' && Object.keys(roto).join() === 'ok,error', 'un fallo interno al guardar ofertas responde solo "servidor"');
+
+titulo('17. Que no se escape la clave');
+m = crearMundo();
+m.llamar(base(m, { action: 'data' })); m.llamar({ key: 'mala', action: 'data' }); m.llamar('xx'); guardar(m, 'A002', '<b>', '2026-10-30'); guardar(m, 'A999', 'x', '2026-10-30'); guardarOf(m, null, { ...OFERTA(), empresa: '<b>' }); guardarOf(m, null, OFERTA());
 ok(m.registro.respuestas.length >= 5 && m.registro.respuestas.every(x => !x.includes(m.clave) && !x.includes('CLAVE')), 'ninguna respuesta (buena o de error) contiene la clave');
 ok(m.registro.errores.every(e => !e.includes(m.clave)), 'el registro del script tampoco');
 

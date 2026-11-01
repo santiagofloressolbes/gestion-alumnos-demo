@@ -10,9 +10,10 @@ El script es un "portero" que vive dentro de tu Google Sheet de prueba. La app l
 
 | Puede | No puede |
 |---|---|
-| Leer las hojas Alumnos, Ofertas y Listas. | Crear ni borrar filas. |
-| Escribir **solo** en "Notas de entrevista" y "Fecha última entrevista" de la hoja Alumnos, en la fila del alumno indicado. | Tocar ninguna otra celda, hoja ni archivo de tu Drive. |
-| Rechazar textos con HTML, demasiado largos (más de 2.000 caracteres) o con fechas futuras. | Enviar correos ni conectarse a otras páginas. |
+| Leer las hojas Alumnos, Ofertas y Listas. | Crear ni borrar alumnos. |
+| Hoja Alumnos: escribir **solo** "Notas de entrevista" y "Fecha última entrevista", en la fila del alumno indicado. | Borrar ninguna fila. |
+| Hoja Ofertas: **añadir una fila nueva** (con ID que pone el script: O011, O012…) o editar las 11 columnas de una oferta. | Tocar ninguna otra hoja (Listas solo se lee) ni archivo de tu Drive. |
+| Rechazar textos con HTML, demasiado largos, con fechas futuras o con valores que no estén en Listas. | Enviar correos ni conectarse a otras páginas. |
 
 ## Reglas de oro
 
@@ -68,14 +69,15 @@ El script es un "portero" que vive dentro de tu Google Sheet de prueba. La app l
 | `config` | Falta la propiedad `CLAVE` o tiene menos de 16 caracteres. | Paso 4. |
 | `hoja` / `columna` | Falta una hoja o una columna (por ejemplo, la han renombrado). | Devuelve el nombre original. |
 | `no-encontrado` / `id-duplicado` | El ID no existe o está repetido en la hoja. | Revisa la columna "ID alumno". |
-| `largo`, `html`, `caracteres`, `fecha`, `fecha-futura` | La nota o la fecha no es válida. | Corrige el texto. |
-| `conflicto` | Alguien cambió esa entrevista mientras la editabas. | La app te enseñará lo que hay ahora. |
+| `largo`, `html`, `caracteres`, `fecha`, `fecha-futura` | La nota, la fecha o un campo de la oferta no es válido. | Corrige el texto. |
+| `requerido`, `lista`, `enlace` | Falta un campo obligatorio de la oferta, el valor no está en la hoja Listas, o el enlace empieza por `http:`, `javascript:`… | Rellena el campo, elige un valor de la lista o usa `https://`. |
+| `conflicto` | Alguien cambió esa entrevista u oferta mientras la editabas. | La app te enseñará lo que hay ahora. |
 | `ocupado` | El script estaba atendiendo otra petición. | Reintenta en unos segundos. |
 | `servidor` | Fallo interno. | Mira en el editor, Ejecuciones, el detalle. |
 
 ## Cómo se ha probado
 
-En `tests/apps-script/` hay un simulador de Google y 128 comprobaciones que ejecutan este mismo `Code.gs`: clave buena y mala, bloqueo, textos con HTML, límites de longitud y fecha, fórmulas, conflictos y que **solo** cambian las 2 celdas. Para repetirlas: `node tests/apps-script/pruebas.mjs`.
+En `tests/apps-script/` hay un simulador de Google y 205 comprobaciones que ejecutan este mismo `Code.gs`: clave buena y mala, bloqueo, textos con HTML, límites de longitud y fecha, fórmulas, conflictos y que **solo** cambian las celdas previstas (2 en una entrevista; en una oferta, las 12 de la fila nueva o solo las que cambias). Para repetirlas: `node tests/apps-script/pruebas.mjs`.
 
 ## Límites que conviene saber
 
@@ -83,3 +85,14 @@ En `tests/apps-script/` hay un simulador de Google y 128 comprobaciones que ejec
 - El script se ejecuta con tu cuenta de Google. Por eso es solo para datos de prueba.
 - La primera petición tras un rato sin usar puede tardar 1 a 3 segundos.
 - Si dos personas editan a la vez, la segunda recibe un `conflicto` en vez de pisar el texto de la primera.
+
+## Actualizar a la versión con ofertas (si ya tenías el script en marcha)
+
+La versión nueva de `Code.gs` también guarda ofertas. Haz esto una vez, en este orden:
+
+1. **Copia de seguridad.** En el Sheet: Archivo, Hacer una copia. Nómbrala "COPIA SEGURIDAD ofertas". El script ahora **puede crear filas** en la hoja Ofertas.
+2. **Añade la columna a Listas.** Abre la hoja Listas. En la primera fila libre a la derecha de "Disponibilidad", escribe como encabezado: `Requisito de permiso`. Debajo, en dos filas, escribe exactamente: `Permiso de trabajo en vigor` y `No requerido`. Mismo texto, mayúsculas y tildes.
+3. **Pega el código nuevo.** Extensiones, Apps Script. Selecciona todo el código viejo (Ctrl+A), bórralo, pega el nuevo `Code.gs` y guarda (disquete). **No toques la propiedad `CLAVE`.**
+4. **Comprueba.** En el desplegable de funciones elige `comprobarConfiguracion` y pulsa "Ejecutar". Debe salir todo `ok`: las columnas de Ofertas y las listas (incluida "Requisito de permiso"). Si pone `FALTA LA COLUMNA EN LISTAS`, revisa el paso 2.
+5. **Publica una nueva versión de la MISMA implementación.** Implementar, Gestionar implementaciones, el lápiz, en "Versión" elige **"Nueva versión"**, Implementar. **No crees una implementación nueva:** cambiaría la dirección y la app dejaría de encontrarla.
+6. **Avísame** de que has llegado hasta aquí (sin pegar la clave ni la dirección). La app seguirá funcionando igual hasta el siguiente paso.
