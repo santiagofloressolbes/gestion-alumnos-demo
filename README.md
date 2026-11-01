@@ -6,7 +6,7 @@ App web para móvil (PWA) para consultar alumnos de un máster: lista por máste
 
 **Fase 1: solo lectura y solo datos de prueba (ficticios).** No usar con alumnos reales: ver [DECISIONES.md](DECISIONES.md).
 
-Web publicada: https://santiagofloressolbes.github.io/alumnos-laliga-app/
+Web publicada: https://santiagofloressolbes.github.io/gestion-alumnos-demo/
 
 ## Qué hay en cada carpeta
 
