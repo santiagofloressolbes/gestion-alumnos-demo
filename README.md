@@ -2,109 +2,76 @@
 
 > **Proyecto personal de demostración. Datos ficticios. No afiliado a LaLiga ni a LaLiga Business School.**
 
-App web para móvil (PWA) para consultar alumnos de un máster: lista por máster, ficha con CV, búsqueda y filtros, y notas de entrevista. Los nombres de los másteres y de las empresas de las ofertas son de ejemplo.
+## Qué es
 
-**Solo datos de prueba (ficticios).** Se puede ver una demo o conectar con un Google Sheet de prueba privado (con clave) y guardar notas de entrevista desde la ficha. **No usar con alumnos reales:** ver [DECISIONES.md](DECISIONES.md).
+Una aplicación para el móvil que ayuda a **consultar a los alumnos de un máster y a encontrarles prácticas o empleo**. Se abre desde el navegador y se puede instalar en la pantalla de inicio del teléfono como cualquier otra app.
 
-Web publicada: https://santiagofloressolbes.github.io/gestion-alumnos-demo/
+**Todos los datos que se ven son inventados.** Los nombres de las personas, las empresas y las ofertas son de ejemplo. No hay ni una sola persona real dentro.
 
-## Qué hay en cada carpeta
+Dirección para probarla: https://santiagofloressolbes.github.io/gestion-alumnos-demo/
 
-| Carpeta o archivo | Para qué sirve |
+## Para qué sirve
+
+La idea es que quien acompaña a los alumnos pueda, desde el móvil y en pocos toques:
+
+- ver quién está en cada máster y qué busca cada persona;
+- buscar a alguien por su área, su país o si necesita permiso de trabajo;
+- apuntar las notas de una entrevista;
+- llevar el control de las ofertas de prácticas y de empleo que van llegando.
+
+## Qué hace hoy
+
+| Qué | Cómo se usa |
 |---|---|
-| `index.html`, `css/`, `js/` | La app (HTML, CSS y JavaScript sin instalar nada). |
-| `js/data/` | **Único sitio que sabe de dónde vienen los datos** (demo o script de Google) y cómo se guardan las notas. |
-| `datos-mock/` | Los 3 CSV de prueba (Alumnos, Ofertas, Listas). Son los datos del **modo demo**. |
-| `docs/apps-script/` | `Code.gs` (el script, sin claves) y `GUIA.md` (cómo ponerlo en marcha). |
-| `tests/apps-script/` | Simulador de Google y 128 comprobaciones del script. |
-| `tests/app/` | Pruebas de la app en un navegador real contra ese simulador. |
-| `fonts/`, `icons/` | Tipografía Open Sans e iconos, guardados en el repo (sin CDN). |
-| `sw.js`, `manifest.webmanifest` | Permiten instalar la app y abrirla sin conexión. |
-| `DECISIONES.md` | Qué se decidió y por qué, los riesgos y cómo migrar a Microsoft. |
+| **Ver los másteres y sus alumnos** | En Inicio se elige un máster y sale la lista de alumnos. |
+| **Ver la ficha de cada alumno** | Nacionalidad, situación de trabajo en España, experiencia, a qué área quiere ir y por qué, y un botón para ver su CV. |
+| **Buscar y filtrar alumnos** | En la pestaña Buscar se escribe un nombre, un área o un país, y se afina con filtros (área, nacionalidad, situación de trabajo, prácticas o empleo). |
+| **Apuntar notas de entrevista** | En la ficha de un alumno, el botón "Editar entrevista" guarda la nota y la fecha. |
+| **Ver las ofertas** | En la pestaña Ofertas se ve la lista (las más recientes primero) y se puede buscar y filtrar por estado, tipo y área. Cada oferta tiene su ficha. |
+| **Añadir y editar ofertas** | Con "Nueva oferta" y "Editar oferta". Las ofertas no se borran: cuando ya no valen, se cierran. |
 
-## Probarla en tu ordenador
+Guardar notas y ofertas solo funciona cuando la app está **conectada a la hoja de cálculo de prueba** (ver más abajo). En la demo se puede mirar todo, pero no guardar nada.
 
-1. Abre una terminal en la carpeta del proyecto.
-2. Escribe `python -m http.server 8123` y pulsa Intro.
-3. Abre `http://localhost:8123` en el navegador.
-4. Para parar el servidor, pulsa Ctrl+C en la terminal.
+## Qué NO hace todavía
 
-No se puede abrir `index.html` con doble clic: los navegadores bloquean así los módulos de JavaScript.
+Esto está pensado para crecer por partes. Aún no hay:
 
-Pruebas (necesitan Node.js; solo para desarrollo, la app no usa npm):
+- **Rondas de selección y candidaturas:** seguir en qué punto de un proceso está cada alumno en cada oferta.
+- **Recomendación automática** de a qué ofertas encaja cada alumno.
+- **Compartir perfiles** con las empresas.
+- **Inicio de sesión personal:** hoy todas las personas autorizadas usan la misma clave.
+- **Crear, borrar o mover alumnos** desde la app. Eso se hace en la hoja de cálculo.
+- **Fotos reales:** solo hay círculos con las iniciales.
+- **Funcionar sin conexión con datos reales:** sin internet solo se puede ver la demo.
 
-- **El script:** `node tests/apps-script/pruebas.mjs`. Deben salir 128 de 128.
-- **La app en un navegador real:** `cd tests/app`, `npm install` (una vez) y `npm test`. Usa Microsoft Edge; con `NAVEGADOR=chromium` usa el Chromium de Playwright (hay que instalarlo con `npx playwright install chromium`). Todo es simulado: no hay claves ni direcciones reales.
+## Dos formas de usarla
 
-## Publicar un cambio (GitHub Pages)
+Al abrir la app por primera vez, se elige una de las dos:
 
-1. **Sube el número de caché** en `sw.js` (la línea `const CACHE = 'gestion-alumnos-demo-vN'`, un número más). Sin esto, el móvil sigue con la versión vieja.
-2. Guarda y sube los cambios a la rama `main` (`git add -A`, `git commit`, `git push`).
-3. Espera 1 o 2 minutos. GitHub Pages publica solo.
-4. En el móvil, cierra la app del todo y ábrela dos veces para que cargue la versión nueva.
+1. **Ver demo.** Muestra los datos de ejemplo que vienen con la app. Arriba aparece siempre el aviso **MODO DEMO** y no se puede guardar nada. No hace falta nada más.
+2. **Conectar.** Hace falta una dirección y una clave que da quien administra la hoja de cálculo de prueba. Con ellas se ven los datos de esa hoja y se pueden guardar notas y ofertas. La dirección y la clave quedan guardadas solo en ese teléfono, y se pueden olvidar con el botón "Olvidar acceso" de Inicio.
 
-Primera vez: en GitHub, Settings, Pages, Source "Deploy from a branch", rama `main`, carpeta `/ (root)`.
+## Instalarla en el iPhone
 
-## Conectar con el Sheet de prueba (con clave)
+1. Abre la dirección de arriba en **Safari**.
+2. Pulsa el botón de compartir (el cuadrado con una flecha hacia arriba).
+3. Elige **"Añadir a pantalla de inicio"**.
+4. A partir de ahí se abre como una app más.
 
-La primera vez la app enseña la pantalla **Acceso**, con dos opciones:
+## Privacidad y avisos importantes
 
-- **Ver demo:** datos de ejemplo que vienen con la app (`datos-mock/`). Sale un aviso fijo "MODO DEMO" y no se puede guardar nada. Es lo único que funciona sin conexión.
-- **Conectar:** escribe la dirección del script (termina en `/exec`) y la clave. La app las comprueba y, solo si son correctas, las guarda **en ese móvil**. Los datos de los alumnos no se guardan en el móvil.
+- **Solo datos de prueba.** No uses esta app con alumnos reales ni escribas información real en ella.
+- **Es una demostración personal.** No es una app oficial ni está afiliada a LaLiga ni a LaLiga Business School. No lleva sus logos ni sus nombres comerciales.
+- **No es privada por sí sola:** la página es pública, pero sin la clave no se ve ningún dato. Aun así, nada de lo que hay detrás está preparado para datos reales.
+- **La clave es una para todos.** Si se pierde un móvil, hay que cambiar la clave. Quien administra la hoja sabe cómo (está explicado en la guía).
+- **Los datos no se guardan en el teléfono.** Se piden cada vez y solo se muestran. Lo que escribes en un formulario tampoco se guarda hasta que pulsas Guardar.
+- Para usarla con datos reales habría que montarla de nuevo dentro de la organización, con inicio de sesión personal, protección de datos y la aprobación del equipo de informática. Todo eso está explicado en el documento técnico.
 
-Para tener un Sheet propio con su script y su clave, sigue [docs/apps-script/GUIA.md](docs/apps-script/GUIA.md). **No pegues la dirección ni la clave en chats, en el código ni en el repositorio.**
+## Quién lee qué
 
-Si el script falla, la app lo dice (sin conexión, clave mala, bloqueo, falta una columna…) y **no** cambia sola a la demo. En Inicio, la tarjeta **Conexión** tiene el botón "Olvidar acceso".
-
-## Notas de entrevista
-
-En la ficha de cada alumno, la tarjeta **Entrevista** tiene **Editar entrevista** (solo conectado al Sheet; no en la demo).
-
-- **Una nota por alumno**, de hasta 2.000 caracteres, y la fecha de la entrevista (hoy por defecto; no se admiten fechas futuras ni código HTML).
-- Solo se escriben esas dos celdas del Sheet. La app no crea ni borra alumnos: eso se hace en el Sheet.
-- Si empiezas la nota con `-`, `=`, `+` o `@`, se guarda con un espacio delante para que el Sheet no la tome por una fórmula.
-- Si otra persona cambió esa entrevista mientras la editabas, la app te enseña lo que hay ahora y eliges: **Guardar el mío igualmente** o **Descartar el mío**.
-- Para borrar una entrevista, deja la nota vacía y confirma.
-- Lo que escribes no se guarda en el móvil hasta que pulsas Guardar.
-
-## Cambiar los datos de alumnos
-
-Edita el Sheet de prueba. No hay que subir nada a GitHub; los cambios se ven al volver a abrir la app.
-
-- **No cambies los nombres de las columnas ni de las hojas** (Alumnos, Ofertas, Listas). Si falta una, la app lo dice con el nombre.
-- **Un alumno nuevo** necesita un ID distinto (A031, A032…) y un máster. Conviene que el máster esté en la hoja Listas; si no, aparece igualmente, al final.
-- **Valores de las listas:** escribe situación de trabajo, área, nacionalidad y disponibilidad exactamente igual que en la hoja Listas (usa el desplegable). Si cambias una letra o una tilde, los filtros lo tratan como otro valor.
-- **El Sheet debe seguir "Restringido"** y sin "Publicar en la web".
-- Para cambiar la demo, edita los CSV de `datos-mock/` (mismo formato) y publica como arriba.
-
-## Seguridad y privacidad (importante)
-
-- **Todo lo que está aquí es público:** el código y los CSV de prueba. Por eso solo hay datos ficticios.
-- **No hay ninguna clave ni contraseña** en el repo, ni la dirección del script. No añadas ninguna. La clave vive en las Propiedades del script y en el móvil de cada persona.
-- **La clave es una sola para todos:** no distingue personas. Si pierdes el móvil, cambia la clave (guía, "Cambiar la clave").
-- **Cuenta personal de Google:** este mecanismo es un puente temporal solo para datos de prueba. Con alumnos reales no se usa.
-- **No uses "Publicar en la web" con datos reales.** Antes de usar alumnos reales hay que migrar a Microsoft con inicio de sesión individual (lista de comprobación en `DECISIONES.md`).
-- **No es una app oficial** ni está afiliada a LaLiga ni a LaLiga Business School. No usar sus logos, nombres comerciales ni datos reales.
-- La web lleva `noindex` para que Google no la muestre, pero **eso no la hace privada**: quien tenga el enlace puede abrirla (aunque sin la clave no ve datos).
-
-## Al migrar a Microsoft
-
-El puente de Google (Apps Script, clave compartida y cuenta personal) es **temporal y solo para datos de prueba**. Con alumnos reales:
-
-1. **Pedir a TI** el registro de la app en Microsoft Entra ID y su visto bueno de seguridad y protección de datos.
-2. **Cambiar la fuente a Microsoft Graph y SharePoint:** crear `js/data/fuente-graph.js` (mismas tablas y la misma función de guardar la entrevista) y elegirla en `js/data/index.js`. Las pantallas no cambian: solo usan `getAlumnos()`, `getMasters()`, `guardarEntrevista()`, etc.
-3. **Quitar la clave compartida** y usar inicio de sesión individual (Entra ID), con permisos por persona. Se sustituye la pantalla Acceso y se borran `acceso.js` y `fuente-apps-script.js`. Se ajusta la política de seguridad de `index.html`.
-4. **Borrar el Apps Script y el Sheet de Google** (y la copia de seguridad).
-5. **Decidir dónde viven los CV y las fotos reales** (SharePoint con permisos por persona).
-
-El detalle y la lista de comprobación previa a usar alumnos reales están en [DECISIONES.md](DECISIONES.md).
-
-## Comprobaciones rápidas tras un cambio
-
-- Sin acceso elegido, solo se ve la pantalla Acceso.
-- **Ver demo:** Inicio muestra 4 másteres con 8, 8, 7 y 7 alumnos y el aviso "MODO DEMO"; no hay botón de editar en las fichas.
-- Conectado: la misma lista, la tarjeta "Conexión" y, en la ficha, **Editar entrevista**.
-- Un máster lista a sus alumnos; una ficha abre su "CV de ejemplo".
-- Buscar encuentra "ibanez" (sin tilde) y los filtros combinan.
-- Una clave mala se rechaza y, tras 5 fallos, bloquea 15 minutos.
-- Sin conexión la app abre; la demo funciona y, en modo script, se avisa de que no hay conexión con Google.
+| Documento | Para quién | Qué cuenta |
+|---|---|---|
+| Este archivo (`README.md`) | Cualquier persona | Qué es la app, qué hace y qué no. |
+| [docs/TECNICO.md](docs/TECNICO.md) | Informática (TI) y quien mantiene la app | Cómo está hecha, cómo se conecta, qué seguridad tiene, sus límites y qué hace falta para integrarla en LaLiga. |
+| [docs/apps-script/GUIA.md](docs/apps-script/GUIA.md) | Quien administra la hoja de prueba | Paso a paso para poner en marcha la conexión con clave. |
+| [DECISIONES.md](DECISIONES.md) | Quien mantiene la app | Qué se decidió, por qué, y los riesgos conocidos. |

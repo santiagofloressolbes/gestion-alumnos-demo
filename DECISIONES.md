@@ -2,7 +2,9 @@
 
 > **Proyecto personal de demostración. Datos ficticios. No afiliado a LaLiga ni a LaLiga Business School.**
 
-Última actualización: 2026-11-01. Fase 1 (lectura) terminada. Fase 2 en curso: hecho el primer bloque (acceso con clave y notas de entrevista); faltan ofertas, rondas y aplicaciones, match y compartir perfiles. Solo datos de prueba (ficticios).
+Última actualización: 2026-11-01. Fase 1 (lectura) terminada. Fase 2 en curso: hechos el acceso con clave, las notas de entrevista y las ofertas (lista, ficha, alta y edición); **faltan rondas y aplicaciones, match y compartir perfiles**. Solo datos de prueba (ficticios).
+
+Documentos: [README.md](README.md) (para cualquier persona), [docs/TECNICO.md](docs/TECNICO.md) (para TI y quien mantiene la app, con la propuesta de integración en LaLiga) y [docs/apps-script/GUIA.md](docs/apps-script/GUIA.md) (poner en marcha el script).
 
 ## Decididas
 
@@ -12,10 +14,16 @@
 | Claves | Ninguna clave, token ni contraseña en el código ni en el repo. La clave del script vive en las Propiedades del script; la dirección del script y la clave, solo en el móvil de cada persona. | Repo público. |
 | Tecnología | HTML, CSS y JavaScript puros, sin instalar ni compilar nada. Módulos JS. Sin librerías ni CDN. | Lo más simple; se publica tal cual en GitHub Pages. |
 | Rutas | Con `#` (por ejemplo `#/master/MBA en inglés`). La clave nunca va en la dirección de la página. | GitHub Pages no entiende rutas de servidor; las direcciones se copian y se quedan en el historial. |
-| Acceso a datos | Todo pasa por `js/data/` (`getAlumnos`, `getOfertas`, `getListas`, `getMasters`, `guardarEntrevista`). Las pantallas nunca leen archivos ni Google directamente. | Migrar a Microsoft Graph tocando pocas piezas (ver "Al migrar a Microsoft"). |
+| Acceso a datos | Todo pasa por `js/data/` (`getAlumnos`, `getOfertas`, `getListas`, `getMasters`, `guardarEntrevista`, `guardarOferta`). Las pantallas nunca leen archivos ni Google directamente. | Migrar a Microsoft Graph tocando pocas piezas (ver "Al migrar a Microsoft"). |
 | Fuentes | Dos: **script** (Google Apps Script con clave sobre un Sheet privado) y **demo** (`datos-mock/`). No hay vuelta automática a la demo si el script falla: se muestra el error. | No mezclar sin avisar datos de prueba con la demo. |
 | Modo demo | Se elige a mano en la pantalla Acceso. Banner fijo "MODO DEMO" en todas las pantallas. No permite guardar nada. | Que nunca se confunda con los datos del Sheet. |
 | Escritura (bloque Ofertas) | Además de las entrevistas, el script puede **crear filas** en la hoja Ofertas y editar sus 11 columnas (nunca borrar). El ID lo pone el script. Los valores de desplegable se validan contra la hoja Listas. Una oferta no se borra: se cierra cambiando el estado. | Alta y edición de ofertas desde el móvil. Es una ampliación del permiso: hay que hacer copia de seguridad del Sheet. |
+| Ofertas: pantallas | Pestaña **Ofertas** (3 pestañas abajo): lista de más reciente a más antigua, con buscador y filtros (estado, tipo, área), ficha de cada oferta y formulario de alta y edición. Estado por defecto "Abierta"; fecha por defecto hoy. Los textos libres no admiten saltos de línea. | Pedido en el plan aprobado (2026-11-01). |
+| Ofertas: conflictos | Al editar, la app envía lo que creía que había; si el Sheet cambió, el script no escribe y la app enseña solo lo que cambió. "Guardar el mío igualmente" guarda **solo los campos que tocó la persona** y conserva lo que cambió la otra. | Distinto de las entrevistas (que reemplazan la nota entera): una oferta tiene 11 campos independientes y no conviene pisar un campo que nadie ha tocado. |
+| Ofertas: altas sin duplicar | Si se pierde la respuesta de un alta, al reintentar la app vuelve a leer el Sheet y reconoce la oferta ya creada en lugar de crear otra. | Sin esto, un fallo de red en el móvil duplicaría ofertas. |
+| Salir sin guardar | Un formulario con cambios pregunta antes de salir (otra pestaña, "atrás", Cancelar o recargar). | Un toque por error en la barra inferior no debe perder lo escrito. |
+| Versión del script | `version` sigue en 1; el script anuncia qué sabe escribir (`soporta`). Si falta `guardarOferta`, la app no enseña los botones de ofertas y explica por qué. | La app nueva sigue funcionando con un script antiguo y al revés. |
+| Documentos | `README.md` para cualquier persona; `docs/TECNICO.md` para TI y para quien mantiene la app; `DECISIONES.md` es el registro de decisiones y riesgos. | Cada documento para su lector. |
 | Lista de permisos | Nueva columna "Requisito de permiso" en Listas ("Permiso de trabajo en vigor", "No requerido"). | La oferta guardaba ese dato como texto libre sin lista. |
 | Nacionalidad requerida (a revisar) | Desplegable con la lista de nacionalidades de Listas; vacío = sin requisito. **Revisar en el bloque de match:** puede hacer falta una opción "Ciudadano UE" o grupos de países. | Decisión de Santiago, 2026-11-01. |
 | Escritura (bloque Entrevistas) | Antes (Fase 1): la app no editaba nada. **Ahora (Fase 2, bloque 1):** solo se escriben 2 campos, "Notas de entrevista" y "Fecha última entrevista", de un alumno cada vez, y solo en modo script. No se crean ni borran filas ni se toca otra celda. Lo imponen **a la vez** el script y la app. | Guardar notas desde el móvil sin abrir el resto de datos a cambios. |
@@ -37,7 +45,7 @@
 | Marca | Nombre público "Gestión de alumnos (demo)"; en el icono del móvil, "Alumnos (demo)". Sin logos ni siglas de LaLiga ni de la escuela. Icono genérico. Aviso visible al final de cada pantalla y en el README. Los nombres de los másteres se mantienen. | Que no parezca una app oficial. |
 | Repositorio | Se llama `gestion-alumnos-demo` (antes tenía "laliga" en el nombre). Las rutas de la app son relativas, así que no dependen del nombre. | Marca neutra; cambiar el nombre cambia la dirección pública. |
 | Plantilla del script | `docs/apps-script/Code.gs` se versiona (sin claves). Cualquier otro `Code.gs` está en `.gitignore`. | Que una copia con una clave nunca se suba por error. |
-| Pruebas | `tests/apps-script/`: simulador de Google y 128 comprobaciones del `Code.gs`. `tests/app/`: pruebas de la app en un navegador real contra ese simulador (sin claves ni direcciones reales). | Probar el mismo código que se pega en Apps Script, sin tocar ningún Sheet real. |
+| Pruebas | `tests/apps-script/`: simulador de Google y 205 comprobaciones del `Code.gs`. `tests/app/`: 363 comprobaciones de la app en un navegador real contra ese simulador (acceso 71, entrevistas 63, ofertas 106 y formulario de ofertas 123), sin claves ni direcciones reales. Además, errores introducidos a propósito para comprobar que las pruebas fallan (script: 16 variantes, 1 equivalente; app: 25, todas detectadas). | Probar el mismo código que se pega en Apps Script, sin tocar ningún Sheet real. |
 | Historial de Git | No se reescribe. Los enlaces antiguos del Sheet que siguen en él ya no funcionan (401) y no hay claves. | Decisión de Santiago: no cambiar un repositorio público ya publicado sin un beneficio real de seguridad. |
 
 ## Mecanismo actual: Google Apps Script (puente temporal)
@@ -47,7 +55,7 @@
 **Cómo funciona:**
 - El Sheet es privado ("Restringido") y sin "Publicar en la web".
 - Un script de Apps Script (`docs/apps-script/Code.gs`, guía en `docs/apps-script/GUIA.md`) vive dentro del Sheet y se ejecuta con la cuenta de Santiago. Solo atiende peticiones con la clave correcta.
-- El script lee Alumnos, Ofertas y Listas, y escribe solo las 2 columnas de entrevista.
+- El script lee Alumnos, Ofertas y Listas. Escribe solo las 2 columnas de entrevista de un alumno, y en Ofertas puede añadir una fila o editar sus 11 columnas (nunca borra). Listas es solo lectura.
 - La app guarda en el móvil solo la dirección del script y la clave (`localStorage`), y las olvida con "Olvidar acceso".
 
 **Riesgos conocidos:**
@@ -55,6 +63,8 @@
 - **Clave única compartida:** no distingue personas, no se revoca por persona y no deja registro de quién consultó o escribió qué. Dos personas con la misma clave aparecen como una.
 - **Clave en el móvil:** está en el almacenamiento del navegador, sin cifrar. Quien use ese móvil desbloqueado puede usar la app. Un móvil perdido obliga a **cambiar la clave** (Propiedades del script).
 - **Fuerza bruta y bloqueo:** la dirección es pública. Hacen falta clave larga (mínimo 16 caracteres, lo exige el script) y el bloqueo. A cambio, cualquiera que conozca la dirección puede **bloquear** a todos 15 minutos con claves malas.
+- **El script crea filas:** desde el bloque de Ofertas, una clave filtrada, además de dejar leer todos los datos, permitiría llenar la hoja Ofertas de filas y cambiar sus valores (no borrar filas). Con la copia de seguridad y el historial de versiones del Sheet se deshace, pero no hay aviso. Más razones para no usar este puente con datos reales.
+- **Lo escrito en un formulario:** no se guarda en el móvil. Un fallo de red o una pestaña cerrada por error puede perderlo (la app avisa antes de salir, no después de que el sistema cierre la app).
 - **Notas delicadas:** las notas de entrevista son datos sensibles incluso con alumnos ficticios como práctica. No escribir en ellas nada real.
 - **CV y fotos:** la clave no los protege. Sus enlaces tendrían que ser privados.
 - **Sin historial de cambios propio:** si una nota se pisa o borra por error, solo sirve el historial de versiones de Google Sheets. Hacer copia de seguridad del Sheet.
@@ -67,9 +77,9 @@ Este puente (Apps Script + clave compartida + cuenta personal de Google) es **te
 
 1. **Pedir a TI de la organización** el registro de la app en Microsoft Entra ID (antes Azure AD) y su visto bueno de seguridad y protección de datos. Sin esto no se debe empezar con datos reales.
 2. **Cambiar la fuente de datos a Microsoft Graph y SharePoint (o Excel en SharePoint):**
-   - Crear `js/data/fuente-graph.js` que devuelva lo mismo que `fuente-apps-script.js`: tablas `{ cabecera, filas }` para Alumnos, Ofertas y Listas (la conversión a objetos ya es común, en `tablas.js`), y una función para guardar la entrevista.
+   - Crear `js/data/fuente-graph.js` que devuelva lo mismo que `fuente-apps-script.js`: tablas `{ cabecera, filas }` para Alumnos, Ofertas y Listas (la conversión a objetos ya es común, en `tablas.js`), y funciones para guardar la entrevista y la oferta.
    - Elegirla en `js/data/index.js` (hoy decide entre `demo` y `script`).
-   - Las pantallas (`js/vistas/`) no cambian: solo usan `getAlumnos()`, `getMasters()`, `guardarEntrevista()`, etc.
+   - Las pantallas (`js/vistas/`) no cambian: solo usan `getAlumnos()`, `getMasters()`, `guardarEntrevista()`, `guardarOferta()`, etc.
 3. **Quitar la clave compartida** y usar **inicio de sesión individual (Entra ID)**:
    - Sustituir la pantalla de Acceso (`js/vistas/acceso.js`) por "Iniciar sesión con Microsoft".
    - Borrar `js/data/acceso.js` y `js/data/fuente-apps-script.js`, que guardan la dirección y la clave.
@@ -80,6 +90,8 @@ Este puente (Apps Script + clave compartida + cuenta personal de Google) es **te
 6. **Antes de usar alumnos reales:** completar la lista de abajo. Y mover la app a un alojamiento que decida la organización: GitHub Pages es público.
 
 **Qué se conserva tal cual:** las pantallas, el esquema de columnas (`esquema.js`), los filtros, el diseño, el service worker, el modo demo y las pruebas de la lógica.
+
+El plan completo para integrarla en LaLiga (identidad, SharePoint y Graph, RGPD, alojamiento, revisión de seguridad, copias, mantenimiento y preguntas abiertas para TI) está en [docs/TECNICO.md](docs/TECNICO.md), sección 10.
 
 ## Antes de usar alumnos reales (lista de comprobación)
 - [ ] Visto bueno de la escuela (protección de datos, RGPD) y de TI.
