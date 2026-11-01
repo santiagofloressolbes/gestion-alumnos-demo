@@ -2,6 +2,8 @@
 <html lang="es">
 <head>
 <meta charset="utf-8">
+<!-- Política de seguridad: solo código de esta misma web; los únicos datos externos permitidos son los del script de Google (y fotos por https). -->
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self'; style-src 'self'; font-src 'self'; img-src 'self' data: https:; connect-src 'self' https://script.google.com https://script.googleusercontent.com; manifest-src 'self'; worker-src 'self'; base-uri 'none'; form-action 'none'">
 <meta name="referrer" content="no-referrer">
 <meta name="robots" content="noindex, nofollow, noarchive">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
@@ -22,6 +24,7 @@
   <header>
     <h1 id="titulo">Gestión de alumnos (demo)</h1>
   </header>
+  <div id="demo" class="demo" role="note" hidden><b>MODO DEMO</b> · datos de ejemplo de la app, no del Sheet. No se guarda nada. <a href="#/acceso">Conectar</a></div>
 
   <main id="main" tabindex="-1">
     <section class="view" id="v-inicio" aria-labelledby="titulo"></section>
@@ -33,6 +36,8 @@
     <section class="view" id="v-cv" aria-labelledby="titulo"></section>
 
     <section class="view" id="v-buscar" aria-label="Buscar"></section>
+
+    <section class="view" id="v-acceso" aria-labelledby="titulo"></section>
 
     <footer class="legal" role="note">Proyecto personal de demostración. Datos ficticios. No afiliado a LaLiga ni a LaLiga Business School.</footer>
   </main>

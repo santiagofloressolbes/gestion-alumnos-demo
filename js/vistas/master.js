@@ -1,5 +1,6 @@
 // Lista de alumnos de un máster: avatar, nombre y un dato breve.
-import { getAlumnos, getMasters } from '../data/index.js';
+import { getAlumnos, getMasters, recargar } from '../data/index.js';
+import { tarjetaError } from './error-datos.js';
 import { el, svgFlecha, plural } from '../util/dom.js';
 import { avatar } from '../util/avatar.js';
 import { navegacion } from '../util/navegacion.js';
@@ -12,8 +13,7 @@ export async function pintarMaster(raiz, nombre) {
   try {
     [masters, alumnos] = await Promise.all([getMasters(), getAlumnos()]);
   } catch (e) {
-    raiz.replaceChildren(volver(), el('div', { class: 'card' },
-      el('h2', {}, 'No se han podido cargar los datos'), el('p', { class: 'sub' }, e.message)));
+    raiz.replaceChildren(volver(), tarjetaError(e, () => { recargar().catch(() => {}); pintarMaster(raiz, nombre); }));
     return;
   }
   if (!masters.some(m => m.nombre === nombre)) {

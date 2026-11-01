@@ -17,8 +17,8 @@ function colorDe(id) {
 
 export function avatar(alumno, grande = false) {
   const clase = 'avatar' + (grande ? ' grande' : '');
-  const texto = el('span', { class: clase, style: `--av:${colorDe(alumno.id)}`, 'aria-hidden': 'true' },
-    iniciales(alumno.nombre, alumno.apellidos));
+  const texto = el('span', { class: clase, 'aria-hidden': 'true' }, iniciales(alumno.nombre, alumno.apellidos));
+  texto.style.setProperty('--av', colorDe(alumno.id));   // por código (no con atributo style): la política de seguridad no admite estilos en línea
   // Solo se admiten fotos por https. Cualquier otra cosa ("iniciales", vacío...) deja las iniciales.
   if (!/^https:\/\//i.test(alumno.foto)) return texto;
   const img = el('img', { class: clase, src: alumno.foto, alt: '', loading: 'lazy', referrerpolicy: 'no-referrer', 'aria-hidden': 'true' });

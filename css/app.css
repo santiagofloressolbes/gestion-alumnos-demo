@@ -138,3 +138,14 @@ main{flex:1;min-height:0;overflow-y:auto;overflow-x:hidden;-webkit-overflow-scro
 
 /* Aviso legal visible al final de cada pantalla */
 .legal{margin:1.5rem 0 0;padding:1rem 1.5rem;border-radius:1.5rem;border:1.5px solid var(--line);font-size:.8125rem;line-height:1.5;color:var(--muted);text-align:center}
+
+/* ---------- Acceso y modo demo ---------- */
+#app.acceso #tabs{display:none}
+.demo{flex:none;margin:.5rem 24px 0;padding:.5rem 1rem;border-radius:1rem;background:var(--card);border:1.5px solid var(--tab-on);font-size:.875rem;color:var(--cink)}
+.demo[hidden]{display:none}
+.error{margin:0 0 1rem;color:var(--tab-on);font-weight:600;font-size:.9375rem}
+.error[hidden]{display:none}
+.campo-form .enlace{margin-top:.25rem}
+.card .primary+.enlace,.card .enlace+.primary{margin-top:.5rem}
+.card .secondary{margin-top:.5rem}
+.conexion{margin-top:1.5rem}

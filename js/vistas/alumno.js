@@ -1,5 +1,6 @@
 // Ficha completa de un alumno, con el botón al CV.
-import { getAlumnos } from '../data/index.js';
+import { getAlumnos, recargar } from '../data/index.js';
+import { tarjetaError } from './error-datos.js';
 import { el } from '../util/dom.js';
 import { avatar } from '../util/avatar.js';
 import { enlaceCV } from '../util/cv.js';
@@ -32,7 +33,7 @@ export async function pintarAlumno(raiz, id) {
   try { a = (await getAlumnos()).find(x => x.id === id) || null; }
   catch (e) {
     raiz.replaceChildren(el('a', { class: 'volver', href: '#/' }, 'Inicio'),
-      el('div', { class: 'card' }, el('h2', {}, 'No se han podido cargar los datos'), el('p', { class: 'sub' }, e.message)));
+      tarjetaError(e, () => { recargar().catch(() => {}); pintarAlumno(raiz, id); }));
     return;
   }
   if (!a) {

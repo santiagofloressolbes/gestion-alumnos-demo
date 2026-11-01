@@ -1,8 +1,8 @@
 // Service worker: deja la app disponible sin conexión.
 // Cada cambio en los archivos de la app: subir CACHE para que el móvil cargue la versión nueva.
-const CACHE = 'gestion-alumnos-demo-v8';
+const CACHE = 'gestion-alumnos-demo-v9';
 const FILES = ['./', './index.html', './manifest.webmanifest', './css/app.css', './js/app.js', './js/util/csv.js', './js/util/dom.js', './js/vistas/inicio.js', './js/vistas/master.js', './js/vistas/alumno.js', './js/util/avatar.js', './js/util/cv.js', './js/vistas/cv.js', './js/vistas/buscar.js', './js/util/texto.js', './js/util/filtros.js', './js/util/navegacion.js',
-  './js/data/index.js', './js/data/config.js', './js/data/esquema.js', './js/data/fuente-csv.js',
+  './js/data/index.js', './js/data/config.js', './js/data/esquema.js', './js/data/fuente-csv.js', './js/data/tablas.js', './js/data/acceso.js', './js/data/fuente-apps-script.js', './js/vistas/acceso.js', './js/vistas/error-datos.js',
   './datos-mock/Alumnos.csv', './datos-mock/Ofertas.csv', './datos-mock/Listas.csv',
   './icons/icon-192.png', './icons/icon-512.png', './icons/apple-touch-icon.png',
   './fonts/opensans-latin-400.woff2', './fonts/opensans-latin-600.woff2', './fonts/opensans-latin-700.woff2',

@@ -3,6 +3,7 @@ import { getAlumnos, getListas, recargar } from '../data/index.js';
 import { el } from '../util/dom.js';
 import { filtrar, estadoVacio, filtrosActivos, hayAlgo } from '../util/filtros.js';
 import { fila } from './master.js';
+import { tarjetaError } from './error-datos.js';
 
 const OPCIONES_AREA = [['ambas', 'Cualquiera'], ['destino', 'Quiere ir'], ['experiencia', 'Experiencia']];
 let construida = false;   // la pantalla se construye una vez: así se conservan lo escrito, los filtros y el foco
@@ -14,10 +15,7 @@ export async function pintarBuscar(raiz) {
   try {
     [alumnos, listas] = await Promise.all([getAlumnos(), getListas()]);
   } catch (e) {
-    raiz.replaceChildren(el('div', { class: 'card' },
-      el('h2', {}, 'No se han podido cargar los datos'),
-      el('p', { class: 'sub' }, e.message),
-      el('button', { class: 'primary', type: 'button', onclick: () => { recargar().catch(() => {}); pintarBuscar(raiz); } }, 'Reintentar')));
+    raiz.replaceChildren(tarjetaError(e, () => { recargar().catch(() => {}); pintarBuscar(raiz); }));
     return;
   }
   construida = true;

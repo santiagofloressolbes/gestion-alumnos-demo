@@ -1,10 +1,11 @@
-// Fuente de datos basada en CSV (Google Sheet publicado, o los archivos de datos-mock/).
+// Fuente de datos del MODO DEMO: los archivos CSV de datos-mock/ (datos ficticios que vienen con la app).
 import { leerCSV } from '../util/csv.js';
 import { CONFIG } from './config.js';
+import { aObjetos, aListas } from './tablas.js';
 
 async function descargar(url) {
   const ctl = new AbortController();
-  const reloj = setTimeout(() => ctl.abort(), CONFIG.esperaMs);
+  const reloj = setTimeout(() => ctl.abort(), CONFIG.esperaLocalMs);
   try {
     const r = await fetch(url, { signal: ctl.signal, cache: 'no-cache', referrerPolicy: 'no-referrer' });
     if (!r.ok) throw new Error('HTTP ' + r.status);
@@ -13,37 +14,22 @@ async function descargar(url) {
 }
 
 // Devuelve { cabecera: [...], filas: [[...], ...] } de una hoja.
-async function hoja(origen, nombre) {
-  const filas = leerCSV(await descargar(CONFIG[origen][nombre]));
+async function hoja(nombre) {
+  const filas = leerCSV(await descargar(CONFIG.local[nombre]));
   if (!filas.length) throw new Error(`La hoja ${nombre} está vacía`);
   return { cabecera: filas[0].map(h => h.trim()), filas: filas.slice(1) };
 }
 
-// Convierte filas en objetos con las claves internas. Avisa si falta alguna columna.
-function aObjetos(nombre, { cabecera, filas }, esquema) {
-  const faltan = Object.keys(esquema).filter(c => !cabecera.includes(c));
-  if (faltan.length) throw new Error(`En la hoja ${nombre} falta la columna: ${faltan.join(', ')}`);
-  return filas.map(f => {
-    const o = {};
-    for (const [col, clave] of Object.entries(esquema)) o[clave] = (f[cabecera.indexOf(col)] ?? '').trim();
-    return o;
-  }).filter(o => o.id);
-}
-
-function aListas({ cabecera, filas }, esquema) {
-  const out = {};
-  for (const [col, clave] of Object.entries(esquema)) {
-    const i = cabecera.indexOf(col);
-    out[clave] = i < 0 ? [] : [...new Set(filas.map(f => (f[i] ?? '').trim()).filter(Boolean))];
-  }
-  return out;
-}
-
-export function crearFuenteCSV(origen, esquemas) {
+export function crearFuenteCSV(esquemas) {
   return {
-    origen,
-    alumnos: async () => aObjetos('Alumnos', await hoja(origen, 'Alumnos'), esquemas.ALUMNO),
-    ofertas: async () => aObjetos('Ofertas', await hoja(origen, 'Ofertas'), esquemas.OFERTA),
-    listas: async () => aListas(await hoja(origen, 'Listas'), esquemas.LISTAS),
+    async cargar() {
+      const [a, o, l] = await Promise.all([hoja('Alumnos'), hoja('Ofertas'), hoja('Listas')]);
+      return {
+        alumnos: aObjetos('Alumnos', a, esquemas.ALUMNO),
+        ofertas: aObjetos('Ofertas', o, esquemas.OFERTA),
+        listas: aListas(l, esquemas.LISTAS),
+        puedeEscribir: false,
+      };
+    },
   };
 }
