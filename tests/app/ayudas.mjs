@@ -58,12 +58,12 @@ export async function nuevo({ modo = 'normal' } = {}) {
     log.peticiones.push({ url: req.url(), metodo: req.method(), cuerpo: req.postData(), tipo: req.headers()['content-type'] });
     const cors = { 'access-control-allow-origin': '*' };
     const accion = req.postData() ? JSON.parse(req.postData()).action : '';
-    if (ctrl.abortar && /^guardar/.test(accion)) { ctrl.abortar = false; return r.abort('failed'); }
+    if (ctrl.abortar && /^(guardar|registrar|crear|cambiar)/.test(accion)) { ctrl.abortar = false; return r.abort('failed'); }
     if (modo === 'caido') return r.abort('failed');
     if (modo === 'html') return r.fulfill({ status: 200, headers: { ...cors, 'content-type': 'text/html' }, body: '<html>Inicia sesión</html>' });
     if (req.method() !== 'POST') return r.fulfill({ status: 200, headers: cors, body: 'x' });
     let j = mundo.llamar(req.postData());
-    if (ctrl.perderRespuesta && /^guardar/.test(accion)) { ctrl.perderRespuesta = false; return r.abort('failed'); }
+    if (ctrl.perderRespuesta && /^(guardar|registrar|crear|cambiar)/.test(accion)) { ctrl.perderRespuesta = false; return r.abort('failed'); }
     if (ctrl.alResponder) j = ctrl.alResponder(j, accion) ?? j;   // para simular un script antiguo o una respuesta rara
     r.fulfill({ status: 200, headers: { ...cors, 'content-type': 'application/json' }, body: JSON.stringify(j) });
   });

@@ -5,6 +5,13 @@ import { aObjetos, aListas } from './tablas.js';
 
 const VERSION_ESPERADA = 1;
 
+// Cómo se nombra cada cosa en los mensajes de "no encontrado" y "repetido".
+const DE = {
+  alumno: { este: 'Este alumno', de: 'de este alumno' }, oferta: { este: 'Esta oferta', de: 'de esta oferta' },
+  ronda: { este: 'Esta ronda', de: 'de esta ronda' }, aplicacion: { este: 'Esta aplicación', de: 'de esta aplicación' },
+};
+const fechaCorta = f => { const m = /^(\d{4})-(\d{2})-(\d{2})$/.exec(f || ''); return m ? `${m[3]}/${m[2]}/${m[1]}` : 'fecha anterior'; };
+
 // Textos para la persona. El script solo envía códigos cortos; los textos están aquí.
 function mensaje(codigo, extra = {}) {
   switch (codigo) {
@@ -27,9 +34,15 @@ function mensaje(codigo, extra = {}) {
     case 'requerido': return 'Falta un dato obligatorio.';
     case 'lista': return 'Un valor no está en las listas de la hoja Listas del Sheet.';
     case 'enlace': return 'El enlace no puede empezar por http:, javascript:… Usa https://.';
-    case 'conflicto': return extra.oferta ? 'Otra persona ha cambiado esta oferta mientras la editabas.' : 'Otra persona ha cambiado esta entrevista mientras la editabas.';
-    case 'no-encontrado': return 'Este alumno ya no está en el Sheet.';
-    case 'id-duplicado': return 'El ID de este alumno está repetido en el Sheet.';
+    case 'conflicto':
+      if (extra.aplicacion) return 'Otra persona ha cambiado esta aplicación mientras la editabas.';
+      if (extra.ultima !== undefined) return 'Otra persona ha registrado una ronda de esta oferta mientras tanto.';
+      return extra.oferta ? 'Otra persona ha cambiado esta oferta mientras la editabas.' : 'Otra persona ha cambiado esta entrevista mientras la editabas.';
+    case 'no-encontrado': return `${DE[extra.campo]?.este || 'Este alumno'} ya no está en el Sheet.`;
+    case 'id-duplicado': return `El número ${DE[extra.campo]?.de || 'de este alumno'} está repetido en el Sheet. Corrígelo en el Sheet.`;
+    case 'duplicado': return 'Este alumno ya ha aplicado a esta ronda de esta oferta.';
+    case 'fecha-anterior': return `La fecha no puede ser anterior al ${fechaCorta(extra.desde)}.`;
+    case 'motivo-sobra': return 'Solo se indica un motivo cuando el estado es «Descartado».';
     case 'peticion': case 'accion': return 'El script no entiende la petición. Actualiza Code.gs (mira la guía).';
     case 'solo-lectura': return 'Esta conexión no permite guardar.';
     case 'sin-notas': return 'Escribe una nota.';

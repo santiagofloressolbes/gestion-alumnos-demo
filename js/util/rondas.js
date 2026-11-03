@@ -1,6 +1,8 @@
 // Rondas de difusión, aplicaciones e historial: orden, resúmenes y avisos (funciones puras: no tocan la pantalla).
 // "Ronda" = cada vez que una oferta se reenvía a los alumnos. "Aplicación" = un alumno que responde a una ronda de una oferta.
 
+import { fechaValida } from './ofertas.js';
+
 export const ESTADO_INICIAL = 'Recibida';
 export const ESTADO_DESCARTE = 'Descartado';   // el único estado que lleva motivo
 
@@ -68,3 +70,52 @@ export function avisosRequisitos(alumno, oferta) {
 
 // Una clase de color para la insignia del estado (el texto siempre dice el estado: el color solo ayuda).
 export const claseEstado = estado => (estado === 'Contratado' ? ' contratado' : estado === ESTADO_DESCARTE ? ' descartada' : '');
+
+/* ---- Validación de los formularios (las mismas reglas que aplica el script; así los errores se ven antes de enviar) ---- */
+
+export const MAX_NOTAS = 2000;
+export const normalizarTexto = t => String(t ?? '').replace(/\r\n?/g, '\n').trim();
+
+// Un texto libre de varias líneas (notas): '' si vale, o el código del problema.
+export function problemaNota(t) {
+  if (t.length > MAX_NOTAS) return 'largo';
+  if (/[\u0000-\u0008\u000B\u000C\u000E-\u001F\u007F]/.test(t)) return 'caracteres';
+  if (/<[\/!?a-zA-Z]/.test(t)) return 'html';
+  return '';
+}
+
+// Cada validador devuelve el primer problema { campo, codigo, desde? } o null.
+// Los códigos son los mismos que usa el script: requerido, fecha, fecha-futura, fecha-anterior, largo, caracteres, html, lista.
+function problemaFecha(fecha, { hoy, desde }) {
+  if (!fecha) return { campo: 'fecha', codigo: 'requerido' };
+  if (!fechaValida(fecha)) return { campo: 'fecha', codigo: 'fecha' };
+  if (fecha > hoy) return { campo: 'fecha', codigo: 'fecha-futura' };
+  if (desde && fecha < desde) return { campo: 'fecha', codigo: 'fecha-anterior', desde };
+  return null;
+}
+
+// "desde" = la fecha más reciente de las que la anteceden (la oferta o la ronda anterior).
+export const validarRonda = (fecha, contexto) => problemaFecha(fecha, contexto);
+
+export function validarAplicacion({ idAlumno, fecha, notas }, contexto) {
+  if (!idAlumno) return { campo: 'alumno', codigo: 'requerido' };
+  const f = problemaFecha(fecha, contexto);
+  if (f) return f;
+  const n = problemaNota(notas);
+  return n ? { campo: 'notas', codigo: n } : null;
+}
+
+// "actual" = { estado, motivo } tal como está ahora; "listas" = { estadosAplicacion, motivosDescarte }.
+export function validarCambio({ estado, motivo, fecha, nota }, { actual, listas, ...contexto }) {
+  if (!estado) return { campo: 'estado', codigo: 'requerido' };
+  if (estado !== actual.estado && !(listas.estadosAplicacion || []).includes(estado)) return { campo: 'estado', codigo: 'lista' };
+  if (estado === ESTADO_DESCARTE) {
+    if (!motivo) return { campo: 'motivo', codigo: 'requerido' };
+    if (motivo !== actual.motivo && !(listas.motivosDescarte || []).includes(motivo)) return { campo: 'motivo', codigo: 'lista' };
+  } else if (motivo) return { campo: 'motivo', codigo: 'motivo-sobra' };
+  if (estado === actual.estado && motivo === actual.motivo) return { campo: 'estado', codigo: 'sin-cambios' };
+  const f = problemaFecha(fecha, contexto);
+  if (f) return f;
+  const n = problemaNota(nota);
+  return n ? { campo: 'nota', codigo: n } : null;
+}

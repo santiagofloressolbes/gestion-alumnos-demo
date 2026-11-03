@@ -144,3 +144,68 @@ export function aplicarOferta(id, oferta) {
   if (i >= 0) Object.assign(enMemoria.ofertas[i], limpio);
   else enMemoria.ofertas.push(limpio);
 }
+
+/* ---- Escritura: rondas, aplicaciones y cambios de estado (nunca se borra nada) ---- */
+
+const CAMPOS_RONDA = Object.values(esquemas.RONDA);
+const CAMPOS_APLICACION = Object.values(esquemas.APLICACION);
+const CAMPOS_HISTORIAL = Object.values(esquemas.HISTORIAL);
+
+// Una respuesta del script solo se acepta si trae el objeto con todos sus campos como texto.
+function objetoDe(x, campos) {
+  if (!x || typeof x !== 'object') throw errorDatos('respuesta');
+  const o = {};
+  for (const k of campos) {
+    if (x[k] !== undefined && typeof x[k] !== 'string') throw errorDatos('respuesta');
+    o[k] = String(x[k] ?? '').trim();
+  }
+  if (!o.id) throw errorDatos('respuesta');
+  return o;
+}
+
+// Pone o cambia una fila en memoria (por su ID).
+function poner(lista, fila) {
+  const i = lista.findIndex(x => x.id === fila.id);
+  if (i >= 0) Object.assign(lista[i], fila); else lista.push(fila);
+}
+export function aplicarRonda(r) { if (enMemoria) poner(enMemoria.rondas, objetoDe(r, CAMPOS_RONDA)); }
+export function aplicarAplicacion(a) { if (enMemoria) poner(enMemoria.aplicaciones, objetoDe(a, CAMPOS_APLICACION)); }
+function aplicarHistorial(h) { if (enMemoria && h) poner(enMemoria.historial, objetoDe(h, CAMPOS_HISTORIAL)); }
+
+async function pedirRondas(accion, peticion) {
+  await datos();
+  if (!puedeEscribirRondas()) throw errorDatos('solo-lectura');
+  try {
+    return await llamarScript(accesoGuardado(), accion, peticion);
+  } catch (e) {
+    if (e.codigo === 'clave') borrarClave();
+    throw e;
+  }
+}
+
+// Registra una ronda de difusión de una oferta. "numero" es el que la app propone (la siguiente a la última):
+// si ya no lo es, el script responde 'conflicto' (con la última y, si existe, la ronda que tiene ese número).
+export async function registrarRonda(idOferta, numero, fecha) {
+  const r = await pedirRondas('registrarRonda', { idOferta, numero, fecha });
+  const ronda = objetoDe(r.ronda, CAMPOS_RONDA);
+  aplicarRonda(ronda);
+  return ronda;
+}
+
+// Un alumno aplica a una ronda de una oferta. Nace "Recibida" con su primera línea de historial.
+export async function crearAplicacion({ idAlumno, idOferta, numeroRonda, fecha, notas }) {
+  const r = await pedirRondas('crearAplicacion', { idAlumno, idOferta, numeroRonda, fecha, notas });
+  const aplicacion = objetoDe(r.aplicacion, CAMPOS_APLICACION), historial = objetoDe(r.historial, CAMPOS_HISTORIAL);
+  aplicarAplicacion(aplicacion); aplicarHistorial(historial);
+  return { aplicacion, historial };
+}
+
+// Cambia el estado de una aplicación. "anterior" = { estado, motivo } tal como se cree que está en el Sheet;
+// si otra persona la cambió, el script responde 'conflicto' con la aplicación como está ahora.
+export async function cambiarEstado(id, { estado, motivo, fecha, nota }, anterior) {
+  const r = await pedirRondas('cambiarEstado', { id, estado, motivo, fecha, nota, anterior });
+  const aplicacion = objetoDe(r.aplicacion, CAMPOS_APLICACION);
+  const historial = r.historial ? objetoDe(r.historial, CAMPOS_HISTORIAL) : null;
+  aplicarAplicacion(aplicacion); aplicarHistorial(historial);
+  return { aplicacion, historial, sinCambios: r.sinCambios === true };
+}

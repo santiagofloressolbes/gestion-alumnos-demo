@@ -63,5 +63,50 @@ chk(/«Necesita permiso de trabajo»/.test(R.avisosRequisitos(al('Necesita permi
 
 igual([R.claseEstado('Contratado'), R.claseEstado('Descartado'), R.claseEstado('Entrevista'), R.claseEstado('')], [' contratado', ' descartada', '', ''], 'clase de color de cada estado');
 
+/* ---- Validadores de los formularios ---- */
+const HOY = '2026-10-31';
+const ctx = (desde = '') => ({ hoy: HOY, desde });
+igual(R.validarRonda('2026-10-30', ctx('2026-10-12')), null, 'ronda: fecha buena');
+igual(R.validarRonda('', ctx()), { campo: 'fecha', codigo: 'requerido' }, 'ronda: sin fecha');
+igual(R.validarRonda('30/10/2026', ctx()), { campo: 'fecha', codigo: 'fecha' }, 'ronda: formato malo');
+igual(R.validarRonda('2026-02-30', ctx()), { campo: 'fecha', codigo: 'fecha' }, 'ronda: día imposible');
+igual(R.validarRonda('1999-12-31', ctx()), { campo: 'fecha', codigo: 'fecha' }, 'ronda: antes del año 2000');
+igual(R.validarRonda('2026-11-01', ctx()), { campo: 'fecha', codigo: 'fecha-futura' }, 'ronda: mañana');
+igual(R.validarRonda('2026-10-31', ctx()), null, 'ronda: hoy vale');
+igual(R.validarRonda('2026-10-11', ctx('2026-10-12')), { campo: 'fecha', codigo: 'fecha-anterior', desde: '2026-10-12' }, 'ronda: antes de la oferta');
+igual(R.validarRonda('2026-10-12', ctx('2026-10-12')), null, 'ronda: el mismo día que la oferta vale');
+
+igual(R.validarAplicacion({ idAlumno: '', fecha: '2026-10-30', notas: '' }, ctx()), { campo: 'alumno', codigo: 'requerido' }, 'aplicación: sin alumno (lo primero)');
+igual(R.validarAplicacion({ idAlumno: 'A1', fecha: '', notas: '' }, ctx()), { campo: 'fecha', codigo: 'requerido' }, 'aplicación: sin fecha');
+igual(R.validarAplicacion({ idAlumno: 'A1', fecha: '2026-10-20', notas: '' }, ctx('2026-10-21')), { campo: 'fecha', codigo: 'fecha-anterior', desde: '2026-10-21' }, 'aplicación: antes de la ronda');
+igual(R.validarAplicacion({ idAlumno: 'A1', fecha: '2026-10-30', notas: 'x'.repeat(2001) }, ctx()), { campo: 'notas', codigo: 'largo' }, 'aplicación: notas largas');
+igual(R.validarAplicacion({ idAlumno: 'A1', fecha: '2026-10-30', notas: 'x'.repeat(2000) }, ctx()), null, 'aplicación: 2000 caracteres justos');
+igual(R.validarAplicacion({ idAlumno: 'A1', fecha: '2026-10-30', notas: 'a <b>b</b>' }, ctx()), { campo: 'notas', codigo: 'html' }, 'aplicación: HTML');
+igual(R.validarAplicacion({ idAlumno: 'A1', fecha: '2026-10-30', notas: 'a\u0000b' }, ctx()), { campo: 'notas', codigo: 'caracteres' }, 'aplicación: carácter de control');
+igual(R.validarAplicacion({ idAlumno: 'A1', fecha: '2026-10-30', notas: 'tiene 3 < 5 años, <3, a < b' }, ctx()), null, 'aplicación: "<" suelto no es HTML');
+igual(R.validarAplicacion({ idAlumno: 'A1', fecha: '2026-10-30', notas: 'línea 1\nlínea 2\ttab ñ 😀' }, ctx()), null, 'aplicación: varias líneas, tabulador, tildes y emojis');
+
+const L = { estadosAplicacion: ['Recibida', 'En revisión', 'Descartado'], motivosDescarte: ['Otro', 'Perfil no encaja'] };
+const cambio = (v, actual = { estado: 'En revisión', motivo: '' }, extra = {}) => R.validarCambio({ fecha: '2026-10-30', nota: '', motivo: '', ...v }, { actual, listas: L, ...ctx('2026-10-27'), ...extra });
+igual(cambio({ estado: 'Recibida' }), null, 'cambio: hacia atrás vale');
+igual(cambio({ estado: '' }), { campo: 'estado', codigo: 'requerido' }, 'cambio: sin estado');
+igual(cambio({ estado: 'Fichado' }), { campo: 'estado', codigo: 'lista' }, 'cambio: estado que no está en la lista');
+igual(cambio({ estado: 'Fichado' }, { estado: 'Fichado', motivo: '' }, { }), { campo: 'estado', codigo: 'sin-cambios' }, 'cambio: el estado de ahora (aunque ya no esté en la lista) se reconoce: sin cambios');
+igual(cambio({ estado: 'Descartado' }), { campo: 'motivo', codigo: 'requerido' }, 'cambio: Descartado exige motivo');
+igual(cambio({ estado: 'Descartado', motivo: 'Inventado' }), { campo: 'motivo', codigo: 'lista' }, 'cambio: motivo que no está en la lista');
+igual(cambio({ estado: 'Descartado', motivo: 'Otro' }), null, 'cambio: Descartado con motivo');
+igual(cambio({ estado: 'Recibida', motivo: 'Otro' }), { campo: 'motivo', codigo: 'motivo-sobra' }, 'cambio: motivo con otro estado');
+igual(cambio({ estado: 'En revisión' }), { campo: 'estado', codigo: 'sin-cambios' }, 'cambio: igual que ahora');
+igual(cambio({ estado: 'Descartado', motivo: 'Otro' }, { estado: 'Descartado', motivo: 'Otro' }), { campo: 'estado', codigo: 'sin-cambios' }, 'cambio: descartado con el mismo motivo');
+igual(cambio({ estado: 'Descartado', motivo: 'Perfil no encaja' }, { estado: 'Descartado', motivo: 'Otro' }), null, 'cambio: solo el motivo');
+igual(cambio({ estado: 'Descartado', motivo: 'Viejo' }, { estado: 'Descartado', motivo: 'Viejo' }), { campo: 'estado', codigo: 'sin-cambios' }, 'cambio: un motivo antiguo que ya no está en la lista, tal cual, es "sin cambios"');
+igual(cambio({ estado: 'Recibida', fecha: '2026-10-26' }), { campo: 'fecha', codigo: 'fecha-anterior', desde: '2026-10-27' }, 'cambio: antes de su último movimiento');
+igual(cambio({ estado: 'Recibida', fecha: '2026-11-01' }), { campo: 'fecha', codigo: 'fecha-futura' }, 'cambio: fecha futura');
+igual(cambio({ estado: 'Recibida', nota: '<script>' }), { campo: 'nota', codigo: 'html' }, 'cambio: nota con HTML');
+igual(cambio({ estado: 'Recibida', nota: 'x'.repeat(2001) }), { campo: 'nota', codigo: 'largo' }, 'cambio: nota larga');
+igual(cambio({ estado: 'Recibida', fecha: '' }), { campo: 'fecha', codigo: 'requerido' }, 'cambio: sin fecha');
+igual([R.normalizarTexto('  a\r\nb\rc  '), R.normalizarTexto(null), R.problemaNota('')], ['a\nb\nc', '', ''], 'normalizar: saltos de línea, null y vacío');
+igual(R.MAX_NOTAS, 2000, 'las notas admiten 2.000 caracteres (como en el script)');
+
 console.log(`\n${ok} bien, ${mal} mal`);
 process.exit(mal ? 1 : 0);
