@@ -23,11 +23,15 @@ async function hoja(nombre) {
 export function crearFuenteCSV(esquemas) {
   return {
     async cargar() {
-      const [a, o, l] = await Promise.all([hoja('Alumnos'), hoja('Ofertas'), hoja('Listas')]);
+      const [a, o, l, r, ap, h] = await Promise.all([hoja('Alumnos'), hoja('Ofertas'), hoja('Listas'), hoja('Rondas'), hoja('Aplicaciones'), hoja('Historial')]);
       return {
         alumnos: aObjetos('Alumnos', a, esquemas.ALUMNO),
         ofertas: aObjetos('Ofertas', o, esquemas.OFERTA),
         listas: aListas(l, esquemas.LISTAS),
+        rondas: aObjetos('Rondas', r, esquemas.RONDA),
+        aplicaciones: aObjetos('Aplicaciones', ap, esquemas.APLICACION),
+        historial: aObjetos('Historial', h, esquemas.HISTORIAL),
+        conRondas: true,
         puedeEscribir: false,
       };
     },

@@ -181,3 +181,16 @@ main{flex:1;min-height:0;overflow-y:auto;overflow-x:hidden;-webkit-overflow-scro
 .campo-form input[type=date]{display:flex;align-items:center;min-height:3rem;line-height:1.5;text-align:left}
 .campo-form input[type=date]::-webkit-date-and-time-value{display:flex;align-items:center;min-height:1.5em;margin:0;text-align:left}
 .campo-form input[type=date]::-webkit-datetime-edit{padding:0}
+
+/* ---------- Rondas y aplicaciones ---------- */
+.insignia.contratado{border-color:var(--tab-on);color:var(--tab-on)}
+.insignia.descartada{color:var(--cmuted)}
+.ronda .resumen{margin:0 0 1rem}
+.ronda .chip{min-height:2rem;padding:0 .75rem;font-size:.8125rem}
+.ronda .alumnos{margin:0 0 .5rem}
+#v-oferta > .primary,#v-oferta > .aviso{margin-top:1rem}
+.historial{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:1rem}
+.historial li{display:flex;flex-direction:column;gap:.125rem;padding-left:1rem;border-left:3px solid var(--line)}
+.historial .sub{margin:0}
+.nota-historial{font-size:.9375rem;overflow-wrap:anywhere;white-space:pre-line}
+.card .campos+.secondary,.card .secondary+.secondary{margin-top:.5rem}

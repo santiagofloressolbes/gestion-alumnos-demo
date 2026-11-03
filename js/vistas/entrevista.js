@@ -45,7 +45,8 @@ export function tarjetaEntrevista(a) {
 
   const ver = (aviso = '') => {
     const hay = !!(a.notasEntrevista.trim() || a.fechaUltimaEntrevista);
-    caja.replaceChildren(
+    // replaceChildren convierte un null en el texto "null": lo opcional se filtra antes.
+    caja.replaceChildren(...[
       el('h2', { id: 'en-titulo' }, 'Entrevista'),
       el('dl', { class: 'campos' },
         campo('Última entrevista', fechaLarga(a.fechaUltimaEntrevista) || 'Sin entrevista registrada', !a.fechaUltimaEntrevista),
@@ -53,7 +54,8 @@ export function tarjetaEntrevista(a) {
       aviso && el('p', { class: 'ok', role: 'status' }, aviso),
       puedeEscribir()
         ? el('button', { class: 'secondary', type: 'button', id: 'en-editar', onclick: editar }, hay ? 'Editar entrevista' : 'Añadir entrevista')
-        : null);
+        : null,
+    ].filter(Boolean));
   };
 
   const editar = () => {

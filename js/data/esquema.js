@@ -16,10 +16,23 @@ export const OFERTA = {
   'Requisito de nacionalidad': 'requisitoNacionalidad', 'Requisito de permiso de trabajo': 'requisitoPermiso',
   'Fecha de recepción': 'fechaRecepcion', 'Estado de la oferta': 'estado', 'Enlace o descripción': 'enlace',
 };
+// Rondas de difusión (cada vez que una oferta se reenvía a los alumnos), aplicaciones (alumno + oferta + ronda) e historial de estados.
+export const RONDA = {
+  'ID ronda': 'id', 'ID oferta': 'idOferta', 'Número de ronda': 'numero', 'Fecha de envío a los alumnos': 'fecha',
+};
+export const APLICACION = {
+  'ID aplicación': 'id', 'ID alumno': 'idAlumno', 'ID oferta': 'idOferta', 'Número de ronda': 'numeroRonda',
+  'Fecha de aplicación': 'fecha', 'Estado': 'estado', 'Motivo de descarte': 'motivo', 'Notas': 'notas',
+};
+export const HISTORIAL = {
+  'ID cambio': 'id', 'ID aplicación': 'idAplicacion', 'Estado anterior': 'estadoAnterior', 'Estado nuevo': 'estadoNuevo',
+  'Motivo de descarte': 'motivo', 'Fecha': 'fecha', 'Nota': 'nota',
+};
 // Hoja Listas: cada columna es una lista de valores (las celdas vacías se ignoran).
 export const LISTAS = {
   'Máster': 'masters', 'Área': 'areas', 'Tipo de organización': 'tiposOrganizacion',
   'Nacionalidad': 'nacionalidades', 'Situación de trabajo en España': 'situaciones',
   'Tipo de oferta': 'tiposOferta', 'Estado de la oferta': 'estadosOferta', 'Disponibilidad': 'disponibilidades',
   'Requisito de permiso': 'requisitosPermiso',
+  'Estado de la aplicación': 'estadosAplicacion', 'Motivo de descarte': 'motivosDescarte',
 };

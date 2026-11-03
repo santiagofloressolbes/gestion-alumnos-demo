@@ -5,6 +5,7 @@ import { el, svgFlecha, plural } from '../util/dom.js';
 import { filtrar, estadoVacio, filtrosActivos, hayAlgo, enlaceOferta } from '../util/ofertas.js';
 import { fechaLarga } from './entrevista.js';
 import { tarjetaError } from './error-datos.js';
+import { datosRondas, seccionesRondas } from './rondas.js';
 
 const e = estadoVacio();   // búsqueda y filtros: se conservan al entrar en una oferta y volver
 const volverAOfertas = () => el('a', { class: 'volver', href: '#/ofertas' }, 'Ofertas');
@@ -121,8 +122,8 @@ function campo(etiqueta, valor, { texto = false, vacio = 'No indicado' } = {}) {
 
 export async function pintarOferta(raiz, id) {
   raiz.replaceChildren(el('p', { class: 'estado', role: 'status' }, 'Cargando oferta…'));
-  let o = null;
-  try { o = (await getOfertas()).find(x => x.id === id) || null; }
+  let o = null, d = null;
+  try { d = await datosRondas(); o = d.ofertas.find(x => x.id === id) || null; }
   catch (err) {
     raiz.replaceChildren(volverAOfertas(), tarjetaError(err, () => { recargar().catch(() => {}); pintarOferta(raiz, id); }));
     return;
@@ -169,6 +170,8 @@ export async function pintarOferta(raiz, id) {
       el('h2', {}, enlace.tipo === 'enlace' ? 'Enlace' : 'Descripción'),
       el('dl', { class: 'campos' },
         campo(enlace.tipo === 'ejemplo' ? 'Enlace de ejemplo (no se abre)' : enlace.tipo === 'enlace' ? 'Dirección' : 'Texto', enlace.texto, { texto: true }))),
+
+    ...seccionesRondas(o, d),
 
     puedeEscribirOfertas() && el('a', { class: 'secondary', id: 'of-editar', href: `#/oferta/${encodeURIComponent(o.id)}/editar` }, 'Editar oferta'),
   ].filter(Boolean));

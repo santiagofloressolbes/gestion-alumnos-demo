@@ -7,5 +7,8 @@ export const CONFIG = {
     Alumnos: new URL('../../datos-mock/Alumnos.csv', import.meta.url).href,
     Ofertas: new URL('../../datos-mock/Ofertas.csv', import.meta.url).href,
     Listas: new URL('../../datos-mock/Listas.csv', import.meta.url).href,
+    Rondas: new URL('../../datos-mock/Rondas.csv', import.meta.url).href,
+    Aplicaciones: new URL('../../datos-mock/Aplicaciones.csv', import.meta.url).href,
+    Historial: new URL('../../datos-mock/Historial.csv', import.meta.url).href,
   },
 };

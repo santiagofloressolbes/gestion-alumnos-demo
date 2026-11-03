@@ -2,6 +2,7 @@
 import { getAlumnos, recargar } from '../data/index.js';
 import { tarjetaError } from './error-datos.js';
 import { tarjetaEntrevista } from './entrevista.js';
+import { datosRondas, tarjetaAplicaciones } from './rondas.js';
 import { el } from '../util/dom.js';
 import { avatar } from '../util/avatar.js';
 import { enlaceCV } from '../util/cv.js';
@@ -22,8 +23,8 @@ const tarjeta = (titulo, ...campos) =>
 
 export async function pintarAlumno(raiz, id) {
   raiz.replaceChildren(el('p', { class: 'estado', role: 'status' }, 'Cargando ficha…'));
-  let a = null;
-  try { a = (await getAlumnos()).find(x => x.id === id) || null; }
+  let a = null, d = null;
+  try { d = await datosRondas(); a = d.alumnos.find(x => x.id === id) || null; }
   catch (e) {
     raiz.replaceChildren(el('a', { class: 'volver', href: '#/' }, 'Inicio'),
       tarjetaError(e, () => { recargar().catch(() => {}); pintarAlumno(raiz, id); }));
@@ -39,7 +40,7 @@ export async function pintarAlumno(raiz, id) {
   const nacionalidades = [a.nacionalidadPrincipal, a.nacionalidadSecundaria].filter(Boolean).join(' · ');
   const cv = enlaceCV(a);
 
-  raiz.replaceChildren(
+  raiz.replaceChildren(...[
     navegacion.origen === 'buscar'
       ? el('a', { class: 'volver', href: '#/buscar' }, 'Buscar')
       : el('a', { class: 'volver', href: '#/master/' + encodeURIComponent(a.master) }, a.master),
@@ -66,5 +67,8 @@ export async function pintarAlumno(raiz, id) {
       campo('Área', a.areaDestino),
       campo('Por qué', a.porQue, { texto: true })),
 
-    tarjetaEntrevista(a));
+    tarjetaEntrevista(a),
+
+    tarjetaAplicaciones(a, d),
+  ].filter(Boolean));   // replaceChildren convierte un null en el texto "null"
 }

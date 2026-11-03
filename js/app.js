@@ -7,6 +7,7 @@ import { pintarBuscar } from './vistas/buscar.js';
 import { pintarAcceso } from './vistas/acceso.js';
 import { pintarOfertas, pintarOferta } from './vistas/ofertas.js';
 import { pintarFormOferta } from './vistas/oferta-form.js';
+import { pintarAplicacion } from './vistas/rondas.js';
 import { navegacion } from './util/navegacion.js';
 import { getModo } from './data/index.js';
 
@@ -23,6 +24,7 @@ function rutaActual() {
     if ((m = h.match(/^alumno\/(.+)$/))) return { vista: 'alumno', valor: decodeURIComponent(m[1]), pestana: 'inicio', titulo: 'Ficha' };
   } catch { /* dirección mal escrita: se vuelve al inicio */ }
   try {
+    if ((m = h.match(/^aplicacion\/([^/]+)$/))) return { vista: 'aplicacion', valor: decodeURIComponent(m[1]), pestana: 'ofertas', titulo: 'Aplicación' };
     if (h === 'oferta/nueva') return { vista: 'oferta-form', valor: null, pestana: 'ofertas', titulo: 'Nueva oferta' };
     if ((m = h.match(/^oferta\/([^/]+)\/editar$/))) return { vista: 'oferta-form', valor: decodeURIComponent(m[1]), pestana: 'ofertas', titulo: 'Editar oferta' };
     if ((m = h.match(/^oferta\/([^/]+)$/))) return { vista: 'oferta', valor: decodeURIComponent(m[1]), pestana: 'ofertas', titulo: 'Oferta' };
@@ -56,6 +58,7 @@ async function pintar() {
   if (r.vista === 'cv') await pintarCV($('#v-cv'), r.valor);
   if (r.vista === 'buscar') { await pintarBuscar($('#v-buscar')); if (vistaPrevia === 'alumno') $('#main').scrollTop = scrollLista.buscar; }
   if (r.vista === 'oferta') await pintarOferta($('#v-oferta'), r.valor);
+  if (r.vista === 'aplicacion') await pintarAplicacion($('#v-aplicacion'), r.valor);
   if (r.vista === 'oferta-form') await pintarFormOferta($('#v-oferta-form'), r.valor);
   if (r.vista === 'ofertas') { await pintarOfertas($('#v-ofertas')); if (vistaPrevia === 'oferta') $('#main').scrollTop = scrollLista.ofertas; }
   vistaPrevia = r.vista;

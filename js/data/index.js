@@ -11,7 +11,7 @@ export { getModo, urlGuardada, urlValida };
 
 let carga = null;
 let enMemoria = null;   // los datos ya cargados (solo en memoria; nunca se guardan en el móvil)
-let estado = { modo: '', puedeEscribir: false, soporta: [] };
+let estado = { modo: '', puedeEscribir: false, soporta: [], conRondas: false };
 
 async function cargarTodo() {
   const modo = getModo();
@@ -19,7 +19,7 @@ async function cargarTodo() {
   const fuente = modo === 'demo' ? crearFuenteCSV(esquemas) : crearFuenteAppsScript(accesoGuardado(), esquemas);
   try {
     const { puedeEscribir, soporta = [], ...datos } = await fuente.cargar();
-    estado = { modo, puedeEscribir, soporta };
+    estado = { modo, puedeEscribir, soporta, conRondas: datos.conRondas === true };
     enMemoria = datos;
     return datos;
   } catch (e) {
@@ -36,6 +36,11 @@ function datos() {
 export const getAlumnos = async () => (await datos()).alumnos;
 export const getOfertas = async () => (await datos()).ofertas;
 export const getListas = async () => (await datos()).listas;
+export const getRondas = async () => (await datos()).rondas;
+export const getAplicaciones = async () => (await datos()).aplicaciones;
+export const getHistorial = async () => (await datos()).historial;
+// ¿El Sheet (o la demo) tiene las hojas de rondas? Si no, la app no enseña nada de rondas.
+export const hayRondas = async () => (await datos()).conRondas === true;
 export const getEstadoFuente = () => estado;
 
 // Másteres en el orden de la hoja Listas, con su número de alumnos.
@@ -60,7 +65,7 @@ export async function conectar(url, clave) {
   if (!guardarAcceso(url, clave)) throw errorDatos('almacenamiento');
 }
 export function usarDemo() { if (!guardarDemo()) throw errorDatos('almacenamiento'); }
-export function olvidarAcceso() { olvidarTodo(); carga = null; enMemoria = null; estado = { modo: '', puedeEscribir: false, soporta: [] }; }
+export function olvidarAcceso() { olvidarTodo(); carga = null; enMemoria = null; estado = { modo: '', puedeEscribir: false, soporta: [], conRondas: false }; }
 
 /* ---- Escritura: solo la entrevista (notas y fecha) ---- */
 
@@ -121,6 +126,14 @@ export async function guardarOferta(id, oferta, anteriores) {
   aplicarOferta(r.id, r.oferta);
   return { id: r.id, creada: r.creada === true };
 }
+
+/* ---- Rondas y aplicaciones: ¿esta conexión sabe guardarlas? ---- */
+
+const FUNCIONES_RONDAS = ['registrarRonda', 'crearAplicacion', 'cambiarEstado'];
+// Hacen falta las 3 hojas en el Sheet Y un script que anuncie las 3 funciones; si no, no se enseñan los botones.
+export const puedeEscribirRondas = () => puedeEscribir() && estado.conRondas && FUNCIONES_RONDAS.every(f => estado.soporta.includes(f));
+// 'conectado' | 'script-antiguo' (script o Sheet sin las rondas) | 'solo-lectura' (demo): para explicar por qué no hay botones.
+export const estadoEscrituraRondas = () => (puedeEscribirRondas() ? 'conectado' : estado.modo === 'script' && estado.puedeEscribir ? 'script-antiguo' : 'solo-lectura');
 
 // Pone en memoria lo que hay ahora en el Sheet (tras guardar, o al descartar un cambio propio por un conflicto).
 export function aplicarOferta(id, oferta) {

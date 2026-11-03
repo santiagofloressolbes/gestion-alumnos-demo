@@ -78,10 +78,16 @@ export function crearFuenteAppsScript(acceso, esquemas) {
       const j = await llamarScript(acceso, 'data');
       if (j.version !== VERSION_ESPERADA) throw errorDatos('version');
       if (!esTabla(j.alumnos) || !esTabla(j.ofertas) || !esTabla(j.listas)) throw errorDatos('respuesta');
+      // Las hojas de rondas pueden no existir todavía en el Sheet (o el script ser antiguo): entonces la app funciona como antes.
+      const conRondas = esTabla(j.rondas) && esTabla(j.aplicaciones) && esTabla(j.historial);
       return {
         alumnos: aObjetos('Alumnos', j.alumnos, esquemas.ALUMNO),
         ofertas: aObjetos('Ofertas', j.ofertas, esquemas.OFERTA),
         listas: aListas(j.listas, esquemas.LISTAS),
+        rondas: conRondas ? aObjetos('Rondas', j.rondas, esquemas.RONDA) : [],
+        aplicaciones: conRondas ? aObjetos('Aplicaciones', j.aplicaciones, esquemas.APLICACION) : [],
+        historial: conRondas ? aObjetos('Historial', j.historial, esquemas.HISTORIAL) : [],
+        conRondas,
         puedeEscribir: j.puedeEscribir === true,
         soporta: Array.isArray(j.soporta) ? j.soporta.filter(x => typeof x === 'string') : [],   // un script antiguo no lo envía
       };

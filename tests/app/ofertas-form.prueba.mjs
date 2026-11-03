@@ -64,7 +64,7 @@ const error = pg => pg.innerText('#v-oferta-form .error');
   chk(m[C.empresa - 1] === 'Club mock Z' && m[C.titulo - 1] === 'Analista de ventas' && m[C.fecha - 1] === hoy() && m[C.estado - 1] === 'Abierta' && m[C.nac - 1] === '', 'valores en el Sheet');
   const t = await pg.innerText('#v-oferta');
   chk(/Oferta creada en el Sheet/.test(t) && /Analista de ventas/.test(t) && /O011/.test(t), 'ficha nueva con aviso');
-  chk(await pg.getAttribute('#v-oferta a.primary', 'href') === 'https://empresa-real.test/o/1', 'enlace https como botón');
+  chk(await pg.getAttribute('#v-oferta .cabecera a.primary', 'href') === 'https://empresa-real.test/o/1', 'enlace https como botón');
   const c = guardarPeticiones(log);
   chk(c.length === 1 && !('id' in c[0]) && !('anteriores' in c[0]) && c[0].oferta.empresa === 'Club mock Z' && typeof c[0].key === 'string', 'petición de alta sin id ni anteriores');
   chk(!log.peticiones.some(p => p.url.includes(CLAVE_PRUEBA.slice(0, 8))), 'la clave no va en la dirección');
