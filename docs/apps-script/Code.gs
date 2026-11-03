@@ -9,6 +9,9 @@
  *     y solo en la fila del alumno indicado. No crea ni borra filas de alumnos.
  *   - Hoja Ofertas: da de alta una oferta (añade una fila al final) o edita las 11 columnas de una oferta.
  *     Nunca borra filas. El ID de una oferta nueva lo pone este script (O011, O012...).
+ *   - Hojas Rondas, Aplicaciones e Historial (si existen): registra una ronda de difusión de una oferta, crea la aplicación
+ *     de un alumno a una ronda y cambia su estado. Solo AÑADE filas (a Historial, siempre) y, en una aplicación, cambia las
+ *     2 celdas de estado y motivo. Nunca borra filas. Los ID los pone este script (R001, AP001, H001...).
  *   - No toca ninguna otra hoja ni columna (la hoja Listas solo se lee).
  *
  * La CLAVE no está en este archivo: se guarda en Configuración del proyecto > Propiedades del script
@@ -27,6 +30,22 @@ const HOJA_OFERTAS = 'Ofertas';
 const COL_ID_OFERTA = 'ID oferta';
 // Funciones de escritura que ofrece este script (la app las consulta para saber qué puede hacer).
 const SOPORTA = ['guardarEntrevista', 'guardarOferta'];
+
+// Rondas de difusión, aplicaciones e historial. Sus funciones solo se anuncian si existen las 3 hojas.
+const HOJA_RONDAS = 'Rondas';
+const HOJA_APLICACIONES = 'Aplicaciones';
+const HOJA_HISTORIAL = 'Historial';
+const SOPORTA_RONDAS = ['registrarRonda', 'crearAplicacion', 'cambiarEstado'];
+// clave interna -> nombre de la columna en el Sheet
+const COLS_RONDA = { id: 'ID ronda', idOferta: 'ID oferta', numero: 'Número de ronda', fecha: 'Fecha de envío a los alumnos' };
+const COLS_APLICACION = { id: 'ID aplicación', idAlumno: 'ID alumno', idOferta: 'ID oferta', numeroRonda: 'Número de ronda',
+  fecha: 'Fecha de aplicación', estado: 'Estado', motivo: 'Motivo de descarte', notas: 'Notas' };
+const COLS_HISTORIAL = { id: 'ID cambio', idAplicacion: 'ID aplicación', estadoAnterior: 'Estado anterior', estadoNuevo: 'Estado nuevo',
+  motivo: 'Motivo de descarte', fecha: 'Fecha', nota: 'Nota' };
+const LISTA_ESTADOS = 'Estado de la aplicación';
+const LISTA_MOTIVOS = 'Motivo de descarte';
+const ESTADO_INICIAL = 'Recibida';       // estado con el que nace una aplicación (tiene que estar en la lista)
+const ESTADO_DESCARTE = 'Descartado';    // el único estado que lleva motivo (tiene que estar en la lista)
 
 // Columnas de una oferta que la app puede escribir. "lista" = el valor debe existir en esa columna de la hoja Listas.
 const CAMPOS_OFERTA = [
@@ -66,10 +85,13 @@ function doPost(e) {
     try { candado.waitLock(20000); } catch (x) { throw fallo('ocupado'); }
     comprobarAcceso(c.key);
     switch (c.action) {
-      case 'ping': return salida({ ok: true, version: VERSION, soporta: SOPORTA });
-      case 'data': return salida(Object.assign({ ok: true, version: VERSION, soporta: SOPORTA, puedeEscribir: true }, leerTodo()));
+      case 'ping': return salida({ ok: true, version: VERSION, soporta: funcionesSoportadas() });
+      case 'data': return salida(Object.assign({ ok: true, version: VERSION, soporta: funcionesSoportadas(), puedeEscribir: true }, leerTodo()));
       case 'guardarEntrevista': return salida(guardarEntrevista(c));
       case 'guardarOferta': return salida(guardarOferta(c));
+      case 'registrarRonda': return salida(registrarRonda(c));
+      case 'crearAplicacion': return salida(crearAplicacion(c));
+      case 'cambiarEstado': return salida(cambiarEstado(c));
       default: throw fallo('accion');
     }
   } catch (err) {
@@ -117,8 +139,21 @@ function iguales(a, b) {
 /* ------------------------------------------------------------------ lectura */
 
 function leerTodo() {
-  return { alumnos: leerTabla('Alumnos'), ofertas: leerTabla('Ofertas'), listas: leerTabla('Listas') };
+  const datos = { alumnos: leerTabla('Alumnos'), ofertas: leerTabla('Ofertas'), listas: leerTabla('Listas') };
+  // Si todavía no se han creado las hojas de rondas, no se envían (y la app sigue funcionando como antes).
+  if (rondasDisponibles()) {
+    datos.rondas = leerTabla(HOJA_RONDAS);
+    datos.aplicaciones = leerTabla(HOJA_APLICACIONES);
+    datos.historial = leerTabla(HOJA_HISTORIAL);
+  }
+  return datos;
 }
+
+function rondasDisponibles() {
+  return [HOJA_RONDAS, HOJA_APLICACIONES, HOJA_HISTORIAL].every(function (n) { return !!SpreadsheetApp.getActive().getSheetByName(n); });
+}
+
+function funcionesSoportadas() { return rondasDisponibles() ? SOPORTA.concat(SOPORTA_RONDAS) : SOPORTA.slice(); }
 
 // { cabecera: [...], filas: [[...], ...] } con todo convertido a texto (las fechas como AAAA-MM-DD).
 function leerTabla(nombre) {
@@ -292,19 +327,233 @@ function leerListas() {
   return out;
 }
 
+function leerListasSiExisten() { return SpreadsheetApp.getActive().getSheetByName('Listas') ? leerListas() : {}; }
+
 // O001, O002... -> el siguiente número libre (con al menos 3 cifras).
 function siguienteIdOferta(valores, cId) {
+  const ids = [];
+  for (let i = 1; i < valores.length; i++) ids.push(valorTexto(valores[i][cId]));
+  return siguienteId('O', ids);
+}
+
+// Con un prefijo ("O", "R", "AP", "H") y los ID que ya hay: el siguiente número libre, con al menos 3 cifras.
+function siguienteId(prefijo, ids) {
+  const patron = new RegExp('^' + prefijo + '(\\d+)$', 'i');
+  const formato = function (n) { return prefijo + ('000' + n).slice(-Math.max(3, String(n).length)); };
   let max = 0;
   const usados = {};
-  for (let i = 1; i < valores.length; i++) {
-    const v = valorTexto(valores[i][cId]).trim();
+  ids.forEach(function (x) {
+    const v = String(x).trim();
     usados[v.toUpperCase()] = true;
-    const m = /^O(\d+)$/i.exec(v);
+    const m = patron.exec(v);
     if (m && +m[1] > max) max = +m[1];
-  }
-  let n = max + 1, id = 'O' + ('000' + n).slice(-Math.max(3, String(n).length));
-  while (usados[id]) { n++; id = 'O' + ('000' + n).slice(-Math.max(3, String(n).length)); }
+  });
+  let n = max + 1, id = formato(n);
+  while (usados[id]) { n++; id = formato(n); }
   return id;
+}
+
+/* ------------------------------------------ escritura: rondas, aplicaciones e historial */
+
+// Una ronda de difusión = cada vez que se reenvía una oferta a los alumnos. La petición lleva:
+//   idOferta, numero (la ronda que la app propone: la siguiente a la última de esa oferta) y fecha (AAAA-MM-DD, de envío).
+// Si "numero" ya no es la siguiente (otra persona registró una ronda, o esta misma petición ya se guardó y se perdió
+// la respuesta), no se crea nada y se responde 'conflicto' con la última ronda y, si existe, la que tiene ese número.
+function registrarRonda(c) {
+  const idOferta = idPeticion(c.idOferta);
+  const numero = numeroPeticion(c.numero);
+  if (typeof c.fecha !== 'string') throw fallo('peticion');
+  const fecha = fechaPeticion(c.fecha, 'fecha');
+
+  const oferta = unica(abrirTabla(HOJA_OFERTAS, { id: COL_ID_OFERTA, fecha: 'Fecha de recepción' }), function (f) { return f.v.id === idOferta; }, 'oferta');
+  const rondas = abrirTabla(HOJA_RONDAS, COLS_RONDA);
+  const propias = rondas.filas.filter(function (f) { return f.v.idOferta === idOferta; });
+  let ultima = 0, fechaUltima = '';
+  propias.forEach(function (f) {
+    const n = Number(f.v.numero) || 0;
+    if (n >= ultima) { ultima = n; fechaUltima = f.v.fecha; }
+  });
+  if (numero !== ultima + 1) {
+    const existente = propias.filter(function (f) { return Number(f.v.numero) === numero; })[0];
+    throw fallo('conflicto', { ultima: String(ultima), ronda: existente ? existente.v : undefined });
+  }
+  comprobarNoAnterior(fecha, [oferta.v.fecha, fechaUltima]);   // no antes de que se recibiera la oferta ni de la ronda anterior
+
+  const nueva = { id: siguienteId('R', rondas.filas.map(function (f) { return f.v.id; })), idOferta: idOferta, numero: String(numero), fecha: fecha };
+  escribirTodo([filaNueva(rondas, COLS_RONDA, nueva)]);
+  return { ok: true, ronda: nueva };
+}
+
+// Un alumno aplica a una ronda de una oferta. La petición lleva: idAlumno, idOferta, numeroRonda, fecha y notas.
+// Nace con el estado inicial y su primera línea de Historial. Una misma pareja alumno + oferta + ronda no se repite
+// ('duplicado', con la que ya existe). Una oferta cerrada se admite (la app avisa).
+function crearAplicacion(c) {
+  const idAlumno = idPeticion(c.idAlumno), idOferta = idPeticion(c.idOferta);
+  const numero = numeroPeticion(c.numeroRonda);
+  if (typeof c.fecha !== 'string' || typeof c.notas !== 'string') throw fallo('peticion');
+  const fecha = fechaPeticion(c.fecha, 'fecha');
+  const notas = validarNota(c.notas, 'notas');
+  if (listaDe(LISTA_ESTADOS).indexOf(ESTADO_INICIAL) < 0) throw fallo('lista', { campo: 'estado' });
+
+  unica(abrirTabla(HOJA_ALUMNOS, { id: COL_ID }), function (f) { return f.v.id === idAlumno; }, 'alumno');
+  unica(abrirTabla(HOJA_OFERTAS, { id: COL_ID_OFERTA }), function (f) { return f.v.id === idOferta; }, 'oferta');
+  const ronda = unica(abrirTabla(HOJA_RONDAS, COLS_RONDA), function (f) { return f.v.idOferta === idOferta && Number(f.v.numero) === numero; }, 'ronda');
+  comprobarNoAnterior(fecha, [ronda.v.fecha]);
+
+  const apps = abrirTabla(HOJA_APLICACIONES, COLS_APLICACION);
+  const repetida = apps.filas.filter(function (f) {
+    return f.v.idAlumno === idAlumno && f.v.idOferta === idOferta && Number(f.v.numeroRonda) === numero;
+  })[0];
+  if (repetida) throw fallo('duplicado', { aplicacion: repetida.v });
+
+  const hist = abrirTabla(HOJA_HISTORIAL, COLS_HISTORIAL);
+  const aplicacion = { id: siguienteId('AP', apps.filas.map(function (f) { return f.v.id; })), idAlumno: idAlumno, idOferta: idOferta,
+    numeroRonda: String(numero), fecha: fecha, estado: ESTADO_INICIAL, motivo: '', notas: notas };
+  const cambio = { id: siguienteId('H', hist.filas.map(function (f) { return f.v.id; })), idAplicacion: aplicacion.id, estadoAnterior: '',
+    estadoNuevo: ESTADO_INICIAL, motivo: '', fecha: fecha, nota: '' };
+  escribirTodo([filaNueva(apps, COLS_APLICACION, aplicacion), filaNueva(hist, COLS_HISTORIAL, cambio)]);
+  return { ok: true, aplicacion: aplicacion, historial: cambio };
+}
+
+// Cambia el estado de una aplicación (hacia delante o hacia atrás) y lo apunta en Historial. La petición lleva:
+//   id (de la aplicación), estado, motivo (solo con "Descartado"), fecha, nota, y anterior: { estado, motivo } = lo que la app creía que había.
+// Si el Sheet ya no coincide con "anterior": 'conflicto' con la aplicación tal como está. Sin cambios reales: no escribe nada.
+function cambiarEstado(c) {
+  const id = idPeticion(c.id);
+  ['estado', 'motivo', 'fecha', 'nota'].forEach(function (k) { if (typeof c[k] !== 'string') throw fallo('peticion'); });
+  if (!objetoPlano(c.anterior) || typeof c.anterior.estado !== 'string' || typeof c.anterior.motivo !== 'string') throw fallo('peticion');
+  const estado = c.estado.trim(), motivo = c.motivo.trim();
+  const fecha = fechaPeticion(c.fecha, 'fecha');
+  const nota = validarNota(c.nota, 'nota');
+  if (!estado) throw fallo('requerido', { campo: 'estado' });
+  if (listaDe(LISTA_ESTADOS).indexOf(estado) < 0) throw fallo('lista', { campo: 'estado' });
+  if (estado === ESTADO_DESCARTE) {
+    if (!motivo) throw fallo('requerido', { campo: 'motivo' });
+    if (listaDe(LISTA_MOTIVOS).indexOf(motivo) < 0) throw fallo('lista', { campo: 'motivo' });
+  } else if (motivo) {
+    throw fallo('motivo-sobra', { campo: 'motivo' });
+  }
+
+  const apps = abrirTabla(HOJA_APLICACIONES, COLS_APLICACION);
+  const fila = unica(apps, function (f) { return f.v.id === id; }, 'aplicacion');
+  const actual = fila.v;
+  if (actual.estado !== c.anterior.estado.trim() || actual.motivo !== c.anterior.motivo.trim()) throw fallo('conflicto', { aplicacion: actual });
+  if (estado === actual.estado && motivo === actual.motivo) return { ok: true, aplicacion: actual, historial: null, sinCambios: true };
+
+  const hist = abrirTabla(HOJA_HISTORIAL, COLS_HISTORIAL);
+  const suyas = hist.filas.filter(function (f) { return f.v.idAplicacion === id; }).map(function (f) { return f.v.fecha; });
+  comprobarNoAnterior(fecha, [actual.fecha].concat(suyas));   // no antes de su último movimiento
+
+  const nueva = Object.assign({}, actual, { estado: estado, motivo: motivo });
+  const cambio = { id: siguienteId('H', hist.filas.map(function (f) { return f.v.id; })), idAplicacion: id, estadoAnterior: actual.estado,
+    estadoNuevo: estado, motivo: motivo, fecha: fecha, nota: nota };
+  const celdas = [];
+  ['estado', 'motivo'].forEach(function (k) {
+    if (nueva[k] !== actual[k]) celdas.push({ col: apps.cols[k], valor: nueva[k], antes: valorTexto(apps.valores[fila.fila - 1][apps.cols[k]]) });
+  });
+  escribirTodo([{ h: apps.h, fila: fila.fila, celdas: celdas }, filaNueva(hist, COLS_HISTORIAL, cambio)]);
+  return { ok: true, aplicacion: nueva, historial: cambio, sinCambios: false };
+}
+
+// Lee una hoja y localiza sus columnas por su nombre. Devuelve:
+//   { h, valores, cols: { clave: nº de columna }, filas: [{ fila: nº de fila en la hoja, v: { clave: texto } }] } (sin las filas vacías).
+function abrirTabla(nombre, columnas) {
+  const h = hoja(nombre);
+  const valores = h.getDataRange().getValues();
+  const cab = (valores[0] || []).map(function (x) { return valorTexto(x).trim(); });
+  const cols = {};
+  Object.keys(columnas).forEach(function (k) {
+    cols[k] = cab.indexOf(columnas[k]);
+    if (cols[k] < 0) throw fallo('columna', { columna: columnas[k] });
+  });
+  const filas = [];
+  for (let i = 1; i < valores.length; i++) {
+    const v = {};
+    Object.keys(cols).forEach(function (k) { v[k] = valorTexto(valores[i][cols[k]]).trim(); });
+    if (Object.keys(v).some(function (k) { return v[k] !== ''; })) filas.push({ fila: i + 1, v: v });
+  }
+  return { h: h, valores: valores, cols: cols, filas: filas };
+}
+
+// La única fila que cumple la condición; si no hay ninguna o hay varias, falla diciendo de qué se trata.
+function unica(tabla, cumple, campo) {
+  const f = tabla.filas.filter(cumple);
+  if (!f.length) throw fallo('no-encontrado', { campo: campo });
+  if (f.length > 1) throw fallo('id-duplicado', { campo: campo });
+  return f[0];
+}
+
+function listaDe(nombre) {
+  const l = leerListas()[nombre];
+  if (!l) throw fallo('columna', { columna: nombre });
+  return l;
+}
+
+// Una fila nueva al final: la primera fila libre tras el último dato (así una fila que se dejó en blanco se reutiliza).
+function filaNueva(t, columnas, v) {
+  let fila = 2;
+  for (let i = t.valores.length - 1; i >= 1; i--) {
+    if (t.valores[i].some(function (x) { return valorTexto(x).trim() !== ''; })) { fila = i + 2; break; }
+  }
+  return { h: t.h, fila: fila, celdas: Object.keys(columnas).map(function (k) { return { col: t.cols[k], valor: v[k], antes: '' }; }) };
+}
+
+// Escribe varias cosas (cada una: { h, fila, celdas: [{ col, valor, antes }] }) como texto plano. Si una falla, deja todo como estaba:
+// así nunca queda una aplicación sin su línea de Historial, ni al revés.
+function escribirTodo(escrituras) {
+  const hechas = [];
+  try {
+    escrituras.forEach(function (e) { hechas.push(e); poner(e, false); });
+    SpreadsheetApp.flush();
+  } catch (x) {
+    hechas.reverse().forEach(function (e) {
+      try { poner(e, true); } catch (y) { console.error('No se pudo deshacer: ' + String(y)); }
+    });
+    throw x;
+  }
+}
+
+function poner(e, deshacer) {
+  e.celdas.forEach(function (c) {
+    const celda = e.h.getRange(e.fila, c.col + 1);
+    celda.setNumberFormat('@');
+    celda.setValue(deshacer ? c.antes : c.valor);
+  });
+}
+
+function idPeticion(x) {
+  if (typeof x !== 'string' || !x.trim() || x.length > 40) throw fallo('peticion');
+  return x.trim();
+}
+
+// Un número de ronda: entero de 1 a 999, como número o como texto ("2").
+function numeroPeticion(x) {
+  const n = typeof x === 'number' ? x : (typeof x === 'string' && /^\d{1,3}$/.test(x.trim()) ? Number(x) : NaN);
+  if (!Number.isInteger(n) || n < 1 || n > 999) throw fallo('peticion');
+  return n;
+}
+
+function fechaPeticion(bruto, campo) {
+  const f = bruto.trim();
+  if (!f) throw fallo('requerido', { campo: campo });
+  if (!fechaValida(f)) throw fallo('fecha', { campo: campo });
+  if (f > hoyTexto()) throw fallo('fecha-futura', { campo: campo });
+  return f;
+}
+
+// La fecha no puede ser anterior a la más reciente de "referencias" (las vacías o raras se ignoran).
+function comprobarNoAnterior(fecha, referencias) {
+  const desde = referencias.filter(fechaValida).sort().pop();
+  if (desde && fecha < desde) throw fallo('fecha-anterior', { campo: 'fecha', desde: desde });
+}
+
+// Texto libre de varias líneas (notas): sin HTML ni caracteres raros, y que nunca se interprete como fórmula.
+function validarNota(bruto, campo) {
+  const v = normalizarTexto(bruto).trim();
+  if (v.length > MAX_NOTAS) throw fallo('largo', { campo: campo });
+  if (/[\u0000-\u0008\u000B\u000C\u000E-\u001F\u007F]/.test(v)) throw fallo('caracteres', { campo: campo });
+  if (/<[\/!?a-zA-Z]/.test(v)) throw fallo('html', { campo: campo });
+  return /^[=+\-@]/.test(v) ? ' ' + v : v;
 }
 
 /* ------------------------------------------------- funciones solo para el editor */
@@ -323,10 +572,11 @@ function comprobarConfiguracion() {
   const props = PropertiesService.getScriptProperties();
   const clave = props.getProperty(P_CLAVE);
   const informe = { clave: !clave ? 'FALTA' : clave.length < CLAVE_MIN ? 'DEMASIADO CORTA (mínimo ' + CLAVE_MIN + ')' : 'ok (' + clave.length + ' caracteres)', hojas: {} };
-  ['Alumnos', 'Ofertas', 'Listas'].forEach(function (n) {
+  ['Alumnos', 'Ofertas', 'Listas', HOJA_RONDAS, HOJA_APLICACIONES, HOJA_HISTORIAL].forEach(function (n) {
     const h = SpreadsheetApp.getActive().getSheetByName(n);
     informe.hojas[n] = h ? (h.getLastRow() - 1) + ' filas' : 'FALTA LA HOJA';
   });
+  informe.rondas = rondasDisponibles() ? 'listas (se anuncian a la app)' : 'FALTAN HOJAS: crea Rondas, Aplicaciones e Historial';
   const h = SpreadsheetApp.getActive().getSheetByName(HOJA_ALUMNOS);
   const cab = h ? h.getDataRange().getValues()[0].map(function (x) { return valorTexto(x).trim(); }) : [];
   informe.columnas = {};
@@ -339,6 +589,17 @@ function comprobarConfiguracion() {
   const cabL = hl ? hl.getDataRange().getValues()[0].map(function (x) { return valorTexto(x).trim(); }) : [];
   informe.listas = {};
   CAMPOS_OFERTA.filter(function (f) { return f.lista; }).forEach(function (f) { informe.listas[f.lista] = cabL.indexOf(f.lista) >= 0 ? 'ok' : 'FALTA LA COLUMNA EN LISTAS'; });
+  [LISTA_ESTADOS, LISTA_MOTIVOS].forEach(function (n) { informe.listas[n] = cabL.indexOf(n) >= 0 ? 'ok' : 'FALTA LA COLUMNA EN LISTAS'; });
+  const l = leerListasSiExisten();
+  informe.estados = {};
+  informe.estados[ESTADO_INICIAL] = l[LISTA_ESTADOS] && l[LISTA_ESTADOS].indexOf(ESTADO_INICIAL) >= 0 ? 'ok' : 'FALTA EN LA LISTA';
+  informe.estados[ESTADO_DESCARTE] = l[LISTA_ESTADOS] && l[LISTA_ESTADOS].indexOf(ESTADO_DESCARTE) >= 0 ? 'ok' : 'FALTA EN LA LISTA';
+  informe.columnasRondas = {};
+  [[HOJA_RONDAS, COLS_RONDA], [HOJA_APLICACIONES, COLS_APLICACION], [HOJA_HISTORIAL, COLS_HISTORIAL]].forEach(function (p) {
+    const hh = SpreadsheetApp.getActive().getSheetByName(p[0]);
+    const cabH = hh ? hh.getDataRange().getValues()[0].map(function (x) { return valorTexto(x).trim(); }) : [];
+    Object.keys(p[1]).forEach(function (k) { informe.columnasRondas[p[0] + ' > ' + p[1][k]] = cabH.indexOf(p[1][k]) >= 0 ? 'ok' : 'FALTA'; });
+  });
   const hasta = Number(props.getProperty(P_BLOQUEO)) || 0;
   informe.bloqueado = ahora().getTime() < hasta;
   console.log(JSON.stringify(informe, null, 2));
@@ -392,7 +653,7 @@ function fallo(codigo, detalle) {
 // Solo salen códigos cortos y estos datos concretos; nunca el texto de un error interno.
 function respuestaError(err) {
   const r = { ok: false, error: err.codigo };
-  ['segundos', 'hoja', 'columna', 'notas', 'fecha', 'campo', 'id', 'oferta'].forEach(function (k) { if (err.detalle[k] !== undefined) r[k] = err.detalle[k]; });
+  ['segundos', 'hoja', 'columna', 'notas', 'fecha', 'campo', 'id', 'oferta', 'ultima', 'ronda', 'aplicacion', 'desde'].forEach(function (k) { if (err.detalle[k] !== undefined) r[k] = err.detalle[k]; });
   return r;
 }
 

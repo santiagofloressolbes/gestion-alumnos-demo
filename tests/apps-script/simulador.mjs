@@ -22,6 +22,8 @@ class Hoja {
     const rango = {
       setNumberFormat(f) { hoja.formatos.set(k, f); hoja.reg.escrituras.push({ hoja: hoja.nombre, fila: r, col: c, tipo: 'formato', valor: f }); return rango; },
       setValue(v) {
+        // Fallo simulado: la escritura número (restantes + 1) a partir de ahora falla una sola vez (para probar que no queda nada a medias).
+        if (hoja.reg.restantes != null) { if (hoja.reg.restantes === 0) { hoja.reg.restantes = null; throw new Error('fallo de escritura simulado'); } hoja.reg.restantes--; }
         hoja.reg.escrituras.push({ hoja: hoja.nombre, fila: r, col: c, tipo: 'valor', valor: v });
         // Si Google recibe "=..." en una celda que no es de texto plano, lo evaluaría como fórmula.
         if (typeof v === 'string' && /^[=+\-@]/.test(v) && hoja.formatos.get(k) !== '@') hoja.reg.formulas.push({ hoja: hoja.nombre, fila: r, col: c, valor: v });
@@ -39,7 +41,7 @@ class Hoja {
 export function crearMundo({ clave = CLAVE_PRUEBA, ajustar, bloqueoOcupado = false, sinClave = false } = {}) {
   const registro = { escrituras: [], formulas: [], errores: [], respuestas: [] };
   const hojas = {};
-  for (const n of ['Alumnos', 'Ofertas', 'Listas']) hojas[n] = new Hoja(n, leerCSV(leer(`datos-mock/${n}.csv`)), registro);
+  for (const n of ['Alumnos', 'Ofertas', 'Listas', 'Rondas', 'Aplicaciones', 'Historial']) hojas[n] = new Hoja(n, leerCSV(leer(`datos-mock/${n}.csv`)), registro);
   const col = hojas.Alumnos.m[0].indexOf('Fecha última entrevista');
   hojas.Alumnos.m[1][col] = new Date(Date.UTC(2026, 9, 20));   // A001: una fecha que Google guarda como fecha de verdad
   ajustar?.(hojas);
@@ -77,5 +79,6 @@ export function crearMundo({ clave = CLAVE_PRUEBA, ajustar, bloqueoOcupado = fal
       if (JSON.stringify((a[n][r] || [])[c]) !== JSON.stringify((d[n][r] || [])[c])) out.push(`${n}!${r + 1},${c + 1}`);
     return out;
   };
-  return { llamar, hojas, props, reloj, registro, sandbox, foto, celdasCambiadas, clave };
+  const fallarEscritura = k => { registro.restantes = k; };
+  return { llamar, hojas, props, reloj, registro, sandbox, foto, celdasCambiadas, fallarEscritura, clave };
 }

@@ -1,0 +1,13 @@
+﻿ID aplicación,ID alumno,ID oferta,Número de ronda,Fecha de aplicación,Estado,Motivo de descarte,Notas
+AP001,A002,O002,1,2026-10-11,Entrevista,,
+AP002,A028,O002,1,2026-10-11,Descartado,Perfil no encaja,
+AP003,A011,O002,1,2026-10-12,Descartado,La empresa eligió a otro,Escribió por la tarde.
+AP004,A001,O002,2,2026-10-22,En revisión,,
+AP005,A028,O002,2,2026-10-22,Recibida,,Vuelve a aplicar en la segunda ronda.
+AP006,A018,O003,1,2026-10-14,Descartado,Permiso de trabajo,
+AP007,A014,O003,1,2026-10-14,Enviada a la empresa,,
+AP008,A004,O003,1,2026-10-15,Contratado,,
+AP009,A009,O003,2,2026-10-27,En revisión,,
+AP010,A007,O003,2,2026-10-28,Recibida,,
+AP011,A015,O006,1,2026-10-17,Contratado,,
+AP012,A008,O006,1,2026-10-17,Descartado,La empresa eligió a otro,
