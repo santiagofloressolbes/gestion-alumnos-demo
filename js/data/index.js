@@ -117,7 +117,7 @@ export async function guardarOferta(id, oferta, anteriores) {
   }
   let r;
   try {
-    r = await llamarScript(accesoGuardado(), 'guardarOferta', peticion);
+    r = await llamarScript(accesoGuardado(), 'guardarOferta', peticion, { reintentarRed: !!id });   // un alta no se repite sola: podría duplicarse
   } catch (e) {
     if (e.codigo === 'clave') borrarClave();
     throw e;

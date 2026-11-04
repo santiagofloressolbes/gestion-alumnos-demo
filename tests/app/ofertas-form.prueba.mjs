@@ -230,9 +230,9 @@ function mundo_ubic(mundo, id) { return hojaOfertas(mundo)[fila(mundo, id) - 1][
   // a) la petición no llega: se puede reintentar y se guarda una sola vez
   let t = await entrar();
   await nueva(t.pg); await rellenar(t.pg, VALIDA);
-  t.ctrl.abortar = true;
+  t.ctrl.abortar = 1;   // un alta no se reintenta sola (podría duplicarse): basta 1
   await guardarBtn(t.pg); await t.pg.waitForSelector('#v-oferta-form .error:not([hidden])');
-  chk(/No hay conexión con Google/.test(await error(t.pg)) && /no se ha perdido/.test(await error(t.pg)), 'sin conexión: mensaje y nada perdido');
+  chk(/no ha podido hablar con Google/.test(await error(t.pg)) && /no se ha perdido/.test(await error(t.pg)), 'sin conexión: mensaje y nada perdido');
   chk(await t.pg.inputValue('#of-f-empresa') === 'Club mock Z' && !(await t.pg.isDisabled('#of-f-empresa')), 'el formulario sigue editable con lo escrito');
   chk(hojaOfertas(t.mundo).length === 11, 'no se ha creado nada');
   await guardarBtn(t.pg); await t.pg.waitForSelector('#v-oferta .cabecera');
@@ -241,7 +241,7 @@ function mundo_ubic(mundo, id) { return hojaOfertas(mundo)[fila(mundo, id) - 1][
   // b) se guarda pero se pierde la respuesta: al reintentar NO se duplica
   t = await entrar();
   await nueva(t.pg); await rellenar(t.pg, VALIDA);
-  t.ctrl.perderRespuesta = true;
+  t.ctrl.perderRespuesta = 1;
   await guardarBtn(t.pg); await t.pg.waitForSelector('#v-oferta-form .error:not([hidden])');
   chk(hojaOfertas(t.mundo).length === 12, 'la oferta sí llegó al Sheet');
   chk(/Es posible que la oferta sí se haya guardado/.test(await error(t.pg)), 'avisa de que puede estar guardada');

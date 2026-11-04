@@ -41,7 +41,11 @@ export async function terminar() {
 
 // Un "móvil" nuevo con su Google simulado.
 //   modo: 'normal' | 'caido' (sin conexión con Google) | 'html' (Google responde una página en vez del script)
-//   ctrl.abortar / ctrl.perderRespuesta: fallan solo la siguiente petición de guardar.
+//   ctrl.abortar / ctrl.perderRespuesta: fallan las siguientes peticiones de guardar. true = 2 (la app reintenta una vez sola, así que
+//     true equivale a "falla también el reintento"); un número N = fallan solo N seguidas (1 = el reintento automático lo arregla).
+//   ctrl.ocupado = N: el script responde "ocupado" (sin escribir nada) a las N siguientes peticiones de guardar.
+//   ctrl.lento = ms: las peticiones de guardar tardan ese tiempo en responder (para ver "Guardando…" y probar la doble pulsación).
+//   ctrl.fallarTodo = N: las N siguientes peticiones, sean de lo que sean, se cortan (incluidas las de leer datos).
 //   ctrl.alResponder(j, accion): cambia la respuesta del script antes de entregarla (devuelve el nuevo objeto).
 export async function nuevo({ modo = 'normal' } = {}) {
   const mundo = crearMundo();
@@ -49,7 +53,8 @@ export async function nuevo({ modo = 'normal' } = {}) {
   const ctx = await b.newContext({ viewport: { width: 390, height: 800 }, serviceWorkers: 'block' });
   const pg = await ctx.newPage();
   const log = { peticiones: [], consola: [], externas: [] };
-  const ctrl = { abortar: false, perderRespuesta: false };
+  const ctrl = { abortar: 0, perderRespuesta: 0, ocupado: 0, lento: 0, fallarTodo: 0 };
+  const cuenta = v => (v === true ? 2 : Number(v) || 0);
   pg.on('console', m => { if (m.type() === 'error' || /Content Security/i.test(m.text())) log.consola.push(m.text()); });
   pg.on('pageerror', e => log.consola.push('pageerror ' + e.message));
   pg.on('request', r => { if (!r.url().startsWith(BASE)) log.externas.push(r.method() + ' ' + r.url()); });
@@ -58,12 +63,16 @@ export async function nuevo({ modo = 'normal' } = {}) {
     log.peticiones.push({ url: req.url(), metodo: req.method(), cuerpo: req.postData(), tipo: req.headers()['content-type'] });
     const cors = { 'access-control-allow-origin': '*' };
     const accion = req.postData() ? JSON.parse(req.postData()).action : '';
-    if (ctrl.abortar && /^(guardar|registrar|crear|cambiar)/.test(accion)) { ctrl.abortar = false; return r.abort('failed'); }
+    const guarda = /^(guardar|registrar|crear|cambiar)/.test(accion);
+    if (ctrl.fallarTodo > 0) { ctrl.fallarTodo--; return r.abort('failed'); }
+    if (guarda && ctrl.lento) await new Promise(res => setTimeout(res, ctrl.lento));
+    if (guarda && cuenta(ctrl.abortar) > 0) { ctrl.abortar = cuenta(ctrl.abortar) - 1; return r.abort('failed'); }
+    if (guarda && ctrl.ocupado > 0) { ctrl.ocupado--; return r.fulfill({ status: 200, headers: { ...cors, 'content-type': 'application/json' }, body: JSON.stringify({ ok: false, error: 'ocupado' }) }); }
     if (modo === 'caido') return r.abort('failed');
     if (modo === 'html') return r.fulfill({ status: 200, headers: { ...cors, 'content-type': 'text/html' }, body: '<html>Inicia sesión</html>' });
     if (req.method() !== 'POST') return r.fulfill({ status: 200, headers: cors, body: 'x' });
     let j = mundo.llamar(req.postData());
-    if (ctrl.perderRespuesta && /^(guardar|registrar|crear|cambiar)/.test(accion)) { ctrl.perderRespuesta = false; return r.abort('failed'); }
+    if (guarda && cuenta(ctrl.perderRespuesta) > 0) { ctrl.perderRespuesta = cuenta(ctrl.perderRespuesta) - 1; return r.abort('failed'); }
     if (ctrl.alResponder) j = ctrl.alResponder(j, accion) ?? j;   // para simular un script antiguo o una respuesta rara
     r.fulfill({ status: 200, headers: { ...cors, 'content-type': 'application/json' }, body: JSON.stringify(j) });
   });

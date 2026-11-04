@@ -112,7 +112,7 @@ const sinClaveEnUrl = log => log.peticiones.every(p => !p.url.includes(CLAVE_PRU
   ctrl.perderRespuesta = true;
   await guardar(pg, 'v-ronda-form');
   await pg.waitForSelector('#v-ronda-form .error:not([hidden])');
-  chk(/No hay conexión/.test(await texto(pg, '#v-ronda-form .error')) && /sí se haya guardado/.test(await texto(pg, '#v-ronda-form .error')) && filas(mundo, 'Rondas').length === antes + 1, 'respuesta perdida: lo dice (y el Sheet sí la tiene)');
+  chk(/no ha podido hablar con Google/.test(await texto(pg, '#v-ronda-form .error')) && /sí se haya guardado/.test(await texto(pg, '#v-ronda-form .error')) && filas(mundo, 'Rondas').length === antes + 1, 'respuesta perdida: lo dice (y el Sheet sí la tiene)');
   await guardar(pg, 'v-ronda-form'); await aterriza(pg, '#/oferta/O003', '#v-oferta .ronda');
   chk(filas(mundo, 'Rondas').length === antes + 1 && /Ronda 3 registrada/.test(await texto(pg, '#v-oferta .aviso-ok')), 'al reintentar la reconoce como ya guardada: no se duplica');
   // sin conexión
@@ -122,7 +122,7 @@ const sinClaveEnUrl = log => log.peticiones.every(p => !p.url.includes(CLAVE_PRU
   ctrl.abortar = true;
   await guardar(pg, 'v-ronda-form');
   await pg.waitForSelector('#v-ronda-form .error:not([hidden])');
-  chk(/No hay conexión/.test(await texto(pg, '#v-ronda-form .error')) && await pg.inputValue('#ro-fecha') === '2026-10-30' && filas(mundo, 'Rondas').length === n1 && !(await pg.isDisabled('#ro-fecha')), 'sin conexión: error claro, la fecha sigue ahí y no se escribió nada');
+  chk(/no ha podido hablar con Google/.test(await texto(pg, '#v-ronda-form .error')) && await pg.inputValue('#ro-fecha') === '2026-10-30' && filas(mundo, 'Rondas').length === n1 && !(await pg.isDisabled('#ro-fecha')), 'sin conexión: error claro, la fecha sigue ahí y no se escribió nada');
   await guardar(pg, 'v-ronda-form'); await aterriza(pg, '#/oferta/O009', '#v-oferta .ronda');
   chk(filas(mundo, 'Rondas').length === n1 + 1, 'al reintentar, se guarda una sola vez');
   chk(log.consola.every(c => /Failed to load resource|net::ERR/i.test(c)), 'solo errores de red esperados en consola: ' + log.consola.join(' | '));
@@ -280,7 +280,7 @@ const sinClaveEnUrl = log => log.peticiones.every(p => !p.url.includes(CLAVE_PRU
   ctrl.perderRespuesta = true;
   await guardar(pg, 'v-aplicacion-form');
   await pg.waitForSelector('#v-aplicacion-form .error:not([hidden])');
-  chk(/No hay conexión/.test(await texto(pg, '#v-aplicacion-form .error')) && /sí se haya guardado/.test(await texto(pg, '#v-aplicacion-form .error')) && filas(mundo, 'Aplicaciones').length === n0 + 1 && await pg.isChecked('#ap-al-A003'), 'respuesta perdida: lo dice (se guardó) y conserva lo escrito');
+  chk(/no ha podido hablar con Google/.test(await texto(pg, '#v-aplicacion-form .error')) && /sí se haya guardado/.test(await texto(pg, '#v-aplicacion-form .error')) && filas(mundo, 'Aplicaciones').length === n0 + 1 && await pg.isChecked('#ap-al-A003'), 'respuesta perdida: lo dice (se guardó) y conserva lo escrito');
   await guardar(pg, 'v-aplicacion-form');
   await pg.waitForSelector('#ap-ok:not([hidden])');
   chk(/Valentina Aguirre ya estaba apuntado en la ronda 2 \(Recibida\)/.test(await texto(pg, '#ap-ok')) && filas(mundo, 'Aplicaciones').length === n0 + 1 && filas(mundo, 'Historial').length === 37, 'al reintentar la reconoce: no se duplica ni la aplicación ni su historial');
@@ -297,7 +297,7 @@ const sinClaveEnUrl = log => log.peticiones.every(p => !p.url.includes(CLAVE_PRU
   const n1 = filas(mundo, 'Aplicaciones').length;
   await guardar(pg, 'v-aplicacion-form');
   await pg.waitForSelector('#v-aplicacion-form .error:not([hidden])');
-  chk(/No hay conexión/.test(await texto(pg, '#v-aplicacion-form .error')) && filas(mundo, 'Aplicaciones').length === n1 && await pg.isChecked('#ap-al-A006') && !(await pg.isDisabled('#ap-q')), 'sin conexión: error claro, nada escrito, la selección sigue');
+  chk(/no ha podido hablar con Google/.test(await texto(pg, '#v-aplicacion-form .error')) && filas(mundo, 'Aplicaciones').length === n1 && await pg.isChecked('#ap-al-A006') && !(await pg.isDisabled('#ap-q')), 'sin conexión: error claro, nada escrito, la selección sigue');
   await guardar(pg, 'v-aplicacion-form');
   await pg.waitForFunction(() => /Andrés Duarte/.test(document.querySelector('#ap-ok').textContent));
   chk(filas(mundo, 'Aplicaciones').length === n1 + 1, 'al reintentar se guarda');
@@ -431,7 +431,7 @@ const sinClaveEnUrl = log => log.peticiones.every(p => !p.url.includes(CLAVE_PRU
   ctrl.perderRespuesta = true;
   await guardar(pg, 'v-estado-form');
   await pg.waitForSelector('#v-estado-form .error:not([hidden])');
-  chk(/No hay conexión/.test(await texto(pg, '#v-estado-form .error')) && /sí se haya guardado/.test(await texto(pg, '#v-estado-form .error')) && filas(mundo, 'Historial').length === n2 + 1, 'respuesta perdida: lo dice y el Sheet sí lo tiene');
+  chk(/no ha podido hablar con Google/.test(await texto(pg, '#v-estado-form .error')) && /sí se haya guardado/.test(await texto(pg, '#v-estado-form .error')) && filas(mundo, 'Historial').length === n2 + 1, 'respuesta perdida: lo dice y el Sheet sí lo tiene');
   await guardar(pg, 'v-estado-form');
   await aterriza(pg, '#/aplicacion/AP009', '#v-aplicacion .cabecera');
   chk(filas(mundo, 'Historial').length === n2 + 1 && /Estado cambiado a «Enviada a la empresa»/.test(await texto(pg, '#v-aplicacion .aviso-ok')), 'al reintentar la reconoce como guardada: una sola línea de historial');
@@ -441,7 +441,7 @@ const sinClaveEnUrl = log => log.peticiones.every(p => !p.url.includes(CLAVE_PRU
   const n3 = filas(mundo, 'Historial').length;
   ctrl.abortar = true; await guardar(pg, 'v-estado-form');
   await pg.waitForSelector('#v-estado-form .error:not([hidden])');
-  chk(/No hay conexión/.test(await texto(pg, '#v-estado-form .error')) && filas(mundo, 'Historial').length === n3 && await pg.inputValue('#es-nota') === 'Mi nota' && await pg.inputValue('#es-estado') === 'En revisión', 'sin conexión: error claro, nada escrito, lo escrito sigue');
+  chk(/no ha podido hablar con Google/.test(await texto(pg, '#v-estado-form .error')) && filas(mundo, 'Historial').length === n3 && await pg.inputValue('#es-nota') === 'Mi nota' && await pg.inputValue('#es-estado') === 'En revisión', 'sin conexión: error claro, nada escrito, lo escrito sigue');
   await guardar(pg, 'v-estado-form'); await aterriza(pg, '#/aplicacion/AP010', '#v-aplicacion .cabecera');
   chk(filas(mundo, 'Historial').length === n3 + 1, 'al reintentar se guarda una vez');
   // la aplicación desaparece del Sheet

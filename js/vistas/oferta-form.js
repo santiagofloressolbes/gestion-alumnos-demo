@@ -6,6 +6,7 @@ import { navegacion } from '../util/navegacion.js';
 import { CAMPOS, validarOferta, mensajeCampo, normalizarTexto, miles } from '../util/ofertas.js';
 import { hoyLocal, fechaLarga } from './entrevista.js';
 import { tarjetaError } from './error-datos.js';
+import { ocupar } from '../util/trabajo.js';
 
 const ir = hash => { location.hash = hash; };
 const igual = (a, b) => CAMPOS.every(c => a[c.clave] === b[c.clave]);
@@ -96,11 +97,7 @@ export async function pintarFormOferta(raiz, id) {
     ir(id ? '#/oferta/' + encodeURIComponent(id) : '#/ofertas');
   } }, 'Cancelar');
   const decir = (t, campo) => { error.textContent = t; error.hidden = !t; if (t && campo) entradas[campo]?.focus(); };
-  const ocupado = si => {
-    guardar.disabled = cancelar.disabled = si;
-    for (const x of Object.values(entradas)) x.disabled = si;
-    guardar.textContent = si ? 'Guardando…' : 'Guardar';
-  };
+  const controles = () => [guardar, cancelar, ...Object.values(entradas), ...conflicto.querySelectorAll('button')];
   const marcarCambios = () => { navegacion.sinGuardar = !igual(leer(), inicial); };
 
   const terminar = (idFinal, aviso) => {
@@ -109,12 +106,14 @@ export async function pintarFormOferta(raiz, id) {
     ir('#/oferta/' + encodeURIComponent(idFinal));
   };
 
-  const enviar = async () => {
+  const enviar = async (pulsado = guardar) => {
     const v = leer();
     if (id && !base && igual(v, inicial)) return terminar(id, '');   // nada que guardar: no se envía nada
     const problema = validarOferta(v, listas, hoy);
     if (problema) { decir(problema.mensaje, problema.campo); return; }
-    decir(''); conflicto.hidden = true; ocupado(true);
+    decir('');
+    if (pulsado === guardar) conflicto.hidden = true;   // si se pulsó un botón del aviso, ese aviso sigue a la vista mientras trabaja
+    const liberar = ocupar(controles(), pulsado);
     try {
       // Si un alta anterior se quedó sin respuesta, primero se mira si la oferta ya está en el Sheet: así no se duplica.
       if (!id && incierto) {
@@ -124,7 +123,7 @@ export async function pintarFormOferta(raiz, id) {
       const r = await guardarOferta(id, v, base || inicial);
       terminar(r.id, r.creada ? 'Oferta creada en el Sheet.' : 'Guardado en el Sheet.');
     } catch (e) {
-      ocupado(false);
+      liberar();
       if (e.codigo === 'conflicto' && e.extra.oferta) return pintarConflicto(e.extra.oferta, v);
       if (e.extra?.campo && mensajeCampo(e.codigo, e.extra.campo)) return decir(mensajeCampo(e.codigo, e.extra.campo), e.extra.campo);
       if (e.codigo === 'clave') return decir('La clave ya no es correcta. Copia lo que has escrito antes de salir y vuelve a entrar con la clave nueva.');
@@ -151,10 +150,10 @@ export async function pintarFormOferta(raiz, id) {
       el('dl', { class: 'campos' }, (cambiados.length ? cambiados : CAMPOS).map(c => el('div', { class: 'campo' },
         el('dt', {}, c.etiqueta),
         el('dd', { class: actual[c.clave] ? '' : 'vacio' }, (c.fecha ? fechaLarga(actual[c.clave]) : actual[c.clave]) || 'Vacío')))),
-      el('button', { class: 'primary', type: 'button', onclick: () => {
+      el('button', { class: 'primary', type: 'button', onclick: ev => {
         // Mis cambios sobre lo que hay ahora: lo que no toqué se queda como está en el Sheet.
         for (const c of CAMPOS) if (mias[c.clave] === inicial[c.clave]) ponerValor(entradas[c.clave], actual[c.clave]);
-        base = actual; enviar();
+        base = actual; enviar(ev.currentTarget);
       } }, 'Guardar el mío igualmente'),
       el('button', { class: 'secondary', type: 'button', onclick: () => { aplicarOferta(id, actual); terminar(id, 'Se ha cargado lo que había en el Sheet.'); } }, 'Descartar el mío'));
     conflicto.hidden = false;

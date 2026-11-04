@@ -20,9 +20,9 @@ function mensaje(codigo, extra = {}) {
     case 'config': return 'El script no tiene bien puesta la clave (mira el paso 4 de la guía).';
     case 'hoja': return `Falta la hoja «${extra.hoja}» en el Sheet.`;
     case 'columna': return `Falta la columna «${extra.columna}» en el Sheet.`;
-    case 'ocupado': return 'El script estaba ocupado. Inténtalo otra vez en unos segundos.';
+    case 'ocupado': return `El script de Google seguía ocupado después de intentarlo ${extra.intentos > 1 ? extra.intentos + ' veces' : 'una vez'}. Espera unos segundos y vuelve a pulsar.`;
     case 'servidor': return 'El script ha tenido un fallo interno. Mira el detalle en el editor de Apps Script.';
-    case 'red': return 'No hay conexión con Google. Comprueba tu conexión e inténtalo otra vez.';
+    case 'red': return `La app no ha podido hablar con Google${extra.intentos > 1 ? ' (lo ha intentado dos veces)' : ''}. Puede ser un corte momentáneo; si no tienes internet, vuelve a intentarlo cuando lo recuperes.`;
     case 'tiempo': return 'Google tarda demasiado en responder. Inténtalo otra vez.';
     case 'respuesta': return 'La dirección no responde como el script. Revisa que esté bien copiada y que se implementó con acceso «Cualquier usuario».';
     case 'version': return 'El script es de una versión que esta app no entiende. Actualiza Code.gs (mira la guía).';
@@ -61,8 +61,30 @@ export function errorDatos(codigo, extra) {
   return e;
 }
 
+// Reintentos automáticos. Un móvil que lleva un rato quieto puede tener la conexión con Google "dormida" y fallar la primera vez.
+//  - Sin respuesta ("red"): se reintenta UNA vez tras una pausa corta. Lo que ya se guardó se detecta solo (duplicado / conflicto idéntico).
+//  - Script "ocupado" (no llegó a escribir nada): se reintenta hasta 2 veces, con más espera.
+const ESPERA_RED_MS = 600;
+const ESPERAS_OCUPADO_MS = [1500, 3000];
+const dormir = ms => new Promise(r => setTimeout(r, ms));
+
+// "reintentarRed: false" para lo que no se puede repetir sin riesgo de duplicar (el alta de una oferta).
+export async function llamarScript(acceso, accion, datos = {}, { reintentarRed = true } = {}) {
+  let intentos = 0, reintentosOcupado = 0;
+  for (;;) {
+    intentos++;
+    try { return await unaLlamada(acceso, accion, datos); }
+    catch (e) {
+      if (e.codigo === 'red' && reintentarRed && intentos === 1) { await dormir(ESPERA_RED_MS); continue; }
+      if (e.codigo === 'ocupado' && reintentosOcupado < ESPERAS_OCUPADO_MS.length) { await dormir(ESPERAS_OCUPADO_MS[reintentosOcupado++]); continue; }
+      if (e.codigo === 'red' || e.codigo === 'ocupado') throw errorDatos(e.codigo, { ...e.extra, intentos });
+      throw e;
+    }
+  }
+}
+
 // Una petición al script. Devuelve la respuesta (ok:true) o lanza un error con .codigo.
-export async function llamarScript({ url, clave }, accion, datos = {}) {
+async function unaLlamada({ url, clave }, accion, datos) {
   const ctl = new AbortController();
   const reloj = setTimeout(() => ctl.abort(), CONFIG.esperaScriptMs);
   try {

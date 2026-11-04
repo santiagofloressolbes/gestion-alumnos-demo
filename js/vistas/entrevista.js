@@ -2,6 +2,7 @@
 // Lo que se escribe NO se guarda en el móvil: solo se envía al script cuando se pulsa "Guardar".
 import { guardarEntrevista, aplicarEntrevista, puedeEscribir } from '../data/index.js';
 import { el } from '../util/dom.js';
+import { ocupar } from '../util/trabajo.js';
 
 const MAX_NOTAS = 2000;
 const MESES = ['enero', 'febrero', 'marzo', 'abril', 'mayo', 'junio', 'julio', 'agosto', 'septiembre', 'octubre', 'noviembre', 'diciembre'];
@@ -84,10 +85,10 @@ export function tarjetaEntrevista(a) {
     pintarCuenta();
 
     const decir = t => { error.textContent = t; error.hidden = !t; };
-    const ocupado = si => { guardar.disabled = cancelar.disabled = textarea.disabled = fechaIn.disabled = si; guardar.textContent = si ? 'Guardando…' : 'Guardar'; };
+    const controles = () => [guardar, cancelar, textarea, fechaIn, ...conflicto.querySelectorAll('button')];
 
     // ¿Se puede guardar? Si no hay nota y ya había entrevista, se entiende que se quiere borrarla.
-    const enviar = async () => {
+    const enviar = async (pulsado = guardar) => {
       const notas = normalizar(textarea.value);
       let fecha = fechaIn.value;
       if (!notas && inicial && !base) {
@@ -97,12 +98,14 @@ export function tarjetaEntrevista(a) {
         const c = validar(notas, fecha, hoy);
         if (c) { decir(MENSAJES[c]); (c === 'fecha' || c === 'fecha-futura' ? fechaIn : textarea).focus(); return; }
       }
-      decir(''); conflicto.hidden = true; ocupado(true);
+      decir('');
+      if (pulsado === guardar) conflicto.hidden = true;   // si se pulsó un botón del aviso, ese aviso sigue a la vista mientras trabaja
+      const liberar = ocupar(controles(), pulsado);
       try {
         await guardarEntrevista(a.id, notas, fecha, base || undefined);
         ver('Guardado en el Sheet.');
       } catch (e) {
-        ocupado(false);
+        liberar();
         if (e.codigo === 'conflicto') return pintarConflicto(e.extra, notas, fecha);
         decir(e.codigo === 'clave'
           ? 'La clave ya no es correcta. Copia tu nota antes de salir y vuelve a entrar con la clave nueva.'
@@ -122,7 +125,7 @@ export function tarjetaEntrevista(a) {
         el('h3', {}, 'Alguien cambió esta entrevista'),
         el('p', { class: 'sub' }, 'Esto es lo que hay ahora en el Sheet. Lo que has escrito sigue en el cuadro de arriba.'),
         el('dl', { class: 'campos' }, campo('Fecha', fechaLarga(fA) || 'Sin fecha', !fA), campo('Notas', nA || 'Sin notas', !nA, true)),
-        el('button', { class: 'primary', type: 'button', onclick: () => { base = { notas: actual.notas || '', fecha: fA }; enviar(); } }, 'Guardar el mío igualmente'),
+        el('button', { class: 'primary', type: 'button', onclick: ev => { base = { notas: actual.notas || '', fecha: fA }; enviar(ev.currentTarget); } }, 'Guardar el mío igualmente'),
         el('button', { class: 'secondary', type: 'button', onclick: () => { aplicarEntrevista(a.id, actual.notas || '', fA); ver('Se ha cargado lo que había en el Sheet.'); } }, 'Descartar el mío'));
       conflicto.hidden = false;
       conflicto.scrollIntoView?.({ block: 'nearest' });

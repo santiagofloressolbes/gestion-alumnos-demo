@@ -122,7 +122,7 @@ import { b, nuevo, chk, almacen, conectar, terminar, BASE, URL_OK, CLAVE_PRUEBA 
     await pg.goto(BASE); await pg.waitForSelector('#v-inicio .card');
     const t = await pg.innerText('#v-inicio');
     chk(/No se han podido cargar los datos/.test(t), modo + ': tarjeta de error');
-    chk(modo === 'caido' ? /No hay conexión con Google/.test(t) : /no responde como el script/.test(t), modo + ': mensaje claro: ' + t.replace(/\n/g, ' | '));
+    chk(modo === 'caido' ? /no ha podido hablar con Google/.test(t) : /no responde como el script/.test(t), modo + ': mensaje claro: ' + t.replace(/\n/g, ' | '));
     chk(!(await pg.locator('.master').count()), modo + ': NO se muestran datos de la demo');
     chk(!(await pg.locator('#demo').isVisible()), modo + ': no se activa el modo demo');
     chk(await pg.locator('text=Reintentar').count() === 1 && await pg.locator('text=Cambiar o quitar el acceso').count() === 1, modo + ': botones');

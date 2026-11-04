@@ -12,6 +12,7 @@ import {
 import { hoyLocal, fechaLarga } from './entrevista.js';
 import { datosRondas, insigniaEstado } from './rondas.js';
 import { tarjetaError } from './error-datos.js';
+import { ocupar, avisoFlotante } from '../util/trabajo.js';
 
 const ir = hash => { location.hash = hash; };
 const ISO = /^\d{4}-\d{2}-\d{2}$/;
@@ -90,25 +91,26 @@ export async function pintarFormRonda(raiz, idOferta, previo = {}) {
     navegacion.sinGuardar = false; ir(hrefOferta(oferta.id));
   } }, 'Cancelar');
   const decir = t => { error.textContent = t; error.hidden = !t; if (t) f.input.focus(); };
-  const ocupado = si => { guardar.disabled = cancelar.disabled = f.input.disabled = si; guardar.textContent = si ? 'Guardando…' : 'Guardar'; };
   const terminar = aviso => { navegacion.sinGuardar = false; navegacion.aviso = aviso; ir(hrefOferta(oferta.id)); };
 
   const enviar = async () => {
     const fecha = f.input.value;
     const p = validarRonda(fecha, { hoy, desde });
     if (p) return decir(mensaje(p));
-    decir(''); ocupado(true);
+    decir('');
+    const liberar = ocupar([guardar, cancelar, f.input], guardar);
     try {
       await registrarRonda(oferta.id, numero, fecha);
       terminar(`Ronda ${numero} registrada.`);
     } catch (e) {
-      ocupado(false);
       if (e.codigo === 'conflicto' && e.extra.ultima !== undefined) {
         const ya = e.extra.ronda;
         if (ya && ya.fecha === fecha) { aplicarRonda(ya); return terminar(`Ronda ${numero} registrada.`); }   // ya estaba guardada (p. ej. se cortó la respuesta)
+        guardar.textContent = 'Cargando…';
         await recargar().catch(() => {});
         return pintarFormRonda(raiz, idOferta, { fecha, aviso: `Otra persona ya había registrado la ronda ${numero}. Ahora será la ronda ${Number(e.extra.ultima) + 1}: revisa la fecha y guarda de nuevo.` });
       }
+      liberar();
       if (e.codigo === 'clave') return decir('La clave ya no es correcta. Vuelve a entrar con la clave nueva.');
       decir(mensajeServidor(e) || e.message);
       if (e.codigo === 'red' || e.codigo === 'tiempo') error.append(' Es posible que la ronda sí se haya guardado: al pulsar Guardar otra vez, la app lo comprobará.');
@@ -170,11 +172,7 @@ export async function pintarFormAplicacion(raiz, idOferta, numeroTxt) {
   const alumnoElegido = () => d.alumnos.find(a => a.id === elegido);
   const marcarCambios = () => { navegacion.sinGuardar = !!elegido || !!normalizarTexto(n.area.value) || f.input.value !== hoy; };
   const decir = (t, donde) => { error.textContent = t; error.hidden = !t; if (t) ok.hidden = true; if (t && donde) donde.focus(); };
-  const ocupado = si => {
-    guardar.disabled = cancelar.disabled = buscar.disabled = f.input.disabled = n.area.disabled = si;
-    for (const r of lista.querySelectorAll('input')) r.disabled = si;
-    guardar.textContent = si ? 'Guardando…' : 'Guardar';
-  };
+  const controles = () => [guardar, cancelar, buscar, f.input, n.area, ...lista.querySelectorAll('input')];
 
   // Avisos de lo que se sabe del alumno elegido: solo informativos, nunca impiden guardar.
   function pintarAvisos() {
@@ -217,8 +215,8 @@ export async function pintarFormAplicacion(raiz, idOferta, numeroTxt) {
     decir('');
     ok.textContent = texto; ok.hidden = false;
     pintarLista(); pintarAvisos();
-    buscar.focus();   // el cursor vuelve al buscador, para añadir otra seguida
-    ok.scrollIntoView?.({ block: 'nearest' });
+    avisoFlotante(texto);   // la confirmación se ve aunque la pantalla esté más abajo
+    buscar.focus({ preventScroll: true });   // el cursor vuelve al buscador, para añadir otra seguida
   }
 
   const enviar = async () => {
@@ -226,18 +224,21 @@ export async function pintarFormAplicacion(raiz, idOferta, numeroTxt) {
     const p = validarAplicacion({ idAlumno: elegido, fecha, notas }, { hoy, desde });
     if (p) return decir(mensaje(p), p.campo === 'fecha' ? f.input : p.campo === 'notas' ? n.area : buscar);
     const a = alumnoElegido();
-    decir(''); ok.hidden = true; ocupado(true);
+    decir(''); ok.hidden = true;
+    const liberar = ocupar(controles(), guardar);
     try {
       const r = await crearAplicacion({ idAlumno: elegido, idOferta, numeroRonda: ronda.numero, fecha, notas });
-      ocupado(false);
+      liberar();
       await despuesDeGuardar(`Aplicación de ${nombreAlumno(a)} añadida (${r.aplicacion.id}). Puedes añadir otra.`);
     } catch (e) {
-      ocupado(false);
       if (e.codigo === 'duplicado' && e.extra.aplicacion) {          // ya estaba guardada (p. ej. se cortó la respuesta)
         aplicarAplicacion(e.extra.aplicacion);
+        guardar.textContent = 'Cargando…';
         await recargar().catch(() => {});
+        liberar();
         return despuesDeGuardar(`${nombreAlumno(a)} ya estaba apuntado en la ronda ${ronda.numero} (${e.extra.aplicacion.estado || 'sin estado'}).`);
       }
+      liberar();
       if (e.codigo === 'clave') return decir('La clave ya no es correcta. Vuelve a entrar con la clave nueva.');
       decir(mensajeServidor(e) || e.message);
       if (e.codigo === 'red' || e.codigo === 'tiempo') error.append(' Es posible que sí se haya guardado: al pulsar Guardar otra vez, la app lo comprobará. Lo que has escrito sigue aquí.');
@@ -307,23 +308,22 @@ export async function pintarFormEstado(raiz, id) {
   const refrescar = () => { cajaMotivo.hidden = selEstado.value !== ESTADO_DESCARTE; navegacion.sinGuardar = !igualQue(leer(), inicial); };
   const entradaDe = { fecha: f.input, nota: n.area, estado: selEstado, motivo: selMotivo };
   const decir = (t, campo) => { error.textContent = t; error.hidden = !t; if (t && campo) entradaDe[campo]?.focus(); };
-  const ocupado = si => {
-    guardar.disabled = cancelar.disabled = selEstado.disabled = selMotivo.disabled = f.input.disabled = n.area.disabled = si;
-    guardar.textContent = si ? 'Guardando…' : 'Guardar';
-  };
+  const controles = () => [guardar, cancelar, selEstado, selMotivo, f.input, n.area, ...conflicto.querySelectorAll('button')];
   const terminar = aviso => { navegacion.sinGuardar = false; navegacion.aviso = aviso; ir('#/aplicacion/' + encodeURIComponent(a.id)); };
 
-  const enviar = async () => {
+  const enviar = async (pulsado = guardar) => {
     const v = leer();
     const actual = base || { estado: a.estado, motivo: a.motivo };
     const p = validarCambio(v, { actual, listas: d.listas, hoy, desde });
     if (p) return decir(mensaje(p), p.campo);
-    decir(''); conflicto.hidden = true; ocupado(true);
+    decir('');
+    if (pulsado === guardar) conflicto.hidden = true;   // si se pulsó un botón del aviso, ese aviso sigue a la vista mientras trabaja
+    const liberar = ocupar(controles(), pulsado);
     try {
       const r = await cambiarEstado(a.id, v, actual);
       terminar(r.sinCambios ? 'Ya estaba así: no se ha cambiado nada.' : `Estado cambiado a «${v.estado}».`);
     } catch (e) {
-      ocupado(false);
+      liberar();
       if (e.codigo === 'conflicto' && e.extra.aplicacion) return pintarConflicto(e.extra.aplicacion, v);
       if (e.codigo === 'clave') return decir('La clave ya no es correcta. Copia lo que has escrito antes de salir y vuelve a entrar con la clave nueva.');
       if (e.codigo === 'no-encontrado') return decir('Esta aplicación ya no está en el Sheet.');
@@ -344,8 +344,9 @@ export async function pintarFormEstado(raiz, id) {
       el('h3', {}, 'Alguien cambió esta aplicación'),
       el('p', { class: 'sub' }, 'Ahora está así en el Sheet. Lo que has escrito sigue en el formulario.'),
       el('dl', { class: 'campos' }, el('div', { class: 'campo' }, el('dt', {}, 'Estado actual'), el('dd', {}, ahora))),
-      el('button', { class: 'primary', type: 'button', onclick: () => { base = { estado: actual.estado, motivo: actual.motivo }; enviar(); } }, 'Guardar el mío igualmente'),
-      el('button', { class: 'secondary', type: 'button', onclick: async () => {
+      el('button', { class: 'primary', type: 'button', onclick: ev => { base = { estado: actual.estado, motivo: actual.motivo }; enviar(ev.currentTarget); } }, 'Guardar el mío igualmente'),
+      el('button', { class: 'secondary', type: 'button', onclick: async ev => {
+        ocupar(controles(), ev.currentTarget, 'Cargando…');   // la pantalla se sustituye al terminar
         aplicarAplicacion(actual); await recargar().catch(() => {}); terminar('Se ha cargado lo que había en el Sheet.');
       } }, 'Descartar el mío'));
     conflicto.hidden = false;

@@ -182,7 +182,7 @@ const peticionesGuardar = log => log.peticiones.filter(p => JSON.parse(p.cuerpo)
   await abrir(pg, 'A008'); await pg.click('#en-editar'); await pg.fill('#en-notas', 'no se debe perder');
   ctrl.abortar = true; const antes = mundo.foto();
   await pg.click('form button[type=submit]'); await pg.waitForSelector('.error:not([hidden])');
-  chk(/No hay conexión/.test(await pg.innerText('.error')) && /no se ha perdido/.test(await pg.innerText('.error')), 'mensaje de red: ' + await pg.innerText('.error'));
+  chk(/no ha podido hablar con Google/.test(await pg.innerText('.error')) && /no se ha perdido/.test(await pg.innerText('.error')), 'mensaje de red: ' + await pg.innerText('.error'));
   chk(await pg.inputValue('#en-notas') === 'no se debe perder', 'el texto sigue en el cuadro');
   chk(mundo.celdasCambiadas(antes, mundo.foto()).length === 0 && await pg.locator('form button[type=submit]').isEnabled(), 'nada escrito y botón de nuevo activo');
   await pg.click('form button[type=submit]'); await pg.waitForSelector('#en-editar');
