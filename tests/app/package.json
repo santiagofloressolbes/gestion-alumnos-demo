@@ -4,7 +4,7 @@
   "type": "module",
   "description": "Pruebas de la app en un navegador real contra un Google simulado. Solo para desarrollo; la app no usa npm.",
   "scripts": {
-    "test": "node acceso.prueba.mjs && node entrevista.prueba.mjs && node ofertas.prueba.mjs && node ofertas-form.prueba.mjs && node rondas-util.prueba.mjs && node rondas.prueba.mjs && node rondas-form.prueba.mjs && node fallos.prueba.mjs"
+    "test": "node acceso.prueba.mjs && node entrevista.prueba.mjs && node ofertas.prueba.mjs && node ofertas-form.prueba.mjs && node rondas-util.prueba.mjs && node rondas.prueba.mjs && node rondas-form.prueba.mjs && node fallos.prueba.mjs && node ajustes.prueba.mjs"
   },
   "devDependencies": {
     "playwright": "1.56.1"

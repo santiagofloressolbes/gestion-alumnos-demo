@@ -27,7 +27,7 @@ for (const modo of ['demo', 'script']) {
     chk(t.length === 10, '10 ofertas: ' + t.length);
     chk(t[0] === 'Asociado/a junior de derecho deportivo' && t[9] === 'Analista de antipiratería', 'más reciente primero (O010) y más antigua última (O001): ' + t[0] + ' / ' + t[9]);
     chk(await cuenta(pg) === '10 ofertas', 'contador: ' + await cuenta(pg));
-    chk(await pg.$$eval('#tabs a', a => a.map(x => x.textContent.trim()).join()) === 'Inicio,Buscar,Ofertas', '3 pestañas');
+    chk(await pg.$$eval('#tabs a', a => a.map(x => x.textContent.trim()).join()) === 'Inicio,Buscar,Ofertas,Ajustes', '4 pestañas');
     chk(await pg.getAttribute('#tabs a[data-tab=ofertas]', 'aria-current') === 'page', 'pestaña Ofertas activa');
     chk(await pg.innerText('#titulo') === 'Ofertas', 'título');
     const fila0 = await pg.innerText('#v-ofertas ul.alumnos li:first-child');

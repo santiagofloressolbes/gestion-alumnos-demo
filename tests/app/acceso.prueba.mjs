@@ -81,7 +81,10 @@ import { b, nuevo, chk, almacen, conectar, terminar, BASE, URL_OK, CLAVE_PRUEBA 
   const textoInicio = await pg.innerText('#v-inicio');
   const suma = [...textoInicio.matchAll(/(\d+) alumnos?/g)].slice(0, -1).map(m => +m[1]).reduce((a, c) => a + c, 0);
   chk(suma === total, `alumnos en pantalla (${suma}) = filas del Sheet (${total})`);
-  chk(/Conectado al Sheet de prueba/.test(textoInicio), 'tarjeta Conexión');
+  chk(!/Conexión/.test(textoInicio), 'Inicio ya no lleva la tarjeta Conexión (está en Ajustes)');
+  await pg.click('#tabs a[data-tab=ajustes]'); await pg.waitForSelector('#v-ajustes .conexion');
+  chk(/Conectado al Sheet de prueba/.test(await pg.innerText('#v-ajustes')), 'tarjeta Conexión (en Ajustes)');
+  await pg.click('#tabs a[data-tab=inicio]'); await pg.waitForSelector('.masters .master');
   // Todas las peticiones: POST, text/plain, solo script.google.com, sin clave en la URL
   chk(log.peticiones.length >= 2, 'ping + data: ' + log.peticiones.length);
   chk(log.peticiones.every(p => p.metodo === 'POST' && /^text\/plain/.test(p.tipo) && p.url === URL_OK), 'POST text/plain a la URL exacta');
@@ -107,6 +110,7 @@ import { b, nuevo, chk, almacen, conectar, terminar, BASE, URL_OK, CLAVE_PRUEBA 
 
   // Olvidar acceso
   pg.on('dialog', d => d.accept());
+  await pg.click('#tabs a[data-tab=ajustes]'); await pg.waitForSelector('#aj-olvidar');
   await pg.click('text=Olvidar acceso'); await pg.waitForSelector('#ac-url');
   chk(Object.keys(await almacen(pg)).length === 0, 'olvidar acceso borra todo');
   chk(await pg.inputValue('#ac-url') === '', 'URL no queda precargada tras olvidar');
@@ -157,7 +161,9 @@ import { b, nuevo, chk, almacen, conectar, terminar, BASE, URL_OK, CLAVE_PRUEBA 
   chk(await pg.locator('#demo').isVisible(), 'banner MODO DEMO visible');
   chk(/MODO DEMO/.test(await pg.innerText('#demo')) && /No se guarda nada/.test(await pg.innerText('#demo')), 'texto del banner');
   chk(log.peticiones.length === 0, 'la demo no contacta con el script');
-  chk(/Estás viendo la demo/.test(await pg.innerText('#v-inicio')), 'tarjeta Conexión en demo');
+  await pg.click('#tabs a[data-tab=ajustes]'); await pg.waitForSelector('#v-ajustes .conexion');
+  chk(/Estás viendo la demo/.test(await pg.innerText('#v-ajustes')), 'tarjeta Conexión en demo (en Ajustes)');
+  await pg.click('#tabs a[data-tab=inicio]'); await pg.waitForSelector('.masters .master');
   const al = await almacen(pg);
   chk(Object.keys(al).join() === 'gad.modo', 'solo se guarda el modo');
   await pg.click('.master >> nth=0'); await pg.waitForSelector('.alumno');

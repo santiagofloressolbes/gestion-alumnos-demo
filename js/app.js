@@ -5,6 +5,7 @@ import { pintarAlumno } from './vistas/alumno.js';
 import { pintarCV } from './vistas/cv.js';
 import { pintarBuscar } from './vistas/buscar.js';
 import { pintarAcceso } from './vistas/acceso.js';
+import { pintarAjustes, AVISO_LEGAL } from './vistas/ajustes.js';
 import { pintarOfertas, pintarOferta } from './vistas/ofertas.js';
 import { pintarFormOferta } from './vistas/oferta-form.js';
 import { pintarAplicacion } from './vistas/rondas.js';
@@ -35,6 +36,7 @@ function rutaActual() {
   } catch { /* dirección mal escrita: se vuelve al inicio */ }
   if (h === 'buscar') return { vista: 'buscar', pestana: 'buscar', titulo: 'Buscar' };
   if (h === 'ofertas') return { vista: 'ofertas', pestana: 'ofertas', titulo: 'Ofertas' };
+  if (h === 'ajustes') return { vista: 'ajustes', pestana: 'ajustes', titulo: 'Ajustes' };
   if (h === 'acceso') return { vista: 'acceso', pestana: '', titulo: 'Acceso' };
   return { vista: 'inicio', pestana: 'inicio', titulo: 'Gestión de alumnos (demo)' };
 }
@@ -53,9 +55,14 @@ async function pintar() {
     else a.removeAttribute('aria-current');
   }
   $('#titulo').textContent = r.titulo;
+  // El aviso de demostración completo se ve en Inicio y en Acceso; en Ajustes es una tarjeta; en el resto, una línea corta.
+  const legal = $('#legal');
+  legal.hidden = r.vista === 'ajustes';
+  legal.textContent = r.vista === 'inicio' || r.vista === 'acceso' ? AVISO_LEGAL : 'Demo · datos ficticios.';
   $('#main').scrollTop = 0;
 
   if (r.vista === 'acceso') pintarAcceso($('#v-acceso'));
+  if (r.vista === 'ajustes') pintarAjustes($('#v-ajustes'));
   if (r.vista === 'inicio' && !inicioPintado) { inicioPintado = true; await pintarInicio($('#v-inicio')); }
   if (r.vista === 'master') await pintarMaster($('#v-master'), r.valor);
   if (r.vista === 'alumno') await pintarAlumno($('#v-alumno'), r.valor);
