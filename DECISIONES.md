@@ -2,7 +2,7 @@
 
 > **Proyecto personal de demostración. Datos ficticios. No afiliado a LaLiga ni a LaLiga Business School.**
 
-Última actualización: 2026-11-03. Fase 1 (lectura) terminada. Fase 2 en curso: hechos el acceso con clave, las notas de entrevista y las ofertas (lista, ficha, alta y edición). **Hecho también: rondas y aplicaciones (script, hojas, lectura, alta y cambio de estado con historial)**. Faltan match y compartir perfiles. Solo datos de prueba (ficticios).
+Última actualización: 2026-11-04. Fase 1 (lectura) terminada. Fase 2 en curso: hechos el acceso con clave, las notas de entrevista y las ofertas (lista, ficha, alta y edición). **Hecho también: rondas y aplicaciones (script, hojas, lectura, alta y cambio de estado con historial)**. Faltan match y compartir perfiles. Solo datos de prueba (ficticios).
 
 Documentos: [README.md](README.md) (para cualquier persona), [docs/TECNICO.md](docs/TECNICO.md) (para TI y quien mantiene la app, con la propuesta de integración en LaLiga) y [docs/apps-script/GUIA.md](docs/apps-script/GUIA.md) (poner en marcha el script).
 
@@ -10,6 +10,11 @@ Documentos: [README.md](README.md) (para cualquier persona), [docs/TECNICO.md](d
 
 | Tema | Decisión | Por qué |
 |---|---|---|
+| Reintentos al guardar | Sin respuesta (`red`): 1 reintento automático tras 0,6 s. Script `ocupado`: hasta 2 reintentos (1,5 s y 3 s). El **alta de una oferta no se reintenta sola** (podría duplicarse). Los mensajes dicen lo que pasó ("no ha podido hablar con Google, lo ha intentado dos veces"), sin culpar a la conexión. | En el iPhone el primer intento tras un rato quieto fallaba 2 de 2 veces y el segundo funcionaba. La causa más probable es una conexión "dormida"; no se pudo reproducir en el simulador. |
+| Botones que trabajan | Todo botón que llama al script se desactiva y dice "Guardando…" o "Cargando…" (también los del aviso de conflicto). | Sin señal, se pulsaba varias veces y el script respondía "ocupado". |
+| Confirmación visible | Al añadir una aplicación sale un aviso flotante arriba (se quita solo a los 6 s o al tocarlo), además del aviso de la pantalla. | La pantalla se queda abajo, en la lista de alumnos, y el aviso quedaba fuera de la vista. |
+| Pestaña Ajustes | Cuarta pestaña: conexión y "Olvidar acceso" (ya no están en Inicio), versión de la app, "Buscar actualización" y el aviso de demostración. En Inicio sigue el aviso completo; en el resto, una línea corta ("Demo · datos ficticios."). | Poder comprobar qué versión tiene el móvil y forzar la última sin cerrar la app. |
+| Buscar actualización | Lee `sw.js` de la red (nunca de la copia guardada), compara con `js/version.js` y, si hay una nueva, deja que el service worker la instale y recarga; si no se activa en 20 s, vacía la copia guardada y recarga. El service worker pide sus archivos con `cache: 'reload'` al instalar. | GitHub Pages guarda los archivos 10 minutos en la caché del navegador: sin esto, la "nueva" podía salir vieja. |
 | Datos | Solo datos ficticios. Avatares con iniciales, sin fotos de personas reales. | Privacidad: el repositorio y la web son públicos. |
 | Claves | Ninguna clave, token ni contraseña en el código ni en el repo. La clave del script vive en las Propiedades del script; la dirección del script y la clave, solo en el móvil de cada persona. | Repo público. |
 | Tecnología | HTML, CSS y JavaScript puros, sin instalar ni compilar nada. Módulos JS. Sin librerías ni CDN. | Lo más simple; se publica tal cual en GitHub Pages. |
@@ -18,7 +23,7 @@ Documentos: [README.md](README.md) (para cualquier persona), [docs/TECNICO.md](d
 | Fuentes | Dos: **script** (Google Apps Script con clave sobre un Sheet privado) y **demo** (`datos-mock/`). No hay vuelta automática a la demo si el script falla: se muestra el error. | No mezclar sin avisar datos de prueba con la demo. |
 | Modo demo | Se elige a mano en la pantalla Acceso. Banner fijo "MODO DEMO" en todas las pantallas. No permite guardar nada. | Que nunca se confunda con los datos del Sheet. |
 | Escritura (bloque Ofertas) | Además de las entrevistas, el script puede **crear filas** en la hoja Ofertas y editar sus 11 columnas (nunca borrar). El ID lo pone el script. Los valores de desplegable se validan contra la hoja Listas. Una oferta no se borra: se cierra cambiando el estado. | Alta y edición de ofertas desde el móvil. Es una ampliación del permiso: hay que hacer copia de seguridad del Sheet. |
-| Ofertas: pantallas | Pestaña **Ofertas** (3 pestañas abajo): lista de más reciente a más antigua, con buscador y filtros (estado, tipo, área), ficha de cada oferta y formulario de alta y edición. Estado por defecto "Abierta"; fecha por defecto hoy. Los textos libres no admiten saltos de línea. | Pedido en el plan aprobado (2026-11-01). |
+| Ofertas: pantallas | Pestaña **Ofertas** (4 pestañas abajo): lista de más reciente a más antigua, con buscador y filtros (estado, tipo, área), ficha de cada oferta y formulario de alta y edición. Estado por defecto "Abierta"; fecha por defecto hoy. Los textos libres no admiten saltos de línea. | Pedido en el plan aprobado (2026-11-01). |
 | Ofertas: conflictos | Al editar, la app envía lo que creía que había; si el Sheet cambió, el script no escribe y la app enseña solo lo que cambió. "Guardar el mío igualmente" guarda **solo los campos que tocó la persona** y conserva lo que cambió la otra. | Distinto de las entrevistas (que reemplazan la nota entera): una oferta tiene 11 campos independientes y no conviene pisar un campo que nadie ha tocado. |
 | Ofertas: altas sin duplicar | Si se pierde la respuesta de un alta, al reintentar la app vuelve a leer el Sheet y reconoce la oferta ya creada en lugar de crear otra. | Sin esto, un fallo de red en el móvil duplicaría ofertas. |
 | Salir sin guardar | Un formulario con cambios pregunta antes de salir (otra pestaña, "atrás", Cancelar o recargar). | Un toque por error en la barra inferior no debe perder lo escrito. |
@@ -38,7 +43,7 @@ Documentos: [README.md](README.md) (para cualquier persona), [docs/TECNICO.md](d
 | Textos de los datos | Siempre se escriben como texto (nunca `innerHTML`). | Una celda con código no puede ejecutarse. |
 | Buscadores | `noindex` en `index.html` y `robots.txt`. | Evita que salga en Google. No hace la app privada. |
 | Búsqueda | El cuadro de texto no mira las notas de entrevista. | Datos delicados. |
-| Caché | Cada cambio en archivos de la app: subir `CACHE` en `sw.js` (ahora `v16`). Las respuestas del script de Google no pasan por el service worker ni se guardan. | Que el móvil cargue siempre la versión nueva y no quede una copia de los datos. |
+| Caché | Cada cambio en archivos de la app: subir `CACHE` en `sw.js` (ahora `v17`; el mismo número va en `js/version.js` y una prueba comprueba que coinciden). Las respuestas del script de Google no pasan por el service worker ni se guardan. | Que el móvil cargue siempre la versión nueva y no quede una copia de los datos. |
 | Sin conexión | La app abre, pero en modo script los datos no se ven (hacen falta Google y la clave). Solo la demo funciona sin conexión. | Consecuencia de no guardar datos en el móvil. |
 | CV de ejemplo | Los enlaces `example.com/cv/…` se desvían a una página "CV de ejemplo" dentro de la app, sin tocar el Sheet. | Pedido por Santiago. |
 | Disponibilidad | Tres valores: Prácticas, Empleo, Ambas. En el filtro, "Prácticas" y "Empleo" incluyen también a los de "Ambas"; "Ambas" muestra solo a los de Ambas. | Quien busca prácticas también acepta a quien admite las dos. |

@@ -116,6 +116,8 @@ Las pantallas solo usan los nombres internos (`nombre`, `areaDestino`, `estado`�
 - **Conflictos:** al editar, la app envía también lo que creía que había (`notasAnteriores` o `anteriores`). Si el Sheet ya no coincide, el script no escribe nada y devuelve `conflicto` con lo que hay. La app lo enseña y deja elegir. En ofertas, "Guardar el mío igualmente" guarda solo los campos que tocó la persona y conserva lo que cambió la otra.
 - **Altas sin duplicar (ofertas):** si la conexión se corta justo al crear una oferta, la app no sabe si llegó. Al reintentar, primero vuelve a leer el Sheet y busca una oferta nueva idéntica; si existe, no la crea otra vez.
 - **Rondas y aplicaciones:** aquí el script lo resuelve solo. Una ronda se pide con el número que la app propone (la siguiente a la última): si ya no lo es, el script responde `conflicto` con la ronda existente y, si tiene la misma fecha, la app entiende que ya estaba guardada. Una aplicación nueva responde `duplicado` (con la existente) si ya está esa combinación alumno + oferta + ronda. Un cambio de estado lleva el estado y el motivo que la app creía que había (`anterior`); si no coinciden, `conflicto` con la aplicación como está, y se deja elegir entre "Guardar el mío igualmente" y "Descartar el mío". Si la otra persona hizo exactamente el mismo cambio, no hay nada que decidir.
+- **Reintentos automáticos** (`llamarScript` en `fuente-apps-script.js`): si la petición no recibe respuesta (`red`), se repite **una vez** tras 0,6 s (un móvil que lleva rato quieto puede tener la conexión con Google "dormida" y fallar la primera vez); si el script responde `ocupado` (no llegó a escribir nada), se repite hasta **2 veces** con esperas de 1,5 y 3 s. Repetir es seguro porque todo lo que se guarda se reconoce si ya estaba (`duplicado`, conflicto idéntico, ronda con la misma fecha), **salvo el alta de una oferta**, que no se reintenta sola (se comprueba al pulsar Guardar otra vez, como antes). Los mensajes dicen cuántos intentos se hicieron.
+- **Botones ocupados:** todo botón que llama al script (Guardar, "Guardar el mío igualmente", "Descartar el mío"…) se desactiva al pulsarlo y dice "Guardando…" o "Cargando…" (`ocupar` en `js/util/trabajo.js`): una segunda pulsación no lanza otra petición. "Descartar el mío" recarga todos los datos (una sola petición) porque el script solo ofrece `data`; pedir solo Aplicaciones e Historial exigiría una acción nueva en `Code.gs`.
 - **Dos hojas a la vez:** crear una aplicación escribe en Aplicaciones y en Historial, y cambiar un estado también. Google Sheets no tiene transacciones: el script **deshace lo ya escrito si falla la segunda escritura**, para no dejar una aplicación sin su historial. Está probado haciendo fallar cada una de las escrituras.
 
 ---
@@ -174,7 +176,7 @@ Todos son aceptables **solo porque los datos son ficticios**.
 9. **Historial de Git.** Siguen escritos en él tres enlaces antiguos del Sheet cuando estuvo publicado. Ya no funcionan (Google responde 401) y la clave y la dirección del script nunca estuvieron en el repositorio. Se decidió no reescribir el historial.
 10. **CSP en una etiqueta `<meta>`.** Es una limitación de GitHub Pages: no se pueden poner cabeceras HTTP. Una etiqueta meta no puede imponer, por ejemplo, `frame-ancestors`.
 11. **Sin conexión, en modo script, no se ven datos** (por diseño: no se guardan en el teléfono). Solo la demo funciona sin conexión.
-12. **La primera petición tras un rato sin usar** el script puede tardar 1 a 3 segundos.
+12. **La primera petición tras un rato sin usar** el script puede tardar 1 a 3 segundos. En un iPhone, además, la primera petición tras un rato quieto puede perderse sin llegar a Google: la app la repite sola una vez (ver §3). No se ha podido reproducir en el simulador; la causa más probable es una conexión "dormida" y se comprueba a mano en el iPhone.
 
 ---
 
@@ -190,9 +192,11 @@ Todos son aceptables **solo porque los datos son ficticios**.
 | La app: funciones puras de rondas (orden, resúmenes, avisos y validación) | 70 | (incluido en `npm test`) |
 | La app: lectura de rondas y aplicaciones | 108 | (incluido en `npm test`) |
 | La app: registrar rondas, añadir aplicaciones y cambiar su estado | 156 | (incluido en `npm test`) |
+| La app: fallos al guardar (primer intento fallido, script ocupado, doble pulsación, botones "Guardando…", aviso flotante) | 64 | (incluido en `npm test`) |
+| La app: pestaña Ajustes, versión, buscar actualización y lista de archivos del service worker | 37 | (incluido en `npm test`) |
 
 - Las pruebas ejecutan **el mismo `Code.gs`** que se pega en Apps Script, dentro de un simulador. No tocan ningún Sheet real ni llevan claves ni direcciones reales: todo es inventado.
-- Se complementan con **pruebas de mutación manuales**: se estropea a propósito una regla (por ejemplo "no comprobar duplicados") y se verifica que las pruebas fallan. Se han hecho con el script (16 variantes de entrevistas y ofertas (1 equivalente) y 34 de rondas; todas detectadas salvo una equivalente) y con la app (25 de entrevistas y ofertas, 29 de la lectura de rondas y 39 de su escritura (3 equivalentes), todas detectadas).
+- Se complementan con **pruebas de mutación manuales**: se estropea a propósito una regla (por ejemplo "no comprobar duplicados") y se verifica que las pruebas fallan. Se han hecho con el script (16 variantes de entrevistas y ofertas (1 equivalente) y 34 de rondas; todas detectadas salvo una equivalente) y con la app (25 de entrevistas y ofertas, 29 de la lectura de rondas y 39 de su escritura (3 equivalentes), todas detectadas). En el paquete de correcciones: 32 variantes sobre fallos al guardar (31 detectadas; la que queda, `preventScroll` al volver el cursor al buscador, solo se nota en un iPhone) y 23 sobre Ajustes y versión (todas detectadas).
 - Los comandos necesitan Node.js y, para las de navegador, Microsoft Edge (o `NAVEGADOR=chromium`). La app en sí no usa npm.
 
 **Lo que no cubren:** la redirección real de Google (se comprobó a mano con el Sheet real), un iPhone real (el aspecto en iPhone lo comprueba Santiago a mano), ni la carga con mucha gente.
@@ -201,7 +205,8 @@ Todos son aceptables **solo porque los datos son ficticios**.
 
 ## 8. Mantenimiento (versión actual)
 
-- **Publicar un cambio de la app:** subir el número `CACHE` de `sw.js`, `git commit` y `git push` a `main`; GitHub Pages publica en 1 o 2 minutos. En el teléfono hay que cerrar la app y abrirla dos veces.
+- **Publicar un cambio de la app:** subir el número `CACHE` de `sw.js` **y** `VERSION` de `js/version.js` (el mismo número; una prueba lo comprueba), `git commit` y `git push` a `main`; GitHub Pages publica en 1 o 2 minutos. En el teléfono: pestaña **Ajustes**, "Buscar actualización" (compara la versión publicada con la que se está usando y, si hay una nueva, la carga sola). Si no funcionase: cerrar la app y abrirla dos veces.
+- **Archivos nuevos:** añadirlos a la lista `FILES` de `sw.js` (una prueba avisa si falta alguno).
 - **Cambiar el script:** pegar el nuevo `Code.gs`, guardar y publicar una **"Nueva versión" de la misma implementación**. No crear una implementación nueva: cambia la dirección y la app dejaría de encontrarla. Guía completa en [GUIA.md](apps-script/GUIA.md).
 - **Cambiar la clave:** editar la propiedad `CLAVE` del script; después, "Olvidar acceso" en la app y volver a entrar.
 - **Cambiar los datos del Sheet:** no renombrar hojas ni columnas. Los valores de las listas deben coincidir con la hoja Listas.

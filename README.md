@@ -34,6 +34,7 @@ La idea es que quien acompaña a los alumnos pueda, desde el móvil y en pocos t
 | **Registrar una ronda y añadir aplicaciones** | "Registrar ronda de difusión" y, dentro de cada ronda, "Añadir aplicación": se busca al alumno, se elige y se guarda. |
 | **Cambiar el estado de una aplicación** | En su detalle, "Cambiar estado". Todo queda apuntado en un historial con fecha y nota, que no se borra. |
 | **Ver las aplicaciones de un alumno** | En su ficha, en el apartado "Aplicaciones". |
+| **Ver la conexión y la versión de la app** | En la pestaña **Ajustes** (la cuarta de la barra de abajo): si estás en la demo o conectado al Sheet, "Olvidar acceso", el número de versión y el botón **Buscar actualización**, que carga la última versión sin tener que cerrar la app. |
 
 Guardar notas, ofertas, rondas y aplicaciones solo funciona cuando la app está **conectada a la hoja de cálculo de prueba** (ver más abajo). En la demo se puede mirar todo, pero no guardar nada.
 
