@@ -101,6 +101,8 @@ const desbordes = pg => pg.evaluate(() => {
   await ir(t.pg, '#/', '.masters .master');
   chk(/Son datos de ejemplo y no se guarda nada\. Conectar con el Sheet/.test(await t.pg.innerText('#demo')), 'franja de la demo: ' + await t.pg.innerText('#demo'));
   chk(await t.pg.innerText('#legal') === 'Proyecto personal de demostración. Todos los datos son ficticios. No afiliado a LaLiga ni a LaLiga Business School.', 'aviso legal con "Todos los datos son ficticios" y "No afiliado"');
+  const html = await (await fetch(BASE + 'index.html')).text();
+  chk(html.includes('Proyecto personal de demostración. Todos los datos son ficticios. No afiliado a LaLiga ni a LaLiga Business School.'), 'el pie de index.html (el que se ve antes de que cargue la app) dice lo mismo');
   const mal = await desbordes(t.pg);
   chk(mal.length === 0, 'la franja de la demo cabe a 320 px: ' + mal.join(' | '));
   // la conexión está en Ajustes (ya no en Inicio): los formularios lo dicen bien

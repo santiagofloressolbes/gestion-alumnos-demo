@@ -4,7 +4,7 @@
 
 **Para quién es:** el equipo de informática (TI) de la organización y quien mantiene la app. Si solo quieres saber qué hace la app, lee el [README](../README.md).
 
-**Estado a 2026-11-03:** Fase 1 (lectura) terminada. Fase 2 en curso: hechos el acceso con clave, las notas de entrevista, las ofertas (lista, ficha, alta y edición) y las rondas y aplicaciones (lectura, alta y cambio de estado con historial). Faltan el match y compartir perfiles. Todo con datos ficticios.
+**Estado a 2026-11-03:** Fase 1 (lectura) terminada. Fase 2 en curso: hechos el acceso con clave, las notas de entrevista, las ofertas (lista, ficha, alta y edición) y las rondas y solicitudes (lectura, alta y cambio de estado con historial). Faltan el match y compartir perfiles. Todo con datos ficticios.
 
 **Cómo leerlo:** lo que se afirma en las secciones 1 a 9 está comprobado en el código o en las pruebas. La sección 10 (integración con LaLiga) es **una propuesta técnica**, no algo ya hecho: los nombres de permisos, servicios y plazos hay que validarlos con TI.
 
@@ -51,7 +51,7 @@
 | Carpeta o archivo | Para qué sirve |
 |---|---|
 | `index.html`, `css/`, `js/` | La app. |
-| `js/vistas/` | Una pantalla por archivo (inicio, máster, alumno, CV, buscar, ofertas, formulario de oferta, acceso, entrevista, rondas y aplicaciones, y los formularios de rondas). |
+| `js/vistas/` | Una pantalla por archivo (inicio, máster, alumno, CV, buscar, ofertas, formulario de oferta, acceso, entrevista, rondas y solicitudes, y los formularios de rondas). |
 | `js/util/` | Funciones sin pantalla: búsqueda y filtros (`filtros.js`, `ofertas.js`), orden, resúmenes, avisos y validación de rondas (`rondas.js`), CSV, textos, avatar, navegación. |
 | **`js/data/`** | **Único sitio que sabe de dónde vienen los datos.** Ver sección 3. |
 | `datos-mock/` | Seis CSV con los datos ficticios del modo demo (Alumnos, Ofertas, Listas, Rondas, Aplicaciones, Historial). También sirven para crear esas hojas en el Sheet de prueba (ver la guía). |
@@ -73,7 +73,7 @@ Seis hojas, con las columnas que espera la app (definidas en `js/data/esquema.js
 | **Historial** | Una fila por cada cambio de estado: ID cambio (H001…), ID aplicación, Estado anterior, Estado nuevo, Motivo de descarte, Fecha, Nota. Solo se añaden filas: no se edita ni se borra. |
 | **Listas** | Una columna por lista de valores: Máster, Área, Tipo de organización, Nacionalidad, Situación de trabajo en España, Tipo de oferta, Estado de la oferta, Disponibilidad, Requisito de permiso, **Estado de la aplicación** (Recibida, En revisión, Enviada a la empresa, Entrevista, Contratado, Descartado) y **Motivo de descarte** (Perfil no encaja, Permiso de trabajo, La empresa eligió a otro, Otro). |
 
-Las hojas de rondas son **opcionales para la app**: si no existen en el Sheet, el script no las envía y la app funciona como antes (y explica qué falta). Los estados "Recibida" y "Descartado" tienen significado fijo (cómo nace una aplicación y cuándo lleva motivo); el resto de estados y motivos se pueden editar en Listas.
+Las hojas de rondas son **opcionales para la app**: si no existen en el Sheet, el script no las envía y la app funciona como antes (y explica qué falta). Los estados "Recibida" y "Descartado" tienen significado fijo (cómo nace una solicitud y cuándo lleva motivo); el resto de estados y motivos se pueden editar en Listas.
 
 Las pantallas solo usan los nombres internos (`nombre`, `areaDestino`, `estado`…). Una fuente nueva solo tiene que devolver objetos con esas claves.
 
@@ -90,7 +90,7 @@ Las pantallas solo usan los nombres internos (`nombre`, `areaDestino`, `estado`�
 | `guardarOferta(id, oferta, anteriores)` | Crear (sin `id`) o editar una oferta. |
 | `registrarRonda(idOferta, numero, fecha)` | Registrar que una oferta se reenvía a los alumnos. |
 | `crearAplicacion(datos)` | Un alumno aplica a una ronda (nace "Recibida" con su primera línea de historial). |
-| `cambiarEstado(id, cambio, anterior)` | Cambiar el estado de una aplicación y apuntarlo en el historial. |
+| `cambiarEstado(id, cambio, anterior)` | Cambiar el estado de una solicitud y apuntarlo en el historial. |
 | `conectar`, `usarDemo`, `olvidarAcceso`, `getModo` | Acceso. |
 | `puedeEscribir`, `puedeEscribirOfertas`, `puedeEscribirRondas` | Qué permite la conexión actual. |
 
@@ -113,12 +113,15 @@ Las pantallas solo usan los nombres internos (`nombre`, `areaDestino`, `estado`�
 **Concurrencia:**
 
 - El script usa un cerrojo (`LockService`) para atender una petición de escritura cada vez.
-- **Conflictos:** al editar, la app envía también lo que creía que había (`notasAnteriores` o `anteriores`). Si el Sheet ya no coincide, el script no escribe nada y devuelve `conflicto` con lo que hay. La app lo enseña y deja elegir. En ofertas, "Guardar el mío igualmente" guarda solo los campos que tocó la persona y conserva lo que cambió la otra.
+- **Conflictos:** al editar, la app envía también lo que creía que había (`notasAnteriores` o `anteriores`). Si el Sheet ya no coincide, el script no escribe nada y devuelve `conflicto` con lo que hay. La app lo enseña y deja elegir. En ofertas, "Guardar mi versión" guarda solo los campos que tocó la persona y conserva lo que cambió la otra.
 - **Altas sin duplicar (ofertas):** si la conexión se corta justo al crear una oferta, la app no sabe si llegó. Al reintentar, primero vuelve a leer el Sheet y busca una oferta nueva idéntica; si existe, no la crea otra vez.
-- **Rondas y aplicaciones:** aquí el script lo resuelve solo. Una ronda se pide con el número que la app propone (la siguiente a la última): si ya no lo es, el script responde `conflicto` con la ronda existente y, si tiene la misma fecha, la app entiende que ya estaba guardada. Una aplicación nueva responde `duplicado` (con la existente) si ya está esa combinación alumno + oferta + ronda. Un cambio de estado lleva el estado y el motivo que la app creía que había (`anterior`); si no coinciden, `conflicto` con la aplicación como está, y se deja elegir entre "Guardar el mío igualmente" y "Descartar el mío". Si la otra persona hizo exactamente el mismo cambio, no hay nada que decidir.
+- **Rondas y solicitudes:** aquí el script lo resuelve solo. Una ronda se pide con el número que la app propone (la siguiente a la última): si ya no lo es, el script responde `conflicto` con la ronda existente y, si tiene la misma fecha, la app entiende que ya estaba guardada. Una solicitud nueva responde `duplicado` (con la existente) si ya está esa combinación alumno + oferta + ronda. Un cambio de estado lleva el estado y el motivo que la app creía que había (`anterior`); si no coinciden, `conflicto` con la solicitud como está, y se deja elegir entre "Guardar mi versión" y "Quedarme con la del Sheet". Si la otra persona hizo exactamente el mismo cambio, no hay nada que decidir.
 - **Reintentos automáticos** (`llamarScript` en `fuente-apps-script.js`): si la petición no recibe respuesta (`red`), se repite **una vez** tras 0,6 s (un móvil que lleva rato quieto puede tener la conexión con Google "dormida" y fallar la primera vez); si el script responde `ocupado` (no llegó a escribir nada), se repite hasta **2 veces** con esperas de 1,5 y 3 s. Repetir es seguro porque todo lo que se guarda se reconoce si ya estaba (`duplicado`, conflicto idéntico, ronda con la misma fecha), **salvo el alta de una oferta**, que no se reintenta sola (se comprueba al pulsar Guardar otra vez, como antes). Los mensajes dicen cuántos intentos se hicieron.
-- **Botones ocupados:** todo botón que llama al script (Guardar, "Guardar el mío igualmente", "Descartar el mío"…) se desactiva al pulsarlo y dice "Guardando…" o "Cargando…" (`ocupar` en `js/util/trabajo.js`): una segunda pulsación no lanza otra petición. "Descartar el mío" recarga todos los datos (una sola petición) porque el script solo ofrece `data`; pedir solo Aplicaciones e Historial exigiría una acción nueva en `Code.gs`.
-- **Dos hojas a la vez:** crear una aplicación escribe en Aplicaciones y en Historial, y cambiar un estado también. Google Sheets no tiene transacciones: el script **deshace lo ya escrito si falla la segunda escritura**, para no dejar una aplicación sin su historial. Está probado haciendo fallar cada una de las escrituras.
+- **Nombres:** en la app se dice **solicitud**; en el Sheet la hoja sigue llamándose **Aplicaciones**, la lista **Estado de la aplicación** y en el código y el script `aplicacion`. Las pantallas solo cambian el texto que se ve.
+- **Pantalla completa en iPhone:** `#app` es `position:fixed` con `top/bottom/left/right:0` (no depende de `dvh`, que en una app instalada puede quedarse corto); la barra de pestañas suma `env(safe-area-inset-bottom)` a su relleno; el fondo de `html` es el de la barra, para que no asome ninguna franja de otro color; `viewport-fit=cover`. Chromium no tiene "safe area": `pantalla.prueba.mjs` la simula dándole a `--sab`, `--sat`, `--sal` y `--sar` el valor de un iPhone.
+- **Después de guardar:** `llevarA()` (en `js/util/trabajo.js`) desplaza la pantalla con suavidad (o sin animación si el móvil pide menos movimiento) hasta el mensaje; no da foco a ningún cuadro, para no abrir el teclado.
+- **Botones ocupados:** todo botón que llama al script (Guardar, "Guardar mi versión", "Quedarme con la del Sheet"…) se desactiva al pulsarlo y dice "Guardando…" o "Cargando…" (`ocupar` en `js/util/trabajo.js`): una segunda pulsación no lanza otra petición. "Quedarme con la del Sheet" recarga todos los datos (una sola petición) porque el script solo ofrece `data`; pedir solo Solicitudes e Historial exigiría una acción nueva en `Code.gs`.
+- **Dos hojas a la vez:** crear una solicitud escribe en las hojas Aplicaciones y Historial, y cambiar un estado también. Google Sheets no tiene transacciones: el script **deshace lo ya escrito si falla la segunda escritura**, para no dejar una solicitud sin su historial. Está probado haciendo fallar cada una de las escrituras.
 
 ---
 
@@ -129,7 +132,7 @@ Las pantallas solo usan los nombres internos (`nombre`, `areaDestino`, `estado`�
 | Alumnos | Escribir **solo** "Notas de entrevista" y "Fecha última entrevista" de un alumno cada vez. | Crear ni borrar alumnos. Tocar otra celda. |
 | Ofertas | **Añadir una fila** (el ID lo genera el script: O011, O012…) o editar las 11 columnas de una oferta. | Borrar filas. (Una oferta se cierra cambiando su estado.) |
 | Rondas | **Añadir filas** (ID R001…, número de ronda calculado por el script). | Editar o borrar filas. |
-| Aplicaciones | **Añadir filas** (ID AP001…) y cambiar **solo** las celdas "Estado" y "Motivo de descarte" de una aplicación. | Borrar filas. Cambiar otra columna (alumno, oferta, ronda, fecha, notas). |
+| Aplicaciones | **Añadir filas** (ID AP001…) y cambiar **solo** las celdas "Estado" y "Motivo de descarte" de una solicitud. | Borrar filas. Cambiar otra columna (alumno, oferta, ronda, fecha, notas). |
 | Historial | **Añadir filas** (ID H001…). | Editar o borrar filas. |
 | Listas | Solo leer. | Escribir. |
 
@@ -138,7 +141,7 @@ Cada valor escrito se guarda como **texto plano** (formato de celda texto). Si u
 **Validaciones** (las aplican a la vez el script y la app; la del script es la que vale):
 
 - Notas: hasta 2.000 caracteres, sin HTML, sin caracteres de control, fecha real y no futura.
-- Rondas y aplicaciones: el alumno, la oferta y la ronda tienen que existir; la fecha es real, no futura y no anterior a la de la oferta, la ronda o el último movimiento; el estado y el motivo tienen que estar en Listas; "Descartado" exige motivo y cualquier otro estado no lo admite; las notas, hasta 2.000 caracteres, sin HTML ni caracteres de control. Una oferta cerrada se admite (la app avisa).
+- Rondas y solicitudes: el alumno, la oferta y la ronda tienen que existir; la fecha es real, no futura y no anterior a la de la oferta, la ronda o el último movimiento; el estado y el motivo tienen que estar en Listas; "Descartado" exige motivo y cualquier otro estado no lo admite; las notas, hasta 2.000 caracteres, sin HTML ni caracteres de control. Una oferta cerrada se admite (la app avisa).
 - Ofertas: campos obligatorios, límites (empresa 100, título 120, ubicación 100, enlace o descripción 500), sin HTML, una sola línea, fecha real y no futura, y los desplegables solo admiten valores que existan en la hoja Listas. El enlace no puede empezar por `http:`, `javascript:`, `data:`, `vbscript:` ni `file:`.
 
 ---
@@ -169,9 +172,9 @@ Todos son aceptables **solo porque los datos son ficticios**.
 3. **Clave en el teléfono sin cifrar** (`localStorage`). Quien use ese teléfono desbloqueado puede usar la app. Un teléfono perdido obliga a cambiar la clave.
 4. **Bloqueo como arma.** La dirección del script es pública: cualquiera que la conozca puede bloquear el acceso 15 minutos con claves malas.
 5. **Notas de entrevista.** Son valoraciones sobre personas: datos sensibles aunque los nombres sean ficticios. No escribir nada real.
-6. **El script crea filas** en la hoja Ofertas y en las de rondas, aplicaciones e historial (antes solo escribía dos celdas). Hay que hacer copia de seguridad del Sheet antes de usarlo.
+6. **El script crea filas** en la hoja Ofertas y en las de rondas, solicitudes e historial (antes solo escribía dos celdas). Hay que hacer copia de seguridad del Sheet antes de usarlo.
 7. **CV y fotos.** La clave no los protege: sus enlaces tendrían que ser privados.
-   - **Aplicaciones y descartes.** Quién fue descartado y por qué (por ejemplo, "Permiso de trabajo") es más sensible que una nota de entrevista. Hoy lo ve cualquiera con la clave. Con datos reales exigiría permisos por rol y revisión de protección de datos (ver 10.4).
+   - **Solicitudes y descartes.** Quién fue descartado y por qué (por ejemplo, "Permiso de trabajo") es más sensible que una nota de entrevista. Hoy lo ve cualquiera con la clave. Con datos reales exigiría permisos por rol y revisión de protección de datos (ver 10.4).
 8. **Sin historial propio de cambios.** Si algo se pisa por error, solo sirve el historial de versiones de Google Sheets.
 9. **Historial de Git.** Siguen escritos en él tres enlaces antiguos del Sheet cuando estuvo publicado. Ya no funcionan (Google responde 401) y la clave y la dirección del script nunca estuvieron en el repositorio. Se decidió no reescribir el historial.
 10. **CSP en una etiqueta `<meta>`.** Es una limitación de GitHub Pages: no se pueden poner cabeceras HTTP. Una etiqueta meta no puede imponer, por ejemplo, `frame-ancestors`.
@@ -185,18 +188,20 @@ Todos son aceptables **solo porque los datos son ficticios**.
 | Qué | Comprobaciones | Cómo ejecutarlas |
 |---|---|---|
 | El script (`Code.gs`) contra un simulador de Google | 389 | `node tests/apps-script/pruebas.mjs` |
-| La app en un navegador real: acceso y clave | 71 | `cd tests/app`, `npm install` (una vez), `npm test` |
+| La app en un navegador real: acceso y clave | 72 | `cd tests/app`, `npm install` (una vez), `npm test` |
 | La app: notas de entrevista | 63 | (incluido en `npm test`) |
 | La app: lista y ficha de ofertas | 106 | (incluido en `npm test`) |
 | La app: formulario de ofertas | 123 | (incluido en `npm test`) |
 | La app: funciones puras de rondas (orden, resúmenes, avisos y validación) | 70 | (incluido en `npm test`) |
-| La app: lectura de rondas y aplicaciones | 108 | (incluido en `npm test`) |
-| La app: registrar rondas, añadir aplicaciones y cambiar su estado | 156 | (incluido en `npm test`) |
-| La app: fallos al guardar (primer intento fallido, script ocupado, doble pulsación, botones "Guardando…", aviso flotante) | 64 | (incluido en `npm test`) |
+| La app: lectura de rondas y solicitudes | 108 | (incluido en `npm test`) |
+| La app: registrar rondas, añadir solicitudes y cambiar su estado | 156 | (incluido en `npm test`) |
+| La app: fallos al guardar (primer intento fallido, script ocupado, doble pulsación, botones "Guardando…", aviso flotante, pantalla que sube tras guardar) | 68 | (incluido en `npm test`) |
 | La app: pestaña Ajustes, versión, buscar actualización y lista de archivos del service worker | 37 | (incluido en `npm test`) |
+| La app: textos (vocabulario "solicitud", botones del conflicto, aviso de demostración) y que nada se salga a 320 px | 39 | (incluido en `npm test`) |
+| La app: pantalla completa en iPhone (cuatro modelos, con y sin barra de inicio, vertical y horizontal) | 120 | (incluido en `npm test`) |
 
 - Las pruebas ejecutan **el mismo `Code.gs`** que se pega en Apps Script, dentro de un simulador. No tocan ningún Sheet real ni llevan claves ni direcciones reales: todo es inventado.
-- Se complementan con **pruebas de mutación manuales**: se estropea a propósito una regla (por ejemplo "no comprobar duplicados") y se verifica que las pruebas fallan. Se han hecho con el script (16 variantes de entrevistas y ofertas (1 equivalente) y 34 de rondas; todas detectadas salvo una equivalente) y con la app (25 de entrevistas y ofertas, 29 de la lectura de rondas y 39 de su escritura (3 equivalentes), todas detectadas). En el paquete de correcciones: 32 variantes sobre fallos al guardar (31 detectadas; la que queda, `preventScroll` al volver el cursor al buscador, solo se nota en un iPhone) y 23 sobre Ajustes y versión (todas detectadas).
+- Se complementan con **pruebas de mutación manuales**: se estropea a propósito una regla (por ejemplo "no comprobar duplicados") y se verifica que las pruebas fallan. Se han hecho con el script (16 variantes de entrevistas y ofertas (1 equivalente) y 34 de rondas; todas detectadas salvo una equivalente) y con la app (25 de entrevistas y ofertas, 29 de la lectura de rondas y 39 de su escritura (3 equivalentes), todas detectadas). En el paquete de correcciones: 32 variantes sobre fallos al guardar (31 detectadas; la que queda, `preventScroll` al volver el cursor al buscador, solo se nota en un iPhone) y 23 sobre Ajustes y versión (todas detectadas). En el paquete de pulido: 26 variantes sobre textos, desplazamiento tras guardar y pantalla completa (todas detectadas; ese cursor ya no se mueve, así que la variante de `preventScroll` desapareció).
 - Los comandos necesitan Node.js y, para las de navegador, Microsoft Edge (o `NAVEGADOR=chromium`). La app en sí no usa npm.
 
 **Lo que no cubren:** la redirección real de Google (se comprobó a mano con el Sheet real), un iPhone real (el aspecto en iPhone lo comprueba Santiago a mano), ni la carga con mucha gente.
@@ -264,7 +269,7 @@ Hoy hay una clave para todos. El objetivo es que cada persona entre con **su cue
 | Validación en el script | **Debe seguir existiendo en el servidor**, no solo en la app: reglas de listas, longitudes, fechas. Con listas de SharePoint, columnas de elección y restricciones; si no basta, una Azure Function o un flujo de Power Automate. |
 | ID de oferta O011… generado por el script | Identificador de la lista o generado de forma única en servidor. |
 | Historial de versiones de Google Sheets | Versionado de SharePoint (activar y definir cuántas versiones). |
-| Rondas, aplicaciones e historial en tres hojas, escritas con deshacer a mano | Tres listas de SharePoint relacionadas (con columnas de búsqueda). El **Historial** debería ser una lista en la que no se pueda editar ni borrar (solo añadir) y que la app escriba siempre junto con el cambio de estado; si no hay transacciones, una Azure Function o un flujo que haga las dos cosas a la vez. |
+| Rondas, solicitudes e historial en tres hojas, escritas con deshacer a mano | Tres listas de SharePoint relacionadas (con columnas de búsqueda). El **Historial** debería ser una lista en la que no se pueda editar ni borrar (solo añadir) y que la app escriba siempre junto con el cambio de estado; si no hay transacciones, una Azure Function o un flujo que haga las dos cosas a la vez. |
 | Numeración (R001, AP001, H001) y comprobación de duplicados en el script | Identificadores y restricciones de unicidad (alumno + oferta + ronda) en el servidor. |
 
 - **CV y fotos:** carpeta de SharePoint con permisos por persona. Se acabaron los enlaces de ejemplo o públicos. Las fotos siguen siendo iniciales hasta que haya consentimiento.
@@ -323,7 +328,7 @@ A confirmar con el delegado de protección de datos (DPD) de la organización. L
 4. **Alojamiento y cabeceras** dentro de la organización.
 5. **Revisión de seguridad y de protección de datos.**
 6. **Piloto con un grupo pequeño** y datos reales mínimos, si TI y el DPD lo aprueban.
-7. **Resto de bloques** (match, compartir perfiles) ya sobre la base nueva. Las rondas y aplicaciones ya existen sobre el puente de Google y habrá que migrarlas con el resto.
+7. **Resto de bloques** (match, compartir perfiles) ya sobre la base nueva. Las rondas y solicitudes ya existen sobre el puente de Google y habrá que migrarlas con el resto.
 
 ### 10.10 Preguntas abiertas para TI
 
@@ -340,7 +345,7 @@ A confirmar con el delegado de protección de datos (DPD) de la organización. L
 11. ¿Quién será el propietario técnico de la app una vez en producción y quién da el soporte?
 12. ¿Hay otras herramientas de la organización con las que deba integrarse (CRM, gestión de prácticas, correo)?
 13. ¿Pueden las listas de SharePoint impedir editar y borrar filas de una lista concreta (el historial de cambios de estado) y permitir solo añadirlas? ¿O hace falta una función intermedia?
-14. ¿Quién debe ver las aplicaciones y los motivos de descarte de cada alumno, y se pueden restringir a nivel de elemento?
+14. ¿Quién debe ver las solicitudes y los motivos de descarte de cada alumno, y se pueden restringir a nivel de elemento?
 
 ---
 

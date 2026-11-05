@@ -31,18 +31,18 @@ La idea es que quien acompaña a los alumnos pueda, desde el móvil y en pocos t
 | **Ver las ofertas** | En la pestaña Ofertas se ve la lista (las más recientes primero) y se puede buscar y filtrar por estado, tipo y área. Cada oferta tiene su ficha. |
 | **Añadir y editar ofertas** | Con "Nueva oferta" y "Editar oferta". Las ofertas no se borran: cuando ya no valen, se cierran. |
 | **Ver las rondas de una oferta** | En la ficha de la oferta salen sus rondas (cada vez que se reenvía a los alumnos) y, en cada una, los alumnos que han aplicado y cómo va cada uno. |
-| **Registrar una ronda y añadir aplicaciones** | "Registrar ronda de difusión" y, dentro de cada ronda, "Añadir aplicación": se busca al alumno, se elige y se guarda. |
-| **Cambiar el estado de una aplicación** | En su detalle, "Cambiar estado". Todo queda apuntado en un historial con fecha y nota, que no se borra. |
-| **Ver las aplicaciones de un alumno** | En su ficha, en el apartado "Aplicaciones". |
+| **Registrar una ronda y añadir solicitudes** | "Registrar nueva ronda" y, dentro de cada ronda, "Añadir solicitud": se busca al alumno, se elige y se guarda. |
+| **Cambiar el estado de una solicitud** | En su detalle, "Cambiar estado". Todo queda apuntado en un historial con fecha y nota, que no se borra. |
+| **Ver las solicitudes de un alumno** | En su ficha, en el apartado "Solicitudes". |
 | **Ver la conexión y la versión de la app** | En la pestaña **Ajustes** (la cuarta de la barra de abajo): si estás en la demo o conectado al Sheet, "Olvidar acceso", el número de versión y el botón **Buscar actualización**, que carga la última versión sin tener que cerrar la app. |
 
-Guardar notas, ofertas, rondas y aplicaciones solo funciona cuando la app está **conectada a la hoja de cálculo de prueba** (ver más abajo). En la demo se puede mirar todo, pero no guardar nada.
+Guardar notas, ofertas, rondas y solicitudes solo funciona cuando la app está **conectada a la hoja de cálculo de prueba** (ver más abajo). En la demo se puede mirar todo, pero no guardar nada.
 
 ## Qué NO hace todavía
 
 Esto está pensado para crecer por partes. Aún no hay:
 
-- **Borrar rondas, aplicaciones o su historial:** nada se borra desde la app. Si una aplicación ya no vale, se marca como "Descartado".
+- **Borrar rondas, solicitudes o su historial:** nada se borra desde la app. Si una solicitud ya no vale, se marca como "Descartado".
 - **Recomendación automática** de a qué ofertas encaja cada alumno.
 - **Compartir perfiles** con las empresas.
 - **Inicio de sesión personal:** hoy todas las personas autorizadas usan la misma clave.
@@ -50,11 +50,13 @@ Esto está pensado para crecer por partes. Aún no hay:
 - **Fotos reales:** solo hay círculos con las iniciales.
 - **Funcionar sin conexión con datos reales:** sin internet solo se puede ver la demo.
 
-## Cómo funcionan las rondas y las aplicaciones
+## Cómo funcionan las rondas y las solicitudes
+
+> **Equivalencia de nombres.** En la app se dice **solicitud**; en el Sheet, esa misma cosa se sigue llamando **Aplicaciones** (la hoja) y **Estado de la aplicación** (la lista), y en el código y el script `aplicacion`. No hay que cambiar nada en el Sheet.
 
 - Una **ronda** es cada vez que una oferta se reenvía a los alumnos. Una oferta puede tener varias: ronda 1, ronda 2…
-- Una **aplicación** es un alumno que responde a una ronda. Si el mismo alumno responde a dos rondas, salen dos aplicaciones.
-- Cada aplicación tiene un **estado**: Recibida, En revisión, Enviada a la empresa, Entrevista, Contratado o Descartado. Si es Descartado, se indica el motivo (por ejemplo, "Permiso de trabajo").
+- Una **solicitud** es un alumno que responde a una ronda. Si el mismo alumno responde a dos rondas, salen dos solicitudes.
+- Cada solicitud tiene un **estado**: Recibida, En revisión, Enviada a la empresa, Entrevista, Contratado o Descartado. Si es Descartado, se indica el motivo (por ejemplo, "Permiso de trabajo").
 - Cada cambio de estado se apunta en un **historial** con su fecha y una nota. El historial no se edita ni se borra.
 - La app **avisa, sin impedir nada,** si la oferta está cerrada o si lo que pide (permiso de trabajo, nacionalidad) choca claramente con la situación del alumno.
 - Si dos personas cambian lo mismo a la vez, la app lo detecta y enseña lo que hay antes de pisar nada.
@@ -64,7 +66,7 @@ Esto está pensado para crecer por partes. Aún no hay:
 Al abrir la app por primera vez, se elige una de las dos:
 
 1. **Ver demo.** Muestra los datos de ejemplo que vienen con la app. Arriba aparece siempre el aviso **MODO DEMO** y no se puede guardar nada. No hace falta nada más.
-2. **Conectar.** Hace falta una dirección y una clave que da quien administra la hoja de cálculo de prueba. Con ellas se ven los datos de esa hoja y se pueden guardar notas, ofertas, rondas y aplicaciones. La dirección y la clave quedan guardadas solo en ese teléfono, y se pueden olvidar con el botón "Olvidar acceso" de Inicio.
+2. **Conectar.** Hace falta una dirección y una clave que da quien administra la hoja de cálculo de prueba. Con ellas se ven los datos de esa hoja y se pueden guardar notas, ofertas, rondas y solicitudes. La dirección y la clave quedan guardadas solo en ese teléfono, y se pueden olvidar con el botón "Olvidar acceso" de Inicio.
 
 ## Instalarla en el iPhone
 

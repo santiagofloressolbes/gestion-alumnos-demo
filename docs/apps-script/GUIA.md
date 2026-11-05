@@ -13,7 +13,7 @@ El script es un "portero" que vive dentro de tu Google Sheet de prueba. La app l
 | Leer las hojas Alumnos, Ofertas y Listas. | Crear ni borrar alumnos. |
 | Hoja Alumnos: escribir **solo** "Notas de entrevista" y "Fecha última entrevista", en la fila del alumno indicado. | Borrar ninguna fila. |
 | Hoja Ofertas: **añadir una fila nueva** (con ID que pone el script: O011, O012…) o editar las 11 columnas de una oferta. | Tocar ninguna otra hoja (Listas solo se lee) ni archivo de tu Drive. |
-| Hojas Rondas, Aplicaciones e Historial: **añadir filas** (con ID que pone el script: R001, AP001, H001…) y cambiar el **estado y el motivo** de una aplicación. | Cambiar ni borrar filas de Rondas o de Historial, ni otras columnas de Aplicaciones. |
+| Hojas Rondas, Aplicaciones e Historial: **añadir filas** (con ID que pone el script: R001, AP001, H001…) y cambiar el **estado y el motivo** de una solicitud. | Cambiar ni borrar filas de Rondas o de Historial, ni otras columnas de Solicitudes. |
 | Rechazar textos con HTML, demasiado largos, con fechas futuras o con valores que no estén en Listas. | Enviar correos ni conectarse a otras páginas. |
 
 ## Reglas de oro
@@ -69,11 +69,11 @@ El script es un "portero" que vive dentro de tu Google Sheet de prueba. La app l
 | `bloqueado` | Demasiados intentos fallidos. | Espera 15 minutos o ejecuta `desbloquear`. |
 | `config` | Falta la propiedad `CLAVE` o tiene menos de 16 caracteres. | Paso 4. |
 | `hoja` / `columna` | Falta una hoja o una columna (por ejemplo, la han renombrado). | Devuelve el nombre original. |
-| `no-encontrado` / `id-duplicado` | El ID no existe o está repetido en la hoja (la respuesta dice si es el alumno, la oferta, la ronda o la aplicación). | Revisa la columna de ID de esa hoja. |
+| `no-encontrado` / `id-duplicado` | El ID no existe o está repetido en la hoja (la respuesta dice si es el alumno, la oferta, la ronda o la solicitud). | Revisa la columna de ID de esa hoja. |
 | `largo`, `html`, `caracteres`, `fecha`, `fecha-futura` | La nota, la fecha o un campo de la oferta no es válido. | Corrige el texto. |
 | `requerido`, `lista`, `enlace` | Falta un campo obligatorio de la oferta, el valor no está en la hoja Listas, o el enlace empieza por `http:`, `javascript:`… | Rellena el campo, elige un valor de la lista o usa `https://`. |
-| `conflicto` | Alguien cambió esa entrevista, oferta o aplicación mientras la editabas, o ya existe la ronda que ibas a registrar. | La app te enseñará lo que hay ahora. |
-| `duplicado` | Ese alumno ya aplicó a esa ronda de esa oferta. | La app te enseñará la aplicación que ya existe. |
+| `conflicto` | Alguien cambió esa entrevista, oferta o solicitud mientras la editabas, o ya existe la ronda que ibas a registrar. | La app te enseñará lo que hay ahora. |
+| `duplicado` | Ese alumno ya tiene solicitud en esa ronda de esa oferta. | La app te enseñará la solicitud que ya existe. |
 | `fecha-anterior` | La fecha es anterior a la de la oferta, la ronda o el último cambio. | Elige una fecha igual o posterior. |
 | `motivo-sobra` | Se envió un motivo de descarte con un estado que no es "Descartado". | Deja el motivo vacío. |
 | `ocupado` | El script estaba atendiendo otra petición. | Reintenta en unos segundos. |
@@ -81,7 +81,7 @@ El script es un "portero" que vive dentro de tu Google Sheet de prueba. La app l
 
 ## Cómo se ha probado
 
-En `tests/apps-script/` hay un simulador de Google y 389 comprobaciones que ejecutan este mismo `Code.gs`: clave buena y mala, bloqueo, textos con HTML, límites de longitud y fecha, fórmulas, conflictos y que **solo** cambian las celdas previstas (2 en una entrevista; en una oferta, las 12 de la fila nueva o solo las que cambias; en una aplicación nueva, 8 celdas más 7 de su historial). También comprueban que, si Google falla a mitad de guardar, se deshace todo y no queda una aplicación sin su historial. Para repetirlas: `node tests/apps-script/pruebas.mjs`.
+En `tests/apps-script/` hay un simulador de Google y 389 comprobaciones que ejecutan este mismo `Code.gs`: clave buena y mala, bloqueo, textos con HTML, límites de longitud y fecha, fórmulas, conflictos y que **solo** cambian las celdas previstas (2 en una entrevista; en una oferta, las 12 de la fila nueva o solo las que cambias; en una solicitud nueva, 8 celdas más 7 de su historial). También comprueban que, si Google falla a mitad de guardar, se deshace todo y no queda una solicitud sin su historial. Para repetirlas: `node tests/apps-script/pruebas.mjs`.
 
 ## Límites que conviene saber
 
@@ -101,9 +101,11 @@ La versión nueva de `Code.gs` también guarda ofertas. Haz esto una vez, en est
 5. **Publica una nueva versión de la MISMA implementación.** Implementar, Gestionar implementaciones, el lápiz, en "Versión" elige **"Nueva versión"**, Implementar. **No crees una implementación nueva:** cambiaría la dirección y la app dejaría de encontrarla.
 6. **Avísame** de que has llegado hasta aquí (sin pegar la clave ni la dirección). La app seguirá funcionando igual hasta el siguiente paso.
 
-## Actualizar a la versión con rondas y aplicaciones (si ya tenías el script en marcha)
+## Actualizar a la versión con rondas y solicitudes (si ya tenías el script en marcha)
 
-La versión nueva de `Code.gs` también guarda **rondas de difusión**, **aplicaciones** de alumnos a una oferta y su **historial**. Hace falta crear 3 hojas y 2 listas. Haz esto una vez, en este orden, y no pases al siguiente hasta terminar el anterior:
+> **Equivalencia de nombres.** En la app se dice **solicitud**; en el Sheet, esa misma cosa se sigue llamando **Aplicaciones** (la hoja) y **Estado de la aplicación** (la lista), y en el código y el script `aplicacion`. No hay que cambiar nada en el Sheet.
+
+La versión nueva de `Code.gs` también guarda **rondas de difusión**, **solicitudes** de alumnos a una oferta y su **historial**. Hace falta crear 3 hojas y 2 listas. Haz esto una vez, en este orden, y no pases al siguiente hasta terminar el anterior:
 
 1. **Copia de seguridad.** En el Sheet: Archivo, Hacer una copia. Nómbrala "COPIA SEGURIDAD rondas". El script ahora **puede añadir filas** en 3 hojas más.
 2. **Crea las 3 hojas con los datos de ejemplo.** Se hace igual con cada uno de estos tres archivos de la carpeta `datos-mock` de tu ordenador (`C:\dev\alumnos-laliga-app\datos-mock`): `Rondas.csv`, `Aplicaciones.csv` y `Historial.csv`.
@@ -121,8 +123,8 @@ La versión nueva de `Code.gs` también guarda **rondas de difusión**, **aplica
    - **Estado de la aplicación:** `Recibida`, `En revisión`, `Enviada a la empresa`, `Entrevista`, `Contratado`, `Descartado` (6 filas).
    - **Motivo de descarte:** `Perfil no encaja`, `Permiso de trabajo`, `La empresa eligió a otro`, `Otro` (4 filas).
 
-   **No cambies el nombre de "Recibida" ni de "Descartado":** el script los usa para saber cuándo nace una aplicación y cuándo lleva motivo. Los demás estados y motivos sí puedes editarlos.
+   **No cambies el nombre de "Recibida" ni de "Descartado":** el script los usa para saber cuándo nace una solicitud y cuándo lleva motivo. Los demás estados y motivos sí puedes editarlos.
 4. **Pega el código nuevo.** Extensiones, Apps Script. Selecciona todo el código viejo (Ctrl+A), bórralo, pega el nuevo `Code.gs` y guarda (disquete). **No toques la propiedad `CLAVE`.**
 5. **Comprueba.** En el desplegable de funciones elige `comprobarConfiguracion` y pulsa "Ejecutar". En el registro debe salir todo `ok`: `rondas: listas (se anuncian a la app)`, las hojas Rondas 5 filas, Aplicaciones 12 filas e Historial 36 filas (o 0 si borraste los ejemplos), las 19 columnas de `columnasRondas`, las dos listas nuevas y `estados` con Recibida y Descartado. Si algo dice `FALTA`, vuelve al paso que corresponda.
 6. **Publica una nueva versión de la MISMA implementación.** Implementar, Gestionar implementaciones, el lápiz, en "Versión" elige **"Nueva versión"**, Implementar. **No crees una implementación nueva:** cambiaría la dirección y la app dejaría de encontrarla.
-7. **Prueba en la app.** Cierra la app del móvil y ábrela dos veces (para que cargue la versión nueva). En la pestaña Ofertas, abre una oferta: deben salir sus rondas. Si no ves los botones "Registrar ronda de difusión" o "Añadir aplicación", la app te dirá si falta alguna hoja o si el script es de una versión anterior.
+7. **Prueba en la app.** Cierra la app del móvil y ábrela dos veces (para que cargue la versión nueva). En la pestaña Ofertas, abre una oferta: deben salir sus rondas. Si no ves los botones "Registrar nueva ronda" o "Añadir solicitud", la app te dirá si falta alguna hoja o si el script es de una versión anterior.
