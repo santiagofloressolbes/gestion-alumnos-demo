@@ -103,6 +103,12 @@ const desbordes = pg => pg.evaluate(() => {
   chk(await t.pg.innerText('#legal') === 'Proyecto personal de demostración. Todos los datos son ficticios. No afiliado a LaLiga ni a LaLiga Business School.', 'aviso legal con "Todos los datos son ficticios" y "No afiliado"');
   const mal = await desbordes(t.pg);
   chk(mal.length === 0, 'la franja de la demo cabe a 320 px: ' + mal.join(' | '));
+  // la conexión está en Ajustes (ya no en Inicio): los formularios lo dicen bien
+  for (const [hash, sel] of [['#/oferta/O002/ronda/nueva', '#v-ronda-form .card'], ['#/oferta/nueva', '#v-oferta-form .card']]) {
+    await ir(t.pg, hash, sel);
+    const x = await t.pg.innerText(sel);
+    chk(x.includes('Estás en la demo y aquí no se puede guardar nada. Conecta con el Sheet de prueba desde Ajustes.'), hash + ': "desde Ajustes": ' + x.replace(/\n/g, ' '));
+  }
   await t.ctx.close();
 }
 
