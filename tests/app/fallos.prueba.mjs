@@ -265,11 +265,30 @@ const FORMS = {
   chk(/añadida/.test(await pg.innerText('#flotante')) && await enPantalla(pg, '#flotante'), 'aviso flotante con la confirmación, a la vista aunque la pantalla esté abajo');
   chk(filas(mundo, 'Aplicaciones').length === n0 + 1 && await pg.isVisible('#ap-ok'), 'se guardó y el aviso de arriba también está');
   chk(await pg.getAttribute('#flotante', 'role') === 'status', 'el aviso se anuncia a los lectores de pantalla (role=status)');
+  chk((await pg.innerText('#flotante')).length <= 45 && !/\(AP\d+\)/.test(await pg.innerText('#flotante')), 'el aviso flotante es corto: ' + await pg.innerText('#flotante'));
+  // la pantalla sube sola, con suavidad, hasta el mensaje y el buscador
+  await pg.waitForFunction(() => document.querySelector('#main').scrollTop < 60, null, { timeout: 5000 });
+  chk(await enPantalla(pg, '#ap-ok') && await enPantalla(pg, '#ap-q'), 'tras guardar, la pantalla sube: se ven el mensaje y el buscador');
+  chk(await pg.evaluate(() => { const a = document.activeElement; return !(a.tagName === 'TEXTAREA' || (a.tagName === 'INPUT' && !['radio', 'checkbox'].includes(a.type))); }), 'el teclado no se abre solo');
   await pg.click('#flotante');
   chk((await pg.$$('#flotante')).length === 0, 'al tocar el aviso, se quita');
   // y se quita solo
   await pg.click('#ap-lista li:first-child label'); await pg.click('#v-aplicacion-form form button[type=submit]'); await pg.waitForSelector('#flotante');
   await pg.waitForSelector('#flotante', { state: 'detached', timeout: 9000 });
+  await ctx.close();
+}
+
+/* 7b. Entrevista: al guardar, la confirmación se ve aunque la pantalla estuviera abajo */
+{
+  console.log('7b. Entrevista: confirmación visible');
+  const { pg, ctx } = await entrar();
+  await ir(pg, '#/alumno/A028', '#en-editar');
+  await pg.click('#en-editar'); await pg.fill('#en-notas', 'Nota nueva de prueba');
+  await pg.evaluate(() => { document.querySelector('#main').scrollTop = 99999; });
+  await pg.click('#v-alumno form button[type=submit]');
+  await pg.waitForSelector('#en-editar');
+  await pg.waitForTimeout(900);   // el desplazamiento es suave
+  chk(/Guardado en el Sheet/.test(await pg.innerText('#v-alumno .card:has(#en-titulo)')) && await enPantalla(pg, '#en-titulo'), 'tras guardar la entrevista, se ve la tarjeta con su confirmación');
   await ctx.close();
 }
 

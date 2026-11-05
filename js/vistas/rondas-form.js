@@ -12,7 +12,7 @@ import {
 import { hoyLocal, fechaLarga } from './entrevista.js';
 import { datosRondas, insigniaEstado } from './rondas.js';
 import { tarjetaError } from './error-datos.js';
-import { ocupar, avisoFlotante } from '../util/trabajo.js';
+import { ocupar, avisoFlotante, llevarA } from '../util/trabajo.js';
 
 const ir = hash => { location.hash = hash; };
 const ISO = /^\d{4}-\d{2}-\d{2}$/;
@@ -216,7 +216,7 @@ export async function pintarFormAplicacion(raiz, idOferta, numeroTxt) {
     ok.textContent = texto; ok.hidden = false;
     pintarLista(); pintarAvisos();
     avisoFlotante(corto);   // la confirmación se ve aunque la pantalla esté más abajo
-    buscar.focus({ preventScroll: true });   // el cursor vuelve al buscador, para añadir otra seguida
+    llevarA(raiz);   // y la pantalla sube, con suavidad, al mensaje y al buscador, para añadir otra seguida (sin abrir el teclado)
   }
 
   const enviar = async () => {

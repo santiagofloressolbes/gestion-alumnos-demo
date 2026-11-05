@@ -32,3 +32,9 @@ export function quitarFlotante() {
   flotante?.remove();
   flotante = null;
 }
+
+// Lleva la pantalla, con suavidad, hasta un elemento (sin abrir el teclado). Si la persona prefiere menos movimiento, salta sin animación.
+export function llevarA(elemento, bloque = 'start') {
+  const poco = typeof matchMedia === 'function' && matchMedia('(prefers-reduced-motion: reduce)').matches;
+  elemento.scrollIntoView?.({ block: bloque, behavior: poco ? 'auto' : 'smooth' });
+}

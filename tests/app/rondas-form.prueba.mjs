@@ -200,7 +200,7 @@ const sinClaveEnUrl = log => log.peticiones.every(p => !p.url.includes(CLAVE_PRU
   chk(ap && ap['ID alumno'] === 'A003' && ap['ID oferta'] === 'O002' && ap['Número de ronda'] === '2' && ap['Fecha de aplicación'] === HOY && ap.Estado === 'Recibida' && ap['Motivo de descarte'] === '' && ap.Notas === ' =1+1', 'en el Sheet: AP013, Recibida, notas como texto (con un espacio delante, sin fórmula)');
   chk(h && h['ID aplicación'] === 'AP013' && h['Estado anterior'] === '' && h['Estado nuevo'] === 'Recibida', 'y su primera línea de historial');
   chk(!(await texto(pg, '#ap-lista')).includes('Valentina Aguirre') && (await pg.$$('#ap-lista input')).length === 27 && await pg.inputValue('#ap-q') === '' && await pg.inputValue('#ap-notas') === '', 'el formulario se limpia y Valentina ya no sale en la lista (27)');
-  chk(await pg.evaluate(() => document.activeElement.id) === 'ap-q', 'el cursor vuelve al buscador, para añadir otra');
+  chk(await pg.evaluate(() => { const a = document.activeElement; return !(a.tagName === 'TEXTAREA' || (a.tagName === 'INPUT' && !['radio', 'checkbox'].includes(a.type))); }), 'no se abre el teclado solo (el foco no está en ningún cuadro de texto)');
   chk(!log.peticiones.some(p => p.url.includes(CLAVE_PRUEBA)) && sinClaveEnUrl(log), 'la clave nunca va en la dirección');
   // otra seguida
   await pg.check('#ap-al-A004'); await guardar(pg, 'v-aplicacion-form');

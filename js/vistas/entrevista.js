@@ -2,7 +2,7 @@
 // Lo que se escribe NO se guarda en el móvil: solo se envía al script cuando se pulsa "Guardar".
 import { guardarEntrevista, aplicarEntrevista, puedeEscribir } from '../data/index.js';
 import { el } from '../util/dom.js';
-import { ocupar } from '../util/trabajo.js';
+import { ocupar, llevarA } from '../util/trabajo.js';
 
 const MAX_NOTAS = 2000;
 const MESES = ['enero', 'febrero', 'marzo', 'abril', 'mayo', 'junio', 'julio', 'agosto', 'septiembre', 'octubre', 'noviembre', 'diciembre'];
@@ -57,6 +57,7 @@ export function tarjetaEntrevista(a) {
         ? el('button', { class: 'secondary', type: 'button', id: 'en-editar', onclick: editar }, hay ? 'Editar entrevista' : 'Añadir entrevista')
         : null,
     ].filter(Boolean));
+    if (aviso) llevarA(caja, 'nearest');   // al guardar, la tarjeta encoge: se asegura de que se vea la confirmación
   };
 
   const editar = () => {
