@@ -63,12 +63,12 @@ export async function pintarBuscar(raiz) {
     el('div', { class: 'filtros-cuerpo' },
       campoSelect('f-area', 'Área', areas, 'area', 'Todas las áreas'),
       el('div', { class: 'campo-form' },
-        el('span', { class: 'etiqueta', id: 'l-area-en' }, 'El área es la que…'),
+        el('span', { class: 'etiqueta', id: 'l-area-en' }, 'Mirar el área…'),
         el('div', { class: 'opciones', role: 'group', 'aria-labelledby': 'l-area-en' }, botonesArea)),
       campoSelect('f-nac', 'Nacionalidad (principal o secundaria)', nacionalidades, 'nacionalidad', 'Todas las nacionalidades'),
       campoSelect('f-sit', 'Situación de trabajo en España', situaciones, 'situacion', 'Todas las situaciones'),
-      campoSelect('f-disp', 'Disponibilidad', disponibilidades, 'disponibilidad', 'Prácticas, empleo o ambas',
-        v => (v === 'Ambas' ? 'Ambas (prácticas y empleo)' : `${v} (incluye Ambas)`))));
+      campoSelect('f-disp', 'Disponibilidad', disponibilidades, 'disponibilidad', 'Todas',
+        v => (v === 'Ambas' ? 'Ambas (prácticas y empleo)' : `${v} (y quien busca ambas)`))));
 
   function pintarResultados() {
     const res = filtrar(alumnos, e);

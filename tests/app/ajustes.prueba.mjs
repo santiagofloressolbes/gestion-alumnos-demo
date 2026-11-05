@@ -16,7 +16,7 @@ const entrar = async (modo = 'script') => {
   return t;
 };
 const ir = async (pg, hash, sel) => { await pg.goto(BASE + hash); await pg.waitForSelector(sel); };
-const LEGAL = 'Proyecto personal de demostración. Datos ficticios. No afiliado a LaLiga ni a LaLiga Business School.';
+const LEGAL = 'Proyecto personal de demostración. Todos los datos son ficticios. No afiliado a LaLiga ni a LaLiga Business School.';
 const visible = (pg, sel) => pg.evaluate(s => { const e = document.querySelector(s); if (!e || e.hidden) return false; const r = e.getBoundingClientRect(); return r.width > 0 && r.height > 0; }, sel);
 
 /* 1. La versión y la lista de archivos del service worker (sin navegador) */

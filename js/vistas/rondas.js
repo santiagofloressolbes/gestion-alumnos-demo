@@ -20,8 +20,8 @@ export function notaSinEscritura() {
   const e = getEstadoFuente();
   if (e.modo !== 'script' || !e.puedeEscribir || puedeEscribirRondas()) return null;
   return el('p', { class: 'aviso', role: 'note' }, e.conRondas
-    ? 'El script de Google es de una versión anterior y no sabe guardar rondas ni aplicaciones. Actualiza Code.gs (guía, "Actualizar a la versión con rondas y aplicaciones").'
-    : 'En el Sheet todavía no están las hojas Rondas, Aplicaciones e Historial. Créalas siguiendo la guía, apartado "Actualizar a la versión con rondas y aplicaciones".');
+    ? 'No se pueden guardar rondas ni solicitudes: el script de Google es de una versión anterior. Actualiza Code.gs con la guía («Actualizar a la versión con rondas y solicitudes»).'
+    : 'No se pueden guardar rondas ni solicitudes: en el Sheet todavía no están las hojas Rondas, Aplicaciones e Historial. Créalas con la guía («Actualizar a la versión con rondas y solicitudes»).');
 }
 
 const mover = origen => () => { navegacion.origenAplicacion = origen; };
@@ -48,31 +48,31 @@ function filaAplicacion(a, d, desde) {
 
 export function seccionesRondas(oferta, d) {
   const nota = notaSinEscritura();
-  if (!d.hay) return [nota && el('section', { class: 'card', 'aria-label': 'Rondas' }, el('h2', {}, 'Rondas de difusión'), nota)].filter(Boolean);
+  if (!d.hay) return [nota && el('section', { class: 'card', 'aria-label': 'Rondas' }, el('h2', {}, 'Rondas'), nota)].filter(Boolean);
 
   const rondas = rondasDeOferta(d.rondas, oferta.id);
   const puede = puedeEscribirRondas();
   const cerrada = oferta.estado === 'Cerrada';
-  const enlaceNueva = puede && el('a', { class: 'primary', id: 'ro-nueva', href: `#/oferta/${encodeURIComponent(oferta.id)}/ronda/nueva` }, 'Registrar ronda de difusión');
-  const avisoCerrada = puede && cerrada && el('p', { class: 'aviso', role: 'note', id: 'ro-cerrada' }, 'Esta oferta está cerrada. Puedes registrar rondas y aplicaciones igualmente.');
+  const enlaceNueva = puede && el('a', { class: 'primary', id: 'ro-nueva', href: `#/oferta/${encodeURIComponent(oferta.id)}/ronda/nueva` }, 'Registrar nueva ronda');
+  const avisoCerrada = puede && cerrada && el('p', { class: 'aviso', role: 'note', id: 'ro-cerrada' }, 'Esta oferta está cerrada, pero aún puedes registrar rondas y solicitudes.');
 
   const tarjetas = rondas.map(r => {
     const apps = aplicacionesDeRonda(d.aplicaciones, oferta.id, r.numero);
     const resumen = resumenEstados(apps, d.listas.estadosAplicacion || []);
     return el('section', { class: 'card ronda', 'aria-label': 'Ronda ' + r.numero },
       el('h2', {}, 'Ronda ' + r.numero),
-      el('p', { class: 'sub' }, [r.fecha && 'Enviada el ' + fechaLarga(r.fecha), plural(apps.length, 'aplicación', 'aplicaciones')].filter(Boolean).join(' · ')),
+      el('p', { class: 'sub' }, [r.fecha && 'Enviada el ' + fechaLarga(r.fecha), plural(apps.length, 'solicitud', 'solicitudes')].filter(Boolean).join(' · ')),
       resumen.length > 0 && el('div', { class: 'chips resumen' }, resumen.map(x => el('span', { class: 'chip' }, `${x.estado}: ${x.n}`))),
       apps.length
-        ? el('ul', { class: 'alumnos', 'aria-label': 'Aplicaciones de la ronda ' + r.numero }, apps.map(a => filaAplicacion(a, d, 'oferta')))
-        : el('p', { class: 'sub' }, 'Sin aplicaciones todavía.'),
-      puede && el('a', { class: 'secondary', href: `#/oferta/${encodeURIComponent(oferta.id)}/ronda/${encodeURIComponent(r.numero)}/aplicar` }, 'Añadir aplicación'));
+        ? el('ul', { class: 'alumnos', 'aria-label': 'Solicitudes de la ronda ' + r.numero }, apps.map(a => filaAplicacion(a, d, 'oferta')))
+        : el('p', { class: 'sub' }, 'Aún no hay solicitudes.'),
+      puede && el('a', { class: 'secondary', href: `#/oferta/${encodeURIComponent(oferta.id)}/ronda/${encodeURIComponent(r.numero)}/aplicar` }, 'Añadir solicitud'));
   });
 
   return [
-    nota && el('section', { class: 'card', 'aria-label': 'Rondas' }, el('h2', {}, 'Rondas de difusión'), nota),
+    nota && el('section', { class: 'card', 'aria-label': 'Rondas' }, el('h2', {}, 'Rondas'), nota),
     ...(tarjetas.length ? tarjetas : [el('section', { class: 'card', 'aria-label': 'Rondas' },
-      el('h2', {}, 'Rondas de difusión'),
+      el('h2', {}, 'Rondas'),
       el('p', { class: 'sub' }, 'Esta oferta todavía no se ha enviado a los alumnos.'))]),
     avisoCerrada,
     enlaceNueva,
@@ -84,12 +84,12 @@ export function seccionesRondas(oferta, d) {
 export function tarjetaAplicaciones(alumno, d) {
   if (!d.hay) return null;
   const apps = aplicacionesDeAlumno(d.aplicaciones, alumno.id);
-  return el('section', { class: 'card', 'aria-label': 'Aplicaciones' },
-    el('h2', {}, 'Aplicaciones'),
+  return el('section', { class: 'card', 'aria-label': 'Solicitudes' },
+    el('h2', {}, 'Solicitudes'),
     apps.length
-      ? [el('p', { class: 'sub' }, plural(apps.length, 'aplicación', 'aplicaciones')),
-         el('ul', { class: 'alumnos', 'aria-label': 'Aplicaciones del alumno' }, apps.map(a => filaAplicacion(a, d, 'alumno')))]
-      : el('p', { class: 'sub' }, 'Todavía no ha aplicado a ninguna oferta.'));
+      ? [el('p', { class: 'sub' }, plural(apps.length, 'solicitud', 'solicitudes')),
+         el('ul', { class: 'alumnos', 'aria-label': 'Solicitudes del alumno' }, apps.map(a => filaAplicacion(a, d, 'alumno')))]
+      : el('p', { class: 'sub' }, 'Todavía no tiene solicitudes.'));
 }
 
 /* ---- Detalle de una aplicación ---- */
@@ -99,7 +99,7 @@ function campo(etiqueta, valor, { texto = false, vacio = 'No indicado' } = {}) {
 }
 
 export async function pintarAplicacion(raiz, id) {
-  raiz.replaceChildren(el('p', { class: 'estado', role: 'status' }, 'Cargando aplicación…'));
+  raiz.replaceChildren(el('p', { class: 'estado', role: 'status' }, 'Cargando solicitud…'));
   let d;
   try { d = await datosRondas(); }
   catch (err) {
@@ -109,7 +109,7 @@ export async function pintarAplicacion(raiz, id) {
   const a = d.hay ? d.aplicaciones.find(x => x.id === id) : null;
   if (!a) {
     raiz.replaceChildren(el('a', { class: 'volver', href: '#/ofertas' }, 'Ofertas'), el('div', { class: 'card' },
-      el('h2', {}, 'Aplicación no encontrada'), el('p', { class: 'sub' }, 'Vuelve a las ofertas y elige otra.')));
+      el('h2', {}, 'Solicitud no encontrada'), el('p', { class: 'sub' }, 'Vuelve a las ofertas y elige otra.')));
     return;
   }
   const alumno = d.alumnos.find(x => x.id === a.idAlumno);
@@ -126,23 +126,23 @@ export async function pintarAplicacion(raiz, id) {
   raiz.replaceChildren(...[
     volver,
     aviso && el('p', { class: 'ok aviso-ok', role: 'status' }, aviso),
-    el('section', { class: 'card cabecera cabecera-oferta', 'aria-label': 'Aplicación' },
+    el('section', { class: 'card cabecera cabecera-oferta', 'aria-label': 'Solicitud' },
       el('h2', { class: 'nombre' }, nombreAl),
       el('p', { class: 'sub' }, nombreOf),
       el('div', { class: 'chips' }, insigniaEstado(a.estado), el('span', { class: 'chip' }, 'Ronda ' + a.numeroRonda)),
       puedeEscribirRondas() && el('a', { class: 'primary', id: 'ap-estado', href: `#/aplicacion/${encodeURIComponent(a.id)}/estado` }, 'Cambiar estado')),
 
     el('section', { class: 'card', 'aria-label': 'Datos' },
-      el('h2', {}, 'La aplicación'),
+      el('h2', {}, 'La solicitud'),
       el('dl', { class: 'campos' },
         campo('Alumno', nombreAl),
         campo('Oferta', nombreOf),
         campo('Ronda', ronda ? `Ronda ${a.numeroRonda}, enviada el ${fechaLarga(ronda.fecha)}` : 'Ronda ' + a.numeroRonda),
-        campo('Aplicó el', fechaLarga(a.fecha)),
+        campo('Solicitada el', fechaLarga(a.fecha)),
         campo('Estado', a.estado),
         a.estado === ESTADO_DESCARTE && campo('Motivo del descarte', a.motivo),
         campo('Notas', a.notas, { texto: true, vacio: 'Sin notas' }),
-        campo('Número de aplicación', a.id)),
+        campo('Número de solicitud', a.id)),
       alumno && el('a', { class: 'secondary', href: '#/alumno/' + encodeURIComponent(alumno.id) }, 'Ver ficha del alumno'),
       oferta && el('a', { class: 'secondary', href: '#/oferta/' + encodeURIComponent(oferta.id) }, 'Ver la oferta')),
 
@@ -150,9 +150,9 @@ export async function pintarAplicacion(raiz, id) {
       el('h2', {}, 'Historial'),
       historial.length
         ? el('ol', { class: 'historial' }, historial.map(h => el('li', {},
-            el('b', {}, h.estadoAnterior ? `${h.estadoAnterior} → ${h.estadoNuevo}` : h.estadoNuevo + ' (aplicación registrada)'),
+            el('b', {}, h.estadoAnterior ? `${h.estadoAnterior} → ${h.estadoNuevo}` : h.estadoNuevo + ' (solicitud registrada)'),
             el('span', { class: 'sub' }, [fechaLarga(h.fecha), h.motivo && 'Motivo: ' + h.motivo].filter(Boolean).join(' · ')),
             h.nota && el('span', { class: 'nota-historial' }, h.nota))))
-        : el('p', { class: 'sub' }, 'Todavía no hay cambios apuntados.')),
+        : el('p', { class: 'sub' }, 'Todavía no hay cambios de estado.')),
   ].filter(Boolean));
 }

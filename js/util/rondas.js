@@ -1,5 +1,5 @@
 // Rondas de difusión, aplicaciones e historial: orden, resúmenes y avisos (funciones puras: no tocan la pantalla).
-// "Ronda" = cada vez que una oferta se reenvía a los alumnos. "Aplicación" = un alumno que responde a una ronda de una oferta.
+// "Ronda" = cada vez que una oferta se reenvía a los alumnos. "Solicitud" (en el Sheet, hoja «Aplicaciones») = un alumno que responde a una ronda de una oferta.
 
 import { fechaValida } from './ofertas.js';
 
@@ -59,7 +59,7 @@ const SIN_PERMISO = ['Necesita permiso de trabajo', 'Permiso de estudiante'];
 export function avisosRequisitos(alumno, oferta) {
   const avisos = [];
   if (oferta.requisitoPermiso === 'Permiso de trabajo en vigor' && SIN_PERMISO.includes(alumno.situacionTrabajo)) {
-    avisos.push(`La oferta pide permiso de trabajo en vigor y ${nombreAlumno(alumno)} figura como «${alumno.situacionTrabajo}».`);
+    avisos.push(`La oferta pide permiso de trabajo en vigor y ${nombreAlumno(alumno)} aparece como «${alumno.situacionTrabajo}».`);
   }
   const nacionalidades = [alumno.nacionalidadPrincipal, alumno.nacionalidadSecundaria].filter(Boolean);
   if (oferta.requisitoNacionalidad && nacionalidades.length && !nacionalidades.includes(oferta.requisitoNacionalidad)) {

@@ -27,9 +27,9 @@ function rutaActual() {
   } catch { /* dirección mal escrita: se vuelve al inicio */ }
   try {
     if ((m = h.match(/^oferta\/([^/]+)\/ronda\/nueva$/))) return { vista: 'ronda-form', valor: decodeURIComponent(m[1]), pestana: 'ofertas', titulo: 'Nueva ronda' };
-    if ((m = h.match(/^oferta\/([^/]+)\/ronda\/([^/]+)\/aplicar$/))) return { vista: 'aplicacion-form', valor: decodeURIComponent(m[1]), valor2: decodeURIComponent(m[2]), pestana: 'ofertas', titulo: 'Añadir aplicación' };
+    if ((m = h.match(/^oferta\/([^/]+)\/ronda\/([^/]+)\/aplicar$/))) return { vista: 'aplicacion-form', valor: decodeURIComponent(m[1]), valor2: decodeURIComponent(m[2]), pestana: 'ofertas', titulo: 'Añadir solicitud' };
     if ((m = h.match(/^aplicacion\/([^/]+)\/estado$/))) return { vista: 'estado-form', valor: decodeURIComponent(m[1]), pestana: 'ofertas', titulo: 'Cambiar estado' };
-    if ((m = h.match(/^aplicacion\/([^/]+)$/))) return { vista: 'aplicacion', valor: decodeURIComponent(m[1]), pestana: 'ofertas', titulo: 'Aplicación' };
+    if ((m = h.match(/^aplicacion\/([^/]+)$/))) return { vista: 'aplicacion', valor: decodeURIComponent(m[1]), pestana: 'ofertas', titulo: 'Solicitud' };
     if (h === 'oferta/nueva') return { vista: 'oferta-form', valor: null, pestana: 'ofertas', titulo: 'Nueva oferta' };
     if ((m = h.match(/^oferta\/([^/]+)\/editar$/))) return { vista: 'oferta-form', valor: decodeURIComponent(m[1]), pestana: 'ofertas', titulo: 'Editar oferta' };
     if ((m = h.match(/^oferta\/([^/]+)$/))) return { vista: 'oferta', valor: decodeURIComponent(m[1]), pestana: 'ofertas', titulo: 'Oferta' };
@@ -82,7 +82,7 @@ async function pintar() {
 let hashPrevio = location.hash, restaurando = false;
 window.addEventListener('hashchange', () => {
   if (restaurando) { restaurando = false; return; }
-  if (navegacion.sinGuardar && !confirm('Tienes cambios sin guardar. ¿Salir y descartarlos?')) {
+  if (navegacion.sinGuardar && !confirm('Hay cambios sin guardar. ¿Salir sin guardarlos?')) {
     restaurando = true; location.hash = hashPrevio; return;
   }
   navegacion.sinGuardar = false;

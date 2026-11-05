@@ -60,10 +60,10 @@ const peticionesGuardar = log => log.peticiones.filter(p => JSON.parse(p.cuerpo)
     chk(esperado.test(await pg.innerText('.error')), nombre + ': ' + await pg.innerText('.error'));
   };
   await probar('', hoy(), /Escribe una nota/, 'sin nota (alumno sin entrevista previa)');
-  await probar('a'.repeat(2001), hoy(), /supera los 2\.000/, '2.001 caracteres');
+  await probar('a'.repeat(2001), hoy(), /demasiado larga: el máximo es de 2\.000/, '2.001 caracteres');
   chk(/exceso/.test(await pg.getAttribute('#en-cuenta', 'class')), 'contador en rojo');
-  await probar('hola <b>negrita</b>', hoy(), /código HTML/, 'HTML');
-  await probar('texto\u0007con campana', hoy(), /caracteres de control/, 'control');
+  await probar('hola <b>negrita</b>', hoy(), /lo toma por código/, 'HTML');
+  await probar('texto\u0007con campana', hoy(), /caracteres raros/, 'control');
   await probar('nota', mañana(), /no puede ser futura/, 'fecha futura');
   await pg.fill('#en-fecha', ''); await pg.fill('#en-notas', 'nota'); await pg.click('form button[type=submit]');
   chk(/fecha válida/.test(await pg.innerText('.error')), 'fecha vacía');
@@ -134,14 +134,14 @@ const peticionesGuardar = log => log.peticiones.filter(p => JSON.parse(p.cuerpo)
   chk(/versión de otra persona/.test(t) && /10 de octubre de 2026/.test(t), 'enseña lo que hay ahora');
   chk(await pg.inputValue('#en-notas') === 'mi versión', 'mi texto sigue en el cuadro');
   chk(await pg.locator('form button[type=submit]').isEnabled(), 'se puede seguir editando');
-  await pg.click('text=Guardar el mío igualmente'); await pg.waitForSelector('#en-editar');
+  await pg.click('text=Guardar mi versión'); await pg.waitForSelector('#en-editar');
   chk(mundo.hojas.Alumnos.m[f - 1][COL_N - 1] === 'mi versión', 'guardar el mío igualmente escribe lo mío');
   // y descartar
   const g = fila(mundo, 'A006');
   await abrir(pg, 'A006'); await pg.click('#en-editar'); await pg.fill('#en-notas', 'otra mía');
   mundo.hojas.Alumnos.m[g - 1][COL_N - 1] = 'de otra persona'; mundo.hojas.Alumnos.m[g - 1][COL_F - 1] = '2026-10-11';
   await pg.click('form button[type=submit]'); await pg.waitForSelector('.conflicto:not([hidden])');
-  await pg.click('text=Descartar el mío'); await pg.waitForSelector('#en-editar');
+  await pg.click('text=Quedarme con la del Sheet'); await pg.waitForSelector('#en-editar');
   chk(mundo.hojas.Alumnos.m[g - 1][COL_N - 1] === 'de otra persona', 'descartar no escribe');
   chk(/de otra persona/.test(await pg.innerText('#v-alumno')), 'la ficha enseña lo del Sheet');
   await ctx.close();
@@ -158,7 +158,7 @@ const peticionesGuardar = log => log.peticiones.filter(p => JSON.parse(p.cuerpo)
   let msg = '';
   pg.once('dialog', d => { msg = d.message(); d.dismiss(); });
   await pg.click('text=Cancelar');
-  chk(/Descartar/.test(msg) && await pg.locator('#en-notas').isVisible(), 'cancelar con cambios pregunta y se puede seguir');
+  chk(/Salir sin guardar/.test(msg) && await pg.locator('#en-notas').isVisible(), 'cancelar con cambios pregunta y se puede seguir');
   pg.once('dialog', d => d.accept());
   await pg.click('text=Cancelar'); await pg.waitForSelector('#en-editar');
   chk(peticionesGuardar(log).length === 0 && mundo.hojas.Alumnos.m[f - 1][COL_N - 1] === 'algo que borrar', 'cancelar no escribe');
@@ -166,7 +166,7 @@ const peticionesGuardar = log => log.peticiones.filter(p => JSON.parse(p.cuerpo)
   await pg.click('#en-editar'); await pg.fill('#en-notas', '   ');
   pg.once('dialog', d => { msg = d.message(); d.dismiss(); });
   await pg.click('form button[type=submit]'); await pg.waitForTimeout(200);
-  chk(/se borrarán/.test(msg) && peticionesGuardar(log).length === 0, 'borrar pide confirmación y si dices no, no hace nada');
+  chk(/Se borrarán/.test(msg) && peticionesGuardar(log).length === 0, 'borrar pide confirmación y si dices no, no hace nada');
   pg.once('dialog', d => d.accept());
   await pg.click('form button[type=submit]'); await pg.waitForSelector('#en-editar');
   chk(mundo.hojas.Alumnos.m[f - 1][COL_N - 1] === '' && mundo.hojas.Alumnos.m[f - 1][COL_F - 1] === '', 'borrar vacía las 2 celdas');
@@ -182,7 +182,7 @@ const peticionesGuardar = log => log.peticiones.filter(p => JSON.parse(p.cuerpo)
   await abrir(pg, 'A008'); await pg.click('#en-editar'); await pg.fill('#en-notas', 'no se debe perder');
   ctrl.abortar = true; const antes = mundo.foto();
   await pg.click('form button[type=submit]'); await pg.waitForSelector('.error:not([hidden])');
-  chk(/no ha podido hablar con Google/.test(await pg.innerText('.error')) && /no se ha perdido/.test(await pg.innerText('.error')), 'mensaje de red: ' + await pg.innerText('.error'));
+  chk(/No se ha podido conectar con Google/.test(await pg.innerText('.error')) && /no se ha perdido/.test(await pg.innerText('.error')), 'mensaje de red: ' + await pg.innerText('.error'));
   chk(await pg.inputValue('#en-notas') === 'no se debe perder', 'el texto sigue en el cuadro');
   chk(mundo.celdasCambiadas(antes, mundo.foto()).length === 0 && await pg.locator('form button[type=submit]').isEnabled(), 'nada escrito y botón de nuevo activo');
   await pg.click('form button[type=submit]'); await pg.waitForSelector('#en-editar');

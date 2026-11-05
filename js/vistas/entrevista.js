@@ -35,9 +35,9 @@ export function validar(notas, fecha, hoy) {
 }
 
 const MENSAJES = {
-  'sin-notas': 'Escribe una nota.', largo: `La nota supera los ${miles(MAX_NOTAS)} caracteres.`,
-  caracteres: 'La nota tiene caracteres de control que no se admiten.',
-  html: 'La nota parece llevar código HTML (un «<» seguido de una letra o una barra). Cámbialo y vuelve a guardar.',
+  'sin-notas': 'Escribe una nota.', largo: `La nota es demasiado larga: el máximo es de ${miles(MAX_NOTAS)} caracteres.`,
+  caracteres: 'La nota tiene caracteres raros que no se admiten (suelen venir de copiar y pegar).',
+  html: 'La nota lleva un «<» seguido de una letra o una barra, y la app lo toma por código. Quítalo o cámbialo y vuelve a guardar.',
   fecha: 'Elige una fecha válida.', 'fecha-futura': 'La fecha no puede ser futura.',
 };
 
@@ -72,7 +72,7 @@ export function tarjetaEntrevista(a) {
     const conflicto = el('div', { class: 'conflicto', hidden: true });
     const guardar = el('button', { class: 'primary', type: 'submit' }, 'Guardar');
     const cancelar = el('button', { class: 'secondary', type: 'button', onclick: () => {
-      if (textarea.value !== inicial && !confirm('¿Descartar lo que has escrito?')) return;
+      if (textarea.value !== inicial && !confirm('¿Salir sin guardar lo que has escrito?')) return;
       ver();
     } }, 'Cancelar');
 
@@ -92,7 +92,7 @@ export function tarjetaEntrevista(a) {
       const notas = normalizar(textarea.value);
       let fecha = fechaIn.value;
       if (!notas && inicial && !base) {
-        if (!confirm('No hay notas: se borrarán las notas y la fecha de esta entrevista. ¿Seguro?')) return;
+        if (!confirm('Has dejado las notas vacías. Se borrarán las notas y la fecha de la entrevista. ¿Seguro?')) return;
         fecha = '';
       } else {
         const c = validar(notas, fecha, hoy);
@@ -108,7 +108,7 @@ export function tarjetaEntrevista(a) {
         liberar();
         if (e.codigo === 'conflicto') return pintarConflicto(e.extra, notas, fecha);
         decir(e.codigo === 'clave'
-          ? 'La clave ya no es correcta. Copia tu nota antes de salir y vuelve a entrar con la clave nueva.'
+          ? 'La clave ha cambiado o ya no vale. Copia tu nota antes de salir y entra de nuevo con la clave nueva.'
           : e.message);
         if (e.codigo === 'red' || e.codigo === 'tiempo') error.append(' Tu nota sigue aquí: no se ha perdido.');
       }
@@ -122,11 +122,11 @@ export function tarjetaEntrevista(a) {
         return ver('Guardado en el Sheet.');
       }
       conflicto.replaceChildren(
-        el('h3', {}, 'Alguien cambió esta entrevista'),
+        el('h3', {}, 'Esta entrevista ha cambiado mientras la editabas'),
         el('p', { class: 'sub' }, 'Esto es lo que hay ahora en el Sheet. Lo que has escrito sigue en el cuadro de arriba.'),
         el('dl', { class: 'campos' }, campo('Fecha', fechaLarga(fA) || 'Sin fecha', !fA), campo('Notas', nA || 'Sin notas', !nA, true)),
-        el('button', { class: 'primary', type: 'button', onclick: ev => { base = { notas: actual.notas || '', fecha: fA }; enviar(ev.currentTarget); } }, 'Guardar el mío igualmente'),
-        el('button', { class: 'secondary', type: 'button', onclick: () => { aplicarEntrevista(a.id, actual.notas || '', fA); ver('Se ha cargado lo que había en el Sheet.'); } }, 'Descartar el mío'));
+        el('button', { class: 'primary', type: 'button', onclick: ev => { base = { notas: actual.notas || '', fecha: fA }; enviar(ev.currentTarget); } }, 'Guardar mi versión'),
+        el('button', { class: 'secondary', type: 'button', onclick: () => { aplicarEntrevista(a.id, actual.notas || '', fA); ver('Listo: ahora ves lo que hay en el Sheet. Tus cambios no se han guardado.'); } }, 'Quedarme con la del Sheet'));
       conflicto.hidden = false;
       conflicto.scrollIntoView?.({ block: 'nearest' });
     };

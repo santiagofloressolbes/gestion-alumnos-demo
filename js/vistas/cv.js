@@ -13,7 +13,7 @@ export async function pintarCV(raiz, id) {
   const bloque = (titulo, texto) => texto && el('section', { class: 'cv-bloque' }, el('h3', {}, titulo), el('p', {}, texto));
   raiz.replaceChildren(
     el('a', { class: 'volver', href: '#/alumno/' + encodeURIComponent(a.id) }, 'Ficha de ' + a.nombre),
-    el('p', { class: 'aviso', role: 'note' }, 'CV de ejemplo: documento ficticio de la versión de prueba. Aquí se abriría el CV real del alumno.'),
+    el('p', { class: 'aviso', role: 'note' }, 'Este CV es de ejemplo y está inventado. Aquí se abriría el CV real del alumno.'),
     el('article', { class: 'card cv', 'aria-label': 'CV de ejemplo' },
       el('h2', {}, `${a.nombre} ${a.apellidos}`.trim()),
       el('p', { class: 'sub' }, [a.master, a.promocion && 'Promoción ' + a.promocion].filter(Boolean).join(' · ')),

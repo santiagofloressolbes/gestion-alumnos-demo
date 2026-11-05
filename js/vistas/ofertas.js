@@ -87,7 +87,7 @@ export async function pintarOfertas(raiz) {
     aviso && el('p', { class: 'ok', role: 'status' }, aviso),
     puedeEscribirOfertas() && el('a', { class: 'primary nueva-oferta', href: '#/oferta/nueva' }, 'Nueva oferta'),
     estadoEscrituraOfertas() === 'script-antiguo' && el('p', { class: 'aviso', role: 'note' },
-      'El script de Google es de una versión anterior y no sabe guardar ofertas. Actualiza Code.gs (guía, "Actualizar a la versión con ofertas").'),
+      'No se pueden guardar ofertas: el script de Google es de una versión anterior. Actualiza Code.gs con la guía («Actualizar a la versión con ofertas»).'),
     el('div', { class: 'card buscador', role: 'search' },
       el('div', { class: 'campo-form' }, el('label', { for: 'of-q' }, 'Buscar oferta'), q),
       el('div', { class: 'campo-form' },

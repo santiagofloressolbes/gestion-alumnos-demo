@@ -56,13 +56,13 @@ export function mensajeCampo(codigo, clave) {
   const c = `«${ETIQUETA[clave] || 'Un campo'}»`;
   switch (codigo) {
     case 'requerido': { const f = CAMPOS.find(x => x.clave === clave); return f?.lista || f?.fecha ? `Elige ${c}.` : `Falta ${c}.`; }
-    case 'caracteres': return `${c} no admite saltos de línea ni caracteres de control.`;
-    case 'html': return `${c} parece llevar código HTML (un «<» seguido de una letra o una barra). Cámbialo y vuelve a guardar.`;
-    case 'largo': return `${c} supera los ${miles(MAX[clave] || 0)} caracteres.`;
-    case 'lista': return `${c}: elige un valor de la lista (si no está, hay que añadirlo antes en la hoja Listas del Sheet).`;
+    case 'caracteres': return `${c} no admite saltos de línea ni caracteres raros.`;
+    case 'html': return `${c} lleva un «<» seguido de una letra o una barra, y la app lo toma por código. Quítalo y vuelve a guardar.`;
+    case 'largo': return `${c} es demasiado larga (máximo ${miles(MAX[clave] || 0)} caracteres).`;
+    case 'lista': return `${c}: elige un valor de la lista. Si no está, añádelo antes en la hoja Listas del Sheet.`;
     case 'fecha': return `${c}: elige una fecha válida.`;
     case 'fecha-futura': return `${c} no puede ser futura.`;
-    case 'enlace': return `${c} no puede empezar por http:, javascript:… Usa https:// o escribe una descripción.`;
+    case 'enlace': return `${c} no puede empezar por http: ni por otros prefijos raros. Usa https:// o escribe una descripción.`;
     default: return '';
   }
 }

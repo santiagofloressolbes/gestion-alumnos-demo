@@ -5,7 +5,7 @@ import { ocupar } from '../util/trabajo.js';
 import { buscarActualizacion } from '../util/actualizar.js';
 import { VERSION } from '../version.js';
 
-export const AVISO_LEGAL = 'Proyecto personal de demostración. Datos ficticios. No afiliado a LaLiga ni a LaLiga Business School.';
+export const AVISO_LEGAL = 'Proyecto personal de demostración. Todos los datos son ficticios. No afiliado a LaLiga ni a LaLiga Business School.';
 
 export function pintarAjustes(raiz) {
   const demo = getModo() === 'demo';
@@ -17,7 +17,7 @@ export function pintarAjustes(raiz) {
     if (r.estado === 'nueva') return;   // la app se recarga sola
     liberar();
     resultado.textContent = r.estado === 'al-dia' ? `Ya tienes la última versión (${r.version}).`
-      : 'No se ha podido comprobar si hay versión nueva. Inténtalo de nuevo en un momento.';
+      : 'No se ha podido comprobar si hay una versión nueva. Inténtalo otra vez en un momento.';
   } }, 'Buscar actualización');
 
   raiz.replaceChildren(
@@ -36,7 +36,7 @@ export function pintarAjustes(raiz) {
     el('section', { class: 'card', 'aria-labelledby': 'ver-titulo' },
       el('h2', { id: 'ver-titulo' }, 'Versión de la app'),
       el('p', { class: 'version', id: 'aj-version' }, 'Versión ' + VERSION),
-      el('p', { class: 'sub' }, 'Si has publicado cambios y no los ves, busca la actualización aquí: no hace falta cerrar la app.'),
+      el('p', { class: 'sub' }, '¿Has publicado cambios y no los ves? Pulsa aquí para traerlos. No hace falta cerrar la app.'),
       buscar, resultado),
     el('section', { class: 'card', 'aria-labelledby': 'av-titulo' },
       el('h2', { id: 'av-titulo' }, 'Aviso'),

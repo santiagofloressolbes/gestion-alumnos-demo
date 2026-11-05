@@ -27,12 +27,12 @@ function mensaje({ codigo, campo, desde }) {
     case 'fecha': return 'Elige una fecha válida.';
     case 'fecha-futura': return 'La fecha no puede ser futura.';
     case 'fecha-anterior': return `La fecha no puede ser anterior al ${fechaLarga(desde)}.`;
-    case 'largo': return `${campo === 'notas' ? 'Las notas superan' : 'La nota supera'} los ${miles(MAX_NOTAS)} caracteres.`;
-    case 'caracteres': return 'El texto tiene caracteres de control que no se admiten.';
-    case 'html': return 'El texto parece llevar código HTML (un «<» seguido de una letra o una barra). Cámbialo y vuelve a guardar.';
-    case 'lista': return campo === 'estado' ? 'Ese estado no está en la lista (hoja Listas del Sheet).' : 'Ese motivo no está en la lista (hoja Listas del Sheet).';
-    case 'motivo-sobra': return 'Solo se indica un motivo cuando el estado es «Descartado».';
-    case 'sin-cambios': return 'No has cambiado nada.';
+    case 'largo': return `${campo === 'notas' ? 'Las notas son demasiado largas' : 'La nota es demasiado larga'}: el máximo es de ${miles(MAX_NOTAS)} caracteres.`;
+    case 'caracteres': return 'El texto tiene caracteres raros que no se admiten (suelen venir de copiar y pegar).';
+    case 'html': return 'El texto lleva un «<» seguido de una letra o una barra, y la app lo toma por código. Quítalo o cámbialo y vuelve a guardar.';
+    case 'lista': return campo === 'estado' ? 'Ese estado no está en la lista. Añádelo antes en la hoja Listas del Sheet.' : 'Ese motivo no está en la lista. Añádelo antes en la hoja Listas del Sheet.';
+    case 'motivo-sobra': return 'El motivo solo se usa cuando el estado es «Descartado».';
+    case 'sin-cambios': return 'Todavía no has cambiado nada.';
     default: return '';
   }
 }
@@ -42,8 +42,8 @@ const mensajeServidor = e => (e.extra?.campo && CAMPO_ENTRADA[e.extra.campo] ? m
 
 function sinPermiso(raiz, volver) {
   const motivo = estadoEscrituraRondas() === 'script-antiguo'
-    ? 'El script de Google es de una versión anterior, o en el Sheet faltan las hojas Rondas, Aplicaciones e Historial. Mira la guía, apartado "Actualizar a la versión con rondas y aplicaciones".'
-    : 'Estás en la demo: no se puede guardar nada. Conecta con el Sheet de prueba desde Inicio.';
+    ? 'No se pueden guardar rondas ni solicitudes: el script es de una versión anterior o faltan hojas en el Sheet (Rondas, Aplicaciones e Historial). Mira la guía, apartado «Actualizar a la versión con rondas y solicitudes».'
+    : 'Estás en la demo y aquí no se puede guardar nada. Conecta con el Sheet de prueba desde Ajustes.';
   raiz.replaceChildren(volver, el('div', { class: 'card' }, el('h2', {}, 'No se puede guardar'), el('p', { class: 'sub' }, motivo)));
 }
 const noEncontrado = (raiz, volver, que) =>
@@ -87,7 +87,7 @@ export async function pintarFormRonda(raiz, idOferta, previo = {}) {
   const error = el('p', { class: 'error', role: 'alert', hidden: true });
   const guardar = el('button', { class: 'primary', type: 'submit' }, 'Guardar');
   const cancelar = el('button', { class: 'secondary', type: 'button', onclick: () => {
-    if (navegacion.sinGuardar && !confirm('¿Descartar lo que has escrito?')) return;
+    if (navegacion.sinGuardar && !confirm('¿Salir sin guardar lo que has escrito?')) return;
     navegacion.sinGuardar = false; ir(hrefOferta(oferta.id));
   } }, 'Cancelar');
   const decir = t => { error.textContent = t; error.hidden = !t; if (t) f.input.focus(); };
@@ -108,12 +108,12 @@ export async function pintarFormRonda(raiz, idOferta, previo = {}) {
         if (ya && ya.fecha === fecha) { aplicarRonda(ya); return terminar(`Ronda ${numero} registrada.`); }   // ya estaba guardada (p. ej. se cortó la respuesta)
         guardar.textContent = 'Cargando…';
         await recargar().catch(() => {});
-        return pintarFormRonda(raiz, idOferta, { fecha, aviso: `Otra persona ya había registrado la ronda ${numero}. Ahora será la ronda ${Number(e.extra.ultima) + 1}: revisa la fecha y guarda de nuevo.` });
+        return pintarFormRonda(raiz, idOferta, { fecha, aviso: `Otra persona ya había registrado la ronda ${numero}, así que esta es la ronda ${Number(e.extra.ultima) + 1}. Revisa la fecha y vuelve a guardar.` });
       }
       liberar();
-      if (e.codigo === 'clave') return decir('La clave ya no es correcta. Vuelve a entrar con la clave nueva.');
+      if (e.codigo === 'clave') return decir('La clave ha cambiado o ya no vale. Entra de nuevo con la clave nueva.');
       decir(mensajeServidor(e) || e.message);
-      if (e.codigo === 'red' || e.codigo === 'tiempo') error.append(' Es posible que la ronda sí se haya guardado: al pulsar Guardar otra vez, la app lo comprobará.');
+      if (e.codigo === 'red' || e.codigo === 'tiempo') error.append(' Puede que la ronda sí se haya guardado. Si vuelves a pulsar Guardar, la app lo comprobará antes.');
     }
   };
 
@@ -121,10 +121,10 @@ export async function pintarFormRonda(raiz, idOferta, previo = {}) {
     volver,
     previo.aviso && el('p', { class: 'aviso', role: 'status', id: 'ro-aviso' }, previo.aviso),
     el('section', { class: 'card', 'aria-labelledby': 'ro-titulo' },
-      el('h2', { id: 'ro-titulo' }, 'Registrar ronda de difusión'),
+      el('h2', { id: 'ro-titulo' }, 'Registrar nueva ronda'),
       el('p', { class: 'sub' }, [oferta.titulo || '(sin título)', oferta.empresa].filter(Boolean).join(' · ')),
-      el('p', { class: 'numero-ronda', id: 'ro-numero' }, 'Será la ronda ' + numero),
-      oferta.estado === 'Cerrada' && el('p', { class: 'aviso', role: 'note', id: 'ro-cerrada' }, 'Esta oferta está cerrada. Puedes registrar la ronda igualmente.'),
+      el('p', { class: 'numero-ronda', id: 'ro-numero' }, numero === 1 ? 'Vas a registrar la ronda 1 (el primer envío de esta oferta a los alumnos).' : `Vas a registrar la ronda ${numero} (un nuevo envío de esta oferta a los alumnos).`),
+      oferta.estado === 'Cerrada' && el('p', { class: 'aviso', role: 'note', id: 'ro-cerrada' }, 'Esta oferta está cerrada, pero aún puedes registrar la ronda.'),
       el('form', { novalidate: true, oninput: () => { navegacion.sinGuardar = f.input.value !== hoy; }, onchange: () => { navegacion.sinGuardar = f.input.value !== hoy; },
         onsubmit: ev => { ev.preventDefault(); if (!guardar.disabled) enviar(); } },
         f.campo, error, guardar, cancelar)),
@@ -156,16 +156,16 @@ export async function pintarFormAplicacion(raiz, idOferta, numeroTxt) {
   const buscar = el('input', { id: 'ap-q', type: 'search', autocomplete: 'off', autocapitalize: 'off', spellcheck: 'false', enterkeyhint: 'search',
     placeholder: 'Nombre, apellidos o máster…', 'aria-controls': 'ap-lista', oninput: () => pintarLista(),
     onkeydown: ev => { if (ev.key === 'Enter') { ev.preventDefault(); buscar.blur(); } } });
-  const lista = el('ul', { class: 'elegir', id: 'ap-lista', role: 'radiogroup', 'aria-label': 'Alumnos que todavía no han aplicado a esta ronda' });
+  const lista = el('ul', { class: 'elegir', id: 'ap-lista', role: 'radiogroup', 'aria-label': 'Alumnos sin solicitud en esta ronda' });
   const cuentaLista = el('p', { class: 'sub', role: 'status', 'aria-live': 'polite', id: 'ap-cuenta' });
   const avisos = el('div', { id: 'ap-avisos', 'aria-live': 'polite' });
-  const f = campoFecha('ap-fecha', 'Fecha en que aplica', hoy, desde, hoy);
+  const f = campoFecha('ap-fecha', 'Fecha de la solicitud', hoy, desde, hoy);
   const n = cuadroNotas('ap-notas', 'Notas (opcional)');
   const error = el('p', { class: 'error', role: 'alert', hidden: true });
   const ok = el('p', { class: 'ok aviso-ok', role: 'status', id: 'ap-ok', hidden: true });
   const guardar = el('button', { class: 'primary', type: 'submit' }, 'Guardar');
   const cancelar = el('button', { class: 'secondary', type: 'button', onclick: () => {
-    if (navegacion.sinGuardar && !confirm('¿Descartar lo que has escrito?')) return;
+    if (navegacion.sinGuardar && !confirm('¿Salir sin guardar lo que has escrito?')) return;
     navegacion.sinGuardar = false; ir(hrefOferta(oferta.id));
   } }, 'Volver a la oferta');
 
@@ -179,7 +179,7 @@ export async function pintarFormAplicacion(raiz, idOferta, numeroTxt) {
     const a = alumnoElegido();
     const previas = a ? d.aplicaciones.filter(x => x.idOferta === idOferta && x.idAlumno === a.id) : [];
     const lineas = a ? [
-      ...previas.map(x => `Ya aplicó en la ronda ${x.numeroRonda} de esta oferta (${x.estado || 'sin estado'}).`),
+      ...previas.map(x => `Ya tiene una solicitud en la ronda ${x.numeroRonda} de esta oferta (${x.estado || 'sin estado'}).`),
       ...avisosRequisitos(a, oferta)] : [];
     avisos.replaceChildren(...lineas.map(t => el('p', { class: 'aviso', role: 'note' }, t)));
   }
@@ -193,7 +193,7 @@ export async function pintarFormAplicacion(raiz, idOferta, numeroTxt) {
     const visibles = candidatos.slice(0, MAX_LISTA);
     const el0 = elegido && sinAplicar.find(a => a.id === elegido);
     if (el0 && !visibles.includes(el0)) visibles.unshift(el0);
-    cuentaLista.textContent = candidatos.length > MAX_LISTA ? `Se ven ${MAX_LISTA} de ${candidatos.length}: escribe para afinar.` : candidatos.length === 1 ? '1 alumno' : `${candidatos.length} alumnos`;
+    cuentaLista.textContent = candidatos.length > MAX_LISTA ? `Se muestran ${MAX_LISTA} de ${candidatos.length}. Escribe para acotar.` : candidatos.length === 1 ? '1 alumno' : `${candidatos.length} alumnos`;
     lista.replaceChildren(...visibles.map(a => {
       const radio = el('input', { type: 'radio', name: 'ap-alumno', id: 'ap-al-' + a.id, value: a.id, onchange: () => { elegido = a.id; decir(''); ok.hidden = true; pintarAvisos(); marcarCambios(); resaltar(); } });
       radio.checked = a.id === elegido;
@@ -201,21 +201,21 @@ export async function pintarFormAplicacion(raiz, idOferta, numeroTxt) {
       return el('li', {}, el('label', { for: radio.id, class: a.id === elegido ? 'elegido' : null }, radio,
         avatar(a),
         el('span', { class: 'alumno-texto' }, el('b', {}, nombreAlumno(a)),
-          el('span', { class: 'sub' }, [a.master, previas.length && `ya aplicó en la ronda ${previas.map(x => x.numeroRonda).join(', ')}`].filter(Boolean).join(' · ')))));
+          el('span', { class: 'sub' }, [a.master, previas.length && `ya tiene solicitud en la ronda ${previas.map(x => x.numeroRonda).join(', ')}`].filter(Boolean).join(' · ')))));
     }));
-    if (!visibles.length) lista.replaceChildren(el('li', { class: 'sub' }, palabras.length ? 'Ningún alumno coincide.' : 'Todos los alumnos ya han aplicado a esta ronda.'));
+    if (!visibles.length) lista.replaceChildren(el('li', { class: 'sub' }, palabras.length ? 'Ningún alumno coincide.' : 'Todos los alumnos ya tienen solicitud en esta ronda.'));
   }
   const resaltar = () => { for (const l of lista.querySelectorAll('label')) l.classList.toggle('elegido', l.control?.checked === true); };
 
   // Tras guardar: se queda en la pantalla para añadir otra aplicación seguida.
-  async function despuesDeGuardar(texto) {
+  async function despuesDeGuardar(texto, corto = texto) {
     try { d = await datosRondas(); } catch { /* se sigue con lo que había */ }
     elegido = ''; buscar.value = ''; n.area.value = ''; n.pintar();
     navegacion.sinGuardar = f.input.value !== hoy;
     decir('');
     ok.textContent = texto; ok.hidden = false;
     pintarLista(); pintarAvisos();
-    avisoFlotante(texto);   // la confirmación se ve aunque la pantalla esté más abajo
+    avisoFlotante(corto);   // la confirmación se ve aunque la pantalla esté más abajo
     buscar.focus({ preventScroll: true });   // el cursor vuelve al buscador, para añadir otra seguida
   }
 
@@ -229,28 +229,28 @@ export async function pintarFormAplicacion(raiz, idOferta, numeroTxt) {
     try {
       const r = await crearAplicacion({ idAlumno: elegido, idOferta, numeroRonda: ronda.numero, fecha, notas });
       liberar();
-      await despuesDeGuardar(`Aplicación de ${nombreAlumno(a)} añadida (${r.aplicacion.id}). Puedes añadir otra.`);
+      await despuesDeGuardar(`Solicitud de ${nombreAlumno(a)} añadida (${r.aplicacion.id}). Puedes añadir otra.`, `Solicitud de ${nombreAlumno(a)} añadida.`);
     } catch (e) {
       if (e.codigo === 'duplicado' && e.extra.aplicacion) {          // ya estaba guardada (p. ej. se cortó la respuesta)
         aplicarAplicacion(e.extra.aplicacion);
         guardar.textContent = 'Cargando…';
         await recargar().catch(() => {});
         liberar();
-        return despuesDeGuardar(`${nombreAlumno(a)} ya estaba apuntado en la ronda ${ronda.numero} (${e.extra.aplicacion.estado || 'sin estado'}).`);
+        return despuesDeGuardar(`${nombreAlumno(a)} ya tenía solicitud en la ronda ${ronda.numero} (${e.extra.aplicacion.estado || 'sin estado'}). No se ha duplicado.`, `${nombreAlumno(a)} ya tenía solicitud.`);
       }
       liberar();
-      if (e.codigo === 'clave') return decir('La clave ya no es correcta. Vuelve a entrar con la clave nueva.');
+      if (e.codigo === 'clave') return decir('La clave ha cambiado o ya no vale. Entra de nuevo con la clave nueva.');
       decir(mensajeServidor(e) || e.message);
-      if (e.codigo === 'red' || e.codigo === 'tiempo') error.append(' Es posible que sí se haya guardado: al pulsar Guardar otra vez, la app lo comprobará. Lo que has escrito sigue aquí.');
+      if (e.codigo === 'red' || e.codigo === 'tiempo') error.append(' Puede que sí se haya guardado. Si vuelves a pulsar Guardar, la app lo comprobará antes. Lo que has escrito sigue aquí.');
     }
   };
 
   raiz.replaceChildren(...[
     volver,
     el('section', { class: 'card', 'aria-labelledby': 'ap-titulo' },
-      el('h2', { id: 'ap-titulo' }, 'Añadir aplicación'),
+      el('h2', { id: 'ap-titulo' }, 'Añadir solicitud'),
       el('p', { class: 'sub' }, `${[oferta.titulo || '(sin título)', oferta.empresa].filter(Boolean).join(' · ')} · Ronda ${ronda.numero}, enviada el ${fechaLarga(ronda.fecha)}`),
-      oferta.estado === 'Cerrada' && el('p', { class: 'aviso', role: 'note', id: 'ap-cerrada' }, 'Esta oferta está cerrada. Puedes añadir la aplicación igualmente.'),
+      oferta.estado === 'Cerrada' && el('p', { class: 'aviso', role: 'note', id: 'ap-cerrada' }, 'Esta oferta está cerrada, pero aún puedes añadir la solicitud.'),
       ok,
       el('form', { novalidate: true, oninput: marcarCambios, onchange: marcarCambios, onsubmit: ev => { ev.preventDefault(); if (!guardar.disabled) enviar(); } },
         el('div', { class: 'campo-form' }, el('label', { for: 'ap-q' }, 'Alumno'), buscar),
@@ -265,13 +265,13 @@ export async function pintarFormAplicacion(raiz, idOferta, numeroTxt) {
 
 export async function pintarFormEstado(raiz, id) {
   navegacion.sinGuardar = false;
-  const volver = el('a', { class: 'volver', href: '#/aplicacion/' + encodeURIComponent(id) }, 'Aplicación');
+  const volver = el('a', { class: 'volver', href: '#/aplicacion/' + encodeURIComponent(id) }, 'Solicitud');
   raiz.replaceChildren(cargando());
   let d;
   try { d = await datosRondas(); }
   catch (err) { raiz.replaceChildren(volver, tarjetaError(err, () => { recargar().catch(() => {}); pintarFormEstado(raiz, id); })); return; }
   const a = d.hay ? d.aplicaciones.find(x => x.id === id) : null;
-  if (!a) return noEncontrado(raiz, el('a', { class: 'volver', href: '#/ofertas' }, 'Ofertas'), 'Aplicación');
+  if (!a) return noEncontrado(raiz, el('a', { class: 'volver', href: '#/ofertas' }, 'Ofertas'), 'Solicitud');
   if (!puedeEscribirRondas()) return sinPermiso(raiz, volver);
   const alumno = d.alumnos.find(x => x.id === a.idAlumno);
   const oferta = d.ofertas.find(x => x.id === a.idOferta);
@@ -296,7 +296,7 @@ export async function pintarFormEstado(raiz, id) {
   const conflicto = el('div', { class: 'conflicto', hidden: true });
   const guardar = el('button', { class: 'primary', type: 'submit' }, 'Guardar');
   const cancelar = el('button', { class: 'secondary', type: 'button', onclick: () => {
-    if (navegacion.sinGuardar && !confirm('¿Descartar lo que has escrito?')) return;
+    if (navegacion.sinGuardar && !confirm('¿Salir sin guardar lo que has escrito?')) return;
     navegacion.sinGuardar = false; ir('#/aplicacion/' + encodeURIComponent(a.id));
   } }, 'Cancelar');
 
@@ -321,14 +321,14 @@ export async function pintarFormEstado(raiz, id) {
     const liberar = ocupar(controles(), pulsado);
     try {
       const r = await cambiarEstado(a.id, v, actual);
-      terminar(r.sinCambios ? 'Ya estaba así: no se ha cambiado nada.' : `Estado cambiado a «${v.estado}».`);
+      terminar(r.sinCambios ? 'Ya estaba así, no hace falta cambiar nada.' : `Estado cambiado a «${v.estado}».`);
     } catch (e) {
       liberar();
       if (e.codigo === 'conflicto' && e.extra.aplicacion) return pintarConflicto(e.extra.aplicacion, v);
-      if (e.codigo === 'clave') return decir('La clave ya no es correcta. Copia lo que has escrito antes de salir y vuelve a entrar con la clave nueva.');
-      if (e.codigo === 'no-encontrado') return decir('Esta aplicación ya no está en el Sheet.');
+      if (e.codigo === 'clave') return decir('La clave ha cambiado o ya no vale. Copia lo que has escrito antes de salir y entra de nuevo con la clave nueva.');
+      if (e.codigo === 'no-encontrado') return decir('Esta solicitud ya no está en el Sheet.');
       decir(mensajeServidor(e) || e.message, e.extra?.campo);
-      if (e.codigo === 'red' || e.codigo === 'tiempo') error.append(' Es posible que sí se haya guardado: al pulsar Guardar otra vez, la app lo comprobará. Lo que has escrito sigue aquí.');
+      if (e.codigo === 'red' || e.codigo === 'tiempo') error.append(' Puede que sí se haya guardado. Si vuelves a pulsar Guardar, la app lo comprobará antes. Lo que has escrito sigue aquí.');
     }
   };
 
@@ -341,14 +341,14 @@ export async function pintarFormEstado(raiz, id) {
     }
     const ahora = actual.estado + (actual.motivo ? ` (${actual.motivo})` : '');
     conflicto.replaceChildren(
-      el('h3', {}, 'Alguien cambió esta aplicación'),
+      el('h3', {}, 'Esta solicitud ha cambiado mientras la editabas'),
       el('p', { class: 'sub' }, 'Ahora está así en el Sheet. Lo que has escrito sigue en el formulario.'),
-      el('dl', { class: 'campos' }, el('div', { class: 'campo' }, el('dt', {}, 'Estado actual'), el('dd', {}, ahora))),
-      el('button', { class: 'primary', type: 'button', onclick: ev => { base = { estado: actual.estado, motivo: actual.motivo }; enviar(ev.currentTarget); } }, 'Guardar el mío igualmente'),
+      el('dl', { class: 'campos' }, el('div', { class: 'campo' }, el('dt', {}, 'Estado en el Sheet'), el('dd', {}, ahora))),
+      el('button', { class: 'primary', type: 'button', onclick: ev => { base = { estado: actual.estado, motivo: actual.motivo }; enviar(ev.currentTarget); } }, 'Guardar mi versión'),
       el('button', { class: 'secondary', type: 'button', onclick: async ev => {
         ocupar(controles(), ev.currentTarget, 'Cargando…');   // la pantalla se sustituye al terminar
-        aplicarAplicacion(actual); await recargar().catch(() => {}); terminar('Se ha cargado lo que había en el Sheet.');
-      } }, 'Descartar el mío'));
+        aplicarAplicacion(actual); await recargar().catch(() => {}); terminar('Listo: ahora ves lo que hay en el Sheet. Tus cambios no se han guardado.');
+      } }, 'Quedarme con la del Sheet'));
     conflicto.hidden = false;
     conflicto.scrollIntoView?.({ block: 'nearest' });
   };

@@ -45,11 +45,11 @@ export function pintarAcceso(raiz) {
     getModo() && el('a', { class: 'volver', href: '#/' }, 'Volver'),
     el('section', { class: 'card', 'aria-labelledby': 'ac-titulo' },
       el('h2', { id: 'ac-titulo' }, 'Conectar con el Sheet de prueba'),
-      el('p', { class: 'sub' }, 'La dirección y la clave se guardan solo en este móvil. Los datos de los alumnos no se guardan en él.'),
+      el('p', { class: 'sub' }, 'La dirección y la clave se quedan solo en este móvil. Los datos de los alumnos, no.'),
       formulario),
     el('section', { class: 'card', 'aria-labelledby': 'ac-demo' },
-      el('h2', { id: 'ac-demo' }, 'O mira la demo'),
-      el('p', { class: 'sub' }, 'Datos de ejemplo que vienen con la app. No necesita clave y no se puede guardar nada.'),
+      el('h2', { id: 'ac-demo' }, 'O prueba la demo'),
+      el('p', { class: 'sub' }, 'Son datos de ejemplo que ya trae la app. No hace falta clave, pero tampoco se puede guardar nada.'),
       el('button', { class: 'secondary', type: 'button', onclick: () => {
         try { usarDemo(); reiniciar(); } catch (e) { error(e.message); }
       } }, 'Ver demo')));

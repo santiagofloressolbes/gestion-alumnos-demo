@@ -31,13 +31,13 @@ for (const modo of ['demo', 'script']) {
     const rondas = await textos(pg, '#v-oferta .ronda h2');
     chk(rondas.join() === 'Ronda 2,Ronda 1', 'las rondas, de la más reciente a la más antigua: ' + rondas);
     const sub = await textos(pg, '#v-oferta .ronda > .sub');
-    chk(sub[0] === 'Enviada el 21 de octubre de 2026 · 2 aplicaciones' && sub[1] === 'Enviada el 10 de octubre de 2026 · 3 aplicaciones', 'fecha de envío y número de aplicaciones: ' + sub);
+    chk(sub[0] === 'Enviada el 21 de octubre de 2026 · 2 solicitudes' && sub[1] === 'Enviada el 10 de octubre de 2026 · 3 solicitudes', 'fecha de envío y número de aplicaciones: ' + sub);
     const chips = await textos(pg, '#v-oferta .ronda .resumen');
     chk(chips[0] === 'Recibida: 1 En revisión: 1' && chips[1] === 'Entrevista: 1 Descartado: 2', 'resumen por estado, en el orden de la lista: ' + chips);
     const filas = await filasRonda(pg, 0);
     chk(filas.length === 2 && /Lucía Quintero/.test(filas[0]) && /En revisión/.test(filas[0]) && /Adrián O'Connor/.test(filas[1]) && /Recibida/.test(filas[1]), 'ronda 2: por orden de llegada, con alumno y estado: ' + filas.join(' || '));
     const r1 = await filasRonda(pg, 1);
-    chk(r1.length === 3 && /Mateo Ferrer.*Entrevista/.test(r1[0]), 'ronda 1: 3 aplicaciones: ' + r1.join(' || '));
+    chk(r1.length === 3 && /Mateo Ferrer.*Entrevista/.test(r1[0]), 'ronda 1: 3 solicitudes: ' + r1.join(' || '));
     chk(r1.some(x => /Adrián O'Connor.*Descartado.*Perfil no encaja/.test(x)) && r1.some(x => /Paula Marín.*Descartado.*La empresa eligió a otro/.test(x)), 'los descartados enseñan su motivo');
     chk((await pg.$$('#v-oferta .ronda a.alumno')).length === 5, '5 aplicaciones en total, todas con enlace');
     await oferta(pg, 'O004');
@@ -58,11 +58,11 @@ for (const modo of ['demo', 'script']) {
     console.log(`2. Ficha del alumno (${modo})`);
     const { pg, ctx } = await entrar(modo);
     await alumno(pg, 'A028');
-    const tarj = await textos(pg, '#v-alumno [aria-label=Aplicaciones] ul.alumnos li');
-    chk(tarj.length === 2 && /Becario\/a de patrocinio.*Club mock B · Ronda 2.*Recibida/.test(tarj[0]) && /Ronda 1.*Descartado.*Perfil no encaja/.test(tarj[1]), 'A028: sus 2 aplicaciones, la más reciente primero: ' + tarj.join(' || '));
-    chk(/2 aplicaciones/.test(await pg.innerText('#v-alumno [aria-label=Aplicaciones]')), 'cuenta las aplicaciones');
+    const tarj = await textos(pg, '#v-alumno [aria-label=Solicitudes] ul.alumnos li');
+    chk(tarj.length === 2 && /Becario\/a de patrocinio.*Club mock B · Ronda 2.*Recibida/.test(tarj[0]) && /Ronda 1.*Descartado.*Perfil no encaja/.test(tarj[1]), 'A028: sus 2 solicitudes, la más reciente primero: ' + tarj.join(' || '));
+    chk(/2 solicitudes/.test(await pg.innerText('#v-alumno [aria-label=Solicitudes]')), 'cuenta las aplicaciones');
     await alumno(pg, 'A010');
-    chk(/Todavía no ha aplicado a ninguna oferta/.test(await pg.innerText('#v-alumno [aria-label=Aplicaciones]')), 'un alumno sin aplicaciones lo dice');
+    chk(/Todavía no tiene solicitudes/.test(await pg.innerText('#v-alumno [aria-label=Solicitudes]')), 'un alumno sin aplicaciones lo dice');
     await alumno(pg, 'A001');
     chk(await limpio(pg, '#v-alumno'), 'sin "null" ni "undefined" en la ficha');
     chk((await pg.$$('#en-titulo')).length === 1, 'la tarjeta de entrevista sigue ahí');
@@ -74,12 +74,12 @@ for (const modo of ['demo', 'script']) {
     console.log(`3. Detalle de una aplicación (${modo})`);
     const { pg, ctx, log } = await entrar(modo);
     await aplicacion(pg, 'AP002');
-    chk(await pg.innerText('#titulo') === 'Aplicación' && await pg.getAttribute('#tabs a[data-tab=ofertas]', 'aria-current') === 'page', 'título y pestaña');
+    chk(await pg.innerText('#titulo') === 'Solicitud' && await pg.getAttribute('#tabs a[data-tab=ofertas]', 'aria-current') === 'page', 'título y pestaña');
     chk(/Adrián O'Connor/.test(await pg.innerText('#v-aplicacion .cabecera')) && /Becario\/a de patrocinio · Club mock B/.test(await pg.innerText('#v-aplicacion .cabecera')) && /Descartado/.test(await pg.innerText('#v-aplicacion .cabecera')) && /Ronda 1/.test(await pg.innerText('#v-aplicacion .cabecera')), 'cabecera: alumno, oferta, estado y ronda');
     const datos = await pg.innerText('#v-aplicacion [aria-label=Datos]');
-    chk(/Ronda 1, enviada el 10 de octubre de 2026/.test(datos) && /Aplicó el\s+11 de octubre de 2026/.test(datos) && /Motivo del descarte\s+Perfil no encaja/.test(datos) && /AP002/.test(datos), 'datos: ronda, fecha, motivo e ID: ' + datos.replace(/\n/g, ' | '));
+    chk(/Ronda 1, enviada el 10 de octubre de 2026/.test(datos) && /Solicitada el\s+11 de octubre de 2026/.test(datos) && /Motivo del descarte\s+Perfil no encaja/.test(datos) && /AP002/.test(datos), 'datos: ronda, fecha, motivo e ID: ' + datos.replace(/\n/g, ' | '));
     const h = await textos(pg, '#v-aplicacion .historial li');
-    chk(h.length === 3 && /^En revisión → Descartado 17 de octubre de 2026 · Motivo: Perfil no encaja Poca experiencia comercial\.$/.test(h[0]) && /^Recibida → En revisión/.test(h[1]) && /^Recibida \(aplicación registrada\) 11 de octubre/.test(h[2]), 'historial: lo último arriba, con motivo y nota: ' + h.join(' || '));
+    chk(h.length === 3 && /^En revisión → Descartado 17 de octubre de 2026 · Motivo: Perfil no encaja Poca experiencia comercial\.$/.test(h[0]) && /^Recibida → En revisión/.test(h[1]) && /^Recibida \(solicitud registrada\) 11 de octubre/.test(h[2]), 'historial: lo último arriba, con motivo y nota: ' + h.join(' || '));
     await aplicacion(pg, 'AP005');
     chk(!/Motivo del descarte/.test(await pg.innerText('#v-aplicacion')) && /Sin notas|Vuelve a aplicar/.test(await pg.innerText('#v-aplicacion')), 'sin descarte no sale el motivo; las notas salen');
     chk((await textos(pg, '#v-aplicacion .historial li')).length === 1, 'una aplicación recién nacida tiene 1 línea de historial');
@@ -88,15 +88,15 @@ for (const modo of ['demo', 'script']) {
     await pg.locator('#v-oferta .ronda').nth(1).locator('a.alumno').first().click();
     await pg.waitForSelector('#v-aplicacion .card');
     chk(await pg.getAttribute('#v-aplicacion .volver', 'href') === '#/oferta/O002', 'si vienes de la oferta, "volver" lleva a la oferta');
-    await pg.goto(BASE + '#/alumno/A028'); await pg.waitForSelector('#v-alumno [aria-label=Aplicaciones] a.alumno');
-    await pg.click('#v-alumno [aria-label=Aplicaciones] a.alumno');
+    await pg.goto(BASE + '#/alumno/A028'); await pg.waitForSelector('#v-alumno [aria-label=Solicitudes] a.alumno');
+    await pg.click('#v-alumno [aria-label=Solicitudes] a.alumno');
     await pg.waitForSelector('#v-aplicacion .card');
     chk(await pg.getAttribute('#v-aplicacion .volver', 'href') === '#/alumno/A028', 'si vienes del alumno, "volver" lleva al alumno');
     await pg.click('#v-aplicacion [aria-label=Datos] a:has-text("Ver la oferta")');
     await pg.waitForSelector('#v-oferta .cabecera');
     chk(location_ok(await pg.evaluate(() => location.hash), /#\/oferta\/O002$/), 'enlace a la oferta');
     await pg.goto(BASE + '#/aplicacion/AP999'); await pg.waitForSelector('#v-aplicacion .card');
-    chk(/Aplicación no encontrada/.test(await pg.innerText('#v-aplicacion')), 'una aplicación que no existe lo dice');
+    chk(/Solicitud no encontrada/.test(await pg.innerText('#v-aplicacion')), 'una aplicación que no existe lo dice');
     chk(escrituras(log).length === 0 && log.consola.length === 0, 'sin peticiones de guardar ni errores: ' + log.consola.join(' | '));
     await ctx.close();
   }
@@ -113,10 +113,10 @@ function location_ok(h, re) { return re.test(h); }
   chk((await pg.$$('#ro-nueva')).length === 0, 'sin botón de registrar ronda');
   await alumno(pg, 'A028');
   chk(await limpio(pg, '#v-alumno'), 'sin "null" ni "undefined" en la ficha del alumno');
-  chk((await pg.$$('#v-alumno [aria-label=Aplicaciones]')).length === 0, 'la ficha del alumno no enseña "Aplicaciones"');
+  chk((await pg.$$('#v-alumno [aria-label=Solicitudes]')).length === 0, 'la ficha del alumno no enseña "Aplicaciones"');
   chk((await pg.$$('#en-titulo')).length === 1 && (await pg.$$('#en-editar')).length === 1, 'la entrevista sigue funcionando');
   await pg.goto(BASE + '#/aplicacion/AP001'); await pg.waitForSelector('#v-aplicacion .card');
-  chk(/Aplicación no encontrada/.test(await pg.innerText('#v-aplicacion')), 'una aplicación no existe sin las hojas');
+  chk(/Solicitud no encontrada/.test(await pg.innerText('#v-aplicacion')), 'una aplicación no existe sin las hojas');
   await pg.goto(BASE + '#/ofertas'); await pg.waitForSelector('#v-ofertas ul.alumnos li');
   chk((await pg.$$('#v-ofertas ul.alumnos li')).length === 10, 'la lista de ofertas sigue igual');
   chk(log.consola.length === 0, 'sin errores: ' + log.consola.join(' | '));
@@ -140,7 +140,7 @@ function location_ok(h, re) { return re.test(h); }
   ctrl.alResponder = (j, accion) => { if (accion === 'data' || accion === 'ping') j.soporta = ['guardarEntrevista', 'guardarOferta']; return j; };
   await oferta(pg, 'O002');
   chk((await pg.$$('#v-oferta .ronda')).length === 2, 'las rondas se ven (son de lectura)');
-  chk(/versión anterior y no sabe guardar rondas ni aplicaciones/.test(await pg.innerText('#v-oferta')) && (await pg.$$('#ro-nueva')).length === 0, 'avisa de que el script es antiguo y no enseña botones');
+  chk(/No se pueden guardar rondas ni solicitudes/.test(await pg.innerText('#v-oferta')) && (await pg.$$('#ro-nueva')).length === 0, 'avisa de que el script es antiguo y no enseña botones');
   await aplicacion(pg, 'AP004');
   chk((await pg.$$('#ap-estado')).length === 0, 'en el detalle no hay "Cambiar estado"');
   await ctx.close();
@@ -169,12 +169,12 @@ function location_ok(h, re) { return re.test(h); }
   await aplicacion(pg, 'AP014');
   chk(/oferta O777, ya no está en el Sheet/.test(await pg.innerText('#v-aplicacion .cabecera')), 'AP014: oferta que ya no existe');
   await alumno(pg, 'A004');
-  chk(/oferta O777, ya no está en el Sheet/.test(await pg.innerText('#v-alumno [aria-label=Aplicaciones]')), 'en la ficha del alumno también');
+  chk(/oferta O777, ya no está en el Sheet/.test(await pg.innerText('#v-alumno [aria-label=Solicitudes]')), 'en la ficha del alumno también');
   chk(await limpio(pg, '#v-alumno'), 'sin "null" ni "undefined"');
   m6: {
     const { pg: p2, ctx: c2 } = await entrar('script', m => { m.hojas.Rondas.m.push(['R006', 'O004', '1', '2026-10-28']); });
     await oferta(p2, 'O004');
-    chk(/Sin aplicaciones todavía/.test(await p2.innerText('#v-oferta .ronda')) && /0 aplicaciones/.test(await p2.innerText('#v-oferta .ronda')) && (await p2.$$('#v-oferta .ronda .resumen')).length === 0, 'una ronda sin aplicaciones: "Sin aplicaciones todavía", sin resumen vacío');
+    chk(/Aún no hay solicitudes/.test(await p2.innerText('#v-oferta .ronda')) && /0 solicitudes/.test(await p2.innerText('#v-oferta .ronda')) && (await p2.$$('#v-oferta .ronda .resumen')).length === 0, 'una ronda sin aplicaciones: "Aún no hay solicitudes", sin resumen vacío');
     await c2.close();
   }
   chk(log.consola.length === 0, 'sin errores de consola: ' + log.consola.join(' | '));

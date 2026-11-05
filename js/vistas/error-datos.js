@@ -9,5 +9,5 @@ export function tarjetaError(e, reintentar) {
     claveMal
       ? el('a', { class: 'primary', href: '#/acceso' }, 'Escribir la clave de nuevo')
       : [reintentar && el('button', { class: 'primary', type: 'button', onclick: reintentar }, 'Reintentar'),
-         el('a', { class: 'enlace', href: '#/acceso' }, 'Cambiar o quitar el acceso')]);
+         el('a', { class: 'enlace', href: '#/acceso' }, 'Cambiar el acceso')]);
 }

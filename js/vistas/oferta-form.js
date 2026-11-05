@@ -25,8 +25,8 @@ export async function pintarFormOferta(raiz, id) {
   }
   if (!puedeEscribirOfertas()) {
     const motivo = estadoEscrituraOfertas() === 'script-antiguo'
-      ? 'El script de Google es de una versión anterior y no sabe guardar ofertas. Actualiza Code.gs (mira la guía, apartado "Actualizar a la versión con ofertas").'
-      : 'Estás en la demo: no se puede guardar nada. Conecta con el Sheet de prueba desde Inicio.';
+      ? 'No se pueden guardar ofertas: el script de Google es de una versión anterior. Actualiza Code.gs con la guía («Actualizar a la versión con ofertas»).'
+      : 'Estás en la demo y aquí no se puede guardar nada. Conecta con el Sheet de prueba desde Ajustes.';
     raiz.replaceChildren(volver, el('div', { class: 'card' }, el('h2', {}, 'No se puede guardar'), el('p', { class: 'sub' }, motivo)));
     return;
   }
@@ -92,7 +92,7 @@ export async function pintarFormOferta(raiz, id) {
   const conflicto = el('div', { class: 'conflicto', hidden: true });
   const guardar = el('button', { class: 'primary', type: 'submit' }, 'Guardar');
   const cancelar = el('button', { class: 'secondary', type: 'button', onclick: () => {
-    if (navegacion.sinGuardar && !confirm('¿Descartar lo que has escrito?')) return;
+    if (navegacion.sinGuardar && !confirm('¿Salir sin guardar lo que has escrito?')) return;
     navegacion.sinGuardar = false;
     ir(id ? '#/oferta/' + encodeURIComponent(id) : '#/ofertas');
   } }, 'Cancelar');
@@ -126,12 +126,12 @@ export async function pintarFormOferta(raiz, id) {
       liberar();
       if (e.codigo === 'conflicto' && e.extra.oferta) return pintarConflicto(e.extra.oferta, v);
       if (e.extra?.campo && mensajeCampo(e.codigo, e.extra.campo)) return decir(mensajeCampo(e.codigo, e.extra.campo), e.extra.campo);
-      if (e.codigo === 'clave') return decir('La clave ya no es correcta. Copia lo que has escrito antes de salir y vuelve a entrar con la clave nueva.');
+      if (e.codigo === 'clave') return decir('La clave ha cambiado o ya no vale. Copia lo que has escrito antes de salir y entra de nuevo con la clave nueva.');
       if (e.codigo === 'no-encontrado') return decir('Esta oferta ya no está en el Sheet.');
-      if (e.codigo === 'id-duplicado') return decir('El número de esta oferta está repetido en el Sheet. Corrígelo en el Sheet.');
+      if (e.codigo === 'id-duplicado') return decir('Hay dos filas con el mismo número en el Sheet. Corrígelo ahí y vuelve a intentarlo.');
       decir(e.message);
       if (e.codigo === 'red' || e.codigo === 'tiempo') {
-        if (!id) { incierto = true; error.append(' Es posible que la oferta sí se haya guardado: al pulsar Guardar otra vez, la app lo comprobará antes de enviarla de nuevo, para no duplicarla.'); }
+        if (!id) { incierto = true; error.append(' Puede que la oferta sí se haya creado. Si vuelves a pulsar Guardar, la app lo comprobará antes de enviarla otra vez, para no duplicarla.'); }
         error.append(' Lo que has escrito sigue aquí: no se ha perdido.');
       }
     }
@@ -144,9 +144,9 @@ export async function pintarFormOferta(raiz, id) {
     const antes = base || inicial;
     const cambiados = CAMPOS.filter(c => actual[c.clave] !== antes[c.clave]);
     conflicto.replaceChildren(
-      el('h3', {}, 'Alguien cambió esta oferta'),
-      el('p', { class: 'sub' }, 'Esto es lo que hay ahora en el Sheet en lo que ha cambiado. Lo que has escrito sigue en el formulario.'),
-      el('p', { class: 'sub' }, 'Si guardas el tuyo, se guardan solo los campos que has tocado tú; en los demás se conserva lo que hay en el Sheet.'),
+      el('h3', {}, 'Esta oferta ha cambiado mientras la editabas'),
+      el('p', { class: 'sub' }, 'Esto es lo que ha cambiado en el Sheet. Lo que has escrito sigue en el formulario.'),
+      el('p', { class: 'sub' }, 'Si guardas tu versión, solo cambian los campos que has tocado tú. Los demás se quedan como están en el Sheet.'),
       el('dl', { class: 'campos' }, (cambiados.length ? cambiados : CAMPOS).map(c => el('div', { class: 'campo' },
         el('dt', {}, c.etiqueta),
         el('dd', { class: actual[c.clave] ? '' : 'vacio' }, (c.fecha ? fechaLarga(actual[c.clave]) : actual[c.clave]) || 'Vacío')))),
@@ -154,8 +154,8 @@ export async function pintarFormOferta(raiz, id) {
         // Mis cambios sobre lo que hay ahora: lo que no toqué se queda como está en el Sheet.
         for (const c of CAMPOS) if (mias[c.clave] === inicial[c.clave]) ponerValor(entradas[c.clave], actual[c.clave]);
         base = actual; enviar(ev.currentTarget);
-      } }, 'Guardar el mío igualmente'),
-      el('button', { class: 'secondary', type: 'button', onclick: () => { aplicarOferta(id, actual); terminar(id, 'Se ha cargado lo que había en el Sheet.'); } }, 'Descartar el mío'));
+      } }, 'Guardar mi versión'),
+      el('button', { class: 'secondary', type: 'button', onclick: () => { aplicarOferta(id, actual); terminar(id, 'Listo: ahora ves lo que hay en el Sheet. Tus cambios no se han guardado.'); } }, 'Quedarme con la del Sheet'));
     conflicto.hidden = false;
     conflicto.scrollIntoView?.({ block: 'nearest' });
   };

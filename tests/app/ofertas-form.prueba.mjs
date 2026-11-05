@@ -105,14 +105,14 @@ const error = pg => pg.innerText('#v-oferta-form .error');
   await probar({ ubicacion: '' }, /Falta «Ubicación»/, 'ubicacion', 'sin ubicación');
   await probar({ requisitoPermiso: '' }, /Elige «Permiso de trabajo»/, 'requisitoPermiso', 'sin permiso');
   await probar({ estado: '' }, /Elige «Estado»/, 'estado', 'sin estado');
-  await probar({ empresa: 'x'.repeat(101) }, /«Empresa» supera los 100/, 'empresa', 'empresa 101');
+  await probar({ empresa: 'x'.repeat(101) }, /«Empresa» es demasiado larga \(máximo 100/, 'empresa', 'empresa 101');
   chk(/exceso/.test(await pg.getAttribute('#of-c-empresa', 'class')), 'contador en rojo');
-  await probar({ titulo: 'x'.repeat(121) }, /«Título del puesto» supera los 120/, 'titulo', 'título 121');
-  await probar({ ubicacion: 'x'.repeat(101) }, /«Ubicación» supera los 100/, 'ubicacion', 'ubicación 101');
-  await probar({ enlace: 'x'.repeat(501) }, /«Enlace o descripción» supera los 500/, 'enlace', 'enlace 501');
-  await probar({ empresa: 'Hola <b>negrita</b>' }, /«Empresa» parece llevar código HTML/, 'empresa', 'HTML');
+  await probar({ titulo: 'x'.repeat(121) }, /«Título del puesto» es demasiado larga \(máximo 120/, 'titulo', 'título 121');
+  await probar({ ubicacion: 'x'.repeat(101) }, /«Ubicación» es demasiado larga \(máximo 100/, 'ubicacion', 'ubicación 101');
+  await probar({ enlace: 'x'.repeat(501) }, /«Enlace o descripción» es demasiado larga \(máximo 500/, 'enlace', 'enlace 501');
+  await probar({ empresa: 'Hola <b>negrita</b>' }, /«Empresa» lleva un «<»/, 'empresa', 'HTML');
   await probar({ enlace: 'http://inseguro.test' }, /no puede empezar por http:/, 'enlace', 'http:');
-  await probar({ enlace: 'JavaScript:alert(1)' }, /no puede empezar por http:, javascript:/, 'enlace', 'javascript:');
+  await probar({ enlace: 'JavaScript:alert(1)' }, /no puede empezar por http: ni por otros prefijos raros/, 'enlace', 'javascript:');
   await probar({ enlace: 'data:text/html,hola' }, /no puede empezar por/, 'enlace', 'data:');
   await probar({ fechaRecepcion: mañana() }, /«Fecha de recepción» no puede ser futura/, 'fechaRecepcion', 'fecha futura');
   await probar({ fechaRecepcion: '' }, /Elige «Fecha de recepción»/, 'fechaRecepcion', 'sin fecha');
@@ -185,10 +185,10 @@ const error = pg => pg.innerText('#v-oferta-form .error');
   await guardarBtn(t.pg);
   await t.pg.waitForSelector('.conflicto:not([hidden])');
   const panel = await t.pg.innerText('.conflicto');
-  chk(/Alguien cambió esta oferta/.test(panel) && /Título del puesto/.test(panel) && /Product manager senior/.test(panel) && !/Ubicación/.test(panel), 'el panel enseña solo lo que cambió la otra persona');
+  chk(/Esta oferta ha cambiado mientras la editabas/.test(panel) && /Título del puesto/.test(panel) && /Product manager senior/.test(panel) && !/Ubicación/.test(panel), 'el panel enseña solo lo que cambió la otra persona');
   chk(await t.pg.inputValue('#of-f-ubicacion') === 'Zaragoza', 'lo que escribí sigue en el formulario');
   chk(guardarPeticiones(t.log).length === 1 && mundo_ubic(t.mundo, 'O003') === 'Madrid', 'no se ha escrito nada todavía');
-  await t.pg.click('text=Guardar el mío igualmente');
+  await t.pg.click('text=Guardar mi versión');
   await t.pg.waitForSelector('#v-oferta .cabecera');
   chk(mundo_ubic(t.mundo, 'O003') === 'Zaragoza' && hojaOfertas(t.mundo)[fila(t.mundo, 'O003') - 1][C.titulo - 1] === 'Product manager senior', 'se guarda lo mío y se conserva el título ajeno');
   chk(/Product manager senior/.test(await t.pg.innerText('#v-oferta')) && /Zaragoza/.test(await t.pg.innerText('#v-oferta')), 'la ficha enseña ambos');
@@ -199,9 +199,9 @@ const error = pg => pg.innerText('#v-oferta-form .error');
   hojaOfertas(t.mundo)[fila(t.mundo, 'O004') - 1][C.estado - 1] = 'Cerrada';
   await t.pg.fill('#of-f-ubicacion', 'Otra ciudad');
   await guardarBtn(t.pg); await t.pg.waitForSelector('.conflicto:not([hidden])');
-  await t.pg.click('text=Descartar el mío'); await t.pg.waitForSelector('#v-oferta .cabecera');
+  await t.pg.click('text=Quedarme con la del Sheet'); await t.pg.waitForSelector('#v-oferta .cabecera');
   const f = await t.pg.innerText('#v-oferta');
-  chk(/Cerrada/.test(f) && !/Otra ciudad/.test(f) && /Se ha cargado lo que había/.test(f) && mundo_ubic(t.mundo, 'O004') === 'Madrid', 'descartar: se ve lo del Sheet y no se escribe nada');
+  chk(/Cerrada/.test(f) && !/Otra ciudad/.test(f) && /Listo: ahora ves lo que hay/.test(f) && mundo_ubic(t.mundo, 'O004') === 'Madrid', 'descartar: se ve lo del Sheet y no se escribe nada');
   await t.ctx.close();
   // c) los dos cambiamos el mismo campo: gana el mío si lo pido
   t = await entrar();
@@ -211,7 +211,7 @@ const error = pg => pg.innerText('#v-oferta-form .error');
   await guardarBtn(t.pg); await t.pg.waitForSelector('#v-oferta .cabecera, .conflicto:not([hidden])');
   // el estado ya coincide pero la ubicación no: hay conflicto (el Sheet cambió desde que abrí)
   chk(await t.pg.isVisible('.conflicto'), 'cambio ajeno aunque coincida con el mío: se avisa igualmente');
-  await t.pg.click('text=Guardar el mío igualmente'); await t.pg.waitForSelector('#v-oferta .cabecera');
+  await t.pg.click('text=Guardar mi versión'); await t.pg.waitForSelector('#v-oferta .cabecera');
   chk(mundo_ubic(t.mundo, 'O005') === 'Vigo' && /Cerrada/.test(await t.pg.innerText('#v-oferta')), 'queda mi ubicación y el estado cerrado');
   await t.ctx.close();
   // d) la oferta desaparece o se repite en el Sheet
@@ -232,7 +232,7 @@ function mundo_ubic(mundo, id) { return hojaOfertas(mundo)[fila(mundo, id) - 1][
   await nueva(t.pg); await rellenar(t.pg, VALIDA);
   t.ctrl.abortar = 1;   // un alta no se reintenta sola (podría duplicarse): basta 1
   await guardarBtn(t.pg); await t.pg.waitForSelector('#v-oferta-form .error:not([hidden])');
-  chk(/no ha podido hablar con Google/.test(await error(t.pg)) && /no se ha perdido/.test(await error(t.pg)), 'sin conexión: mensaje y nada perdido');
+  chk(/No se ha podido conectar con Google/.test(await error(t.pg)) && /no se ha perdido/.test(await error(t.pg)), 'sin conexión: mensaje y nada perdido');
   chk(await t.pg.inputValue('#of-f-empresa') === 'Club mock Z' && !(await t.pg.isDisabled('#of-f-empresa')), 'el formulario sigue editable con lo escrito');
   chk(hojaOfertas(t.mundo).length === 11, 'no se ha creado nada');
   await guardarBtn(t.pg); await t.pg.waitForSelector('#v-oferta .cabecera');
@@ -244,7 +244,7 @@ function mundo_ubic(mundo, id) { return hojaOfertas(mundo)[fila(mundo, id) - 1][
   t.ctrl.perderRespuesta = 1;
   await guardarBtn(t.pg); await t.pg.waitForSelector('#v-oferta-form .error:not([hidden])');
   chk(hojaOfertas(t.mundo).length === 12, 'la oferta sí llegó al Sheet');
-  chk(/Es posible que la oferta sí se haya guardado/.test(await error(t.pg)), 'avisa de que puede estar guardada');
+  chk(/Puede que la oferta sí se haya creado/.test(await error(t.pg)), 'avisa de que puede estar guardada');
   await guardarBtn(t.pg); await t.pg.waitForSelector('#v-oferta .cabecera');
   chk(hojaOfertas(t.mundo).length === 12, 'tras reintentar sigue habiendo una sola (no se duplica)');
   chk(/Oferta creada en el Sheet/.test(await t.pg.innerText('#v-oferta')) && /O011/.test(await t.pg.innerText('#v-oferta')), 'se reconoce la oferta ya guardada (O011)');
@@ -255,7 +255,7 @@ function mundo_ubic(mundo, id) { return hojaOfertas(mundo)[fila(mundo, id) - 1][
   await editar(t.pg, 'O007'); await t.pg.fill('#of-f-ubicacion', 'Lugo');
   t.ctrl.perderRespuesta = true;
   await guardarBtn(t.pg); await t.pg.waitForSelector('#v-oferta-form .error:not([hidden])');
-  chk(!/Es posible que la oferta sí se haya guardado/.test(await error(t.pg)) && /no se ha perdido/.test(await error(t.pg)), 'edición: mensaje de conexión');
+  chk(!/Puede que la oferta sí se haya creado/.test(await error(t.pg)) && /no se ha perdido/.test(await error(t.pg)), 'edición: mensaje de conexión');
   await guardarBtn(t.pg); await t.pg.waitForSelector('#v-oferta .cabecera');
   chk(/Guardado en el Sheet/.test(await t.pg.innerText('#v-oferta')) && mundo_ubic(t.mundo, 'O007') === 'Lugo', 'edición reintentada: se reconoce como guardada');
   await t.ctx.close();
@@ -264,7 +264,7 @@ function mundo_ubic(mundo, id) { return hojaOfertas(mundo)[fila(mundo, id) - 1][
   await nueva(t.pg); await rellenar(t.pg, VALIDA);
   t.mundo.props.set('CLAVE', 'otra frase larga distinta de la anterior 99');
   await guardarBtn(t.pg); await t.pg.waitForSelector('#v-oferta-form .error:not([hidden])');
-  chk(/La clave ya no es correcta/.test(await error(t.pg)) && await t.pg.inputValue('#of-f-empresa') === 'Club mock Z', 'clave cambiada: aviso y texto conservado');
+  chk(/La clave ha cambiado o ya no vale/.test(await error(t.pg)) && await t.pg.inputValue('#of-f-empresa') === 'Club mock Z', 'clave cambiada: aviso y texto conservado');
   chk(!(await almacen(t.pg))['gad.clave'], 'la clave que ya no vale se borra del móvil');
   await t.ctx.close();
   // e) doble pulsación = una sola petición
@@ -283,7 +283,7 @@ function mundo_ubic(mundo, id) { return hojaOfertas(mundo)[fila(mundo, id) - 1][
   // g) respuesta rara del script
   t.ctrl.alResponder = (j, accion) => (accion === 'guardarOferta' ? { ok: true } : j);
   await guardarBtn(t.pg); await t.pg.waitForSelector('#v-oferta-form .error:not([hidden])');
-  chk(/no responde como el script/.test(await error(t.pg)), 'respuesta sin id: error claro');
+  chk(/no responde como debería el script/.test(await error(t.pg)), 'respuesta sin id: error claro');
   await t.ctx.close();
 }
 
@@ -310,7 +310,7 @@ function mundo_ubic(mundo, id) { return hojaOfertas(mundo)[fila(mundo, id) - 1][
   // Cancelar con cambios
   await nueva(pg); await pg.fill('#of-f-empresa', 'Otra'); t.dialogos.length = 0; t.responder = false;
   await pg.click('#v-oferta-form button:has-text("Cancelar")');
-  chk(t.dialogos.length === 1 && /Descartar/.test(t.dialogos[0]) && await pg.innerText('#titulo') === 'Nueva oferta', 'Cancelar pregunta y no sale si dices que no');
+  chk(t.dialogos.length === 1 && /Salir sin guardar/.test(t.dialogos[0]) && await pg.innerText('#titulo') === 'Nueva oferta', 'Cancelar pregunta y no sale si dices que no');
   t.responder = true;
   await pg.click('#v-oferta-form button:has-text("Cancelar")'); await pg.waitForSelector('#v-ofertas ul.alumnos li');
   chk(t.dialogos.length === 2 && await pg.innerText('#titulo') === 'Ofertas', 'Cancelar con sí: vuelve a la lista (y sin segunda pregunta)');

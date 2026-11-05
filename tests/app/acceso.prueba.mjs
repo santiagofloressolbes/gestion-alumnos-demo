@@ -49,10 +49,10 @@ import { b, nuevo, chk, almacen, conectar, terminar, BASE, URL_OK, CLAVE_PRUEBA 
   chk(Object.keys(await almacen(pg)).length === 0, 'clave mala no se guarda');
   chk(await pg.inputValue('#ac-clave') === '', 'se vacía el campo de clave tras fallo');
   await pg.fill('#ac-clave', 'clave incorrecta 5'); await pg.click('form button[type=submit]');
-  await pg.waitForFunction(() => /Demasiados intentos/.test(document.querySelector('.error')?.textContent || ''));
+  await pg.waitForFunction(() => /demasiados intentos/.test(document.querySelector('.error')?.textContent || ''));
   chk(/15 minutos/.test(await pg.innerText('.error')), 'quinto fallo bloquea 15 min: ' + await pg.innerText('.error'));
   await pg.fill('#ac-clave', CLAVE_PRUEBA); await pg.click('form button[type=submit]');
-  await pg.waitForFunction(() => /Demasiados intentos/.test(document.querySelector('.error')?.textContent || ''));
+  await pg.waitForFunction(() => /demasiados intentos/.test(document.querySelector('.error')?.textContent || ''));
   chk(Object.keys(await almacen(pg)).length === 0, 'bloqueado: ni con la clave buena se guarda');
   mundo.sandbox.desbloquear();
   await pg.fill('#ac-clave', CLAVE_PRUEBA); await pg.click('form button[type=submit]');
@@ -126,10 +126,10 @@ import { b, nuevo, chk, almacen, conectar, terminar, BASE, URL_OK, CLAVE_PRUEBA 
     await pg.goto(BASE); await pg.waitForSelector('#v-inicio .card');
     const t = await pg.innerText('#v-inicio');
     chk(/No se han podido cargar los datos/.test(t), modo + ': tarjeta de error');
-    chk(modo === 'caido' ? /no ha podido hablar con Google/.test(t) : /no responde como el script/.test(t), modo + ': mensaje claro: ' + t.replace(/\n/g, ' | '));
+    chk(modo === 'caido' ? /No se ha podido conectar con Google/.test(t) : /no responde como debería el script/.test(t), modo + ': mensaje claro: ' + t.replace(/\n/g, ' | '));
     chk(!(await pg.locator('.master').count()), modo + ': NO se muestran datos de la demo');
     chk(!(await pg.locator('#demo').isVisible()), modo + ': no se activa el modo demo');
-    chk(await pg.locator('text=Reintentar').count() === 1 && await pg.locator('text=Cambiar o quitar el acceso').count() === 1, modo + ': botones');
+    chk(await pg.locator('text=Reintentar').count() === 1 && await pg.locator('text=Cambiar el acceso').count() === 1, modo + ': botones');
     chk(!log.externas.some(x => x.includes('datos-mock')) , 'no pide datos-mock');
     const al = await almacen(pg);
     chk(al['gad.clave'] === CLAVE_PRUEBA, modo + ': el fallo de red no borra la clave');
@@ -159,7 +159,7 @@ import { b, nuevo, chk, almacen, conectar, terminar, BASE, URL_OK, CLAVE_PRUEBA 
   await pg.goto(BASE); await pg.waitForSelector('#ac-url');
   await pg.click('text=Ver demo'); await pg.waitForSelector('.masters .master');
   chk(await pg.locator('#demo').isVisible(), 'banner MODO DEMO visible');
-  chk(/MODO DEMO/.test(await pg.innerText('#demo')) && /No se guarda nada/.test(await pg.innerText('#demo')), 'texto del banner');
+  chk(/MODO DEMO/.test(await pg.innerText('#demo')) && /no se guarda nada/.test(await pg.innerText('#demo')), 'texto del banner');
   chk(log.peticiones.length === 0, 'la demo no contacta con el script');
   await pg.click('#tabs a[data-tab=ajustes]'); await pg.waitForSelector('#v-ajustes .conexion');
   chk(/Estás viendo la demo/.test(await pg.innerText('#v-ajustes')), 'tarjeta Conexión en demo (en Ajustes)');

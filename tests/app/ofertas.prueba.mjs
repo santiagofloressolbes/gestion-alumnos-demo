@@ -165,7 +165,7 @@ for (const modo of ['demo', 'script']) {
   await c.pg.addInitScript(([u, k]) => { localStorage.setItem('gad.url', u); localStorage.setItem('gad.clave', k); }, [URL_OK, CLAVE_PRUEBA]);
   await c.pg.goto(BASE + '#/ofertas');
   await c.pg.waitForSelector('#v-ofertas .card');
-  chk(/hablar con Google/.test(await c.pg.innerText('#v-ofertas')) && await c.pg.isVisible('#v-ofertas button'), 'sin conexión: aviso y reintentar');
+  chk(/conectar con Google/.test(await c.pg.innerText('#v-ofertas')) && await c.pg.isVisible('#v-ofertas button'), 'sin conexión: aviso y reintentar');
   await c.ctx.close();
   // sin ofertas en el Sheet
   const v = await entrar('script', mundo => { mundo.hojas.Ofertas.m.splice(1); });

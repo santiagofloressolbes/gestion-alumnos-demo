@@ -8,7 +8,7 @@ const VERSION_ESPERADA = 1;
 // Cómo se nombra cada cosa en los mensajes de "no encontrado" y "repetido".
 const DE = {
   alumno: { este: 'Este alumno', de: 'de este alumno' }, oferta: { este: 'Esta oferta', de: 'de esta oferta' },
-  ronda: { este: 'Esta ronda', de: 'de esta ronda' }, aplicacion: { este: 'Esta aplicación', de: 'de esta aplicación' },
+  ronda: { este: 'Esta ronda', de: 'de esta ronda' }, aplicacion: { este: 'Esta solicitud', de: 'de esta solicitud' },
 };
 const fechaCorta = f => { const m = /^(\d{4})-(\d{2})-(\d{2})$/.exec(f || ''); return m ? `${m[3]}/${m[2]}/${m[1]}` : 'fecha anterior'; };
 
@@ -16,41 +16,41 @@ const fechaCorta = f => { const m = /^(\d{4})-(\d{2})-(\d{2})$/.exec(f || ''); r
 function mensaje(codigo, extra = {}) {
   switch (codigo) {
     case 'clave': return 'La clave no es correcta.';
-    case 'bloqueado': return `Demasiados intentos fallidos. Prueba de nuevo dentro de ${Math.max(1, Math.ceil((Number(extra.segundos) || 900) / 60))} minutos.`;
-    case 'config': return 'El script no tiene bien puesta la clave (mira el paso 4 de la guía).';
+    case 'bloqueado': return `Se han hecho demasiados intentos con la clave incorrecta. Prueba de nuevo dentro de ${Math.max(1, Math.ceil((Number(extra.segundos) || 900) / 60))} minutos.`;
+    case 'config': return 'El script de Google no tiene la clave bien configurada. Revisa el paso 4 de la guía.';
     case 'hoja': return `Falta la hoja «${extra.hoja}» en el Sheet.`;
     case 'columna': return `Falta la columna «${extra.columna}» en el Sheet.`;
-    case 'ocupado': return `El script de Google seguía ocupado después de intentarlo ${extra.intentos > 1 ? extra.intentos + ' veces' : 'una vez'}. Espera unos segundos y vuelve a pulsar.`;
-    case 'servidor': return 'El script ha tenido un fallo interno. Mira el detalle en el editor de Apps Script.';
-    case 'red': return `La app no ha podido hablar con Google${extra.intentos > 1 ? ' (lo ha intentado dos veces)' : ''}. Puede ser un corte momentáneo; si no tienes internet, vuelve a intentarlo cuando lo recuperes.`;
+    case 'ocupado': return `Google está ocupado y no se ha guardado nada (se ha intentado ${extra.intentos > 1 ? extra.intentos + ' veces' : 'una vez'}). Espera unos segundos y vuelve a pulsar.`;
+    case 'servidor': return 'El script de Google ha fallado por dentro. El detalle está en el editor de Apps Script.';
+    case 'red': return `No se ha podido conectar con Google${extra.intentos > 1 ? ' (se ha intentado dos veces)' : ''}. Suele ser un corte breve: vuelve a intentarlo en un momento. Si no tienes internet, espera a recuperarla.`;
     case 'tiempo': return 'Google tarda demasiado en responder. Inténtalo otra vez.';
-    case 'respuesta': return 'La dirección no responde como el script. Revisa que esté bien copiada y que se implementó con acceso «Cualquier usuario».';
-    case 'version': return 'El script es de una versión que esta app no entiende. Actualiza Code.gs (mira la guía).';
-    case 'largo': return 'La nota supera los 2.000 caracteres.';
-    case 'html': return 'La nota parece llevar código HTML (un «<» seguido de una letra o una barra). Cámbialo y vuelve a guardar.';
-    case 'caracteres': return 'La nota tiene caracteres de control que no se admiten.';
+    case 'respuesta': return 'Esa dirección no responde como debería el script. Comprueba que la has copiado entera y que el script se publicó con acceso «Cualquier usuario».';
+    case 'version': return 'El script es de una versión que la app no reconoce. Actualiza Code.gs con la guía.';
+    case 'largo': return 'La nota es demasiado larga: el máximo es de 2.000 caracteres.';
+    case 'html': return 'La nota lleva un «<» seguido de una letra o una barra, y la app lo toma por código. Quítalo o cámbialo y vuelve a guardar.';
+    case 'caracteres': return 'La nota tiene caracteres raros que no se admiten (suelen venir de copiar y pegar).';
     case 'fecha': return 'Elige una fecha válida.';
     case 'fecha-futura': return 'La fecha no puede ser futura.';
     case 'requerido': return 'Falta un dato obligatorio.';
     case 'lista': return 'Un valor no está en las listas de la hoja Listas del Sheet.';
     case 'enlace': return 'El enlace no puede empezar por http:, javascript:… Usa https://.';
     case 'conflicto':
-      if (extra.aplicacion) return 'Otra persona ha cambiado esta aplicación mientras la editabas.';
+      if (extra.aplicacion) return 'Esta solicitud ha cambiado mientras la editabas.';
       if (extra.ultima !== undefined) return 'Otra persona ha registrado una ronda de esta oferta mientras tanto.';
-      return extra.oferta ? 'Otra persona ha cambiado esta oferta mientras la editabas.' : 'Otra persona ha cambiado esta entrevista mientras la editabas.';
+      return extra.oferta ? 'Esta oferta ha cambiado mientras la editabas.' : 'Esta entrevista ha cambiado mientras la editabas.';
     case 'no-encontrado': return `${DE[extra.campo]?.este || 'Este alumno'} ya no está en el Sheet.`;
-    case 'id-duplicado': return `El número ${DE[extra.campo]?.de || 'de este alumno'} está repetido en el Sheet. Corrígelo en el Sheet.`;
-    case 'duplicado': return 'Este alumno ya ha aplicado a esta ronda de esta oferta.';
+    case 'id-duplicado': return `Hay dos filas con el mismo número ${DE[extra.campo]?.de || 'de este alumno'} en el Sheet. Corrígelo ahí y vuelve a intentarlo.`;
+    case 'duplicado': return 'Este alumno ya tiene solicitud en esta ronda.';
     case 'fecha-anterior': return `La fecha no puede ser anterior al ${fechaCorta(extra.desde)}.`;
-    case 'motivo-sobra': return 'Solo se indica un motivo cuando el estado es «Descartado».';
+    case 'motivo-sobra': return 'El motivo solo se usa cuando el estado es «Descartado».';
     case 'peticion': case 'accion': return 'El script no entiende la petición. Actualiza Code.gs (mira la guía).';
     case 'solo-lectura': return 'Esta conexión no permite guardar.';
     case 'sin-notas': return 'Escribe una nota.';
     case 'direccion': return 'La dirección no es válida. Debe empezar por https://script.google.com/macros/s/ y terminar en /exec.';
     case 'sin-clave': return 'Escribe la clave.';
     case 'sin-acceso': return 'Todavía no hay acceso configurado.';
-    case 'almacenamiento': return 'Este navegador no permite guardar el acceso (¿navegación privada?).';
-    default: return 'No se ha podido completar la operación (' + String(codigo).slice(0, 30) + ').';
+    case 'almacenamiento': return 'Este navegador no deja guardar el acceso. ¿Estás en una ventana privada?';
+    default: return 'Algo ha salido mal y no se ha podido completar (código: ' + String(codigo).slice(0, 30) + ').';
   }
 }
 
