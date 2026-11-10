@@ -149,6 +149,7 @@ const escrituras = log => log.peticiones.filter(p => /^guardar|^registrar|^crear
   chk(/Nacionalidad: España/.test(t) && /Situación de trabajo en España: Ciudadano UE o español/.test(t) && /Experiencia: Dos años en una app/.test(t), 'marcando lo sensible, sale: ' + t.slice(0, 160).replace(/\n/g, ' / '));
   chk(/CV: https:\/\/example\.com\/cv\/A001/.test(t), 'el CV con https sale');
   chk(!/sin-https\.org|javascript:/.test(t) && !/CV: http:/.test(t), 'un CV con http, o con javascript:, se deja fuera');
+  chk(await pg.isVisible('#cp-sensible'), 'el aviso de datos sensibles se ve al marcarlos');
   const aviso = await pg.innerText('#cp-sensible');
   chk(/datos sensibles \(nacionalidad, situación de trabajo en españa, resumen de experiencia, enlace al cv\)/i.test(aviso) && /la persona lo sabe y lo permite/.test(aviso), 'avisa de los datos sensibles marcados: ' + aviso.replace(/\n/g, ' '));
   chk(/Sin enlace https, se deja fuera el CV de: .*Mateo Ferrer.*Valentina Aguirre|Sin enlace https, se deja fuera el CV de: .*Valentina Aguirre.*Mateo Ferrer/.test(aviso), 'y de a quién se le deja fuera el CV: ' + aviso.replace(/\n/g, ' '));

@@ -39,7 +39,7 @@ El script es un "portero" que vive dentro de tu Google Sheet de prueba. La app l
    - Vuelve al editor (icono `< >` a la izquierda).
    - Arriba, en el desplegable de funciones, elige `comprobarConfiguracion` y pulsa "Ejecutar".
    - Google te pide permiso la primera vez: "Revisar permisos", elige tu cuenta. Si dice "Google no ha verificado esta aplicación", pulsa "Configuración avanzada", luego "Ir a Puente alumnos demo (no seguro)" y "Permitir". Es normal: el script es tuyo y solo pide acceso a este Sheet.
-   - Abajo, en "Registro de ejecución", debe salir: clave `ok (N caracteres)`, hojas Alumnos 30 filas, Ofertas 10 filas, Listas 17 filas, las 3 columnas `ok` y `bloqueado: false`. **La clave no se muestra.**
+   - Abajo, en "Registro de ejecución", debe salir: clave `ok (N caracteres)`, hojas Alumnos 30 filas, Ofertas 10 filas, Listas 18 filas, las 3 columnas `ok` y `bloqueado: false`. **La clave no se muestra.**
 6. **Publica el script como aplicación web.**
    - Arriba a la derecha: Implementar, Nueva implementación.
    - Pulsa el engranaje junto a "Seleccionar tipo" y elige "Aplicación web".
@@ -128,3 +128,18 @@ La versión nueva de `Code.gs` también guarda **rondas de difusión**, **solici
 5. **Comprueba.** En el desplegable de funciones elige `comprobarConfiguracion` y pulsa "Ejecutar". En el registro debe salir todo `ok`: `rondas: listas (se anuncian a la app)`, las hojas Rondas 5 filas, Aplicaciones 12 filas e Historial 36 filas (o 0 si borraste los ejemplos), las 19 columnas de `columnasRondas`, las dos listas nuevas y `estados` con Recibida y Descartado. Si algo dice `FALTA`, vuelve al paso que corresponda.
 6. **Publica una nueva versión de la MISMA implementación.** Implementar, Gestionar implementaciones, el lápiz, en "Versión" elige **"Nueva versión"**, Implementar. **No crees una implementación nueva:** cambiaría la dirección y la app dejaría de encontrarla.
 7. **Prueba en la app.** Cierra la app del móvil y ábrela dos veces (para que cargue la versión nueva). En la pestaña Ofertas, abre una oferta: deben salir sus rondas. Si no ves los botones "Registrar nueva ronda" o "Añadir solicitud", la app te dirá si falta alguna hoja o si el script es de una versión anterior.
+
+## Añadir «Unión Europea (UE/EEE)» a la lista Nacionalidad (opcional, para el match)
+
+Sirve para que una oferta pueda pedir «nacionalidad de la UE o del EEE» sin elegir un país concreto. **No cambia el script ni hay que publicar nada:** es solo una fila más en la hoja Listas. Si no la añades, la app funciona igual (solo que en el formulario de ofertas no podrás elegir esa opción).
+
+1. Abre el Sheet y la pestaña **Listas**.
+2. Busca la columna **Nacionalidad** (la que empieza con `Alemania`, `Argentina`…).
+3. Baja hasta la primera celda vacía, justo debajo del último país.
+4. Escribe exactamente, con esas mayúsculas, la tilde de «Unión» y los paréntesis: `Unión Europea (UE/EEE)`. Pulsa Intro.
+5. Comprueba que no se ha quedado ninguna celda vacía entre los países y la nueva fila.
+6. En la app, cierra y abre dos veces (o Ajustes, «Buscar actualización»). En una oferta, «Editar oferta», el desplegable «Nacionalidad requerida» debe ofrecer la nueva opción.
+
+**Cómo se usa.** En una oferta que pida «Unión Europea (UE/EEE)», cumple quien tenga alguna nacionalidad de la UE o del EEE (la principal o la secundaria) **o** tenga la situación «Ciudadano UE o español». **Suiza no cuenta** (no es de la UE ni del EEE): la app lo marca «a revisar» con un aviso. Los países se escriben como en la lista (por ejemplo `Países Bajos`, `República Checa`); si falta alguno, el alumno saldrá «a revisar», nunca descartado.
+
+**Si empiezas desde cero** con la carpeta `datos-mock`, `Listas.csv` ya trae esa fila (la hoja Listas queda con 18 filas) y la oferta de ejemplo O005 pide «Unión Europea (UE/EEE)».

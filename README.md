@@ -34,6 +34,8 @@ La idea es que quien acompaña a los alumnos pueda, desde el móvil y en pocos t
 | **Registrar una ronda y añadir solicitudes** | "Registrar nueva ronda" y, dentro de cada ronda, "Añadir solicitud": se busca al alumno, se elige y se guarda. |
 | **Cambiar el estado de una solicitud** | En su detalle, "Cambiar estado". Todo queda apuntado en un historial con fecha y nota, que no se borra. |
 | **Ver las solicitudes de un alumno** | En su ficha, en el apartado "Solicitudes". |
+| **Ver qué alumnos encajan con una oferta** | En la ficha de la oferta, la tarjeta "Alumnos que encajan" reparte a **todos** los alumnos en tres grupos (encaja, encaja con reservas, no encaja) y cada fila explica por qué. En la ficha del alumno, "Ofertas que encajan" hace lo mismo al revés. |
+| **Compartir perfiles** | En la ficha de la oferta se marcan hasta 10 alumnos (o, en la ficha de un alumno, "Compartir perfil"), se ve una vista previa con el texto exacto y se envía con el menú de compartir del móvil o se copia. |
 | **Ver la conexión y la versión de la app** | En la pestaña **Ajustes** (la cuarta de la barra de abajo): si estás en la demo o conectado al Sheet, "Olvidar acceso", el número de versión y el botón **Buscar actualización**, que carga la última versión sin tener que cerrar la app. |
 
 Guardar notas, ofertas, rondas y solicitudes solo funciona cuando la app está **conectada a la hoja de cálculo de prueba** (ver más abajo). En la demo se puede mirar todo, pero no guardar nada.
@@ -43,8 +45,8 @@ Guardar notas, ofertas, rondas y solicitudes solo funciona cuando la app está *
 Esto está pensado para crecer por partes. Aún no hay:
 
 - **Borrar rondas, solicitudes o su historial:** nada se borra desde la app. Si una solicitud ya no vale, se marca como "Descartado".
-- **Recomendación automática** de a qué ofertas encaja cada alumno.
-- **Compartir perfiles** con las empresas.
+- **Decidir por ti:** "Alumnos que encajan" solo ordena y explica; no descarta a nadie ni envía nada a las empresas.
+- **Anotar lo que se comparte:** la app no apunta quién compartió qué perfil ni con quién. Es un requisito antes de usar datos reales (ver DECISIONES).
 - **Inicio de sesión personal:** hoy todas las personas autorizadas usan la misma clave.
 - **Crear, borrar o mover alumnos** desde la app. Eso se hace en la hoja de cálculo.
 - **Fotos reales:** solo hay círculos con las iniciales.
@@ -60,6 +62,21 @@ Esto está pensado para crecer por partes. Aún no hay:
 - Cada cambio de estado se apunta en un **historial** con su fecha y una nota. El historial no se edita ni se borra.
 - La app **avisa, sin impedir nada,** si la oferta está cerrada o si lo que pide (permiso de trabajo, nacionalidad) choca claramente con la situación del alumno.
 - Si dos personas cambian lo mismo a la vez, la app lo detecta y enseña lo que hay antes de pisar nada.
+
+## Cómo funcionan "Alumnos que encajan" y "Compartir perfiles"
+
+**Alumnos que encajan.** Para cada alumno se miran cuatro cosas y se escribe el motivo de cada una:
+
+| Qué se mira | Cómo se decide |
+|---|---|
+| Área | Si la oferta es del área a la que **quiere ir**, encaja. Si solo tiene **experiencia** en ella, se revisa. Si no, no coincide. |
+| Prácticas o empleo | Lo que busca el alumno (Prácticas, Empleo o Ambas) frente al tipo de la oferta. |
+| Nacionalidad | Si la oferta pide un país, el alumno debe tenerlo (principal o secundaria). Si pide **Unión Europea (UE/EEE)**, vale cualquier país de la UE o del EEE, o que su situación sea "Ciudadano UE o español". **Suiza se revisa a mano** (no es UE ni EEE, aunque tiene un acuerdo de libre circulación). |
+| Permiso de trabajo | Si la oferta lo pide: cumple quien es ciudadano UE o residente con permiso. **"Permiso de estudiante" se revisa** (puede valer para unas prácticas, nunca se da por perdido). No cumple solo quien "Necesita permiso de trabajo". |
+
+Si algo no consta (por ejemplo, un alumno sin nacionalidad), se pone **"a revisar"**, no "no cumple". Si todo cuadra, el alumno "encaja"; si nada falla pero hay algo que mirar, "encaja con reservas"; si algo no cuadra, "no encaja". **Nadie desaparece de la lista:** los tres grupos suman todos los alumnos, y los avisos de "Añadir solicitud" usan exactamente estas mismas reglas. Es una ayuda para mirar, no una decisión.
+
+**Compartir perfiles.** Siempre pasa por una **vista previa** con el texto exacto que se enviará. Por defecto solo salen nombre, máster, área y qué busca. Nacionalidad, situación de trabajo, resumen de experiencia y enlace al CV (solo si es `https`) son **datos sensibles** y vienen desmarcados. Las notas de entrevista, el historial y los motivos de descarte **nunca** se incluyen. El máximo es de 10 alumnos por envío. La app no guarda nada de lo compartido.
 
 ## Dos formas de usarla
 
@@ -81,6 +98,7 @@ Al abrir la app por primera vez, se elige una de las dos:
 - **Es una demostración personal.** No es una app oficial ni está afiliada a LaLiga ni a LaLiga Business School. No lleva sus logos ni sus nombres comerciales.
 - **No es privada por sí sola:** la página es pública, pero sin la clave no se ve ningún dato. Aun así, nada de lo que hay detrás está preparado para datos reales.
 - **La clave es una para todos.** Si se pierde un móvil, hay que cambiar la clave. Quien administra la hoja sabe cómo (está explicado en la guía).
+- **Lo que compartes sale de la app.** Al enviar o copiar un perfil, el texto ya no se controla (quien lo recibe puede reenviarlo) y la app no deja registro. Con datos reales haría falta el permiso de cada persona y un registro de lo compartido.
 - **Los datos no se guardan en el teléfono.** Se piden cada vez y solo se muestran. Lo que escribes en un formulario tampoco se guarda hasta que pulsas Guardar.
 - Para usarla con datos reales habría que montarla de nuevo dentro de la organización, con inicio de sesión personal, protección de datos y la aprobación del equipo de informática. Todo eso está explicado en el documento técnico.
 

@@ -51,8 +51,8 @@
 | Carpeta o archivo | Para qué sirve |
 |---|---|
 | `index.html`, `css/`, `js/` | La app. |
-| `js/vistas/` | Una pantalla por archivo (inicio, máster, alumno, CV, buscar, ofertas, formulario de oferta, acceso, entrevista, rondas y solicitudes, y los formularios de rondas). |
-| `js/util/` | Funciones sin pantalla: búsqueda y filtros (`filtros.js`, `ofertas.js`), orden, resúmenes, avisos y validación de rondas (`rondas.js`), CSV, textos, avatar, navegación. |
+| `js/vistas/` | Una pantalla por archivo (inicio, máster, alumno, CV, buscar, ofertas, formulario de oferta, acceso, entrevista, rondas y solicitudes, los formularios de rondas, **las tarjetas del match (`match.js`) y la pantalla de compartir perfiles (`compartir.js`)**). |
+| `js/util/` | Funciones sin pantalla: búsqueda y filtros (`filtros.js`, `ofertas.js`), orden, resúmenes y validación de rondas (`rondas.js`), **match oferta-alumno y avisos de requisitos (`match.js`)**, **texto de los perfiles que se comparten (`compartir.js`)**, CSV, textos, avatar, navegación. |
 | **`js/data/`** | **Único sitio que sabe de dónde vienen los datos.** Ver sección 3. |
 | `datos-mock/` | Seis CSV con los datos ficticios del modo demo (Alumnos, Ofertas, Listas, Rondas, Aplicaciones, Historial). También sirven para crear esas hojas en el Sheet de prueba (ver la guía). |
 | `docs/apps-script/` | `Code.gs` (el script, **sin claves**) y `GUIA.md` (puesta en marcha). |
@@ -76,6 +76,17 @@ Seis hojas, con las columnas que espera la app (definidas en `js/data/esquema.js
 Las hojas de rondas son **opcionales para la app**: si no existen en el Sheet, el script no las envía y la app funciona como antes (y explica qué falta). Los estados "Recibida" y "Descartado" tienen significado fijo (cómo nace una solicitud y cuándo lleva motivo); el resto de estados y motivos se pueden editar en Listas.
 
 Las pantallas solo usan los nombres internos (`nombre`, `areaDestino`, `estado`…). Una fuente nueva solo tiene que devolver objetos con esas claves.
+
+### 2.4 Match y compartir perfiles
+
+Todo es **lectura y cálculo en el navegador**: no hay acciones nuevas en el script ni peticiones nuevas (usa las mismas `getAlumnos`, `getOfertas`, `getListas`, `getAplicaciones` de la capa de datos), así que no se ve afectado por la migración a Microsoft Graph.
+
+- **`js/util/match.js`** (funciones puras). `evaluar(alumno, oferta)` devuelve 4 criterios `{ id, grupo, estado: 'ok' | 'revisar' | 'no', texto }` y una categoría (`encaja`, `reservas`, `no`). `emparejar` y `ofertasParaAlumno` devuelven **todos** los elementos, ordenados; nunca filtran. `avisosRequisitos` (que `rondas.js` reexporta) usa los mismos criterios de requisito, para que los avisos de «Añadir solicitud» y el match no se contradigan.
+- **Unión Europea.** Una oferta puede pedir el valor `Unión Europea (UE/EEE)` (fila de la lista Nacionalidad). La lista de países UE/EEE está en `match.js` (27 + Islandia, Liechtenstein y Noruega) y se compara sin mirar tildes ni mayúsculas. Suiza queda fuera a propósito y se trata como «a revisar». Si la fila no está en el Sheet, nada falla: el valor de una oferta existente se sigue evaluando y el formulario de ofertas conserva el valor que ya tenía.
+- **`js/vistas/match.js`.** Las tarjetas «Alumnos que encajan» (ficha de la oferta, con casillas para elegir hasta 10) y «Ofertas que encajan» (ficha del alumno). Tres grupos plegables y «Ver más» de 15 en 15; cada fila lleva un «Por qué» con los 4 criterios (símbolo y palabra, nunca solo color).
+- **`js/util/compartir.js`.** Arma el texto. Solo lee campos de una lista cerrada; las notas de entrevista, el historial, los motivos de descarte y el «por qué» **no están en la lista**, así que no pueden salir. Cada dato va en una sola línea (un nombre con saltos de línea no puede inventar otro perfil), el enlace al CV solo si es `https`, y como mucho 10 perfiles.
+- **`js/vistas/compartir.js`.** Ruta `#/oferta/ID/compartir` (los alumnos elegidos viven solo en memoria: al recargar hay que volver a elegirlos) y `#/alumno/ID/compartir` (el alumno va en la dirección). La vista previa es el **mismo texto** que recibe `navigator.share` y `navigator.clipboard.writeText` (una prueba lo comprueba), con respaldo `execCommand('copy')`. Si el navegador no tiene menú de compartir, el botón queda desactivado y se usa «Copiar». No se guarda nada: ni lo marcado ni lo compartido.
+- **Pendiente antes de datos reales:** registro de lo compartido y consentimiento (ver §6, punto 13).
 
 ---
 
@@ -180,6 +191,8 @@ Todos son aceptables **solo porque los datos son ficticios**.
 10. **CSP en una etiqueta `<meta>`.** Es una limitación de GitHub Pages: no se pueden poner cabeceras HTTP. Una etiqueta meta no puede imponer, por ejemplo, `frame-ancestors`.
 11. **Sin conexión, en modo script, no se ven datos** (por diseño: no se guardan en el teléfono). Solo la demo funciona sin conexión.
 12. **La primera petición tras un rato sin usar** el script puede tardar 1 a 3 segundos. En un iPhone, además, la primera petición tras un rato quieto puede perderse sin llegar a Google: la app la repite sola una vez (ver §3). No se ha podido reproducir en el simulador; la causa más probable es una conexión "dormida" y se comprueba a mano en el iPhone.
+13. **Compartir perfiles.** El texto sale de la app (menú de compartir o portapapeles) y **ya no se puede recuperar ni controlar**: quien lo recibe puede reenviarlo. **La app no guarda un registro de lo compartido** (quién, qué perfiles, cuándo, a quién): registrarlo exigiría escribir en el Sheet, y se decidió no hacerlo en este paquete. **Requisito previo a usar datos reales**, junto con el consentimiento de cada persona (ver 10.4). Mitigaciones actuales: vista previa obligatoria, datos sensibles desmarcados y avisados, máximo de 10 perfiles y nunca notas, historial ni descartes.
+14. **Match por nacionalidad y permiso.** Puede discriminar si se usa para descartar. Hoy solo ordena y explica, no oculta a nadie, y los datos que faltan son «a revisar». Con datos reales, revisarlo con protección de datos.
 
 ---
 
@@ -192,7 +205,10 @@ Todos son aceptables **solo porque los datos son ficticios**.
 | La app: notas de entrevista | 63 | (incluido en `npm test`) |
 | La app: lista y ficha de ofertas | 106 | (incluido en `npm test`) |
 | La app: formulario de ofertas | 123 | (incluido en `npm test`) |
-| La app: funciones puras de rondas (orden, resúmenes, avisos y validación) | 70 | (incluido en `npm test`) |
+| La app: funciones puras de rondas (orden, resúmenes, avisos y validación) | 71 | (incluido en `npm test`) |
+| La app: funciones puras del match (UE/EEE, Suiza, estudiante, afinidad, categorías, nunca oculta, avisos coherentes) | 71 | (incluido en `npm test`) |
+| La app: pantallas del match (alumnos y ofertas que encajan, "Ver más", orden y etiquetas en Añadir solicitud, con y sin la fila UE, 320 px) | 50 | (incluido en `npm test`) |
+| La app: compartir perfiles (texto, "canarios" que nunca deben salir, vista previa = lo que se envía, Compartir, Copiar, sin menú, 320 px) | 81 | (incluido en `npm test`) |
 | La app: lectura de rondas y solicitudes | 108 | (incluido en `npm test`) |
 | La app: registrar rondas, añadir solicitudes y cambiar su estado | 156 | (incluido en `npm test`) |
 | La app: fallos al guardar (primer intento fallido, script ocupado, doble pulsación, botones "Guardando…", aviso flotante, pantalla que sube tras guardar) | 68 | (incluido en `npm test`) |
@@ -201,7 +217,7 @@ Todos son aceptables **solo porque los datos son ficticios**.
 | La app: pantalla completa en iPhone (cuatro modelos, con y sin barra de inicio, vertical y horizontal) | 120 | (incluido en `npm test`) |
 
 - Las pruebas ejecutan **el mismo `Code.gs`** que se pega en Apps Script, dentro de un simulador. No tocan ningún Sheet real ni llevan claves ni direcciones reales: todo es inventado.
-- Se complementan con **pruebas de mutación manuales**: se estropea a propósito una regla (por ejemplo "no comprobar duplicados") y se verifica que las pruebas fallan. Se han hecho con el script (16 variantes de entrevistas y ofertas (1 equivalente) y 34 de rondas; todas detectadas salvo una equivalente) y con la app (25 de entrevistas y ofertas, 29 de la lectura de rondas y 39 de su escritura (3 equivalentes), todas detectadas). En el paquete de correcciones: 32 variantes sobre fallos al guardar (31 detectadas; la que queda, `preventScroll` al volver el cursor al buscador, solo se nota en un iPhone) y 23 sobre Ajustes y versión (todas detectadas). En el paquete de pulido: 26 variantes sobre textos, desplazamiento tras guardar y pantalla completa (todas detectadas; ese cursor ya no se mueve, así que la variante de `preventScroll` desapareció).
+- Se complementan con **pruebas de mutación manuales**: se estropea a propósito una regla (por ejemplo "no comprobar duplicados") y se verifica que las pruebas fallan. Se han hecho con el script (16 variantes de entrevistas y ofertas (1 equivalente) y 34 de rondas; todas detectadas salvo una equivalente) y con la app (25 de entrevistas y ofertas, 29 de la lectura de rondas y 39 de su escritura (3 equivalentes), todas detectadas). En el paquete de correcciones: 32 variantes sobre fallos al guardar (31 detectadas; la que queda, `preventScroll` al volver el cursor al buscador, solo se nota en un iPhone) y 23 sobre Ajustes y versión (todas detectadas). En el paquete de pulido: 26 variantes sobre textos, desplazamiento tras guardar y pantalla completa (todas detectadas; ese cursor ya no se mueve, así que la variante de `preventScroll` desapareció). En el paquete de match y compartir: 32 variantes sobre las reglas del match (UE/EEE, Suiza, estudiante, categorías, orden, que nunca oculte a nadie), las pantallas y el texto compartido (CV solo `https`, notas que no deben colarse, máximo de 10, vista previa igual a lo enviado, datos sensibles desmarcados). Se detectaron 31; la que queda es equivalente (el botón «Compartir» se desactiva sin menú de compartir en dos sitios del código a la vez). Tres sobrevivieron al principio y se añadieron pruebas para ellas.
 - Los comandos necesitan Node.js y, para las de navegador, Microsoft Edge (o `NAVEGADOR=chromium`). La app en sí no usa npm.
 
 **Lo que no cubren:** la redirección real de Google (se comprobó a mano con el Sheet real), un iPhone real (el aspecto en iPhone lo comprueba Santiago a mano), ni la carga con mucha gente.

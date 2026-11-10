@@ -29,6 +29,7 @@ igual(est(M.evaluar(al({ nacionalidadPrincipal: 'Chile', nacionalidadSecundaria:
 igual(est(M.evaluar(al({ nacionalidadPrincipal: 'Chile' }), of({ requisitoNacionalidad: 'Perú' })), 'nacionalidad'), 'no', 'país concreto que no tiene: no cumple');
 igual(est(M.evaluar(al({ nacionalidadPrincipal: 'Chile', situacionTrabajo: 'Ciudadano UE o español' }), of({ requisitoNacionalidad: 'España' })), 'nacionalidad'), 'no', 'pedir "España" no se cumple solo con la situación UE');
 igual(est(M.evaluar(al(), of({ requisitoNacionalidad: '' })), 'nacionalidad'), 'ok', 'sin requisito: cumple');
+igual(est(M.evaluar(al({ nacionalidadPrincipal: '', nacionalidadSecundaria: '' }), of({ requisitoNacionalidad: 'Perú' })), 'nacionalidad'), 'revisar', 'país concreto y no consta la nacionalidad: a revisar, no "no cumple"');
 // sin la fila "Unión Europea" en el Sheet: la oferta no la puede pedir, pero todo lo demás sigue funcionando sin errores
 igual(est(M.evaluar(al({ nacionalidadPrincipal: 'Francia' }), of()), 'nacionalidad'), 'ok', 'oferta sin requisito (como cuando falta la fila en el Sheet): sin errores');
 igual(est(M.evaluar(al({ nacionalidadPrincipal: 'Francia' }), { id: 'O9' }), 'nacionalidad'), 'ok', 'oferta casi vacía: sin errores');
@@ -78,10 +79,10 @@ igual(new Set(r.map(x => x.alumno.id)).size, todos.length, 'sin repetir ni perde
 igual(r.map(x => x.alumno.id), ['A', 'E', 'C', 'D', 'B'], 'orden: encajan (por nombre), con reservas (los que quieren ir al área primero), y al final los que no');
 igual(M.emparejar([], pide), [], 'sin alumnos: lista vacía, sin errores');
 igual(M.emparejar([{ id: 'X' }], { id: 'O' }).length, 1, 'un alumno vacío y una oferta vacía: sin errores y sin perderlo');
-const ofs = [of({ id: 'O1', area: 'Finanzas', fechaRecepcion: '2026-10-01' }), of({ id: 'O2', fechaRecepcion: '2026-10-05' }), of({ id: 'O3', fechaRecepcion: '2026-10-09' })];
+const ofs = [of({ id: 'O1', area: 'Finanzas', fechaRecepcion: '2026-10-01' }), of({ id: 'O2', fechaRecepcion: '2026-10-05' }), of({ id: 'O3', fechaRecepcion: '2026-10-09' }), of({ id: 'O4', area: 'Derecho y compliance', fechaRecepcion: '2026-10-12' })];
 const po = M.ofertasParaAlumno(ofs, al());
-igual(po.length, 3, 'ofertasParaAlumno devuelve TODAS las ofertas');
-igual(po.map(x => x.oferta.id), ['O3', 'O2', 'O1'], 'las que encajan primero (más recientes antes) y las que no, al final');
+igual(po.length, 4, 'ofertasParaAlumno devuelve TODAS las ofertas (también la que no encaja)');
+igual(po.map(x => x.oferta.id), ['O3', 'O2', 'O1', 'O4'], 'las que encajan primero (más recientes antes) y las que no, al final');
 
 console.log('Los avisos de "Añadir solicitud" y el match no se contradicen');
 const personas = ['Ciudadano UE o español', 'Residente con permiso de trabajo', 'Permiso de estudiante', 'Necesita permiso de trabajo', '', 'Raro'];
