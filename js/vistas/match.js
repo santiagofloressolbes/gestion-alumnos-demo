@@ -3,6 +3,8 @@
 import { el, svgFlecha, plural } from '../util/dom.js';
 import { emparejar, ofertasParaAlumno, CATEGORIAS } from '../util/match.js';
 import { nombreAlumno } from '../util/rondas.js';
+import { navegacion } from '../util/navegacion.js';
+import { MAX_PERFILES } from '../util/compartir.js';
 
 const POR_PAGINA = 15;   // filas que se pintan de golpe en cada grupo (con "Ver más")
 const SIGNO = { ok: '✓', revisar: '!', no: '✗' };
@@ -49,15 +51,36 @@ function grupos(resultados, fila, nombreItem, extra = () => {}) {
 
 /* ---- Ficha de la oferta: alumnos que encajan ---- */
 
-export function tarjetaAlumnosQueEncajan(oferta, d, opciones = {}) {
+export function tarjetaAlumnosQueEncajan(oferta, d) {
   const res = emparejar(d.alumnos, oferta);
   const yaTiene = new Set(d.aplicaciones.filter(a => a.idOferta === oferta.id).map(a => a.idAlumno));
+
+  // Alumnos marcados para compartir su perfil (solo en memoria; al cambiar de oferta se empieza de cero).
+  const sel = new Set(navegacion.compartir?.idOferta === oferta.id ? navegacion.compartir.ids.filter(id => d.alumnos.some(a => a.id === id)) : []);
+  let tarjeta = null;
+  const cuenta = el('p', { class: 'sub', id: 'cp-cuenta', role: 'status', 'aria-live': 'polite' });
+  const boton = el('button', { class: 'primary', type: 'button', id: 'cp-ir', onclick: () => { location.hash = `#/oferta/${encodeURIComponent(oferta.id)}/compartir`; } }, 'Compartir perfiles');
+  const actualizar = () => {
+    navegacion.compartir = { idOferta: oferta.id, ids: [...sel] };
+    cuenta.textContent = sel.size ? `${plural(sel.size, 'alumno elegido', 'alumnos elegidos')} para compartir (máximo ${MAX_PERFILES}).` : `Marca a quien quieras para compartir su perfil (máximo ${MAX_PERFILES}).`;
+    boton.disabled = sel.size === 0;
+    boton.textContent = sel.size ? `Compartir perfiles (${sel.size})` : 'Compartir perfiles';
+    for (const i of tarjeta?.querySelectorAll('input.cp-sel') || []) i.disabled = sel.size >= MAX_PERFILES && !i.checked;
+  };
+  const casilla = a => {
+    const i = el('input', { type: 'checkbox', class: 'cp-sel', id: 'cp-sel-' + a.id, 'aria-label': 'Elegir a ' + nombreAlumno(a) + ' para compartir su perfil',
+      onchange: () => { if (i.checked) sel.add(a.id); else sel.delete(a.id); actualizar(); } });
+    i.checked = sel.has(a.id);
+    i.disabled = sel.size >= MAX_PERFILES && !i.checked;
+    return el('label', { class: 'sel-compartir' }, i);
+  };
+
   const fila = r => {
     const a = r.alumno;
     return el('li', { class: 'fila-match' },
-      opciones.filaExtra ? opciones.filaExtra(a) : null,
+      casilla(a),
       el('div', { class: 'fila-match-cuerpo' },
-        el('a', { class: 'alumno oferta', href: '#/alumno/' + encodeURIComponent(a.id), onclick: opciones.alAbrir },
+        el('a', { class: 'alumno oferta', href: '#/alumno/' + encodeURIComponent(a.id) },
           el('span', { class: 'alumno-texto' },
             el('b', {}, nombreAlumno(a)),
             el('span', { class: 'sub' }, [a.master, yaTiene.has(a.id) && 'ya tiene solicitud en esta oferta'].filter(Boolean).join(' · ')),
@@ -65,11 +88,13 @@ export function tarjetaAlumnosQueEncajan(oferta, d, opciones = {}) {
           svgFlecha()),
         porQue(r.criterios)));
   };
-  return el('section', { class: 'card', id: 'match-alumnos', 'aria-labelledby': 'match-titulo' },
+  tarjeta = el('section', { class: 'card', id: 'match-alumnos', 'aria-labelledby': 'match-titulo' },
     el('h2', { id: 'match-titulo' }, 'Alumnos que encajan'),
     el('p', { class: 'sub' }, `${plural(d.alumnos.length, 'alumno', 'alumnos')}, ordenados por cómo encajan con esta oferta. ${NOTA}`),
-    opciones.cabecera || null,
-    grupos(res, fila, 'alumno', opciones.alPintar));
+    el('div', { class: 'compartir-barra' }, cuenta, boton),
+    grupos(res, fila, 'alumno', actualizar));
+  actualizar();
+  return tarjeta;
 }
 
 /* ---- Ficha del alumno: ofertas que encajan ---- */

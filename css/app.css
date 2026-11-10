@@ -232,3 +232,19 @@ button:disabled{opacity:.7;cursor:progress}
 .crit{display:flex;gap:.5rem;align-items:flex-start}
 .crit-signo{flex:none;width:1.25rem;font-weight:700}
 .crit.no{color:var(--cmuted)}
+
+/* ---------- Compartir perfiles ---------- */
+.compartir-barra{margin:0 0 1rem}
+.compartir-barra .sub{margin:0 0 .5rem}
+.sel-compartir{flex:none;display:flex;align-items:center;justify-content:center;width:2.75rem;min-height:4.5rem;cursor:pointer}
+.sel-compartir input{width:1.25rem;height:1.25rem;accent-color:var(--act-bg)}
+.elegir-cp{max-height:none;margin-bottom:1rem}
+.elegir-cp input[type=checkbox]{flex:none;width:1.25rem;height:1.25rem;accent-color:var(--act-bg)}
+.elegir-cp label.sensible{border-style:dashed}
+.sub-titulo{margin:1rem 0 .5rem;font-size:.9375rem}
+#cp-sensible{margin:0 0 1rem}
+#cp-sensible .bloque{display:block}
+#cp-sensible .bloque+.bloque{margin-top:.5rem}
+.vista-previa{margin:0 0 1rem;padding:1rem;border-radius:1rem;border:1.5px solid var(--line);background:var(--inp);color:var(--cink);font-family:var(--sans);font-size:.875rem;line-height:1.5;white-space:pre-wrap;overflow-wrap:anywhere;max-height:22rem;overflow-y:auto}
+.card .vista-previa+.primary,.card .ok+.primary,.card .error+.primary{margin-top:.5rem}
+.cp-oculto{position:fixed;opacity:0;pointer-events:none}

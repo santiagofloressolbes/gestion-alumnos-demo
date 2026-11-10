@@ -9,6 +9,7 @@ import { pintarAjustes, AVISO_LEGAL } from './vistas/ajustes.js';
 import { pintarOfertas, pintarOferta } from './vistas/ofertas.js';
 import { pintarFormOferta } from './vistas/oferta-form.js';
 import { pintarAplicacion } from './vistas/rondas.js';
+import { pintarCompartir } from './vistas/compartir.js';
 import { pintarFormRonda, pintarFormAplicacion, pintarFormEstado } from './vistas/rondas-form.js';
 import { navegacion } from './util/navegacion.js';
 import { getModo } from './data/index.js';
@@ -23,6 +24,7 @@ function rutaActual() {
   try {
     if ((m = h.match(/^master\/(.+)$/))) return { vista: 'master', valor: decodeURIComponent(m[1]), pestana: 'inicio', titulo: decodeURIComponent(m[1]) };
     if ((m = h.match(/^cv\/(.+)$/))) return { vista: 'cv', valor: decodeURIComponent(m[1]), pestana: 'inicio', titulo: 'CV de ejemplo' };
+    if ((m = h.match(/^alumno\/([^/]+)\/compartir$/))) return { vista: 'compartir', valor: '', valor2: decodeURIComponent(m[1]), pestana: 'inicio', titulo: 'Compartir perfil' };
     if ((m = h.match(/^alumno\/(.+)$/))) return { vista: 'alumno', valor: decodeURIComponent(m[1]), pestana: 'inicio', titulo: 'Ficha' };
   } catch { /* dirección mal escrita: se vuelve al inicio */ }
   try {
@@ -30,6 +32,7 @@ function rutaActual() {
     if ((m = h.match(/^oferta\/([^/]+)\/ronda\/([^/]+)\/aplicar$/))) return { vista: 'aplicacion-form', valor: decodeURIComponent(m[1]), valor2: decodeURIComponent(m[2]), pestana: 'ofertas', titulo: 'Añadir solicitud' };
     if ((m = h.match(/^aplicacion\/([^/]+)\/estado$/))) return { vista: 'estado-form', valor: decodeURIComponent(m[1]), pestana: 'ofertas', titulo: 'Cambiar estado' };
     if ((m = h.match(/^aplicacion\/([^/]+)$/))) return { vista: 'aplicacion', valor: decodeURIComponent(m[1]), pestana: 'ofertas', titulo: 'Solicitud' };
+    if ((m = h.match(/^oferta\/([^/]+)\/compartir$/))) return { vista: 'compartir', valor: decodeURIComponent(m[1]), valor2: '', pestana: 'ofertas', titulo: 'Compartir perfiles' };
     if (h === 'oferta/nueva') return { vista: 'oferta-form', valor: null, pestana: 'ofertas', titulo: 'Nueva oferta' };
     if ((m = h.match(/^oferta\/([^/]+)\/editar$/))) return { vista: 'oferta-form', valor: decodeURIComponent(m[1]), pestana: 'ofertas', titulo: 'Editar oferta' };
     if ((m = h.match(/^oferta\/([^/]+)$/))) return { vista: 'oferta', valor: decodeURIComponent(m[1]), pestana: 'ofertas', titulo: 'Oferta' };
@@ -72,6 +75,7 @@ async function pintar() {
   if (r.vista === 'aplicacion') await pintarAplicacion($('#v-aplicacion'), r.valor);
   if (r.vista === 'ronda-form') await pintarFormRonda($('#v-ronda-form'), r.valor);
   if (r.vista === 'aplicacion-form') await pintarFormAplicacion($('#v-aplicacion-form'), r.valor, r.valor2);
+  if (r.vista === 'compartir') await pintarCompartir($('#v-compartir'), { idOferta: r.valor, idAlumno: r.valor2 });
   if (r.vista === 'estado-form') await pintarFormEstado($('#v-estado-form'), r.valor);
   if (r.vista === 'oferta-form') await pintarFormOferta($('#v-oferta-form'), r.valor);
   if (r.vista === 'ofertas') { await pintarOfertas($('#v-ofertas')); if (vistaPrevia === 'oferta') $('#main').scrollTop = scrollLista.ofertas; }

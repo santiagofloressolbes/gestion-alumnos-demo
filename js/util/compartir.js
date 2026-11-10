@@ -20,7 +20,7 @@ export const CAMPOS_SENSIBLES = [
 export const BASE_POR_DEFECTO = CAMPOS_BASE.map(c => c.clave);
 
 // Una sola línea: sin saltos ni espacios de más (lo que viene del Sheet no puede inventarse líneas nuevas del mensaje).
-const linea = t => String(t ?? '').replace(/[\u0000-\u001F\u007F  ]+/g, ' ').replace(/\s+/g, ' ').trim();
+const linea = t => String(t ?? '').replace(/[\u0000-\u001F\u007F]+/g, ' ').replace(/\s+/g, ' ').trim();
 
 // El enlace al CV solo se incluye si es una dirección https válida; si no, se deja fuera (nunca http, javascript:, data:…).
 export function enlaceHttps(t) {

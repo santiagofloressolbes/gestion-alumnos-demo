@@ -54,7 +54,8 @@ export async function pintarAlumno(raiz, id) {
       cv
         ? el('a', { class: 'primary', href: cv.href, target: cv.externo ? '_blank' : null, rel: cv.externo ? 'noopener noreferrer' : null },
             cv.externo ? 'Ver CV' : 'Ver CV (ejemplo)')
-        : el('span', { class: 'primary desactivado', role: 'link', 'aria-disabled': 'true' }, 'Sin CV')),
+        : el('span', { class: 'primary desactivado', role: 'link', 'aria-disabled': 'true' }, 'Sin CV'),
+      el('a', { class: 'secondary', id: 'al-compartir', href: `#/alumno/${encodeURIComponent(a.id)}/compartir` }, 'Compartir perfil')),
 
     tarjeta('Situación',
       campo('Nacionalidad', nacionalidades),
