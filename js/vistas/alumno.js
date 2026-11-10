@@ -3,6 +3,7 @@ import { getAlumnos, recargar } from '../data/index.js';
 import { tarjetaError } from './error-datos.js';
 import { tarjetaEntrevista } from './entrevista.js';
 import { datosRondas, tarjetaAplicaciones } from './rondas.js';
+import { tarjetaOfertasQueEncajan } from './match.js';
 import { el } from '../util/dom.js';
 import { avatar } from '../util/avatar.js';
 import { enlaceCV } from '../util/cv.js';
@@ -70,5 +71,7 @@ export async function pintarAlumno(raiz, id) {
     tarjetaEntrevista(a),
 
     tarjetaAplicaciones(a, d),
+
+    tarjetaOfertasQueEncajan(a, d),
   ].filter(Boolean));   // replaceChildren convierte un null en el texto "null"
 }

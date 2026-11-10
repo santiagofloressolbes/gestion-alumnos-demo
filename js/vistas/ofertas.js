@@ -6,6 +6,7 @@ import { filtrar, estadoVacio, filtrosActivos, hayAlgo, enlaceOferta } from '../
 import { fechaLarga } from './entrevista.js';
 import { tarjetaError } from './error-datos.js';
 import { datosRondas, seccionesRondas } from './rondas.js';
+import { tarjetaAlumnosQueEncajan } from './match.js';
 
 const e = estadoVacio();   // búsqueda y filtros: se conservan al entrar en una oferta y volver
 const volverAOfertas = () => el('a', { class: 'volver', href: '#/ofertas' }, 'Ofertas');
@@ -172,6 +173,8 @@ export async function pintarOferta(raiz, id) {
         campo(enlace.tipo === 'ejemplo' ? 'Enlace de ejemplo (no se abre)' : enlace.tipo === 'enlace' ? 'Dirección' : 'Texto', enlace.texto, { texto: true }))),
 
     ...seccionesRondas(o, d),
+
+    tarjetaAlumnosQueEncajan(o, d),
 
     puedeEscribirOfertas() && el('a', { class: 'secondary', id: 'of-editar', href: `#/oferta/${encodeURIComponent(o.id)}/editar` }, 'Editar oferta'),
   ].filter(Boolean));

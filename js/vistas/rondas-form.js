@@ -12,6 +12,7 @@ import {
 import { hoyLocal, fechaLarga } from './entrevista.js';
 import { datosRondas, insigniaEstado } from './rondas.js';
 import { tarjetaError } from './error-datos.js';
+import { emparejar, CATEGORIAS } from '../util/match.js';
 import { ocupar, avisoFlotante, llevarA } from '../util/trabajo.js';
 
 const ir = hash => { location.hash = hash; };
@@ -187,7 +188,9 @@ export async function pintarFormAplicacion(raiz, idOferta, numeroTxt) {
   function pintarLista() {
     const palabras = norm(buscar.value).split(/\s+/).filter(Boolean);
     const sinAplicar = alumnosSinAplicar(d.alumnos, d.aplicaciones, idOferta, ronda.numero);
-    const candidatos = sinAplicar
+    // Los que mejor encajan con la oferta, primero; nadie se quita de la lista (el match solo ordena y etiqueta).
+    const emp = emparejar(sinAplicar, oferta), categoria = new Map(emp.map(r => [r.alumno.id, r.categoria]));
+    const candidatos = emp.map(r => r.alumno)
       .filter(a => { const t = norm(`${nombreAlumno(a)} ${a.master}`); return palabras.every(p => t.includes(p)); });
     // El alumno elegido siempre sigue a la vista aunque la búsqueda cambie.
     const visibles = candidatos.slice(0, MAX_LISTA);
@@ -201,7 +204,7 @@ export async function pintarFormAplicacion(raiz, idOferta, numeroTxt) {
       return el('li', {}, el('label', { for: radio.id, class: a.id === elegido ? 'elegido' : null }, radio,
         avatar(a),
         el('span', { class: 'alumno-texto' }, el('b', {}, nombreAlumno(a)),
-          el('span', { class: 'sub' }, [a.master, previas.length && `ya tiene solicitud en la ronda ${previas.map(x => x.numeroRonda).join(', ')}`].filter(Boolean).join(' · ')))));
+          el('span', { class: 'sub' }, [a.master, CATEGORIAS[categoria.get(a.id)], previas.length && `ya tiene solicitud en la ronda ${previas.map(x => x.numeroRonda).join(', ')}`].filter(Boolean).join(' · ')))));
     }));
     if (!visibles.length) lista.replaceChildren(el('li', { class: 'sub' }, palabras.length ? 'Ningún alumno coincide.' : 'Todos los alumnos ya tienen solicitud en esta ronda.'));
   }
