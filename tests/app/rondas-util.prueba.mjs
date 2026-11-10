@@ -51,12 +51,13 @@ igual(R.avisosRequisitos(al('Permiso de estudiante'), { requisitoPermiso: 'Permi
 igual(R.avisosRequisitos(al('Residente con permiso de trabajo'), { requisitoPermiso: 'Permiso de trabajo en vigor' }), [], 'con permiso: no avisa');
 igual(R.avisosRequisitos(al('Ciudadano UE o español'), { requisitoPermiso: 'Permiso de trabajo en vigor' }), [], 'ciudadano UE: no avisa');
 igual(R.avisosRequisitos(al('Necesita permiso de trabajo'), { requisitoPermiso: 'No requerido' }), [], 'oferta que no pide permiso: no avisa');
-igual(R.avisosRequisitos(al('Algo raro'), { requisitoPermiso: 'Permiso de trabajo en vigor' }), [], 'en la duda (situación desconocida): no avisa');
-igual(R.avisosRequisitos(al(''), { requisitoPermiso: 'Permiso de trabajo en vigor' }), [], 'situación vacía: no avisa');
+igual(R.avisosRequisitos(al('Algo raro'), { requisitoPermiso: 'Permiso de trabajo en vigor' }).length, 1, 'situación desconocida: avisa de que hay que revisarla (igual que el match)');
+igual(R.avisosRequisitos(al(''), { requisitoPermiso: 'Permiso de trabajo en vigor' }).length, 1, 'situación vacía: avisa de que no consta (igual que el match)');
+chk(/puede valer para unas prácticas/.test(R.avisosRequisitos(al('Permiso de estudiante'), { requisitoPermiso: 'Permiso de trabajo en vigor' })[0]), 'estudiante: el aviso dice "revisar", no "no cumple"');
 igual(R.avisosRequisitos(al('Ciudadano UE o español', 'Chile'), { requisitoNacionalidad: 'Estados Unidos' }).length, 1, 'nacionalidad requerida distinta: avisa');
 igual(R.avisosRequisitos(al('Ciudadano UE o español', 'Chile', 'Estados Unidos'), { requisitoNacionalidad: 'Estados Unidos' }), [], 'la tiene como secundaria: no avisa');
 igual(R.avisosRequisitos(al('Ciudadano UE o español', 'Estados Unidos'), { requisitoNacionalidad: 'Estados Unidos' }), [], 'la tiene: no avisa');
-igual(R.avisosRequisitos(al('Ciudadano UE o español', ''), { requisitoNacionalidad: 'Estados Unidos' }), [], 'sin nacionalidad conocida: no avisa');
+igual(R.avisosRequisitos(al('Ciudadano UE o español', ''), { requisitoNacionalidad: 'Estados Unidos' }).length, 1, 'sin nacionalidad conocida: avisa de que no consta (a revisar)');
 igual(R.avisosRequisitos(al('Ciudadano UE o español', 'Chile'), { requisitoNacionalidad: '' }), [], 'sin requisito de nacionalidad: no avisa');
 igual(R.avisosRequisitos(al('Necesita permiso de trabajo', 'Chile'), { requisitoPermiso: 'Permiso de trabajo en vigor', requisitoNacionalidad: 'Estados Unidos' }).length, 2, 'los dos choques a la vez: dos avisos');
 chk(/«Necesita permiso de trabajo»/.test(R.avisosRequisitos(al('Necesita permiso de trabajo'), { requisitoPermiso: 'Permiso de trabajo en vigor' })[0]), 'el aviso dice la situación del alumno');

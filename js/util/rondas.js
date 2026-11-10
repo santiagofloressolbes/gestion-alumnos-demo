@@ -53,20 +53,8 @@ export function alumnosSinAplicar(alumnos, apps, idOferta, numero) {
   return alumnos.filter(a => !ya.has(a.id)).sort((x, y) => nombreAlumno(x).localeCompare(nombreAlumno(y), 'es'));
 }
 
-// Avisos (solo informativos) cuando hay un choque CLARO entre lo que pide la oferta y la situación del alumno.
-// En la duda, no se avisa: un aviso de más es peor que ninguno.
-const SIN_PERMISO = ['Necesita permiso de trabajo', 'Permiso de estudiante'];
-export function avisosRequisitos(alumno, oferta) {
-  const avisos = [];
-  if (oferta.requisitoPermiso === 'Permiso de trabajo en vigor' && SIN_PERMISO.includes(alumno.situacionTrabajo)) {
-    avisos.push(`La oferta pide permiso de trabajo en vigor y ${nombreAlumno(alumno)} aparece como «${alumno.situacionTrabajo}».`);
-  }
-  const nacionalidades = [alumno.nacionalidadPrincipal, alumno.nacionalidadSecundaria].filter(Boolean);
-  if (oferta.requisitoNacionalidad && nacionalidades.length && !nacionalidades.includes(oferta.requisitoNacionalidad)) {
-    avisos.push(`La oferta pide nacionalidad «${oferta.requisitoNacionalidad}» y ${nombreAlumno(alumno)} tiene «${nacionalidades.join(' · ')}».`);
-  }
-  return avisos;
-}
+// Avisos (solo informativos) de requisitos que no se cumplen o hay que revisar: son los mismos criterios que usa el match (util/match.js).
+export { avisosRequisitos } from './match.js';
 
 // Una clase de color para la insignia del estado (el texto siempre dice el estado: el color solo ayuda).
 export const claseEstado = estado => (estado === 'Contratado' ? ' contratado' : estado === ESTADO_DESCARTE ? ' descartada' : '');
