@@ -11,6 +11,7 @@ import { pintarFormOferta } from './vistas/oferta-form.js';
 import { pintarAplicacion } from './vistas/rondas.js';
 import { pintarCompartir } from './vistas/compartir.js';
 import { pintarAvisos, pintarAvisosInicio } from './vistas/avisos.js';
+import { pintarCorreo } from './vistas/correo.js';
 import { pintarFormRonda, pintarFormAplicacion, pintarFormEstado } from './vistas/rondas-form.js';
 import { navegacion } from './util/navegacion.js';
 import { getModo } from './data/index.js';
@@ -31,6 +32,7 @@ function rutaActual() {
   try {
     if ((m = h.match(/^oferta\/([^/]+)\/ronda\/nueva$/))) return { vista: 'ronda-form', valor: decodeURIComponent(m[1]), pestana: 'ofertas', titulo: 'Nueva ronda' };
     if ((m = h.match(/^oferta\/([^/]+)\/ronda\/([^/]+)\/aplicar$/))) return { vista: 'aplicacion-form', valor: decodeURIComponent(m[1]), valor2: decodeURIComponent(m[2]), pestana: 'ofertas', titulo: 'Añadir solicitud' };
+    if ((m = h.match(/^aplicacion\/([^/]+)\/correo$/))) return { vista: 'correo', valor: decodeURIComponent(m[1]), pestana: 'ofertas', titulo: 'Borrador de correo' };
     if ((m = h.match(/^aplicacion\/([^/]+)\/estado$/))) return { vista: 'estado-form', valor: decodeURIComponent(m[1]), pestana: 'ofertas', titulo: 'Cambiar estado' };
     if ((m = h.match(/^aplicacion\/([^/]+)$/))) return { vista: 'aplicacion', valor: decodeURIComponent(m[1]), pestana: 'ofertas', titulo: 'Solicitud' };
     if ((m = h.match(/^oferta\/([^/]+)\/compartir$/))) return { vista: 'compartir', valor: decodeURIComponent(m[1]), valor2: '', pestana: 'ofertas', titulo: 'Compartir perfiles' };
@@ -71,6 +73,7 @@ async function pintar() {
   if (r.vista === 'inicio' && !inicioPintado) { inicioPintado = true; await pintarInicio($('#v-inicio')); }
   else if (r.vista === 'inicio') await pintarAvisosInicio($('#in-avisos'));   // los avisos pueden haber cambiado (silenciar, nuevos umbrales)
   if (r.vista === 'avisos') await pintarAvisos($('#v-avisos'), r.valor);
+  if (r.vista === 'correo') await pintarCorreo($('#v-correo'), r.valor);
   if (r.vista === 'master') await pintarMaster($('#v-master'), r.valor);
   if (r.vista === 'alumno') await pintarAlumno($('#v-alumno'), r.valor);
   if (r.vista === 'cv') await pintarCV($('#v-cv'), r.valor);

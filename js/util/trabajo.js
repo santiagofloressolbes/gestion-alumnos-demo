@@ -38,3 +38,15 @@ export function llevarA(elemento, bloque = 'start') {
   const poco = typeof matchMedia === 'function' && matchMedia('(prefers-reduced-motion: reduce)').matches;
   elemento.scrollIntoView?.({ block: bloque, behavior: poco ? 'auto' : 'smooth' });
 }
+
+// Copia un texto al portapapeles (con un respaldo para navegadores que no lo permiten). Devuelve true si se copió.
+export async function copiarTexto(texto) {
+  try { await navigator.clipboard.writeText(texto); return true; } catch { /* se prueba el respaldo */ }
+  const t = document.createElement('textarea');
+  t.setAttribute('aria-hidden', 'true'); t.setAttribute('tabindex', '-1'); t.readOnly = true; t.className = 'cp-oculto';
+  t.value = texto; document.body.append(t); t.select();
+  let bien = false;
+  try { bien = document.execCommand('copy'); } catch { bien = false; }
+  t.remove();
+  return bien;
+}

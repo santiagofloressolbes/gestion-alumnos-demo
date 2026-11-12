@@ -2,6 +2,7 @@
 import { getAlumnos, getOfertas, getListas, getRondas, getAplicaciones, getHistorial, hayRondas, recargar, getEstadoFuente, puedeEscribirRondas, estadoEscrituraRondas } from '../data/index.js';
 import { navegacion } from '../util/navegacion.js';
 import { el, svgFlecha, plural } from '../util/dom.js';
+import { tipoDeEstado } from '../util/correo.js';
 import { rondasDeOferta, aplicacionesDeRonda, aplicacionesDeAlumno, resumenEstados, historialDe, nombreAlumno, claseEstado, ESTADO_DESCARTE } from '../util/rondas.js';
 import { fechaLarga } from './entrevista.js';
 import { tarjetaError } from './error-datos.js';
@@ -130,7 +131,8 @@ export async function pintarAplicacion(raiz, id) {
       el('h2', { class: 'nombre' }, nombreAl),
       el('p', { class: 'sub' }, nombreOf),
       el('div', { class: 'chips' }, insigniaEstado(a.estado), el('span', { class: 'chip' }, 'Ronda ' + a.numeroRonda)),
-      puedeEscribirRondas() && el('a', { class: 'primary', id: 'ap-estado', href: `#/aplicacion/${encodeURIComponent(a.id)}/estado` }, 'Cambiar estado')),
+      puedeEscribirRondas() && el('a', { class: 'primary', id: 'ap-estado', href: `#/aplicacion/${encodeURIComponent(a.id)}/estado` }, 'Cambiar estado'),
+      alumno && oferta && tipoDeEstado(a.estado) && el('a', { class: 'secondary', id: 'ap-correo', href: `#/aplicacion/${encodeURIComponent(a.id)}/correo` }, 'Borrador de correo')),
 
     el('section', { class: 'card', 'aria-label': 'Datos' },
       el('h2', {}, 'La solicitud'),
