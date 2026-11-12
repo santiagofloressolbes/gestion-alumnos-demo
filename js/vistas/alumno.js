@@ -8,6 +8,7 @@ import { el } from '../util/dom.js';
 import { avatar } from '../util/avatar.js';
 import { enlaceCV } from '../util/cv.js';
 import { navegacion } from '../util/navegacion.js';
+import { tarjetaAvisosAlumno } from './avisos.js';
 
 // Una línea "etiqueta / valor". Sin valor: se omite (opcional) o se muestra "No indicado".
 function campo(etiqueta, valor, { opcional = false, texto = false } = {}) {
@@ -44,6 +45,8 @@ export async function pintarAlumno(raiz, id) {
   raiz.replaceChildren(...[
     navegacion.origen === 'buscar'
       ? el('a', { class: 'volver', href: '#/buscar' }, 'Buscar')
+      : navegacion.origen === 'avisos'
+      ? el('a', { class: 'volver', href: '#/avisos/' + navegacion.avisosTipo }, 'Avisos')
       : el('a', { class: 'volver', href: '#/master/' + encodeURIComponent(a.master) }, a.master),
 
     el('section', { class: 'card cabecera', 'aria-label': 'Alumno' },
@@ -56,6 +59,8 @@ export async function pintarAlumno(raiz, id) {
             cv.externo ? 'Ver CV' : 'Ver CV (ejemplo)')
         : el('span', { class: 'primary desactivado', role: 'link', 'aria-disabled': 'true' }, 'Sin CV'),
       el('a', { class: 'secondary', id: 'al-compartir', href: `#/alumno/${encodeURIComponent(a.id)}/compartir` }, 'Compartir perfil')),
+
+    tarjetaAvisosAlumno(a, d),
 
     tarjeta('Situación',
       campo('Nacionalidad', nacionalidades),

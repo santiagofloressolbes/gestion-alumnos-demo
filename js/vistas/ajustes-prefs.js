@@ -34,8 +34,7 @@ export function tarjetaAvisos() {
   const decir = (t, bien) => { estado.textContent = bien ? t : ''; estado.hidden = !(bien && t); error.textContent = bien ? '' : t; error.hidden = !t || bien; };
   const limpiarErrores = () => { for (const c of CAMPOS) { errores[c.clave].hidden = true; inputs[c.clave].removeAttribute('aria-invalid'); } };
 
-  const guardar = e => {
-    e.preventDefault();
+  const guardar = () => {
     limpiarErrores(); decir('', true);
     const r = validarUmbrales(Object.fromEntries(CAMPOS.map(c => [c.clave, inputs[c.clave].value])));
     if (!r.umbrales) {
@@ -63,12 +62,13 @@ export function tarjetaAvisos() {
     decir('Valores por defecto restablecidos.', true);
   };
 
+  const enter = e => { if (e.key === 'Enter' && e.target.tagName === 'INPUT') { e.preventDefault(); guardar(); } };   // Enter en un campo = Guardar (sin <form>, para no mezclarse con los formularios de la app)
   return el('section', { class: 'card', id: 'aj-avisos', 'aria-labelledby': 'aj-av-titulo' },
     el('h2', { id: 'aj-av-titulo' }, 'Avisos de alumnos'),
     el('p', { class: 'sub' }, '«Sin solicitudes»: en esos días se difundieron ofertas y el alumno no ha aplicado a ninguna. «Aplica a todo»: ha aplicado a casi todas. Son solo avisos: nunca bloquean ni ocultan nada.'),
-    el('form', { novalidate: true, onsubmit: guardar },
+    el('div', { role: 'group', 'aria-labelledby': 'aj-av-titulo', onkeydown: enter },
       filas, error, estado,
-      el('button', { class: 'primary', type: 'submit', id: 'aj-av-guardar' }, 'Guardar'),
+      el('button', { class: 'primary', type: 'button', id: 'aj-av-guardar', onclick: guardar }, 'Guardar'),
       el('button', { class: 'secondary', type: 'button', id: 'aj-av-defecto', onclick: porDefecto }, 'Valores por defecto')),
     el('p', { class: 'sub' }, 'Se guardan solo en este móvil: cada móvil tiene los suyos.'));
 }
@@ -78,8 +78,7 @@ export function tarjetaFirma() {
   const error = el('p', { class: 'error', role: 'alert', id: 'aj-fi-error', hidden: true });
   const campo = el('input', { type: 'text', id: 'aj-firma', value: leerFirma(), maxlength: String(MAX_FIRMA), autocomplete: 'off', placeholder: 'Tu nombre', 'aria-describedby': 'aj-firma-ayuda',
     oninput: () => { estado.hidden = true; error.hidden = true; } });
-  const guardar = e => {
-    e.preventDefault();
+  const guardar = () => {
     const f = limpiarFirma(campo.value);
     campo.value = f;
     const bien = guardarFirma(f) && leerFirma() === f;
@@ -88,13 +87,14 @@ export function tarjetaFirma() {
     estado.textContent = bien ? (f ? 'Firma guardada en este móvil.' : 'Firma borrada.') : '';
     estado.hidden = !bien;
   };
+  const enter = e => { if (e.key === 'Enter' && e.target.tagName === 'INPUT') { e.preventDefault(); guardar(); } };
   return el('section', { class: 'card', id: 'aj-firma-tarjeta', 'aria-labelledby': 'aj-fi-titulo' },
     el('h2', { id: 'aj-fi-titulo' }, 'Firma de los correos'),
     el('p', { class: 'sub' }, 'Sale al final de los borradores de seguimiento. Solo el nombre.'),
-    el('form', { novalidate: true, onsubmit: guardar },
+    el('div', { role: 'group', 'aria-labelledby': 'aj-fi-titulo', onkeydown: enter },
       el('div', { class: 'campo-form' },
         el('label', { for: 'aj-firma' }, 'Tu nombre'), campo,
         el('p', { class: 'sub ayuda', id: 'aj-firma-ayuda' }, `Hasta ${MAX_FIRMA} caracteres. Se guarda solo en este móvil.`)),
       error, estado,
-      el('button', { class: 'primary', type: 'submit', id: 'aj-fi-guardar' }, 'Guardar firma')));
+      el('button', { class: 'primary', type: 'button', id: 'aj-fi-guardar', onclick: guardar }, 'Guardar firma')));
 }

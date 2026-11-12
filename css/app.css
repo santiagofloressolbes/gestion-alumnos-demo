@@ -254,3 +254,20 @@ button:disabled{opacity:.7;cursor:progress}
 .diag{gap:.75rem;margin-bottom:1rem}
 .diag .campo dt{font-size:.8125rem}
 .diag .campo dd{font-size:.9375rem;font-variant-numeric:tabular-nums}
+
+/* ---------- Avisos de alumnos (v20) ---------- */
+#in-avisos{margin-bottom:1.5rem}
+.avisos-resumen{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:.5rem}
+.aviso-fila{display:flex;align-items:center;gap:1rem;min-height:4.5rem;padding:1rem;border-radius:1.5rem;background:var(--inp);color:var(--cink);text-decoration:none}
+.aviso-fila:active{filter:brightness(1.15)}
+.aviso-fila svg{flex:none;width:1.5rem;height:1.5rem;stroke:var(--tab-on);fill:none;stroke-width:2.2;stroke-linecap:round;stroke-linejoin:round}
+.etiqueta-aviso{align-self:flex-start;margin-top:.25rem;padding:.125rem .75rem;border-radius:6.1875rem;border:1.5px solid var(--tab-on);color:var(--tab-on);font-size:.8125rem;font-weight:700}   /* el rojo solo como texto/borde */
+.avisos-lista{gap:1rem}
+.aviso-item{background:var(--card);border-radius:1.5rem;padding:.5rem .5rem 1rem}
+.aviso-item .alumno{padding:.5rem}
+.aviso-motivo{margin:0 .5rem 1rem;color:var(--cink);overflow-wrap:anywhere}
+.aviso-silencio{margin:-.5rem .5rem 1rem;font-weight:600}
+.aviso-item .secondary{width:calc(100% - 1rem);margin:0 .5rem}
+.aviso-ficha{margin-top:1rem;padding-top:1rem;border-top:1px solid var(--line)}
+.aviso-ficha .aviso-motivo,.aviso-ficha .aviso-silencio{margin-left:0;margin-right:0}
+.aviso-ficha .secondary{width:100%}

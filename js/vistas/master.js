@@ -4,6 +4,7 @@ import { tarjetaError } from './error-datos.js';
 import { el, svgFlecha, plural } from '../util/dom.js';
 import { avatar } from '../util/avatar.js';
 import { navegacion } from '../util/navegacion.js';
+import { avisosActivosPorAlumno, etiquetaAviso } from './avisos.js';
 
 export const volver = () => el('a', { class: 'volver', href: '#/' }, 'Inicio');
 
@@ -26,22 +27,24 @@ export async function pintarMaster(raiz, nombre) {
   const lista = alumnos.filter(a => a.master === nombre)
     .sort((a, b) => `${a.apellidos} ${a.nombre}`.localeCompare(`${b.apellidos} ${b.nombre}`, 'es'));
 
+  const avisosDe = await avisosActivosPorAlumno();
   raiz.replaceChildren(
     volver(),
     el('h2', { class: 'seccion' }, plural(lista.length, 'alumno', 'alumnos')),
     lista.length
-      ? el('ul', { class: 'alumnos', 'aria-label': 'Alumnos de ' + nombre }, lista.map(a => fila(a, 'master')))
+      ? el('ul', { class: 'alumnos', 'aria-label': 'Alumnos de ' + nombre }, lista.map(a => fila(a, 'master', false, avisosDe(a.id))))
       : el('div', { class: 'card' }, el('p', { class: 'sub' }, 'Este máster todavía no tiene alumnos.')));
 }
 
 // Dato breve: a qué área quiere ir y si busca prácticas o empleo. En la búsqueda se añade el máster.
-export function fila(a, origen, conMaster = false) {
+export function fila(a, origen, conMaster = false, avisos = []) {
   const breve = [a.areaDestino, a.disponibilidad].filter(Boolean).join(' · ');
   return el('li', {}, el('a', { class: 'alumno', href: '#/alumno/' + encodeURIComponent(a.id), onclick: () => { navegacion.origen = origen; } },
     avatar(a),
     el('span', { class: 'alumno-texto' },
       el('b', {}, `${a.nombre} ${a.apellidos}`.trim()),
       breve && el('span', { class: 'sub' }, breve),
-      conMaster && el('span', { class: 'sub' }, a.master)),
+      conMaster && el('span', { class: 'sub' }, a.master),
+      avisos.length > 0 && el('span', { class: 'etiqueta-aviso' }, etiquetaAviso(avisos))),
     svgFlecha()));
 }

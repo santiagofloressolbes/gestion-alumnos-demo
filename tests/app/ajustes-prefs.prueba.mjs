@@ -24,6 +24,7 @@ console.log('1. Valores por defecto y etiquetas');
   chk(await pg.getAttribute('#aj-av-dias', 'inputmode') === 'numeric', 'teclado numérico en el iPhone');
   chk(await pg.$eval('#aj-av-dias', e => parseFloat(getComputedStyle(e).fontSize)) >= 16, 'letra de 16 px o más (el iPhone no amplía al enfocar)');
 
+  chk(await pg.$$eval('#v-ajustes form, #v-ajustes button[type=submit]', e => e.length) === 0, 'las tarjetas de Ajustes no usan <form> ni botones «submit» (no se mezclan con los formularios de la app)');
   console.log('2. Guardar valores nuevos');
   await poner(pg, ['14', '2', '4', '70']);
   await pg.click('#aj-av-guardar');
@@ -36,6 +37,10 @@ console.log('1. Valores por defecto y etiquetas');
   await poner(pg, ['30', '3', '5', '80']); await pg.click('#aj-av-guardar');
   chk(await guardado(pg, 'gad.avisos') === null, 'guardar los valores por defecto no deja nada guardado');
 
+  await poner(pg, ['15', '3', '5', '80']); await pg.focus('#aj-av-dias'); await pg.keyboard.press('Enter');
+  chk(JSON.parse(await guardado(pg, 'gad.avisos')).dias === 15, 'Enter en un campo = Guardar');
+  await pg.fill('#aj-firma', 'Eva'); await pg.focus('#aj-firma'); await pg.keyboard.press('Enter');
+  chk(await guardado(pg, 'gad.firma') === 'Eva', 'Enter en la firma = Guardar');
   console.log('3. Valores incorrectos: se dice cuál, no se guarda nada');
   await poner(pg, ['14', '2', '4', '70']); await pg.click('#aj-av-guardar');
   const antes = await guardado(pg, 'gad.avisos');

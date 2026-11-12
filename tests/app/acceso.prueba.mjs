@@ -78,8 +78,8 @@ import { b, nuevo, chk, almacen, conectar, terminar, BASE, URL_OK, CLAVE_PRUEBA 
   const sesion = await pg.evaluate(() => JSON.stringify(sessionStorage));
   chk(!sesion.includes('Ana') && sesion === '{}', 'nada en sessionStorage');
   const total = mundo.hojas.Alumnos.m.length - 1;
-  const textoInicio = await pg.innerText('#v-inicio');
-  const suma = [...textoInicio.matchAll(/(\d+) alumnos?/g)].slice(0, -1).map(m => +m[1]).reduce((a, c) => a + c, 0);
+  const textoInicio = await pg.innerText('#v-inicio .masters');   // solo los botones de máster (la tarjeta de Avisos también cuenta alumnos)
+  const suma = [...textoInicio.matchAll(/(\d+) alumnos?/g)].map(m => +m[1]).reduce((a, c) => a + c, 0);
   chk(suma === total, `alumnos en pantalla (${suma}) = filas del Sheet (${total})`);
   chk(!/Conexión/.test(textoInicio), 'Inicio ya no lleva la tarjeta Conexión (está en Ajustes)');
   await pg.click('#tabs a[data-tab=ajustes]'); await pg.waitForSelector('#v-ajustes .conexion');

@@ -10,6 +10,7 @@ import { pintarOfertas, pintarOferta } from './vistas/ofertas.js';
 import { pintarFormOferta } from './vistas/oferta-form.js';
 import { pintarAplicacion } from './vistas/rondas.js';
 import { pintarCompartir } from './vistas/compartir.js';
+import { pintarAvisos, pintarAvisosInicio } from './vistas/avisos.js';
 import { pintarFormRonda, pintarFormAplicacion, pintarFormEstado } from './vistas/rondas-form.js';
 import { navegacion } from './util/navegacion.js';
 import { getModo } from './data/index.js';
@@ -37,6 +38,7 @@ function rutaActual() {
     if ((m = h.match(/^oferta\/([^/]+)\/editar$/))) return { vista: 'oferta-form', valor: decodeURIComponent(m[1]), pestana: 'ofertas', titulo: 'Editar oferta' };
     if ((m = h.match(/^oferta\/([^/]+)$/))) return { vista: 'oferta', valor: decodeURIComponent(m[1]), pestana: 'ofertas', titulo: 'Oferta' };
   } catch { /* dirección mal escrita: se vuelve al inicio */ }
+  if ((m = h.match(/^avisos\/(sin-solicitudes|aplica-a-todo)$/))) return { vista: 'avisos', valor: m[1], pestana: 'inicio', titulo: m[1] === 'sin-solicitudes' ? 'Sin solicitudes' : 'Aplica a todo' };
   if (h === 'buscar') return { vista: 'buscar', pestana: 'buscar', titulo: 'Buscar' };
   if (h === 'ofertas') return { vista: 'ofertas', pestana: 'ofertas', titulo: 'Ofertas' };
   if (h === 'ajustes') return { vista: 'ajustes', pestana: 'ajustes', titulo: 'Ajustes' };
@@ -67,6 +69,8 @@ async function pintar() {
   if (r.vista === 'acceso') pintarAcceso($('#v-acceso'));
   if (r.vista === 'ajustes') pintarAjustes($('#v-ajustes'));
   if (r.vista === 'inicio' && !inicioPintado) { inicioPintado = true; await pintarInicio($('#v-inicio')); }
+  else if (r.vista === 'inicio') await pintarAvisosInicio($('#in-avisos'));   // los avisos pueden haber cambiado (silenciar, nuevos umbrales)
+  if (r.vista === 'avisos') await pintarAvisos($('#v-avisos'), r.valor);
   if (r.vista === 'master') await pintarMaster($('#v-master'), r.valor);
   if (r.vista === 'alumno') await pintarAlumno($('#v-alumno'), r.valor);
   if (r.vista === 'cv') await pintarCV($('#v-cv'), r.valor);
