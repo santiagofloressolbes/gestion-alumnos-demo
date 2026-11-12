@@ -2,6 +2,7 @@
 // Solo mide la ventana y el modo de la app: ningún dato personal, ninguna clave, ninguna dirección.
 import { el } from '../util/dom.js';
 import { plegable } from './plegable.js';
+import { copiarTexto } from '../util/trabajo.js';
 
 // Interruptor de PRUEBA (v21): fuerza #app a la altura de screen.height para ver si así desaparece la franja. NO se guarda en el móvil,
 // se apaga solo a los 60 s (por si la barra de pestañas quedase fuera de la pantalla) y siempre empieza apagado al abrir la app.
@@ -75,8 +76,7 @@ export function tarjetaDiagnostico() {
   };
   const texto = () => lineasDiagnostico().map(([k, v]) => `${k}: ${v}`).join('\n');
   const copiar = el('button', { class: 'secondary', type: 'button', id: 'dg-copiar', onclick: async () => {
-    let bien = false;
-    try { await navigator.clipboard.writeText(texto()); bien = true; } catch { bien = false; }
+    const bien = await copiarTexto(texto());
     estado.hidden = false;
     estado.textContent = bien ? 'Copiado. Pégalo en el chat.' : 'No se ha podido copiar. Apunta los números a mano.';
   } }, 'Copiar diagnóstico');

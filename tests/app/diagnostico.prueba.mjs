@@ -37,7 +37,7 @@ console.log('3. Privacidad');
 const texto = await pg.innerText('#aj-diagnostico');
 chk(!texto.includes(CLAVE_PRUEBA) && !/script\.google|AKfycb|https?:\/\//.test(texto), 'no aparece la clave ni la dirección del script');
 chk(!/Quintero|Lucía|@/.test(texto), 'no aparecen nombres ni correos');
-await pg.evaluate(() => { navigator.clipboard.writeText = async t => { window.__copiado = t; }; });
+await pg.evaluate(() => { navigator.clipboard.write = async i => { window.__copiado = await (await i[0].getType('text/plain')).text(); }; });
 await pg.click('#dg-copiar');
 await pg.waitForSelector('#dg-estado:not([hidden])');
 const copiado = await pg.evaluate(() => window.__copiado);

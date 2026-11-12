@@ -39,14 +39,24 @@ export function llevarA(elemento, bloque = 'start') {
   elemento.scrollIntoView?.({ block: bloque, behavior: poco ? 'auto' : 'smooth' });
 }
 
-// Copia un texto al portapapeles (con un respaldo para navegadores que no lo permiten). Devuelve true si se copió.
+// Copia un texto al portapapeles COMO TEXTO PLANO, y nada más. Devuelve true si se copió.
+// Se escribe un único tipo, text/plain, desde una cadena (nunca desde un elemento de la página: un enlace, una selección o
+// un bloque con formato se copiarían con HTML y al pegar saldría con formato, por ejemplo subrayado como enlace).
+// Orden: ClipboardItem solo con text/plain → writeText (también solo texto) → un textarea oculto (un textarea solo da texto plano).
 export async function copiarTexto(texto) {
-  try { await navigator.clipboard.writeText(texto); return true; } catch { /* se prueba el respaldo */ }
-  const t = document.createElement('textarea');
-  t.setAttribute('aria-hidden', 'true'); t.setAttribute('tabindex', '-1'); t.readOnly = true; t.className = 'cp-oculto';
-  t.value = texto; document.body.append(t); t.select();
+  const t = String(texto ?? '');
+  try {
+    if (typeof ClipboardItem === 'function' && navigator.clipboard?.write) {
+      await navigator.clipboard.write([new ClipboardItem({ 'text/plain': new Blob([t], { type: 'text/plain' }) })]);
+      return true;
+    }
+  } catch { /* se prueba el siguiente */ }
+  try { await navigator.clipboard.writeText(t); return true; } catch { /* se prueba el respaldo */ }
+  const area = document.createElement('textarea');
+  area.setAttribute('aria-hidden', 'true'); area.setAttribute('tabindex', '-1'); area.readOnly = true; area.className = 'cp-oculto';
+  area.value = t; document.body.append(area); area.select();
   let bien = false;
   try { bien = document.execCommand('copy'); } catch { bien = false; }
-  t.remove();
+  area.remove();
   return bien;
 }

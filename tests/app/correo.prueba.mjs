@@ -154,7 +154,7 @@ const sinScrollLateral = pg => pg.evaluate(() => document.documentElement.scroll
   chk(/^Subject:/.test(await pg.innerText('#co-vista')), 'y vuelve a English');
 
   console.log('10. Copiar y abrir el correo');
-  await pg.evaluate(() => { navigator.clipboard.writeText = async t => { window.__copiado = t; }; });
+  await pg.evaluate(() => { navigator.clipboard.write = async i => { window.__copiado = await (await i[0].getType('text/plain')).text(); }; });
   await pg.click('#co-copiar');
   await pg.waitForSelector('#co-estado:not([hidden])');
   const copiado = await pg.evaluate(() => window.__copiado);

@@ -3,7 +3,7 @@
 import { recargar } from '../data/index.js';
 import { el } from '../util/dom.js';
 import { navegacion } from '../util/navegacion.js';
-import { avisoFlotante } from '../util/trabajo.js';
+import { avisoFlotante, copiarTexto as copiarAlPortapapeles } from '../util/trabajo.js';
 import { CAMPOS_BASE, CAMPOS_SENSIBLES, BASE_POR_DEFECTO, MAX_PERFILES, textoPerfiles, nombreCompleto, sensiblesMarcados, cvSinHttps } from '../util/compartir.js';
 import { datosRondas } from './rondas.js';
 import { tarjetaError } from './error-datos.js';
@@ -86,15 +86,7 @@ export async function pintarCompartir(raiz, { idOferta = '', idAlumno = '' } = {
 
   async function copiarTexto() {
     if (!actual) return;
-    const texto = actual;
-    let bien = false;
-    try { await navigator.clipboard.writeText(texto); bien = true; }
-    catch {
-      const t = el('textarea', { 'aria-hidden': 'true', tabindex: '-1', readonly: true, class: 'cp-oculto' });   // respaldo para navegadores sin portapapeles
-      t.value = texto; document.body.append(t); t.select();
-      try { bien = document.execCommand('copy'); } catch { bien = false; }
-      t.remove();
-    }
+    const bien = await copiarAlPortapapeles(actual);   // solo texto plano (ver util/trabajo.js)
     if (bien) { decir('Copiado. Pégalo donde quieras: desde ahora el texto ya no se controla desde la app.', true); avisoFlotante('Copiado.'); }
     else decir('No se ha podido copiar. Mantén pulsado el texto de la vista previa y elige «Copiar».', false);
   }
