@@ -3,7 +3,7 @@ import { nuevo, chk, terminar, BASE, URL_OK, CLAVE_PRUEBA } from './ayudas.mjs';
 
 const entrar = async () => {
   const t = await nuevo();
-  await t.pg.addInitScript(([u, c]) => { if (!sessionStorage.getItem('ini')) { localStorage.setItem('gad.url', u); localStorage.setItem('gad.clave', c); sessionStorage.setItem('ini', '1'); } }, [URL_OK, CLAVE_PRUEBA]);
+  await t.pg.addInitScript(([u, c]) => { if (!sessionStorage.getItem('ini')) { localStorage.setItem('gad.ajustes', '["conexion","avisos","firma","version","diagnostico"]'); localStorage.setItem('gad.url', u); localStorage.setItem('gad.clave', c); sessionStorage.setItem('ini', '1'); } }, [URL_OK, CLAVE_PRUEBA]);
   return t;
 };
 const ir = async (pg) => { await pg.goto(BASE + '#/ajustes'); await pg.waitForSelector('#aj-avisos'); };
@@ -82,7 +82,7 @@ console.log('1. Valores por defecto y etiquetas');
   console.log('6. Nada va al Sheet');
   const guardarGoogle = log.peticiones.filter(p => /"action":"(guardar|registrar|crear|cambiar)/.test(p.cuerpo || ''));
   chk(guardarGoogle.length === 0, 'ninguna petición de guardar al script de Google');
-  chk(Object.keys(await pg.evaluate(() => ({ ...localStorage }))).sort().join() === 'gad.clave,gad.url', 'al final no queda nada guardado de más');
+  chk(Object.keys(await pg.evaluate(() => ({ ...localStorage }))).sort().join() === 'gad.ajustes,gad.clave,gad.url', 'al final no queda nada guardado de más');
   chk(log.consola.length === 0, 'sin errores de consola/CSP: ' + log.consola.join(' | '));
   await ctx.close();
 }

@@ -1,5 +1,6 @@
 // Ajustes: los umbrales de los avisos y la firma de los correos. Todo se guarda solo en ESTE móvil (no en el Sheet).
 import { el } from '../util/dom.js';
+import { plegable } from './plegable.js';
 import { UMBRALES_POR_DEFECTO, LIMITES, validarUmbrales } from '../util/avisos.js';
 import { leerUmbrales, guardarUmbrales, restablecerUmbrales, leerFirma, guardarFirma, limpiarFirma, MAX_FIRMA } from '../util/preferencias.js';
 
@@ -63,8 +64,7 @@ export function tarjetaAvisos() {
   };
 
   const enter = e => { if (e.key === 'Enter' && e.target.tagName === 'INPUT') { e.preventDefault(); guardar(); } };   // Enter en un campo = Guardar (sin <form>, para no mezclarse con los formularios de la app)
-  return el('section', { class: 'card', id: 'aj-avisos', 'aria-labelledby': 'aj-av-titulo' },
-    el('h2', { id: 'aj-av-titulo' }, 'Avisos de alumnos'),
+  return plegable({ id: 'aj-avisos', clave: 'avisos', idTitulo: 'aj-av-titulo', titulo: 'Avisos de alumnos' },
     el('p', { class: 'sub' }, '«Sin solicitudes»: en esos días se difundieron ofertas y el alumno no ha aplicado a ninguna. «Aplica a todo»: ha aplicado a casi todas. Son solo avisos: nunca bloquean ni ocultan nada.'),
     el('div', { role: 'group', 'aria-labelledby': 'aj-av-titulo', onkeydown: enter },
       filas, error, estado,
@@ -88,8 +88,7 @@ export function tarjetaFirma() {
     estado.hidden = !bien;
   };
   const enter = e => { if (e.key === 'Enter' && e.target.tagName === 'INPUT') { e.preventDefault(); guardar(); } };
-  return el('section', { class: 'card', id: 'aj-firma-tarjeta', 'aria-labelledby': 'aj-fi-titulo' },
-    el('h2', { id: 'aj-fi-titulo' }, 'Firma de los correos'),
+  return plegable({ id: 'aj-firma-tarjeta', clave: 'firma', idTitulo: 'aj-fi-titulo', titulo: 'Firma de los correos' },
     el('p', { class: 'sub' }, 'Sale al final de los borradores de seguimiento. Solo el nombre.'),
     el('div', { role: 'group', 'aria-labelledby': 'aj-fi-titulo', onkeydown: enter },
       el('div', { class: 'campo-form' },

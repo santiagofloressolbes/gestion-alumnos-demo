@@ -6,13 +6,14 @@ import { b, nuevo, chk, terminar, BASE, URL_OK, CLAVE_PRUEBA } from './ayudas.mj
 
 const RAIZ = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../..');
 const leer = f => fs.readFileSync(path.join(RAIZ, f), 'utf8');
-const entrar = async (modo = 'script') => {
+const entrar = async (modo = 'script', abrirTodo = true) => {
   const t = await nuevo();
-  await t.pg.addInitScript(([m, u, c]) => {
+  await t.pg.addInitScript(([m, u, c, todo]) => {
     if (sessionStorage.getItem('ini')) return;
+    if (todo) localStorage.setItem('gad.ajustes', '["conexion","avisos","firma","version","diagnostico"]');
     if (m === 'demo') localStorage.setItem('gad.modo', 'demo'); else { localStorage.setItem('gad.url', u); localStorage.setItem('gad.clave', c); }
     sessionStorage.setItem('ini', '1');
-  }, [modo, URL_OK, CLAVE_PRUEBA]);
+  }, [modo, URL_OK, CLAVE_PRUEBA, abrirTodo]);
   return t;
 };
 const ir = async (pg, hash, sel) => { await pg.goto(BASE + hash); await pg.waitForSelector(sel); };
@@ -74,7 +75,7 @@ const visible = (pg, sel) => pg.evaluate(s => { const e = document.querySelector
   chk(/Estás viendo la demo/.test(await pg.innerText('#v-ajustes')) && (await pg.$$('#aj-olvidar')).length === 0 && /Conectar con el Sheet de prueba/.test(await pg.innerText('#v-ajustes')), 'demo: lo explica y ofrece conectar (sin "Olvidar acceso")');
   await ctx.close();
   // olvidar acceso desde Ajustes
-  ({ pg, ctx } = await entrar('script'));
+  ({ pg, ctx } = await entrar('script', false));
   pg.on('dialog', d => d.accept());
   await ir(pg, '#/ajustes', '#aj-olvidar');
   await pg.click('#aj-olvidar'); await pg.waitForSelector('#ac-url');
@@ -147,7 +148,7 @@ const visible = (pg, sel) => pg.evaluate(s => { const e = document.querySelector
   console.log('6. Con service worker');
   const ctx = await b.newContext({ viewport: { width: 390, height: 800 } });
   const pg = await ctx.newPage();
-  await pg.addInitScript(() => localStorage.setItem('gad.modo', 'demo'));
+  await pg.addInitScript(() => { localStorage.setItem('gad.modo', 'demo'); localStorage.setItem('gad.ajustes', '["version"]'); });
   await pg.goto(BASE + '#/ajustes');
   await pg.waitForSelector('#aj-version');
   await pg.evaluate(() => navigator.serviceWorker.ready);

@@ -1,6 +1,7 @@
 // TEMPORAL (v20): mide la pantalla del móvil para encontrar la franja bajo la barra de pestañas. Se quita en la v21, con el arreglo.
 // Solo mide la ventana y el modo de la app: ningún dato personal, ninguna clave, ninguna dirección.
 import { el } from '../util/dom.js';
+import { plegable } from './plegable.js';
 
 // Interruptor de PRUEBA (v21): fuerza #app a la altura de screen.height para ver si así desaparece la franja. NO se guarda en el móvil,
 // se apaga solo a los 60 s (por si la barra de pestañas quedase fuera de la pantalla) y siempre empieza apagado al abrir la app.
@@ -97,8 +98,7 @@ export function tarjetaDiagnostico() {
     window.visualViewport?.removeEventListener('resize', alCambiar);
   };
 
-  const t = el('section', { class: 'card', id: 'aj-diagnostico', 'aria-labelledby': 'dg-titulo' },
-    el('h2', { id: 'dg-titulo' }, 'Diagnóstico (temporal)'),
+  const t = plegable({ id: 'aj-diagnostico', clave: 'diagnostico', idTitulo: 'dg-titulo', titulo: 'Diagnóstico (temporal)' },
     el('p', { class: 'sub' }, 'Solo mide la ventana de este móvil, para arreglar la franja bajo la barra. No lleva datos personales ni claves. Se quitará en la próxima versión.'),
     lista, pruebas, copiar, estado);
   pintar();

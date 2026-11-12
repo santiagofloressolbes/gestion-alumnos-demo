@@ -6,6 +6,7 @@ import { buscarActualizacion } from '../util/actualizar.js';
 import { VERSION } from '../version.js';
 import { tarjetaDiagnostico } from './diagnostico.js';
 import { tarjetaAvisos, tarjetaFirma } from './ajustes-prefs.js';
+import { plegable } from './plegable.js';
 
 export const AVISO_LEGAL = 'Proyecto personal de demostración. Todos los datos son ficticios. No afiliado a LaLiga ni a LaLiga Business School.';
 
@@ -23,8 +24,7 @@ export function pintarAjustes(raiz) {
   } }, 'Buscar actualización');
 
   raiz.replaceChildren(
-    el('section', { class: 'card conexion', 'aria-labelledby': 'cx-titulo' },
-      el('h2', { id: 'cx-titulo' }, 'Conexión'),
+    plegable({ id: 'aj-conexion', clave: 'conexion', idTitulo: 'cx-titulo', titulo: 'Conexión', clase: 'conexion' },
       el('p', { class: 'sub' }, demo
         ? 'Estás viendo la demo, con datos de ejemplo de la app. No se puede guardar nada.'
         : 'Conectado al Sheet de prueba. La dirección y la clave están guardadas solo en este móvil.'),
@@ -37,8 +37,7 @@ export function pintarAjustes(raiz) {
           } }, 'Olvidar acceso')),
     tarjetaAvisos(),
     tarjetaFirma(),
-    el('section', { class: 'card', 'aria-labelledby': 'ver-titulo' },
-      el('h2', { id: 'ver-titulo' }, 'Versión de la app'),
+    plegable({ id: 'aj-version-tarjeta', clave: 'version', idTitulo: 'ver-titulo', titulo: 'Versión de la app' },
       el('p', { class: 'version', id: 'aj-version' }, 'Versión ' + VERSION),
       el('p', { class: 'sub' }, '¿Has publicado cambios y no los ves? Pulsa aquí para traerlos. No hace falta cerrar la app.'),
       buscar, resultado),

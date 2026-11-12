@@ -4,7 +4,7 @@ import { nuevo, chk, terminar, BASE, URL_OK, CLAVE_PRUEBA } from './ayudas.mjs';
 
 const entrar = async () => {
   const t = await nuevo();
-  await t.pg.addInitScript(([u, c]) => { if (!sessionStorage.getItem('ini')) { localStorage.setItem('gad.url', u); localStorage.setItem('gad.clave', c); sessionStorage.setItem('ini', '1'); } }, [URL_OK, CLAVE_PRUEBA]);
+  await t.pg.addInitScript(([u, c]) => { if (!sessionStorage.getItem('ini')) { localStorage.setItem('gad.ajustes', '["conexion","avisos","firma","version","diagnostico"]'); localStorage.setItem('gad.url', u); localStorage.setItem('gad.clave', c); sessionStorage.setItem('ini', '1'); } }, [URL_OK, CLAVE_PRUEBA]);
   return t;
 };
 const valor = (pg, clave) => pg.evaluate(k => { for (const c of document.querySelectorAll('#dg-lista .campo')) if (c.querySelector('dt').textContent === k) return c.querySelector('dd').textContent; return null; }, clave);

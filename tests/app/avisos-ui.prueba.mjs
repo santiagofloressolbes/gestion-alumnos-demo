@@ -6,7 +6,7 @@ const HOY = '2026-11-12T12:00:00';
 const entrar = async ({ extraApps = '', hoy = HOY, ancho = 390, alto = 800 } = {}) => {
   const t = await nuevo();
   await t.ctx.clock.setFixedTime(hoy);
-  await t.pg.addInitScript(() => { if (!sessionStorage.getItem('ini')) { localStorage.setItem('gad.modo', 'demo'); sessionStorage.setItem('ini', '1'); } });
+  await t.pg.addInitScript(() => { if (!sessionStorage.getItem('ini')) { localStorage.setItem('gad.ajustes', '["conexion","avisos","firma","version","diagnostico"]'); localStorage.setItem('gad.modo', 'demo'); sessionStorage.setItem('ini', '1'); } });
   if (extraApps) {
     await t.pg.route('**/datos-mock/Aplicaciones.csv*', async r => {
       const res = await r.fetch();
