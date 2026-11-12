@@ -248,3 +248,9 @@ button:disabled{opacity:.7;cursor:progress}
 .vista-previa{margin:0 0 1rem;padding:1rem;border-radius:1rem;border:1.5px solid var(--line);background:var(--inp);color:var(--cink);font-family:var(--sans);font-size:.875rem;line-height:1.5;white-space:pre-wrap;overflow-wrap:anywhere;max-height:22rem;overflow-y:auto}
 .card .vista-previa+.primary,.card .ok+.primary,.card .error+.primary{margin-top:.5rem}
 .cp-oculto{position:fixed;opacity:0;pointer-events:none}
+
+/* ---------- Diagnóstico temporal (v20) ---------- */
+.sonda-margen{position:fixed;left:0;top:0;width:1px;height:1px;visibility:hidden;pointer-events:none;border:0}
+.diag{gap:.75rem;margin-bottom:1rem}
+.diag .campo dt{font-size:.8125rem}
+.diag .campo dd{font-size:.9375rem;font-variant-numeric:tabular-nums}
