@@ -81,6 +81,15 @@ for (const [guardadoRaro, esperado, que] of [
   await ctx.close();
 }
 
+{
+  // lo raro que había guardado no se arrastra: al guardar de nuevo, solo quedan nombres válidos
+  const { pg, ctx } = await entrar('["<script>","avisos",5,"x;DROP"]');
+  await ir(pg);
+  await pulsa(pg, '#aj-firma-tarjeta summary');
+  chk(await guardado(pg) === '["avisos","firma"]', 'al guardar otra vez se limpian los nombres raros: ' + await guardado(pg));
+  await ctx.close();
+}
+
 console.log('5. Sin almacenamiento');
 {
   const { pg, ctx } = await entrar();
