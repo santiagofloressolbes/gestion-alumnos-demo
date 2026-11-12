@@ -36,6 +36,9 @@ La idea es que quien acompaña a los alumnos pueda, desde el móvil y en pocos t
 | **Ver las solicitudes de un alumno** | En su ficha, en el apartado "Solicitudes". |
 | **Ver qué alumnos encajan con una oferta** | En la ficha de la oferta, la tarjeta "Alumnos que encajan" reparte a **todos** los alumnos en tres grupos (encaja, encaja con reservas, no encaja) y cada fila explica por qué. En la ficha del alumno, "Ofertas que encajan" hace lo mismo al revés. |
 | **Compartir perfiles** | En la ficha de la oferta se marcan hasta 10 alumnos (o, en la ficha de un alumno, "Compartir perfil"), se ve una vista previa con el texto exacto y se envía con el menú de compartir del móvil o se copia. |
+| **Ver avisos sobre los alumnos** | En Inicio, la tarjeta **Avisos** cuenta los alumnos «sin solicitudes» y los que «aplican a todo». Al tocar uno se ve quién es y **por qué ha saltado**, con los números. También sale una marca en la lista del máster y una tarjeta en la ficha. Solo informan: no bloquean nada. Se pueden **silenciar 30 días**. |
+| **Preparar un correo de seguimiento** | En el detalle de una solicitud, **Borrador de correo** (si está en proceso o descartada): se elige español o inglés, se ve el texto exacto y se copia o se abre en la app de correo. No incluye notas, motivos de descarte, situación de trabajo ni estatus migratorio. |
+| **Ajustar los avisos y la firma** | En **Ajustes**: los días, las ofertas y las solicitudes que cuentan para los avisos, y tu nombre para firmar los correos. Se guardan solo en ese móvil. |
 | **Ver la conexión y la versión de la app** | En la pestaña **Ajustes** (la cuarta de la barra de abajo): si estás en la demo o conectado al Sheet, "Olvidar acceso", el número de versión y el botón **Buscar actualización**, que carga la última versión sin tener que cerrar la app. |
 
 Guardar notas, ofertas, rondas y solicitudes solo funciona cuando la app está **conectada a la hoja de cálculo de prueba** (ver más abajo). En la demo se puede mirar todo, pero no guardar nada.
@@ -46,6 +49,7 @@ Esto está pensado para crecer por partes. Aún no hay:
 
 - **Borrar rondas, solicitudes o su historial:** nada se borra desde la app. Si una solicitud ya no vale, se marca como "Descartado".
 - **Decidir por ti:** "Alumnos que encajan" solo ordena y explica; no descarta a nadie ni envía nada a las empresas.
+- **Enviar correos:** los borradores se copian o se abren en tu app de correo; la app no envía nada ni guarda qué se mandó.
 - **Anotar lo que se comparte:** la app no apunta quién compartió qué perfil ni con quién. Es un requisito antes de usar datos reales (ver DECISIONES).
 - **Inicio de sesión personal:** hoy todas las personas autorizadas usan la misma clave.
 - **Crear, borrar o mover alumnos** desde la app. Eso se hace en la hoja de cálculo.
@@ -78,6 +82,19 @@ Si algo no consta (por ejemplo, un alumno sin nacionalidad), se pone **"a revisa
 
 **Compartir perfiles.** Siempre pasa por una **vista previa** con el texto exacto que se enviará. Por defecto solo salen nombre, máster, área y qué busca. Nacionalidad, situación de trabajo, resumen de experiencia y enlace al CV (solo si es `https`) son **datos sensibles** y vienen desmarcados. Las notas de entrevista, el historial y los motivos de descarte **nunca** se incluyen. El máximo es de 10 alumnos por envío. La app no guarda nada de lo compartido.
 
+## Cómo funcionan los avisos y los borradores de correo
+
+**Avisos.** Se calculan en el móvil con las rondas y las solicitudes (sin tocar el Sheet). Con los valores por defecto:
+
+| Aviso | Salta cuando… |
+|---|---|
+| **Sin solicitudes** | En los últimos 30 días se difundieron al menos 3 ofertas y el alumno no ha hecho **ninguna** solicitud. No salta a quien ya está Contratado, y cuenta desde la primera ronda registrada si es más reciente. |
+| **Aplica a todo** | En los últimos 30 días ha hecho al menos 5 solicitudes y a un 80 % o más de las ofertas difundidas. Se añade cuántas de esas ofertas el match marca como «no encaja», pero eso no decide nada. |
+
+Los cuatro números (días, ofertas, solicitudes y porcentaje) se cambian en Ajustes. **Un aviso nunca bloquea nada** y siempre dice por qué ha saltado. «Silenciar 30 días» lo oculta de los contadores hasta esa fecha; se guarda solo en ese móvil.
+
+**Borradores de correo.** Hay dos: **en proceso** (Recibida, En revisión, Enviada a la empresa y Entrevista) y **descartado**, que dice con tacto que la solicitud no continúa e **invita a acercarse** si quiere ir hacia el área de la oferta. Se escriben en español, o en inglés para el MBA en inglés, y se puede cambiar el idioma en la vista previa. El texto solo usa el nombre de pila, el puesto, la empresa y el estado: **nunca** notas de entrevista, motivos de descarte, situación de trabajo ni estatus migratorio. La app no envía nada: se copia o se abre en la app de correo, sin destinatario.
+
 ## Dos formas de usarla
 
 Al abrir la app por primera vez, se elige una de las dos:
@@ -109,4 +126,6 @@ Al abrir la app por primera vez, se elige una de las dos:
 | Este archivo (`README.md`) | Cualquier persona | Qué es la app, qué hace y qué no. |
 | [docs/TECNICO.md](docs/TECNICO.md) | Informática (TI) y quien mantiene la app | Cómo está hecha, cómo se conecta, qué seguridad tiene, sus límites y qué hace falta para integrarla en LaLiga. |
 | [docs/apps-script/GUIA.md](docs/apps-script/GUIA.md) | Quien administra la hoja de prueba | Paso a paso para poner en marcha la conexión con clave. |
+| [docs/PREPARAR-LALIGA.md](docs/PREPARAR-LALIGA.md) | Quien impulsa el proyecto | Qué se puede preparar hoy sin datos reales y qué depende de LaLiga y TI (Microsoft Forms y Entra ID). |
+| [docs/PREGUNTAS-TI.md](docs/PREGUNTAS-TI.md) | Equipo de TI | Las preguntas que hay que contestar antes de usar datos reales. |
 | [DECISIONES.md](DECISIONES.md) | Quien mantiene la app | Qué se decidió, por qué, y los riesgos conocidos. |

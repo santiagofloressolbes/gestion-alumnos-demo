@@ -79,6 +79,10 @@ El script es un "portero" que vive dentro de tu Google Sheet de prueba. La app l
 | `ocupado` | El script estaba atendiendo otra petición. | Reintenta en unos segundos. |
 | `servidor` | Fallo interno. | Mira en el editor, Ejecuciones, el detalle. |
 
+## La versión 20 de la app no cambia el script ni el Sheet
+
+Los avisos de alumnos, los borradores de correo, la firma y el bloque «Diagnóstico» se calculan **dentro de la app**, con los datos que ya llegan. **No hace falta** pegar un `Code.gs` nuevo, ni crear hojas, ni añadir columnas o listas. Los umbrales de los avisos, la firma y los avisos silenciados se guardan solo en el móvil (no en el Sheet), así que cada móvil tiene los suyos.
+
 ## Cómo se ha probado
 
 En `tests/apps-script/` hay un simulador de Google y 389 comprobaciones que ejecutan este mismo `Code.gs`: clave buena y mala, bloqueo, textos con HTML, límites de longitud y fecha, fórmulas, conflictos y que **solo** cambian las celdas previstas (2 en una entrevista; en una oferta, las 12 de la fila nueva o solo las que cambias; en una solicitud nueva, 8 celdas más 7 de su historial). También comprueban que, si Google falla a mitad de guardar, se deshace todo y no queda una solicitud sin su historial. Para repetirlas: `node tests/apps-script/pruebas.mjs`.
