@@ -5,6 +5,7 @@ import { ocupar } from '../util/trabajo.js';
 import { buscarActualizacion } from '../util/actualizar.js';
 import { VERSION } from '../version.js';
 import { tarjetaDiagnostico } from './diagnostico.js';
+import { tarjetaAvisos, tarjetaFirma } from './ajustes-prefs.js';
 
 export const AVISO_LEGAL = 'Proyecto personal de demostración. Todos los datos son ficticios. No afiliado a LaLiga ni a LaLiga Business School.';
 
@@ -34,6 +35,8 @@ export function pintarAjustes(raiz) {
             olvidarAcceso();
             location.replace(location.pathname);
           } }, 'Olvidar acceso')),
+    tarjetaAvisos(),
+    tarjetaFirma(),
     el('section', { class: 'card', 'aria-labelledby': 'ver-titulo' },
       el('h2', { id: 'ver-titulo' }, 'Versión de la app'),
       el('p', { class: 'version', id: 'aj-version' }, 'Versión ' + VERSION),
