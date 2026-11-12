@@ -2,6 +2,22 @@
 // Solo mide la ventana y el modo de la app: ningún dato personal, ninguna clave, ninguna dirección.
 import { el } from '../util/dom.js';
 
+// Interruptor de PRUEBA (v21): fuerza #app a la altura de screen.height para ver si así desaparece la franja. NO se guarda en el móvil,
+// se apaga solo a los 60 s (por si la barra de pestañas quedase fuera de la pantalla) y siempre empieza apagado al abrir la app.
+export const SEGUNDOS_PRUEBA = 60;
+let forzado = false, relojForzado = 0, alApagar = null;
+export function forzarAltura(encendido) {
+  clearTimeout(relojForzado);
+  forzado = !!encendido;
+  const app = document.querySelector('#app');
+  if (app) {
+    if (forzado) { app.style.setProperty('height', screen.height + 'px'); app.style.setProperty('bottom', 'auto'); }
+    else { app.style.removeProperty('height'); app.style.removeProperty('bottom'); }
+  }
+  if (forzado) relojForzado = setTimeout(() => { forzarAltura(false); alApagar?.(); }, SEGUNDOS_PRUEBA * 1000);
+}
+export const alturaForzada = () => forzado;
+
 let quitarAnterior = null;   // al volver a pintar Ajustes se sueltan los avisos de la vez anterior (si no, se acumulan)
 
 const px = n => (Number.isFinite(n) ? String(Math.round(n * 10) / 10).replace('.', ',') + ' px' : 'no disponible');
@@ -42,6 +58,8 @@ export function lineasDiagnostico() {
     ['Borde inferior de la barra', px(rt?.bottom)],
     ['Hueco bajo la barra (innerHeight − borde)', px(rt ? window.innerHeight - rt.bottom : NaN)],
     ['Borde inferior de #app', px(ra?.bottom)],
+    ['Altura de #app', px(ra?.height)],
+    ['Interruptor de prueba (altura forzada)', forzado ? 'ACTIVADO' : 'desactivado'],
     ['Modo standalone (display-mode)', standalone],
     ['navigator.standalone (iOS)', iosStandalone],
     ['Sistema (versión de iOS)', sistema ? `${sistema[1]}.${sistema[2]}` : 'no detectada'],
@@ -62,6 +80,12 @@ export function tarjetaDiagnostico() {
     estado.textContent = bien ? 'Copiado. Pégalo en el chat.' : 'No se ha podido copiar. Apunta los números a mano.';
   } }, 'Copiar diagnóstico');
 
+  const interruptor = el('input', { type: 'checkbox', id: 'dg-forzar', checked: forzado, onchange: () => { forzarAltura(interruptor.checked); pintar(); } });
+  alApagar = () => { interruptor.checked = false; if (lista.isConnected) pintar(); };
+  const pruebas = el('label', { class: 'diag-interruptor', for: 'dg-forzar' }, interruptor,
+    el('span', {}, el('b', {}, 'Probar: forzar la altura de #app a screen.height'),
+      el('span', { class: 'sub' }, `Solo para medir. No se guarda y se apaga solo a los ${SEGUNDOS_PRUEBA} segundos. Si la barra de pestañas desaparece, espera o cierra la app.`)));
+
   quitarAnterior?.();
   const alCambiar = () => { if (lista.isConnected) pintar(); };
   window.addEventListener('resize', alCambiar);
@@ -76,7 +100,7 @@ export function tarjetaDiagnostico() {
   const t = el('section', { class: 'card', id: 'aj-diagnostico', 'aria-labelledby': 'dg-titulo' },
     el('h2', { id: 'dg-titulo' }, 'Diagnóstico (temporal)'),
     el('p', { class: 'sub' }, 'Solo mide la ventana de este móvil, para arreglar la franja bajo la barra. No lleva datos personales ni claves. Se quitará en la próxima versión.'),
-    lista, copiar, estado);
+    lista, pruebas, copiar, estado);
   pintar();
   return t;
 }

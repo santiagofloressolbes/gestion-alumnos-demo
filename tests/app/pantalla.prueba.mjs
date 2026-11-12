@@ -96,6 +96,13 @@ for (const [nombre, ancho, alto, sab, sat] of MODELOS) {
   chk(/\.tabs\{[^}]*padding:[^}]*var\(--sab\)/.test(css), 'la barra de pestañas suma el margen inferior (--sab) a su relleno');
   chk(/html\{[^}]*background:var\(--tab-bg\)/.test(css), 'el fondo de la página es el de la barra de pestañas');
   chk(/#app\{[^}]*position:fixed/.test(css), '#app es position:fixed (ocupa toda la pantalla)');
+  // v21: todo lo que puede verse fuera de la página (theme-color, color de fondo del manifest, html y body) es el color de la barra
+  const man = await (await fetch(BASE + 'manifest.webmanifest')).json();
+  const col = await pg.evaluate(() => { const c = (e, p) => getComputedStyle(e)[p]; return { tabs: c(document.querySelector('#tabs'), 'backgroundColor'), html: c(document.documentElement, 'backgroundColor'), body: c(document.body, 'backgroundColor'), app: c(document.querySelector('#app'), 'backgroundColor') }; });
+  chk(man.background_color === '#101013' && man.theme_color === '#101013', 'manifest: background_color y theme_color = #101013: ' + man.background_color + ' / ' + man.theme_color);
+  chk(await pg.getAttribute('meta[name=theme-color]', 'content') === '#101013', 'meta theme-color = #101013');
+  chk(col.html === col.tabs && col.body === col.tabs && col.tabs === 'rgb(16, 16, 19)', 'html, body y barra: el mismo color #101013: ' + JSON.stringify(col));
+  chk(col.app === 'rgb(23, 23, 27)', 'el contenido (#app) conserva su fondo de siempre (#17171B): ' + col.app);
   chk(await pg.getAttribute('meta[name=apple-mobile-web-app-capable]', 'content') === 'yes', 'app instalable en iPhone (apple-mobile-web-app-capable)');
   await ctx.close();
 }

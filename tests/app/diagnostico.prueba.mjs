@@ -49,7 +49,40 @@ await pg.evaluate(() => { const o = window.addEventListener; window.__altas = 0;
 for (let i = 0; i < 3; i++) { await pg.click('#tabs a[data-tab=inicio]'); await pg.waitForSelector('.masters .master'); await pg.click('#tabs a[data-tab=ajustes]'); await pg.waitForSelector('#aj-diagnostico'); }
 chk(await pg.evaluate(() => window.__altas) === 3, 'cada visita añade un solo aviso (y quita el anterior)');
 
-console.log('5. A 320 px');
+console.log('5. Interruptor de prueba: forzar la altura de #app');
+{
+  chk(await valor(pg, 'Interruptor de prueba (altura forzada)') === 'desactivado' && !(await pg.isChecked('#dg-forzar')), 'empieza desactivado');
+  chk(await pg.$eval('#app', a => a.style.height === ''), '#app sin altura forzada');
+  await pg.setViewportSize({ width: 390, height: 700 });
+  await pg.evaluate(() => Object.defineProperty(screen, 'height', { value: 900, configurable: true }));   // un iPhone con la ventana más baja que la pantalla
+  await pg.click('label[for=dg-forzar]');
+  await pg.waitForFunction(() => [...document.querySelectorAll('#dg-lista .campo')].some(c => /ACTIVADO/.test(c.textContent)));
+  chk(await valor(pg, 'Altura de #app') === '900 px' && await valor(pg, 'Borde inferior de la barra') === '900 px', 'activado: #app y la barra miden lo que screen.height (900): ' + await valor(pg, 'Altura de #app'));
+  chk(await valor(pg, 'Hueco bajo la barra (innerHeight − borde)') === '-200 px', 'los números en vivo: hueco −200 px: ' + await valor(pg, 'Hueco bajo la barra (innerHeight − borde)'));
+  chk(await valor(pg, 'Interruptor de prueba (altura forzada)') === 'ACTIVADO', 'el diagnóstico dice ACTIVADO');
+  chk(!(await pg.evaluate(() => Object.keys(localStorage).concat(Object.keys(sessionStorage)).some(k => /forz|altura/i.test(k) || /forz/i.test(localStorage.getItem(k) || '')))), 'no se guarda en el móvil');
+  await pg.click('label[for=dg-forzar]');
+  await pg.waitForFunction(() => [...document.querySelectorAll('#dg-lista .campo')].some(c => /desactivado/.test(c.textContent)));
+  chk(await valor(pg, 'Altura de #app') === '700 px' && await valor(pg, 'Hueco bajo la barra (innerHeight − borde)') === '0 px' && await pg.$eval('#app', a => a.style.height === '' && a.style.bottom === ''), 'desactivado: todo vuelve a 700 y el hueco a 0');
+  await pg.click('label[for=dg-forzar]');   // se deja activado y se recarga: la app siempre empieza apagada
+  await pg.reload(); await pg.waitForSelector('#aj-diagnostico');
+  chk(await valor(pg, 'Interruptor de prueba (altura forzada)') === 'desactivado' && !(await pg.isChecked('#dg-forzar')) && await pg.$eval('#app', a => a.style.height === ''), 'al cerrar y abrir la app, el interruptor vuelve apagado');
+  chk(await pg.$eval('.diag-interruptor', e => e.getBoundingClientRect().height >= 44) && /se apaga solo a los 60 segundos/.test(await pg.innerText('.diag-interruptor')), 'mide 44 px y avisa de que se apaga solo');
+}
+{
+  const t = await entrar();
+  await t.ctx.clock.install();
+  await t.pg.goto(BASE + '#/ajustes'); await t.pg.waitForSelector('#aj-diagnostico');
+  await t.pg.click('label[for=dg-forzar]');
+  chk(await t.pg.isChecked('#dg-forzar') && await t.pg.$eval('#app', a => a.style.height !== ''), 'seguridad: activado');
+  await t.pg.clock.fastForward(59000);
+  chk(await t.pg.isChecked('#dg-forzar'), 'a los 59 s sigue activado');
+  await t.pg.clock.fastForward(2000);
+  chk(!(await t.pg.isChecked('#dg-forzar')) && await t.pg.$eval('#app', a => a.style.height === '' && a.style.bottom === ''), 'a los 60 s se apaga solo y la barra vuelve (no puede dejarte sin barra)');
+  await t.ctx.close();
+}
+
+console.log('6. A 320 px');
 await pg.setViewportSize({ width: 320, height: 640 });
 await pg.waitForTimeout(100);
 chk(await pg.evaluate(() => document.documentElement.scrollWidth <= innerWidth && document.querySelector('#main').scrollWidth <= document.querySelector('#main').clientWidth), 'sin scroll lateral en 320 px');
