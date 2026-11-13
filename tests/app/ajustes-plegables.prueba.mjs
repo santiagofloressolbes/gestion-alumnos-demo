@@ -2,7 +2,7 @@
 // lo abierto se recuerda en el móvil, teclado, datos guardados rotos y 320 px.
 import { nuevo, chk, terminar, BASE, URL_OK, CLAVE_PRUEBA } from './ayudas.mjs';
 
-const SECCIONES = [['aj-conexion', 'Conexión'], ['aj-avisos', 'Avisos de alumnos'], ['aj-firma-tarjeta', 'Firma de los correos'], ['aj-version-tarjeta', 'Versión de la app'], ['aj-diagnostico', 'Diagnóstico (temporal)']];
+const SECCIONES = [['aj-conexion', 'Conexión'], ['aj-avisos', 'Avisos de alumnos'], ['aj-firma-tarjeta', 'Firma de los correos'], ['aj-version-tarjeta', 'Versión de la app']];
 const entrar = async (guardado) => {
   const t = await nuevo();
   await t.pg.addInitScript(([u, c, g]) => {
@@ -27,8 +27,8 @@ console.log('1. Por defecto: solo «Conexión» abierta');
   await ir(pg);
   const e = await estados(pg);
   chk(e['aj-conexion'][0] === true && e['aj-conexion'][1] === 'true', 'Conexión: abierta y tiene aria-expanded=true');
-  for (const id of ['aj-avisos', 'aj-firma-tarjeta', 'aj-version-tarjeta', 'aj-diagnostico']) chk(e[id][0] === false && e[id][1] === 'false', `${id}: cerrada y tiene aria-expanded=false`);
-  chk(await pg.$$eval('#v-ajustes details', d => d.length) === 5, 'son 5 secciones plegables');
+  for (const id of ['aj-avisos', 'aj-firma-tarjeta', 'aj-version-tarjeta']) chk(e[id][0] === false && e[id][1] === 'false', `${id}: cerrada y tiene aria-expanded=false`);
+  chk(await pg.$$eval('#v-ajustes details', d => d.length) === 4, 'son 4 secciones plegables');
   const titulos = await pg.$$eval('#v-ajustes summary h2', h => h.map(x => x.textContent));
   chk(JSON.stringify(titulos) === JSON.stringify(SECCIONES.map(s => s[1])), 'los títulos, en este orden: ' + titulos.join(' · '));
   chk(await visible(pg, '#aj-olvidar') && !(await visible(pg, '#aj-av-dias')) && !(await visible(pg, '#aj-firma')) && !(await visible(pg, '#aj-buscar')) && !(await visible(pg, '#dg-lista')), 'se ve el contenido de Conexión y no el de las cerradas');
@@ -71,7 +71,7 @@ for (const [guardadoRaro, esperado, que] of [
   ['"texto"', ['aj-conexion'], 'un texto en vez de una lista → por defecto'],
   ['["<script>","avisos",5,"conexion;DROP"]', ['aj-avisos'], 'nombres raros se descartan, el válido se respeta'],
   ['[]', [], 'lista vacía → todo cerrado'],
-  ['["conexion","avisos","firma","version","diagnostico"]', SECCIONES.map(s => s[0]), 'todo abierto'],
+  ['["conexion","avisos","firma","version"]', SECCIONES.map(s => s[0]), 'todo abierto'],
 ]) {
   const { pg, ctx } = await entrar(guardadoRaro);
   await ir(pg);
@@ -102,7 +102,7 @@ console.log('5. Sin almacenamiento');
 
 console.log('6. A 320 px');
 {
-  for (const [nombre, g] of [['todo cerrado', '[]'], ['todo abierto', '["conexion","avisos","firma","version","diagnostico"]']]) {
+  for (const [nombre, g] of [['todo cerrado', '[]'], ['todo abierto', '["conexion","avisos","firma","version"]']]) {
     const { pg, ctx } = await entrar(g);
     await pg.setViewportSize({ width: 320, height: 640 });
     await ir(pg);

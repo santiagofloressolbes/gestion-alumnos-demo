@@ -10,7 +10,7 @@ const entrar = async (modo = 'script', abrirTodo = true) => {
   const t = await nuevo();
   await t.pg.addInitScript(([m, u, c, todo]) => {
     if (sessionStorage.getItem('ini')) return;
-    if (todo) localStorage.setItem('gad.ajustes', '["conexion","avisos","firma","version","diagnostico"]');
+    if (todo) localStorage.setItem('gad.ajustes', '["conexion","avisos","firma","version"]');
     if (m === 'demo') localStorage.setItem('gad.modo', 'demo'); else { localStorage.setItem('gad.url', u); localStorage.setItem('gad.clave', c); }
     sessionStorage.setItem('ini', '1');
   }, [modo, URL_OK, CLAVE_PRUEBA, abrirTodo]);

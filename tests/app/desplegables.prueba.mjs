@@ -27,7 +27,7 @@ const entrar = async (ancho = 390) => {
   await t.pg.addInitScript(([u, c]) => {
     if (sessionStorage.getItem('ini')) return;
     localStorage.setItem('gad.url', u); localStorage.setItem('gad.clave', c);
-    localStorage.setItem('gad.ajustes', '["conexion","avisos","firma","version","diagnostico"]');
+    localStorage.setItem('gad.ajustes', '["conexion","avisos","firma","version"]');
     sessionStorage.setItem('ini', '1');
   }, [URL_OK, CLAVE_PRUEBA]);
   return t;
@@ -57,7 +57,7 @@ for (const ancho of [390, 320]) {
   const { pg, ctx, log } = await entrar(ancho);
 
   await pg.goto(BASE + '#/ajustes'); await pg.waitForSelector('#aj-conexion summary');
-  await verificar(pg, '#v-ajustes', 'Ajustes', 5);
+  await verificar(pg, '#v-ajustes', 'Ajustes', 4);
   await pg.goto(BASE + '#/oferta/O005'); await pg.waitForSelector('#match-alumnos .grupo-match');
   const g = await verificar(pg, '#match-alumnos', 'Grupos del match (ficha de la oferta)', 3);
   chk(g.some(x => x.abierto) && g.some(x => !x.abierto), 'unos grupos empiezan abiertos y otros cerrados, y aria-expanded lo refleja');

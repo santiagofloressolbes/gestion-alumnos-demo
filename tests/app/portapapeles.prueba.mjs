@@ -1,4 +1,4 @@
-// Pruebas de «Copiar»: en los borradores de correo, en Compartir perfiles y en el Diagnóstico solo se escribe TEXTO PLANO en el portapapeles
+// Pruebas de «Copiar»: en los borradores de correo, en Compartir perfiles y solo se escribe TEXTO PLANO en el portapapeles
 // (nada de HTML, enlaces ni formato: al pegar en Notas se veía todo subrayado como un enlace).
 // El portapapeles se espía: se anota qué función se llama y con qué tipos; así se ve exactamente lo que se escribiría.
 import fs from 'node:fs';
@@ -21,7 +21,7 @@ console.log('1. El código');
   chk(!archivos.some(f => /ClipboardItem\(\{(?![^}]*'text\/plain'\s*:)/.test(fuentes[f])), 'todo ClipboardItem lleva text/plain');
   chk(/ClipboardItem\(\{ 'text\/plain': new Blob\(\[t\], \{ type: 'text\/plain' \}\) \}\)/.test(fuentes['js/util/trabajo.js']), 'el ClipboardItem tiene UN solo tipo: text/plain, hecho de una cadena');
   chk(!archivos.some(f => /getSelection\(\)|\.select\(\)|createRange|selectNode/.test(fuentes[f].split('area.select()').join(''))), 'nadie copia una selección de la página (solo el textarea oculto del respaldo)');
-  chk(['js/vistas/correo.js', 'js/vistas/compartir.js', 'js/vistas/diagnostico.js'].every(f => /copiarTexto|copiarAlPortapapeles/.test(fuentes[f])), 'correo, compartir y diagnóstico copian con la misma función');
+  chk(['js/vistas/correo.js', 'js/vistas/compartir.js'].every(f => /copiarTexto|copiarAlPortapapeles/.test(fuentes[f])), 'correo y compartir copian con la misma función');
 }
 
 const entrar = async (modo = 'demo') => {
@@ -30,7 +30,7 @@ const entrar = async (modo = 'demo') => {
   await t.pg.addInitScript(([m, u, c]) => {
     if (!sessionStorage.getItem('ini')) {
       if (m === 'demo') localStorage.setItem('gad.modo', 'demo'); else { localStorage.setItem('gad.url', u); localStorage.setItem('gad.clave', c); }
-      localStorage.setItem('gad.firma', 'Ana Pérez'); localStorage.setItem('gad.ajustes', '["conexion","diagnostico"]');
+      localStorage.setItem('gad.firma', 'Ana Pérez'); localStorage.setItem('gad.ajustes', '["conexion"]');
       sessionStorage.setItem('ini', '1');
     }
   }, [modo, URL_OK, CLAVE_PRUEBA]);
@@ -51,11 +51,10 @@ const escrituras = pg => pg.evaluate(() => window.__escrituras);
 const copias = pg => pg.evaluate(() => window.__copiasDoc);
 const ir = async (pg, hash, sel) => { await pg.goto(BASE + hash); await pg.waitForSelector(sel); };
 
-// Las tres pantallas con su botón y su vista previa.
+// Las dos pantallas con su botón y su vista previa.
 const FUENTES = [
   ['Borrador de correo', '#/aplicacion/AP001/correo', '#co-vista', '#co-copiar', '#co-estado'],
   ['Compartir un perfil', '#/alumno/A001/compartir', '#cp-vista', '#cp-copiar', '#cp-estado'],
-  ['Diagnóstico', '#/ajustes', '#dg-lista', '#dg-copiar', '#dg-estado'],
 ];
 const textoVista = (pg, vista) => pg.evaluate(v => document.querySelector(v).textContent, vista);
 
@@ -69,7 +68,7 @@ for (const [nombre, hash, vista, boton, estado] of FUENTES) {
   const e = await escrituras(pg);
   chk(e.length === 1 && e[0].via === 'write', `${nombre}: una sola escritura, con clipboard.write`);
   chk(e[0] && JSON.stringify(e[0].tipos) === '["text/plain"]', `${nombre}: los tipos escritos son EXACTAMENTE ["text/plain"]: ` + JSON.stringify(e[0]?.tipos));
-  if (vista !== '#dg-lista') chk(e[0]?.texto === await textoVista(pg, vista), `${nombre}: el texto es exactamente la vista previa`);
+  chk(e[0]?.texto === await textoVista(pg, vista), `${nombre}: el texto es exactamente la vista previa`);
   else chk(/window\.innerHeight: \d+/.test(e[0]?.texto || '') && !/<|&lt;|href/.test(e[0]?.texto || ''), `${nombre}: el texto es una lista de «clave: valor» sin marcas HTML`);
   chk(!/<[a-z!\/]|&[a-z]+;|\bhref=|\bmailto:/i.test(e[0]?.texto || ''), `${nombre}: el texto no lleva etiquetas HTML ni enlaces`);
   chk(await pg.evaluate(v => !document.querySelector(v).closest('a') && !document.querySelector(v).querySelector('a'), vista), `${nombre}: la vista previa no es un enlace ni lleva ninguno dentro`);
@@ -110,7 +109,7 @@ for (const [nombre, hash, vista, boton, estado] of FUENTES) {
   const c = await copias(pg);
   chk(c.length === 1 && c[0].cmd === 'copy' && c[0].etiqueta === 'TEXTAREA', `${nombre}: se copia desde un TEXTAREA (no desde la vista previa, un enlace ni una selección): ` + JSON.stringify(c[0]?.etiqueta));
   chk(c[0] && c[0].enlace === false, `${nombre}: el elemento no está dentro de un enlace`);
-  if (vista !== '#dg-lista') chk(c[0]?.valor === await textoVista(pg, vista), `${nombre}: el textarea lleva exactamente la vista previa`);
+  chk(c[0]?.valor === await textoVista(pg, vista), `${nombre}: el textarea lleva exactamente la vista previa`);
   chk((await pg.$$('textarea.cp-oculto')).length === 0, `${nombre}: el textarea oculto se quita después`);
   await ctx.close();
 }
@@ -138,7 +137,7 @@ console.log('7. El texto copiado con el portapapeles real del navegador');
   await ctx.close();
 }
 
-console.log('8. El diagnóstico y los textos con caracteres raros');
+console.log('8. Los textos con caracteres raros');
 {
   const { pg, ctx } = await entrar();
   await ir(pg, '#/aplicacion/AP001/correo', '#co-vista');
@@ -155,9 +154,9 @@ console.log('9. La primera línea de lo copiado NO tiene la forma «palabra:» (
 {
   const primera = t => t.split(String.fromCharCode(10))[0];
   const mala = l => /^[^\s:]+:/.test(l) || /^[a-z][a-z0-9+.-]*:/i.test(l);   // «Asunto:», «Subject:», «http:», «mailto:»…
-  chk(mala('Asunto: x') && mala('Subject: x') && mala('mailto:a') && mala('http://a') && !mala('Asunto — x') && !mala('Perfil de un alumno') && !mala('Diagnóstico de pantalla — v22'), 'el detector distingue lo malo de lo bueno');
+  chk(mala('Asunto: x') && mala('Subject: x') && mala('mailto:a') && mala('http://a') && !mala('Asunto — x') && !mala('Perfil de un alumno'), 'el detector distingue lo malo de lo bueno');
   const destinos = [['Borrador en español', '#/aplicacion/AP001/correo', '#co-copiar', '#co-estado', '#co-idioma-es'], ['Borrador en inglés', '#/aplicacion/AP001/correo', '#co-copiar', '#co-estado', '#co-idioma-en'],
-    ['Compartir perfiles', '#/alumno/A001/compartir', '#cp-copiar', '#cp-estado'], ['Diagnóstico', '#/ajustes', '#dg-copiar', '#dg-estado']];
+    ['Compartir perfiles', '#/alumno/A001/compartir', '#cp-copiar', '#cp-estado']];
   for (const [nombre, hash, boton, estado, idioma] of destinos) {
     const { pg, ctx } = await entrar();
     await ir(pg, hash, boton);

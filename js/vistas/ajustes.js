@@ -4,7 +4,6 @@ import { el } from '../util/dom.js';
 import { ocupar } from '../util/trabajo.js';
 import { buscarActualizacion } from '../util/actualizar.js';
 import { VERSION } from '../version.js';
-import { tarjetaDiagnostico } from './diagnostico.js';
 import { tarjetaAvisos, tarjetaFirma } from './ajustes-prefs.js';
 import { plegable } from './plegable.js';
 
@@ -43,6 +42,5 @@ export function pintarAjustes(raiz) {
       buscar, resultado),
     el('section', { class: 'card', 'aria-labelledby': 'av-titulo' },
       el('h2', { id: 'av-titulo' }, 'Aviso'),
-      el('p', { class: 'sub', id: 'aj-aviso' }, AVISO_LEGAL)),
-    tarjetaDiagnostico());
+      el('p', { class: 'sub', id: 'aj-aviso' }, AVISO_LEGAL)));
 }
