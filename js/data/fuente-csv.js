@@ -27,7 +27,7 @@ export function crearFuenteCSV(esquemas) {
       return {
         alumnos: aObjetos('Alumnos', a, esquemas.ALUMNO),
         ofertas: aObjetos('Ofertas', o, esquemas.OFERTA),
-        listas: aListas(l, esquemas.LISTAS),
+        listas: aListas(l, esquemas.LISTAS, esquemas.ALIAS_LISTAS),
         rondas: aObjetos('Rondas', r, esquemas.RONDA),
         aplicaciones: aObjetos('Aplicaciones', ap, esquemas.APLICACION),
         historial: aObjetos('Historial', h, esquemas.HISTORIAL),

@@ -29,8 +29,13 @@ export const HISTORIAL = {
   'Motivo de descarte': 'motivo', 'Fecha': 'fecha', 'Nota': 'nota',
 };
 // Hoja Listas: cada columna es una lista de valores (las celdas vacías se ignoran).
+// Programas (v23): la hoja Listas puede llamar «Máster» a la columna de programas (nombre de antes) o «Programa»; la app acepta las dos.
+// «Categoría del programa» e «Idioma del programa» van en la MISMA FILA que su programa. Son opcionales.
+export const ALIAS_LISTAS = { 'Programa': ['Máster'] };
+export const COLUMNA_CATEGORIA = 'Categoría del programa';
+export const COLUMNA_IDIOMA = 'Idioma del programa';
 export const LISTAS = {
-  'Máster': 'masters', 'Área': 'areas', 'Tipo de organización': 'tiposOrganizacion',
+  'Programa': 'masters', 'Área': 'areas', 'Tipo de organización': 'tiposOrganizacion',
   'Nacionalidad': 'nacionalidades', 'Situación de trabajo en España': 'situaciones',
   'Tipo de oferta': 'tiposOferta', 'Estado de la oferta': 'estadosOferta', 'Disponibilidad': 'disponibilidades',
   'Requisito de permiso': 'requisitosPermiso',

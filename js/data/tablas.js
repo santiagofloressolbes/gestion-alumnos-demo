@@ -16,11 +16,23 @@ export function aObjetos(nombre, { cabecera, filas }, esquema) {
 }
 
 // Hoja Listas: cada columna es una lista de valores (las celdas vacías se ignoran).
-export function aListas({ cabecera, filas }, esquema) {
+// Cada columna puede tener nombres alternativos (alias): se usa el primero que exista en la hoja.
+// Además devuelve "programas": [{ nombre, categoria, idioma }] (cada programa con lo que hay en SU fila; sin repetir nombres).
+export function aListas({ cabecera, filas }, esquema, alias = {}) {
   const out = {};
+  const indice = col => [col, ...(alias[col] || [])].map(c => cabecera.indexOf(c)).find(i => i >= 0) ?? -1;
   for (const [col, clave] of Object.entries(esquema)) {
-    const i = cabecera.indexOf(col);
+    const i = indice(col);
     out[clave] = i < 0 ? [] : [...new Set(filas.map(f => (f[i] ?? '').trim()).filter(Boolean))];
+  }
+  const ip = indice('Programa'), ic = cabecera.indexOf('Categoría del programa'), ii = cabecera.indexOf('Idioma del programa');
+  const vistos = new Set();
+  out.programas = [];
+  if (ip >= 0) for (const f of filas) {
+    const nombre = (f[ip] ?? '').trim();
+    if (!nombre || vistos.has(nombre)) continue;
+    vistos.add(nombre);
+    out.programas.push({ nombre, categoria: ic < 0 ? '' : (f[ic] ?? '').trim(), idioma: ii < 0 ? '' : (f[ii] ?? '').trim() });
   }
   return out;
 }

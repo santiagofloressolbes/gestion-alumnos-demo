@@ -118,7 +118,7 @@ export function crearFuenteAppsScript(acceso, esquemas) {
       return {
         alumnos: aObjetos('Alumnos', j.alumnos, esquemas.ALUMNO),
         ofertas: aObjetos('Ofertas', j.ofertas, esquemas.OFERTA),
-        listas: aListas(j.listas, esquemas.LISTAS),
+        listas: aListas(j.listas, esquemas.LISTAS, esquemas.ALIAS_LISTAS),
         rondas: conRondas ? aObjetos('Rondas', j.rondas, esquemas.RONDA) : [],
         aplicaciones: conRondas ? aObjetos('Aplicaciones', j.aplicaciones, esquemas.APLICACION) : [],
         historial: conRondas ? aObjetos('Historial', j.historial, esquemas.HISTORIAL) : [],

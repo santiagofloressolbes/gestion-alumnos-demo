@@ -95,7 +95,7 @@ const d = m.llamar(base(m, { action: 'data' }));
 ok(d.ok && d.puedeEscribir === true, 'data responde ok e indica que se puede escribir');
 igual([d.alumnos.filas.length, d.ofertas.filas.length], [30, 10], '30 alumnos y 10 ofertas');
 ok(d.alumnos.cabecera.includes('Notas de entrevista') && d.alumnos.cabecera.length === 17, 'cabecera de Alumnos con 17 columnas');
-ok(d.listas.cabecera[0] === 'Máster' && d.listas.filas.length === 18, 'hoja Listas completa (18 filas)');
+ok(d.listas.cabecera[0] === 'Programa' && d.listas.filas.length === 18, 'hoja Listas completa (18 filas)');
 const c1 = d.alumnos.filas.find(f => f[0] === 'A001');
 ok(c1[d.alumnos.cabecera.indexOf('Fecha última entrevista')] === '2026-10-20', 'una fecha guardada como fecha real sale como 2026-10-20');
 ok(d.alumnos.filas.every(f => f.length === 17 && f.every(x => typeof x === 'string')), 'todo sale como texto');

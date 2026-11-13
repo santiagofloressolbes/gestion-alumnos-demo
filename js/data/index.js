@@ -43,12 +43,14 @@ export const getHistorial = async () => (await datos()).historial;
 export const hayRondas = async () => (await datos()).conRondas === true;
 export const getEstadoFuente = () => estado;
 
-// Másteres en el orden de la hoja Listas, con su número de alumnos.
+// Programas en el orden de la hoja Listas, con su número de alumnos, su categoría y su idioma.
+// Un programa que un alumno tiene pero que NO está en Listas se añade al final con enLista:false (la app no falla y lo avisa).
 export async function getMasters() {
   const { alumnos, listas } = await datos();
-  const nombres = [...listas.masters];
-  for (const a of alumnos) if (a.master && !nombres.includes(a.master)) nombres.push(a.master);
-  return nombres.map(nombre => ({ nombre, alumnos: alumnos.filter(a => a.master === nombre).length }));
+  const lista = listas.programas || listas.masters.map(nombre => ({ nombre, categoria: '', idioma: '' }));
+  const fuera = [...new Set(alumnos.map(a => a.master).filter(n => n && !lista.some(p => p.nombre === n)))];
+  return [...lista.map(p => ({ ...p, enLista: true })), ...fuera.map(nombre => ({ nombre, categoria: '', idioma: '', enLista: false }))]
+    .map(p => ({ ...p, alumnos: alumnos.filter(a => a.master === p.nombre).length }));
 }
 
 // Vuelve a pedir los datos (botón "Reintentar").
