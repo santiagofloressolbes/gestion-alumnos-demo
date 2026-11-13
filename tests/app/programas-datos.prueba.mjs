@@ -2,6 +2,9 @@
 import { aListas } from '../../js/data/tablas.js';
 import { LISTAS, ALIAS_LISTAS } from '../../js/data/esquema.js';
 import { agruparProgramas } from '../../js/util/programas.js';
+import fs from 'node:fs';
+import path from 'node:path';
+import { fileURLToPath } from 'node:url';
 
 let ok = 0, mal = 0;
 const chk = (c, t) => { if (c) ok++; else { mal++; console.log('  ✗ FALLA:', t); } };
@@ -34,6 +37,15 @@ igual(h.map(x => x.categoria), ['MBA', 'Otros programas'], 'sin categoría o fue
 igual(h[1].programas.map(p => p.nombre), ['x', 'y', 'z'], 'y ahí están los tres');
 chk(h[1].otros === true && h[1].alumnos === 5, '«otros» está marcado y cuenta sus alumnos');
 igual(agruparProgramas([]), [], 'sin programas: sin grupos');
+
+console.log('3. Todos los módulos de js/ están en la lista de archivos de sw.js (si falta uno, la app no funciona sin conexión)');
+{
+  const raiz = fileURLToPath(new URL('../../', import.meta.url));
+  const sw = fs.readFileSync(path.join(raiz, 'sw.js'), 'utf8');
+  const hay = d => fs.readdirSync(path.join(raiz, d), { withFileTypes: true }).flatMap(e => (e.isDirectory() ? hay(d + '/' + e.name) : [d + '/' + e.name]));
+  igual(hay('js').filter(f => f.endsWith('.js')).filter(f => !sw.includes(`'./${f}'`)), [], 'ningún módulo de js/ falta en sw.js');
+  igual([...sw.matchAll(/'\.\/(js\/[^']+)'/g)].map(m => m[1]).filter(f => !fs.existsSync(path.join(raiz, f))), [], 'sw.js no nombra archivos que ya no existen');
+}
 
 console.log(`\n${ok} bien, ${mal} mal`);
 process.exit(mal ? 1 : 0);

@@ -81,7 +81,7 @@ El script es un "portero" que vive dentro de tu Google Sheet de prueba. La app l
 
 ## La versión 20 de la app no cambia el script ni el Sheet
 
-Los avisos de alumnos, los borradores de correo, la firma y el bloque «Diagnóstico» se calculan **dentro de la app**, con los datos que ya llegan. **No hace falta** pegar un `Code.gs` nuevo, ni crear hojas, ni añadir columnas o listas. Los umbrales de los avisos, la firma y los avisos silenciados se guardan solo en el móvil (no en el Sheet), así que cada móvil tiene los suyos.
+Los avisos de alumnos, los borradores de correo y la firma se calculan **dentro de la app**, con los datos que ya llegan. **No hace falta** pegar un `Code.gs` nuevo, ni crear hojas, ni añadir columnas o listas. Los umbrales de los avisos, la firma y los avisos silenciados se guardan solo en el móvil (no en el Sheet), así que cada móvil tiene los suyos.
 
 ## Cómo se ha probado
 
@@ -147,3 +147,18 @@ Sirve para que una oferta pueda pedir «nacionalidad de la UE o del EEE» sin el
 **Cómo se usa.** En una oferta que pida «Unión Europea (UE/EEE)», cumple quien tenga alguna nacionalidad de la UE o del EEE (la principal o la secundaria) **o** tenga la situación «Ciudadano UE o español». **Suiza no cuenta** (no es de la UE ni del EEE): la app lo marca «a revisar» con un aviso. Los países se escriben como en la lista (por ejemplo `Países Bajos`, `República Checa`); si falta alguno, el alumno saldrá «a revisar», nunca descartado.
 
 **Si empiezas desde cero** con la carpeta `datos-mock`, `Listas.csv` ya trae esa fila (la hoja Listas queda con 18 filas) y la oferta de ejemplo O005 pide «Unión Europea (UE/EEE)».
+
+
+---
+
+## Programas agrupados en Inicio (versión 23)
+
+**No cambia el script ni hay que publicar nada:** la lista de programas, su categoría y su idioma se leen de la hoja Listas, que el script ya entrega entera.
+
+1. Abre el Sheet y la pestaña **Listas**.
+2. La columna de programas puede llamarse **`Programa`** o **`Máster`** (la app acepta las dos). Escribe ahí un programa por fila, con el nombre exacto, sin celdas vacías entre medias. El orden de las filas es el orden en Inicio.
+3. A la derecha de la última columna, en la primera fila, escribe el encabezado **`Categoría del programa`**. En la fila de cada programa, escribe su categoría (por ejemplo `Másteres`, `MBA`, `LaLiga Executive Education`, `Formación para Jugadores`), escrita siempre igual. Las categorías salen en Inicio en el orden en que aparecen.
+4. A su derecha, escribe el encabezado **`Idioma del programa`**. Pon `en` en los programas cuyo correo de seguimiento deba salir en inglés. Vacío o `es`: español. (Si se deja vacío, vale la palabra «inglés» o «English» en el nombre del programa).
+5. En la hoja **Alumnos**, la columna `Máster` lleva el programa de cada persona, escrito **igual** que en Listas. Si no coincide, Inicio lo enseña en «Otros programas» y la ficha avisa.
+6. Las columnas de categoría e idioma van en la **misma fila** que su programa. Si una fila queda sin categoría, ese programa sale en «Otros programas».
+7. En la app, «Ajustes» → «Buscar actualización» (o cierra y abre dos veces) y comprueba Inicio.

@@ -4,7 +4,7 @@
 
 ## Qué es
 
-Una aplicación para el móvil que ayuda a **consultar a los alumnos de un máster y a encontrarles prácticas o empleo**. Se abre desde el navegador y se puede instalar en la pantalla de inicio del teléfono como cualquier otra app.
+Una aplicación para el móvil que ayuda a **consultar a los alumnos de los programas de LaLiga Business School y a encontrarles prácticas o empleo**. Se abre desde el navegador y se puede instalar en la pantalla de inicio del teléfono como cualquier otra app.
 
 **Todos los datos que se ven son inventados.** Los nombres de las personas, las empresas y las ofertas son de ejemplo. No hay ni una sola persona real dentro.
 
@@ -14,7 +14,7 @@ Dirección para probarla: https://santiagofloressolbes.github.io/gestion-alumnos
 
 La idea es que quien acompaña a los alumnos pueda, desde el móvil y en pocos toques:
 
-- ver quién está en cada máster y qué busca cada persona;
+- ver quién está en cada programa y qué busca cada persona;
 - buscar a alguien por su área, su país o si necesita permiso de trabajo;
 - apuntar las notas de una entrevista;
 - llevar el control de las ofertas de prácticas y de empleo que van llegando;
@@ -24,7 +24,7 @@ La idea es que quien acompaña a los alumnos pueda, desde el móvil y en pocos t
 
 | Qué | Cómo se usa |
 |---|---|
-| **Ver los másteres y sus alumnos** | En Inicio se elige un máster y sale la lista de alumnos. |
+| **Ver los programas y sus alumnos** | En Inicio los programas están agrupados en 4 secciones desplegables (Másteres, MBA, LaLiga Executive Education y Formación para Jugadores). Salen **todos** los programas, aunque no tengan alumnos. Se elige uno y sale la lista de alumnos. La lista de programas y la categoría de cada uno se cambian en el Sheet (hoja Listas), sin tocar la app. |
 | **Ver la ficha de cada alumno** | Nacionalidad, situación de trabajo en España, experiencia, a qué área quiere ir y por qué, y un botón para ver su CV. |
 | **Buscar y filtrar alumnos** | En la pestaña Buscar se escribe un nombre, un área o un país, y se afina con filtros (área, nacionalidad, situación de trabajo, prácticas o empleo). |
 | **Apuntar notas de entrevista** | En la ficha de un alumno, el botón "Editar entrevista" guarda la nota y la fecha. |
@@ -80,7 +80,7 @@ Esto está pensado para crecer por partes. Aún no hay:
 
 Si algo no consta (por ejemplo, un alumno sin nacionalidad), se pone **"a revisar"**, no "no cumple". Si todo cuadra, el alumno "encaja"; si nada falla pero hay algo que mirar, "encaja con reservas"; si algo no cuadra, "no encaja". **Nadie desaparece de la lista:** los tres grupos suman todos los alumnos, y los avisos de "Añadir solicitud" usan exactamente estas mismas reglas. Es una ayuda para mirar, no una decisión.
 
-**Compartir perfiles.** Siempre pasa por una **vista previa** con el texto exacto que se enviará. Por defecto solo salen nombre, máster, área y qué busca. Nacionalidad, situación de trabajo, resumen de experiencia y enlace al CV (solo si es `https`) son **datos sensibles** y vienen desmarcados. Las notas de entrevista, el historial y los motivos de descarte **nunca** se incluyen. El máximo es de 10 alumnos por envío. La app no guarda nada de lo compartido.
+**Compartir perfiles.** Siempre pasa por una **vista previa** con el texto exacto que se enviará. Por defecto solo salen nombre, programa, área y qué busca. Nacionalidad, situación de trabajo, resumen de experiencia y enlace al CV (solo si es `https`) son **datos sensibles** y vienen desmarcados. Las notas de entrevista, el historial y los motivos de descarte **nunca** se incluyen. El máximo es de 10 alumnos por envío. La app no guarda nada de lo compartido.
 
 ## Cómo funcionan los avisos y los borradores de correo
 
