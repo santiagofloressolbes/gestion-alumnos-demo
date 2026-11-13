@@ -1,25 +1,10 @@
-// TEMPORAL (v20): mide la pantalla del móvil para encontrar la franja bajo la barra de pestañas. Se quita en la v21, con el arreglo.
+// TEMPORAL (v20): mide la pantalla del móvil para encontrar la franja bajo la barra de pestañas. Se quita cuando la franja esté resuelta.
+// (v22: el interruptor de altura forzada se quitó: no servía, la ventana real seguía midiendo lo mismo y la barra de pestañas quedaba cortada.)
 // Solo mide la ventana y el modo de la app: ningún dato personal, ninguna clave, ninguna dirección.
 import { el } from '../util/dom.js';
 import { plegable } from './plegable.js';
 import { copiarTexto } from '../util/trabajo.js';
 import { VERSION } from '../version.js';
-
-// Interruptor de PRUEBA (v21): fuerza #app a la altura de screen.height para ver si así desaparece la franja. NO se guarda en el móvil,
-// se apaga solo a los 60 s (por si la barra de pestañas quedase fuera de la pantalla) y siempre empieza apagado al abrir la app.
-export const SEGUNDOS_PRUEBA = 60;
-let forzado = false, relojForzado = 0, alApagar = null;
-export function forzarAltura(encendido) {
-  clearTimeout(relojForzado);
-  forzado = !!encendido;
-  const app = document.querySelector('#app');
-  if (app) {
-    if (forzado) { app.style.setProperty('height', screen.height + 'px'); app.style.setProperty('bottom', 'auto'); }
-    else { app.style.removeProperty('height'); app.style.removeProperty('bottom'); }
-  }
-  if (forzado) relojForzado = setTimeout(() => { forzarAltura(false); alApagar?.(); }, SEGUNDOS_PRUEBA * 1000);
-}
-export const alturaForzada = () => forzado;
 
 let quitarAnterior = null;   // al volver a pintar Ajustes se sueltan los avisos de la vez anterior (si no, se acumulan)
 
@@ -62,7 +47,7 @@ export function lineasDiagnostico() {
     ['Hueco bajo la barra (innerHeight − borde)', px(rt ? window.innerHeight - rt.bottom : NaN)],
     ['Borde inferior de #app', px(ra?.bottom)],
     ['Altura de #app', px(ra?.height)],
-    ['Interruptor de prueba (altura forzada)', forzado ? 'ACTIVADO' : 'desactivado'],
+    ['Estilo de la barra de estado (meta apple-mobile-web-app-status-bar-style)', document.querySelector('meta[name=apple-mobile-web-app-status-bar-style]')?.getAttribute('content') || 'no hay'],
     ['Modo standalone (display-mode)', standalone],
     ['navigator.standalone (iOS)', iosStandalone],
     ['Sistema (versión de iOS)', sistema ? `${sistema[1]}.${sistema[2]}` : 'no detectada'],
@@ -83,12 +68,6 @@ export function tarjetaDiagnostico() {
     estado.textContent = bien ? 'Copiado. Pégalo en el chat.' : 'No se ha podido copiar. Apunta los números a mano.';
   } }, 'Copiar diagnóstico');
 
-  const interruptor = el('input', { type: 'checkbox', id: 'dg-forzar', checked: forzado, onchange: () => { forzarAltura(interruptor.checked); pintar(); } });
-  alApagar = () => { interruptor.checked = false; if (lista.isConnected) pintar(); };
-  const pruebas = el('label', { class: 'diag-interruptor', for: 'dg-forzar' }, interruptor,
-    el('span', {}, el('b', {}, 'Probar: forzar la altura de #app a screen.height'),
-      el('span', { class: 'sub' }, `Solo para medir. No se guarda y se apaga solo a los ${SEGUNDOS_PRUEBA} segundos. Si la barra de pestañas desaparece, espera o cierra la app.`)));
-
   quitarAnterior?.();
   const alCambiar = () => { if (lista.isConnected) pintar(); };
   window.addEventListener('resize', alCambiar);
@@ -101,8 +80,8 @@ export function tarjetaDiagnostico() {
   };
 
   const t = plegable({ id: 'aj-diagnostico', clave: 'diagnostico', idTitulo: 'dg-titulo', titulo: 'Diagnóstico (temporal)' },
-    el('p', { class: 'sub' }, 'Solo mide la ventana de este móvil, para arreglar la franja bajo la barra. No lleva datos personales ni claves. Se quitará en la próxima versión.'),
-    lista, pruebas, copiar, estado);
+    el('p', { class: 'sub' }, 'Solo mide la ventana de este móvil, para arreglar la franja bajo la barra. No lleva datos personales ni claves. Se quitará cuando la franja esté resuelta.'),
+    lista, copiar, estado);
   pintar();
   return t;
 }

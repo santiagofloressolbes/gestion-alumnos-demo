@@ -104,6 +104,13 @@ for (const [nombre, ancho, alto, sab, sat] of MODELOS) {
   chk(col.html === col.tabs && col.body === col.tabs && col.tabs === 'rgb(16, 16, 19)', 'html, body y barra: el mismo color #101013: ' + JSON.stringify(col));
   chk(col.app === 'rgb(23, 23, 27)', 'el contenido (#app) conserva su fondo de siempre (#17171B): ' + col.app);
   chk(await pg.getAttribute('meta[name=apple-mobile-web-app-capable]', 'content') === 'yes', 'app instalable en iPhone (apple-mobile-web-app-capable)');
+  // v22: experimento de la franja: barra de estado opaca (black). Un solo sitio, fácil de revertir.
+  const html = await (await fetch(BASE)).text();
+  const metas = html.match(/<meta name="apple-mobile-web-app-status-bar-style"[^>]*>/g) || [];
+  chk(metas.length === 1 && /content="black"/.test(metas[0]), 'status-bar-style: UNA sola etiqueta y vale black (barra de estado opaca): ' + metas.join(' '));
+  chk(await pg.getAttribute('meta[name=apple-mobile-web-app-status-bar-style]', 'content') === 'black', 'y el navegador la lee como black');
+  chk(/ESTILO_BARRA[^>]*REVERTIR[^>]*black-translucent/.test(html), 'junto a la etiqueta está escrito cómo revertir (ESTILO_BARRA → black-translucent)');
+  chk(/header\{[^}]*padding:calc\(var\(--sat\)/.test(css) && /--sat:env\(safe-area-inset-top,0px\)/.test(css), 'la cabecera suma el margen superior (env): con black vale 0 y con black-translucent vuelve a valer lo suyo, sin tocar nada más');
   await ctx.close();
 }
 
