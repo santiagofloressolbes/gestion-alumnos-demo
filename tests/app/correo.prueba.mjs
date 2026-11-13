@@ -112,7 +112,7 @@ console.log('7. Enlace para abrir el correo');
   chk(href.length <= C.MAX_MAILTO, `longitud razonable (${href.length} ≤ ${C.MAX_MAILTO})`);
   const largo = { asunto: 'a'.repeat(100), cuerpo: 'é'.repeat(400), idioma: 'es' };
   igual(C.enlaceCorreo(largo), null, 'un texto demasiado largo no genera enlace (se usa «Copiar»)');
-  chk(C.textoCompleto({ idioma: 'es', asunto: 'S', cuerpo: 'C' }) === 'Asunto: S\n\nC' && C.textoCompleto({ idioma: 'en', asunto: 'S', cuerpo: 'C' }) === 'Subject: S\n\nC', 'el texto que se copia lleva el asunto delante');
+  chk(C.textoCompleto({ idioma: 'es', asunto: 'S', cuerpo: 'C' }) === 'Asunto — S\n\nC' && C.textoCompleto({ idioma: 'en', asunto: 'S', cuerpo: 'C' }) === 'Subject — S\n\nC', 'el texto que se copia lleva el asunto delante');
 }
 
 console.log('8. En pantalla: solicitud AP001 (Mateo Ferrer, MBA en inglés, Entrevista)');
@@ -140,7 +140,7 @@ const sinScrollLateral = pg => pg.evaluate(() => document.documentElement.scroll
   chk(await pg.innerText('#titulo') === 'Borrador de correo' && await pg.getAttribute('#tabs a[data-tab=ofertas]', 'aria-current') === 'page', 'título y pestaña');
   chk(await pg.isChecked('#co-idioma-en') && !(await pg.isChecked('#co-idioma-es')), 'MBA en inglés: el idioma por defecto es English');
   let vista = await pg.innerText('#co-vista');
-  chk(/^Subject: Update on your application: Becario\/a de patrocinio at Club mock B/.test(vista) && /Hi Mateo,/.test(vista) && /interview stage/.test(vista) && /Best regards,\s*Ana Pérez$/.test(vista.trim()), 'vista previa en inglés, con asunto, nombre y firma: ' + vista.slice(0, 120).replace(/\n/g, ' / '));
+  chk(/^Subject — Update on your application: Becario\/a de patrocinio at Club mock B/.test(vista) && /Hi Mateo,/.test(vista) && /interview stage/.test(vista) && /Best regards,\s*Ana Pérez$/.test(vista.trim()), 'vista previa en inglés, con asunto, nombre y firma: ' + vista.slice(0, 120).replace(/\n/g, ' / '));
   chk(!/CANARIO/.test(await pg.innerText('#v-correo')) && !/Ferrer/.test(vista), 'ningún canario en la pantalla y sin apellidos en el borrador');
   chk(/no incluye notas de entrevista, motivo de descarte, situación de trabajo ni estatus migratorio/i.test(await pg.innerText('#co-privacidad')), 'avisa de qué nunca incluye');
   chk(!(await visible(pg, '#co-firma-falta')), 'con firma guardada no avisa de que falte');
@@ -148,10 +148,10 @@ const sinScrollLateral = pg => pg.evaluate(() => document.documentElement.scroll
   console.log('9. Cambiar de idioma');
   await pg.click('label[for=co-idioma-es]');
   vista = await pg.innerText('#co-vista');
-  chk(/^Asunto: Seguimiento de tu solicitud: Becario\/a de patrocinio en Club mock B/.test(vista) && /Hola Mateo,/.test(vista) && /fase de entrevista/.test(vista) && /Un saludo,\s*Ana Pérez$/.test(vista.trim()), 'al elegir Español, la vista previa cambia');
+  chk(/^Asunto — Seguimiento de tu solicitud: Becario\/a de patrocinio en Club mock B/.test(vista) && /Hola Mateo,/.test(vista) && /fase de entrevista/.test(vista) && /Un saludo,\s*Ana Pérez$/.test(vista.trim()), 'al elegir Español, la vista previa cambia');
   chk(await pg.getAttribute('html', 'lang') === 'es', 'el idioma de la página no cambia (solo el borrador)');
   await pg.click('label[for=co-idioma-en]');
-  chk(/^Subject:/.test(await pg.innerText('#co-vista')), 'y vuelve a English');
+  chk(/^Subject — /.test(await pg.innerText('#co-vista')), 'y vuelve a English');
 
   console.log('10. Copiar y abrir el correo');
   await pg.evaluate(() => { navigator.clipboard.write = async i => { window.__copiado = await (await i[0].getType('text/plain')).text(); }; });

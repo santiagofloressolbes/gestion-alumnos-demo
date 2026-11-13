@@ -105,7 +105,8 @@ export function borradorCorreo({ alumno, oferta, aplicacion, idioma = 'es', firm
 }
 
 // El texto tal como se copia: asunto y cuerpo juntos.
-export const textoCompleto = b => `${lineaAsunto(b.idioma)}: ${b.asunto}\n\n${b.cuerpo}`;
+// La primera línea NO puede tener la forma «palabra:» (iOS la lee como una dirección web): va con raya.
+export const textoCompleto = b => `${lineaAsunto(b.idioma)} — ${b.asunto}\n\n${b.cuerpo}`;
 export const lineaAsunto = idioma => (idioma === 'en' ? 'Subject' : 'Asunto');
 
 // Enlace para abrir la app de correo, sin destinatario. Todo va codificado: nada del texto puede añadir cabeceras (Bcc, Cc…).

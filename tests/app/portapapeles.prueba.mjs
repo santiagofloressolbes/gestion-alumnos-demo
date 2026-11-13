@@ -146,8 +146,33 @@ console.log('8. El diagnóstico y los textos con caracteres raros');
   await pg.click('label[for=co-idioma-es]');
   await pg.click('#co-copiar'); await pg.waitForSelector('#co-estado:not([hidden])');
   const e = await escrituras(pg);
-  chk(e[0].texto.includes('Asunto: ') && e[0].texto.includes('Seguimiento de tu solicitud') && !/[\p{Zl}\p{Zp}\u0000]/u.test(e[0].texto), 'el texto copiado es el del idioma elegido, sin separadores raros');
+  chk(e[0].texto.startsWith('Asunto — ') && e[0].texto.includes('Seguimiento de tu solicitud') && !/[\p{Zl}\p{Zp}\u0000]/u.test(e[0].texto), 'el texto copiado es el del idioma elegido, sin separadores raros');
   chk(JSON.stringify(e[0].tipos) === '["text/plain"]', 'y solo text/plain');
+  await ctx.close();
+}
+
+console.log('9. La primera línea de lo copiado NO tiene la forma «palabra:» (iOS lo leería como una dirección web: subrayado y %20)');
+{
+  const primera = t => t.split(String.fromCharCode(10))[0];
+  const mala = l => /^[^\s:]+:/.test(l) || /^[a-z][a-z0-9+.-]*:/i.test(l);   // «Asunto:», «Subject:», «http:», «mailto:»…
+  chk(mala('Asunto: x') && mala('Subject: x') && mala('mailto:a') && mala('http://a') && !mala('Asunto — x') && !mala('Perfil de un alumno') && !mala('Diagnóstico de pantalla — v22'), 'el detector distingue lo malo de lo bueno');
+  const destinos = [['Borrador en español', '#/aplicacion/AP001/correo', '#co-copiar', '#co-estado', '#co-idioma-es'], ['Borrador en inglés', '#/aplicacion/AP001/correo', '#co-copiar', '#co-estado', '#co-idioma-en'],
+    ['Compartir perfiles', '#/alumno/A001/compartir', '#cp-copiar', '#cp-estado'], ['Diagnóstico', '#/ajustes', '#dg-copiar', '#dg-estado']];
+  for (const [nombre, hash, boton, estado, idioma] of destinos) {
+    const { pg, ctx } = await entrar();
+    await ir(pg, hash, boton);
+    if (idioma) await pg.click(`label[for=${idioma.slice(1)}]`);
+    await espiar(pg);
+    await pg.click(boton); await pg.waitForSelector(estado + ':not([hidden])');
+    const e = await escrituras(pg);
+    const l = primera(e[0].texto);
+    chk(!mala(l), `${nombre}: la primera línea no es «palabra:» → ` + JSON.stringify(l));
+    chk(l.length > 3 && !/^\s/.test(l), `${nombre}: la primera línea tiene texto`);
+    await ctx.close();
+  }
+  const { pg, ctx } = await entrar();
+  await ir(pg, '#/aplicacion/AP001/correo', '#co-vista');
+  chk(/^(Asunto|Subject) — /.test((await textoVista(pg, '#co-vista'))), 'la vista previa del borrador empieza igual que lo copiado');
   await ctx.close();
 }
 await terminar();

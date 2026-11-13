@@ -3,6 +3,7 @@
 import { el } from '../util/dom.js';
 import { plegable } from './plegable.js';
 import { copiarTexto } from '../util/trabajo.js';
+import { VERSION } from '../version.js';
 
 // Interruptor de PRUEBA (v21): fuerza #app a la altura de screen.height para ver si así desaparece la franja. NO se guarda en el móvil,
 // se apaga solo a los 60 s (por si la barra de pestañas quedase fuera de la pantalla) y siempre empieza apagado al abrir la app.
@@ -74,7 +75,8 @@ export function tarjetaDiagnostico() {
   const pintar = () => {
     lista.replaceChildren(...lineasDiagnostico().map(([k, v]) => el('div', { class: 'campo' }, el('dt', {}, k), el('dd', {}, v))));
   };
-  const texto = () => lineasDiagnostico().map(([k, v]) => `${k}: ${v}`).join('\n');
+  // La primera línea es un título sin la forma «palabra:» (iOS la leería como una dirección web al pegar).
+  const texto = () => `Diagnóstico de pantalla — v${VERSION}\n` + lineasDiagnostico().map(([k, v]) => `${k}: ${v}`).join('\n');
   const copiar = el('button', { class: 'secondary', type: 'button', id: 'dg-copiar', onclick: async () => {
     const bien = await copiarTexto(texto());
     estado.hidden = false;
