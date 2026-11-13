@@ -90,7 +90,7 @@ const visible = (pg, sel) => pg.evaluate(s => { const e = document.querySelector
   await ir(pg, '#/', '.masters .master');
   chk(await pg.innerText('#legal') === LEGAL && await visible(pg, '#legal'), 'Inicio: aviso completo');
   chk(/MODO DEMO/.test(await pg.innerText('#demo')), 'el banner de modo demo sigue arriba');
-  await pg.click('.master >> nth=0'); await pg.waitForSelector('.alumno');
+  await pg.locator('.master', { hasNotText: '0 alumnos' }).first().click(); await pg.waitForSelector('.alumno');
   chk(await pg.innerText('#legal') === 'Demo · datos ficticios.', 'otras pantallas: aviso corto');
   await ir(pg, '#/buscar', '#v-buscar .buscador');
   chk(await pg.innerText('#legal') === 'Demo · datos ficticios.', 'Buscar: aviso corto');

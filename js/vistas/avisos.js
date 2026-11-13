@@ -1,4 +1,4 @@
-// Avisos de alumnos en pantalla: la tarjeta de Inicio, la lista de cada tipo, la marca en la lista del máster y la tarjeta de la ficha.
+// Avisos de alumnos en pantalla: la tarjeta de Inicio, la lista de cada tipo, la marca en la lista del programa y la tarjeta de la ficha.
 // Un aviso nunca bloquea nada: solo informa, dice por qué ha saltado y se puede silenciar 30 días (solo en este móvil).
 import { el, svgFlecha, plural } from '../util/dom.js';
 import { avatar } from '../util/avatar.js';
@@ -60,9 +60,9 @@ export async function pintarAvisosInicio(caja) {
 
 export const cajaAvisosInicio = () => el('section', { class: 'card', id: 'in-avisos', 'aria-labelledby': 'in-av-titulo', hidden: true });
 
-/* ---- Marca en la lista del máster ---- */
+/* ---- Marca en la lista del programa ---- */
 
-// Los avisos activos de cada alumno (para la lista del máster). Si algo falla, no hay marcas: la lista sigue igual.
+// Los avisos activos de cada alumno (para la lista del programa). Si algo falla, no hay marcas: la lista sigue igual.
 export async function avisosActivosPorAlumno() {
   try {
     const e = estadoAvisos(await datosRondas());

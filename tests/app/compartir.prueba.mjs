@@ -14,7 +14,7 @@ console.log('1. El texto (funciones puras)');
     nacionalidadPrincipal: 'España', nacionalidadSecundaria: 'Chile', situacionTrabajo: 'Ciudadano UE o español', resumenExperiencia: '2 años\nen una app', enlaceCV: 'https://ejemplo.org/cv/A1',
     notasEntrevista: CANARIOS[0], porQue: CANARIOS[1], fechaUltimaEntrevista: '2026-10-01', notas: CANARIOS[2], motivo: CANARIOS[3], nota: CANARIOS[4], estado: 'Descartado' };
   const base = C.textoPerfiles({ alumnos: [a], campos: C.BASE_POR_DEFECTO });
-  chk(/^Perfil de un alumno\n\n1\. Lucía Quintero\n   Máster: MBA en inglés\n   Quiere ir a: Producto y tecnología\n   Experiencia en: Finanzas\n   Busca: Prácticas\n\nInformación confidencial/.test(base), 'por defecto: nombre, máster, área y qué busca: ' + JSON.stringify(base));
+  chk(/^Perfil de un alumno\n\n1\. Lucía Quintero\n   Programa: MBA en inglés\n   Quiere ir a: Producto y tecnología\n   Experiencia en: Finanzas\n   Busca: Prácticas\n\nInformación confidencial/.test(base), 'por defecto: nombre, máster, área y qué busca: ' + JSON.stringify(base));
   chk(!/España|Chile|Ciudadano|2 años|ejemplo\.org/.test(base), 'por defecto NO salen nacionalidad, situación, experiencia ni CV');
   const todo = C.textoPerfiles({ alumnos: [a], campos: [...C.BASE_POR_DEFECTO, ...C.CAMPOS_SENSIBLES.map(c => c.clave)] });
   chk(/Nacionalidad: España · Chile/.test(todo) && /Situación de trabajo en España: Ciudadano UE o español/.test(todo) && /Experiencia: 2 años en una app/.test(todo) && /CV: https:\/\/ejemplo\.org\/cv\/A1/.test(todo), 'marcando lo sensible, sale (y el resumen en una sola línea): ' + JSON.stringify(todo));
@@ -141,7 +141,7 @@ const escrituras = log => log.peticiones.filter(p => /^guardar|^registrar|^crear
   chk(/ya no se controla quién lo lee ni lo reenvía/.test(await pg.innerText('#cp-aviso')) && /no guarda un registro de lo que compartes/.test(await pg.innerText('#cp-aviso')), 'aviso de privacidad visible: sale de la app y no hay registro');
   chk(/Las notas de entrevista, el historial y los motivos de descarte nunca se incluyen/.test(await pg.innerText('#v-compartir')), 'dice que notas, historial y descartes nunca se incluyen');
   let t = await vista(pg);
-  chk(/1\. Lucía Quintero/.test(t) && /2\. Mateo Ferrer/.test(t) && /3\. Valentina Aguirre/.test(t) && /Máster: /.test(t) && /Busca: /.test(t), 'el texto tiene los 3 perfiles');
+  chk(/1\. Lucía Quintero/.test(t) && /2\. Mateo Ferrer/.test(t) && /3\. Valentina Aguirre/.test(t) && /Programa: /.test(t) && /Busca: /.test(t), 'el texto tiene los 3 perfiles');
   chk(!/Nacionalidad|Situación de trabajo|Dos años|CV:/.test(t), 'por defecto no sale nada sensible');
   // se marca todo lo sensible
   for (const c of ['nacionalidad', 'situacion', 'experiencia', 'cv']) await pg.check('#cp-c-' + c);

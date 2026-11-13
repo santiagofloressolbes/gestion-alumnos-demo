@@ -1,5 +1,5 @@
 // Recuerda desde dónde se abrió una ficha, para que "volver" lleve al mismo sitio.
-// Se guarda solo en memoria: al recargar la página se vuelve a la lista del máster.
+// Se guarda solo en memoria: al recargar la página se vuelve a la lista del programa.
 export const navegacion = {
   origen: 'master',      // 'master' | 'buscar' | 'avisos'
   avisosTipo: 'sin-solicitudes',   // si el origen es 'avisos': de qué lista viene (para volver a ella)

@@ -243,12 +243,6 @@ button:disabled{opacity:.7;cursor:progress}
 .card .vista-previa+.primary,.card .ok+.primary,.card .error+.primary{margin-top:.5rem}
 .cp-oculto{position:fixed;opacity:0;pointer-events:none}
 
-/* ---------- Diagnóstico temporal (v20) ---------- */
-.sonda-margen{position:fixed;left:0;top:0;width:1px;height:1px;visibility:hidden;pointer-events:none;border:0}
-.diag{gap:.75rem;margin-bottom:1rem}
-.diag .campo dt{font-size:.8125rem}
-.diag .campo dd{font-size:.9375rem;font-variant-numeric:tabular-nums}
-
 /* ---------- Avisos de alumnos (v20) ---------- */
 #in-avisos{margin-bottom:1.5rem}
 .avisos-resumen{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:.5rem}
@@ -266,10 +260,6 @@ button:disabled{opacity:.7;cursor:progress}
 .aviso-ficha .aviso-motivo,.aviso-ficha .aviso-silencio{margin-left:0;margin-right:0}
 .aviso-ficha .secondary{width:100%}
 
-.diag-interruptor{display:flex;align-items:flex-start;gap:.75rem;min-height:3rem;margin:0 0 1rem;padding:.75rem 1rem;border-radius:1rem;border:1.5px dashed var(--line);background:var(--inp);color:var(--cink)}
-.diag-interruptor input{flex:none;width:1.25rem;height:1.25rem;margin-top:.125rem;accent-color:var(--act-bg)}
-.diag-interruptor span{min-width:0}
-.diag-interruptor .sub{display:block;margin:.25rem 0 0}
 
 /* ---------- Desplegable comun (v22): una sola flecha estandar que gira, zona tactil de al menos 44 px; el estado va en aria-expanded, sin texto ---------- */
 .desplegable>summary{display:flex;align-items:center;justify-content:space-between;gap:1rem;min-height:2.75rem;cursor:pointer;list-style:none}
@@ -282,3 +272,14 @@ button:disabled{opacity:.7;cursor:progress}
 .plegable>summary{padding:.5rem 1.5rem;border-radius:1.5rem;min-height:3.5rem}
 .plegable>summary>h2{margin:0;min-width:0;overflow-wrap:anywhere}
 .plegable-cuerpo{padding:0 1.5rem 1.5rem}
+
+/* ---------- Programas agrupados en Inicio (v23): secciones con el desplegable comun ---------- */
+.grupos{display:flex;flex-direction:column;gap:1rem}
+.grupo-programas{background:var(--card);border-radius:1.5rem}
+.grupo-programas>summary{padding:.5rem 1.5rem;min-height:4rem;border-radius:1.5rem}
+.grupo-texto{display:flex;flex-direction:column;min-width:0}
+.grupo-titulo{margin:0;font:700 1.0625rem/1.3 var(--sans);overflow-wrap:anywhere}
+.grupo-texto .sub{margin:0}
+.grupo-cuerpo{padding:0 1rem 1rem}
+.grupo-cuerpo .aviso{margin:0 0 1rem}
+.grupo-cuerpo .master{background:var(--bg)}

@@ -1,4 +1,4 @@
-// Lista de alumnos de un máster: avatar, nombre y un dato breve.
+// Lista de alumnos de un programa: avatar, nombre y un dato breve.
 import { getAlumnos, getMasters, recargar } from '../data/index.js';
 import { tarjetaError } from './error-datos.js';
 import { el, svgFlecha, plural } from '../util/dom.js';
@@ -19,7 +19,7 @@ export async function pintarMaster(raiz, nombre) {
   }
   if (!masters.some(m => m.nombre === nombre)) {
     raiz.replaceChildren(volver(), el('div', { class: 'card' },
-      el('h2', {}, 'Máster no encontrado'),
+      el('h2', {}, 'Programa no encontrado'),
       el('p', { class: 'sub' }, 'Vuelve al inicio y elige uno de la lista.')));
     return;
   }
@@ -28,15 +28,17 @@ export async function pintarMaster(raiz, nombre) {
     .sort((a, b) => `${a.apellidos} ${a.nombre}`.localeCompare(`${b.apellidos} ${b.nombre}`, 'es'));
 
   const avisosDe = await avisosActivosPorAlumno();
+  const programa = masters.find(m => m.nombre === nombre);
   raiz.replaceChildren(
     volver(),
+    !programa.enLista && el('p', { class: 'aviso', role: 'note', id: 'ma-fuera-de-lista' }, `El programa «${nombre}» no está en la hoja Listas del Sheet. Añádelo allí o corrígelo en la hoja Alumnos.`),
     el('h2', { class: 'seccion' }, plural(lista.length, 'alumno', 'alumnos')),
     lista.length
       ? el('ul', { class: 'alumnos', 'aria-label': 'Alumnos de ' + nombre }, lista.map(a => fila(a, 'master', false, avisosDe(a.id))))
-      : el('div', { class: 'card' }, el('p', { class: 'sub' }, 'Este máster todavía no tiene alumnos.')));
+      : el('div', { class: 'card' }, el('p', { class: 'sub' }, 'Este programa todavía no tiene alumnos.')));
 }
 
-// Dato breve: a qué área quiere ir y si busca prácticas o empleo. En la búsqueda se añade el máster.
+// Dato breve: a qué área quiere ir y si busca prácticas o empleo. En la búsqueda se añade el programa.
 export function fila(a, origen, conMaster = false, avisos = []) {
   const breve = [a.areaDestino, a.disponibilidad].filter(Boolean).join(' · ');
   return el('li', {}, el('a', { class: 'alumno', href: '#/alumno/' + encodeURIComponent(a.id), onclick: () => { navegacion.origen = origen; } },

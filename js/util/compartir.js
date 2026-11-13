@@ -7,7 +7,7 @@ export const MAX_PERFILES = 10;
 // Lo que se incluye por defecto (no sensible) y lo que hay que marcar a mano (sensible).
 export const CAMPOS_BASE = [
   { clave: 'nombre', etiqueta: 'Nombre' },
-  { clave: 'master', etiqueta: 'Máster' },
+  { clave: 'master', etiqueta: 'Programa' },
   { clave: 'area', etiqueta: 'Área (a la que quiere ir y de experiencia)' },
   { clave: 'disponibilidad', etiqueta: 'Qué busca (prácticas o empleo)' },
 ];
@@ -33,7 +33,7 @@ export const nombreCompleto = a => linea(`${a.nombre ?? ''} ${a.apellidos ?? ''}
 function lineasDe(a, campos) {
   const L = [];
   const si = c => campos.has(c);
-  if (si('master') && linea(a.master)) L.push(['Máster', linea(a.master)]);
+  if (si('master') && linea(a.master)) L.push(['Programa', linea(a.master)]);
   if (si('area')) {
     const destino = linea(a.areaDestino), exp = linea(a.areaExperiencia);
     if (destino) L.push(['Quiere ir a', destino]);

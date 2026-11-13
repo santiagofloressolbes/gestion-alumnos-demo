@@ -31,7 +31,7 @@ console.log('1. Tarjeta de Inicio');
   chk(/Avisos/.test(await pg.innerText('#in-av-titulo')) && /no bloquean nada/.test(await pg.innerText('#in-avisos')), 'hay una tarjeta «Avisos» que dice que no bloquea nada');
   chk(/Sin solicitudes\s*21 alumnos/.test((await pg.innerText('#in-av-sin-solicitudes')).replace(/\n/g, ' ')), 'Sin solicitudes: 21 alumnos: ' + (await pg.innerText('#in-av-sin-solicitudes')).replace(/\n/g, ' '));
   chk(/Aplica a todo\s*Ningún alumno/.test((await pg.innerText('#in-av-aplica-a-todo')).replace(/\n/g, ' ')), 'Aplica a todo: ningún alumno');
-  chk(await pg.$$eval('.masters .master', m => m.length) === 4, 'los 4 botones de máster siguen ahí');
+  chk(await pg.$$eval('.masters .master', m => m.length) === 14, 'los 14 botones de programa siguen ahí');
   chk(await pg.$$eval('#in-avisos a', a => a.every(x => x.getBoundingClientRect().height >= 44)), 'las filas miden al menos 44 px');
 
   console.log('2. Lista de «Sin solicitudes» con su motivo');

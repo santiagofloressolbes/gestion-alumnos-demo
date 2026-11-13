@@ -78,7 +78,7 @@ import { b, nuevo, chk, almacen, conectar, terminar, BASE, URL_OK, CLAVE_PRUEBA 
   const sesion = await pg.evaluate(() => JSON.stringify(sessionStorage));
   chk(!sesion.includes('Ana') && sesion === '{}', 'nada en sessionStorage');
   const total = mundo.hojas.Alumnos.m.length - 1;
-  const textoInicio = await pg.innerText('#v-inicio .masters');   // solo los botones de máster (la tarjeta de Avisos también cuenta alumnos)
+  const textoInicio = await pg.$$eval('#v-inicio .masters', n => n.map(x => x.textContent).join(' '));   // solo los botones de programa (la tarjeta de Avisos también cuenta alumnos)
   const suma = [...textoInicio.matchAll(/(\d+) alumnos?/g)].map(m => +m[1]).reduce((a, c) => a + c, 0);
   chk(suma === total, `alumnos en pantalla (${suma}) = filas del Sheet (${total})`);
   chk(!/Conexión/.test(textoInicio), 'Inicio ya no lleva la tarjeta Conexión (está en Ajustes)');
@@ -92,7 +92,7 @@ import { b, nuevo, chk, almacen, conectar, terminar, BASE, URL_OK, CLAVE_PRUEBA 
   chk(log.externas.every(x => x.includes('script.google.com')), 'solo se contacta con script.google.com: ' + log.externas.filter(x => !x.includes('script.google.com')));
   chk(!pg.url().includes('clave') && !pg.url().includes(CLAVE_PRUEBA), 'la dirección de la página no lleva la clave');
   // Navegar: lista, ficha, buscar
-  await pg.click('.master >> nth=0'); await pg.waitForSelector('.alumno');
+  await pg.locator('.master', { hasNotText: '0 alumnos' }).first().click(); await pg.waitForSelector('.alumno');
   const n1 = await pg.locator('.alumno').count();
   await pg.click('.alumno >> nth=0'); await pg.waitForSelector('.campos');
   chk(await pg.locator('.campos').count() > 0, 'ficha abre');
@@ -166,7 +166,7 @@ import { b, nuevo, chk, almacen, conectar, terminar, BASE, URL_OK, CLAVE_PRUEBA 
   await pg.click('#tabs a[data-tab=inicio]'); await pg.waitForSelector('.masters .master');
   const al = await almacen(pg);
   chk(Object.keys(al).join() === 'gad.modo', 'solo se guarda el modo');
-  await pg.click('.master >> nth=0'); await pg.waitForSelector('.alumno');
+  await pg.locator('.master', { hasNotText: '0 alumnos' }).first().click(); await pg.waitForSelector('.alumno');
   chk(await pg.locator('#demo').isVisible(), 'el banner sigue en las otras pantallas');
   await pg.goto(BASE + '#/acceso'); await pg.waitForSelector('#ac-url');
   chk(await pg.locator('text=Volver').count() > 0, 'desde demo se puede ir a Acceso y volver');

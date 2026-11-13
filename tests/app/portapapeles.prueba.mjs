@@ -69,7 +69,6 @@ for (const [nombre, hash, vista, boton, estado] of FUENTES) {
   chk(e.length === 1 && e[0].via === 'write', `${nombre}: una sola escritura, con clipboard.write`);
   chk(e[0] && JSON.stringify(e[0].tipos) === '["text/plain"]', `${nombre}: los tipos escritos son EXACTAMENTE ["text/plain"]: ` + JSON.stringify(e[0]?.tipos));
   chk(e[0]?.texto === await textoVista(pg, vista), `${nombre}: el texto es exactamente la vista previa`);
-  else chk(/window\.innerHeight: \d+/.test(e[0]?.texto || '') && !/<|&lt;|href/.test(e[0]?.texto || ''), `${nombre}: el texto es una lista de «clave: valor» sin marcas HTML`);
   chk(!/<[a-z!\/]|&[a-z]+;|\bhref=|\bmailto:/i.test(e[0]?.texto || ''), `${nombre}: el texto no lleva etiquetas HTML ni enlaces`);
   chk(await pg.evaluate(v => !document.querySelector(v).closest('a') && !document.querySelector(v).querySelector('a'), vista), `${nombre}: la vista previa no es un enlace ni lleva ninguno dentro`);
   await ctx.close();
