@@ -37,7 +37,7 @@ export async function pintarCorreo(raiz, id) {
   }
 
   const firma = leerFirma();
-  let idioma = idiomaPorDefecto(alumno);
+  let idioma = idiomaPorDefecto(alumno, d.listas.programas);
   let actual = null;   // lo que se ve en la vista previa es lo que se copia y lo que va al enlace de correo
 
   const vista = el('pre', { class: 'vista-previa', id: 'co-vista', tabindex: '0', 'aria-label': 'Texto del borrador' });

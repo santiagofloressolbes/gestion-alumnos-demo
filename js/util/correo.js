@@ -32,8 +32,17 @@ export function tipoDeEstado(estado) {
   return null;
 }
 
-// El MBA en inglés recibe el borrador en inglés; el resto, en español. La persona puede cambiarlo con el selector.
-export const idiomaPorDefecto = alumno => (norm(alumno?.master).includes('ingles') ? 'en' : 'es');
+// Idioma del borrador (solo para elegir el idioma: el programa NUNCA aparece en el texto). La persona puede cambiarlo con el selector.
+//   1) Lo que diga la columna «Idioma del programa» de la hoja Listas para el programa del alumno (en / es, también English, Inglés, Español…).
+//   2) Si está vacía o no se entiende: el nombre del programa lleva la palabra «inglés» o «English» → inglés.
+//   3) Si no: español.
+const IDIOMA_COLUMNA = { en: 'en', english: 'en', ingles: 'en', es: 'es', espanol: 'es', castellano: 'es' };
+export function idiomaPorDefecto(alumno, programas = []) {
+  const programa = (programas || []).find(p => p.nombre === alumno?.master);
+  const dePrograma = IDIOMA_COLUMNA[norm(programa?.idioma)];
+  if (dePrograma) return dePrograma;
+  return /\b(ingles|english)\b/.test(norm(alumno?.master)) ? 'en' : 'es';
+}
 
 // "el puesto en la empresa", con lo que haya.
 function descripcion(puesto, empresa, idioma) {

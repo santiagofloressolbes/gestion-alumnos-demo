@@ -25,8 +25,22 @@ igual(C.borradorCorreo({ alumno, oferta, aplicacion: app('Contratado') }), null,
 igual(C.borradorCorreo({ alumno, oferta, aplicacion: app('') }), null, 'sin estado: no se genera borrador');
 igual(C.idiomaPorDefecto({ master: 'MBA en inglés' }), 'en', 'MBA en inglés: inglés por defecto');
 igual(C.idiomaPorDefecto({ master: 'MBA en español' }), 'es', 'MBA en español: español');
-igual(C.idiomaPorDefecto({ master: 'Máster en Marketing Deportivo' }), 'es', 'otro máster: español');
-igual(C.idiomaPorDefecto({}), 'es', 'sin máster: español');
+igual(C.idiomaPorDefecto({ master: 'Marketing Deportivo / Global Sports Marketing' }), 'es', 'otro programa: español (por defecto)');
+igual(C.idiomaPorDefecto({}), 'es', 'sin programa: español');
+{
+  const L = [{ nombre: 'Global Sports Marketing', idioma: 'en' }, { nombre: 'MBA en inglés', idioma: 'es' }, { nombre: 'Programa X', idioma: '' }, { nombre: 'Programa English', idioma: '' }, { nombre: 'Otro', idioma: 'klingon' }, { nombre: 'Curso', idioma: ' English ' }, { nombre: 'Otro curso', idioma: 'Inglés' }, { nombre: 'Curso es', idioma: 'Español' }];
+  const i = m => C.idiomaPorDefecto({ master: m }, L);
+  igual(i('Global Sports Marketing'), 'en', 'la columna «Idioma del programa» = en: inglés (aunque el nombre no lo diga)');
+  igual(i('MBA en inglés'), 'es', 'la columna manda sobre el nombre: «es» en «MBA en inglés» da español');
+  igual(i('Programa X'), 'es', 'columna vacía y sin la palabra: español');
+  igual(i('Programa English'), 'en', 'columna vacía y el nombre dice English: inglés');
+  igual(i('Otro'), 'es', 'columna que no se entiende: español');
+  igual([i('Curso'), i('Otro curso'), i('Curso es')], ['en', 'en', 'es'], 'English, Inglés y Español también valen (con espacios y sin mirar tildes)');
+  igual(i('No está en la lista'), 'es', 'programa que no está en Listas: español');
+  igual(C.idiomaPorDefecto({ master: 'MBA en inglés' }, undefined), 'en', 'sin lista de programas: vale el respaldo por el nombre');
+  igual(C.idiomaPorDefecto({ master: 'Inglesa Marketing' }, L), 'es', '«Inglesa» no es la palabra «inglés» (se mira la palabra entera)');
+  igual(C.idiomaPorDefecto({ master: 'Máster Bilingüe English-Spanish' }, L), 'en', '«English» como palabra suelta, también entre guiones');
+}
 igual(C.IDIOMAS.map(i => i.clave), ['es', 'en'], 'dos idiomas');
 
 console.log('2. El texto en español');
@@ -213,6 +227,18 @@ console.log('14. A 320 px');
   chk(await pg.$$eval('#v-correo label, #v-correo .primary, #v-correo .secondary', e => e.every(x => x.getBoundingClientRect().height >= 44 && x.getBoundingClientRect().right <= innerWidth)), 'idiomas y botones: 44 px y dentro de la pantalla');
   await pg.click('label[for=co-idioma-es]');
   chk(await sinScrollLateral(pg), 'en español, sin scroll lateral');
+  await ctx.close();
+}
+
+console.log('9. El idioma por defecto sale de la columna «Idioma del programa» de la hoja Listas');
+for (const [idioma, esperado] of [['en', 'en'], ['', 'es'], ['es', 'es']]) {
+  const { pg, ctx } = await entrar({ apps: false });
+  await pg.route('**/datos-mock/Listas.csv*', async r => {   // «MBA en español» (alumna A009, solicitud AP009): se le pone el idioma de la columna
+    const res = await r.fetch();
+    await r.fulfill({ response: res, body: (await res.text()).replace(/^(MBA en español,.*,MBA),[^,\r\n]*$/m, `$1,${idioma}`) });
+  });
+  await pg.goto(BASE + '#/aplicacion/AP009/correo'); await pg.waitForSelector('#co-vista');
+  chk(await pg.isChecked('#co-idioma-' + esperado), `columna «${idioma || 'vacía'}» en «MBA en español»: el borrador sale en ${esperado === 'en' ? 'English' : 'español'}`);
   await ctx.close();
 }
 await terminar();
