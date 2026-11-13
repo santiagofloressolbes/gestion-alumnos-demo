@@ -1,6 +1,7 @@
 // Tarjetas del match: "Alumnos que encajan" (ficha de la oferta) y "Ofertas que encajan" (ficha del alumno).
 // Solo lectura y cálculo. Nadie se oculta: los tres grupos suman todos los alumnos (u ofertas) y cada fila dice por qué.
 import { el, svgFlecha, plural } from '../util/dom.js';
+import { desplegable } from './desplegable.js';
 import { emparejar, ofertasParaAlumno, CATEGORIAS } from '../util/match.js';
 import { nombreAlumno } from '../util/rondas.js';
 import { navegacion } from '../util/navegacion.js';
@@ -13,7 +14,7 @@ const NOTA = 'Es una ayuda para mirar, no una decisión: nadie queda fuera de la
 
 // Los criterios de una fila: el símbolo y la palabra van siempre en texto (el color nunca es lo único que lo dice).
 function porQue(criterios) {
-  return el('details', { class: 'porque' },
+  return desplegable({ class: 'porque' },
     el('summary', {}, 'Por qué'),
     el('ul', { class: 'criterios' }, criterios.map(c => el('li', { class: 'crit ' + c.estado },
       el('span', { class: 'crit-signo', 'aria-hidden': 'true' }, SIGNO[c.estado]),
@@ -43,7 +44,7 @@ function grupos(resultados, fila, nombreItem, extra = () => {}) {
       extra();
     };
     pintar();
-    return el('details', { class: 'grupo-match ' + c, open: c !== 'no' && items.length > 0, 'data-grupo': c },
+    return desplegable({ class: 'grupo-match ' + c, open: c !== 'no' && items.length > 0, 'data-grupo': c },
       el('summary', {}, `${CATEGORIAS[c]} (${items.length})`),
       items.length ? [lista, mas] : el('p', { class: 'sub' }, `Ningún ${nombreItem} en este grupo.`));
   });

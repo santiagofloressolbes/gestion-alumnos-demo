@@ -129,10 +129,7 @@ button:disabled{opacity:.7;cursor:progress}
 .campo-form input,.campo-form select{display:block;width:100%;min-height:3rem;padding:0 1rem;border-radius:1rem;border:1.5px solid var(--line);background:var(--inp);color:var(--cink);font-size:1rem}   /* 16 px: el iPhone no amplía al enfocar */
 .campo-form input::placeholder{color:var(--cmuted)}
 .campo-form select{-webkit-appearance:none;appearance:none;padding-right:2.5rem;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23A1A1AA' stroke-width='2.2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right .75rem center;background-size:1.5rem}
-.filtros summary{display:flex;align-items:center;justify-content:space-between;min-height:2.75rem;font-weight:700;cursor:pointer;list-style:none}
-.filtros summary::-webkit-details-marker{display:none}
-.filtros summary::after{content:"";width:.625rem;height:.625rem;border-right:2.2px solid var(--tab-on);border-bottom:2.2px solid var(--tab-on);transform:rotate(45deg);margin-right:.5rem;transition:transform .15s}
-.filtros[open] summary::after{transform:rotate(-135deg)}
+.filtros>summary{padding:0}
 .filtros-cuerpo{padding-top:1rem}
 .filtros-cuerpo .campo-form:last-child{margin-bottom:0}
 .opciones{display:flex;flex-wrap:wrap;gap:.5rem}
@@ -218,16 +215,13 @@ button:disabled{opacity:.7;cursor:progress}
 
 /* ---------- Match: alumnos y ofertas que encajan ---------- */
 .grupo-match{margin:0 0 .5rem;border:1.5px solid var(--line);border-radius:1rem;background:var(--inp)}
-.grupo-match>summary{display:flex;align-items:center;justify-content:space-between;min-height:2.75rem;padding:0 1rem;font-weight:700;cursor:pointer;list-style:none}
-.grupo-match>summary::-webkit-details-marker{display:none}
-.grupo-match>summary::after{content:"";width:.625rem;height:.625rem;border-right:2.2px solid var(--tab-on);border-bottom:2.2px solid var(--tab-on);transform:rotate(45deg);margin-right:.25rem}
-.grupo-match[open]>summary::after{transform:rotate(-135deg)}
+.grupo-match>summary{padding:0 1rem}
 .grupo-match>ul,.grupo-match>.sub,.grupo-match>.secondary{margin:0 .5rem .5rem;width:auto}
 .grupo-match>.sub{padding:.25rem .5rem .5rem}
 .fila-match{display:flex;align-items:flex-start;gap:.5rem}
 .fila-match-cuerpo{flex:1;min-width:0}
 .porque{margin:.25rem 0 0}
-.porque>summary{display:flex;align-items:center;min-height:2.75rem;padding:0 .5rem;font-size:.875rem;font-weight:700;color:var(--tab-on);cursor:pointer}
+.porque>summary{padding:0 .5rem;font-size:.875rem;font-weight:700;color:var(--tab-on)}
 .criterios{list-style:none;margin:0;padding:0 .5rem .5rem;display:flex;flex-direction:column;gap:.5rem;font-size:.875rem}
 .crit{display:flex;gap:.5rem;align-items:flex-start}
 .crit-signo{flex:none;width:1.25rem;font-weight:700}
@@ -277,12 +271,14 @@ button:disabled{opacity:.7;cursor:progress}
 .diag-interruptor span{min-width:0}
 .diag-interruptor .sub{display:block;margin:.25rem 0 0}
 
+/* ---------- Desplegable comun (v22): una sola flecha estandar que gira, zona tactil de al menos 44 px; el estado va en aria-expanded, sin texto ---------- */
+.desplegable>summary{display:flex;align-items:center;justify-content:space-between;gap:1rem;min-height:2.75rem;cursor:pointer;list-style:none}
+.desplegable>summary::-webkit-details-marker{display:none}
+.desplegable>summary::after{content:"";flex:none;width:.625rem;height:.625rem;border-right:2.2px solid var(--tab-on);border-bottom:2.2px solid var(--tab-on);transform:rotate(45deg);margin:0 .25rem;transition:transform .15s}
+.desplegable[open]>summary::after{transform:rotate(-135deg)}
+
 /* ---------- Secciones plegables de Ajustes (v21) ---------- */
 .plegable-tarjeta{padding:0}
-.plegable summary{display:flex;align-items:center;justify-content:space-between;gap:1rem;min-height:3.5rem;padding:.5rem 1.5rem;border-radius:1.5rem;cursor:pointer;list-style:none}
-.plegable summary::-webkit-details-marker{display:none}
-.plegable summary h2{margin:0;min-width:0;overflow-wrap:anywhere}
-.plegable-estado{flex:none;display:inline-flex;align-items:center;gap:.5rem;font-size:.875rem;font-weight:600;color:var(--cmuted)}
-.plegable-estado::after{content:"";width:.5rem;height:.5rem;border-right:2px solid currentColor;border-bottom:2px solid currentColor;transform:rotate(45deg) translateY(-1px)}   /* la flecha solo acompaña al texto */
-.plegable[open] .plegable-estado::after{transform:rotate(-135deg) translateY(-1px)}
+.plegable>summary{padding:.5rem 1.5rem;border-radius:1.5rem;min-height:3.5rem}
+.plegable>summary>h2{margin:0;min-width:0;overflow-wrap:anywhere}
 .plegable-cuerpo{padding:0 1.5rem 1.5rem}

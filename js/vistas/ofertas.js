@@ -2,6 +2,7 @@
 import { getOfertas, getListas, recargar, puedeEscribirOfertas, estadoEscrituraOfertas } from '../data/index.js';
 import { navegacion } from '../util/navegacion.js';
 import { el, svgFlecha, plural } from '../util/dom.js';
+import { desplegable } from './desplegable.js';
 import { filtrar, estadoVacio, filtrosActivos, hayAlgo, enlaceOferta } from '../util/ofertas.js';
 import { fechaLarga } from './entrevista.js';
 import { tarjetaError } from './error-datos.js';
@@ -65,7 +66,7 @@ export async function pintarOfertas(raiz) {
     el('h2', {}, 'Ninguna oferta coincide'),
     el('p', { class: 'sub' }, 'Prueba con menos palabras o quita algún filtro.'));
 
-  const filtros = el('details', { class: 'filtros', open: !!(e.tipo || e.area) },
+  const filtros = desplegable({ class: 'filtros', open: !!(e.tipo || e.area) },
     resumen,
     el('div', { class: 'filtros-cuerpo' },
       campoSelect('of-tipo', 'Tipo', tipos, 'tipo', 'Prácticas y empleo'),

@@ -1,4 +1,4 @@
-// Pruebas de las secciones plegables de Ajustes: solo «Conexión» abierta por defecto, el estado dicho con texto,
+// Pruebas de las secciones plegables de Ajustes: solo «Conexión» abierta por defecto, el estado en aria-expanded, sin texto visible,
 // lo abierto se recuerda en el móvil, teclado, datos guardados rotos y 320 px.
 import { nuevo, chk, terminar, BASE, URL_OK, CLAVE_PRUEBA } from './ayudas.mjs';
 
@@ -14,7 +14,7 @@ const entrar = async (guardado) => {
   return t;
 };
 const ir = async pg => { await pg.goto(BASE + '#/ajustes'); await pg.waitForSelector('#aj-conexion summary'); };
-const estados = pg => pg.evaluate(ids => Object.fromEntries(ids.map(id => { const d = document.querySelector(`#${id} details`); return [id, [d.open, d.querySelector('.plegable-estado').textContent]]; })), SECCIONES.map(s => s[0]));
+const estados = pg => pg.evaluate(ids => Object.fromEntries(ids.map(id => { const d = document.querySelector(`#${id} details`); return [id, [d.open, d.querySelector('summary').getAttribute('aria-expanded')]]; })), SECCIONES.map(s => s[0]));
 const guardado = pg => pg.evaluate(() => localStorage.getItem('gad.ajustes'));
 const visible = (pg, sel) => pg.evaluate(s => { const e = document.querySelector(s); if (!e || e.hidden) return false; const d = e.closest('details'); if (d && !d.open) return false; const r = e.getBoundingClientRect(); return r.width > 0 && r.height > 0; }, sel);
 // «toggle» es asíncrono: tras pulsar se espera un instante a que el texto y lo guardado se pongan al día
@@ -26,8 +26,8 @@ console.log('1. Por defecto: solo «Conexión» abierta');
   const { pg, ctx, log } = await entrar();
   await ir(pg);
   const e = await estados(pg);
-  chk(e['aj-conexion'][0] === true && e['aj-conexion'][1] === 'Abierto', 'Conexión: abierta y dice «Abierto»');
-  for (const id of ['aj-avisos', 'aj-firma-tarjeta', 'aj-version-tarjeta', 'aj-diagnostico']) chk(e[id][0] === false && e[id][1] === 'Cerrado', `${id}: cerrada y dice «Cerrado»`);
+  chk(e['aj-conexion'][0] === true && e['aj-conexion'][1] === 'true', 'Conexión: abierta y tiene aria-expanded=true');
+  for (const id of ['aj-avisos', 'aj-firma-tarjeta', 'aj-version-tarjeta', 'aj-diagnostico']) chk(e[id][0] === false && e[id][1] === 'false', `${id}: cerrada y tiene aria-expanded=false`);
   chk(await pg.$$eval('#v-ajustes details', d => d.length) === 5, 'son 5 secciones plegables');
   const titulos = await pg.$$eval('#v-ajustes summary h2', h => h.map(x => x.textContent));
   chk(JSON.stringify(titulos) === JSON.stringify(SECCIONES.map(s => s[1])), 'los títulos, en este orden: ' + titulos.join(' · '));
@@ -39,14 +39,14 @@ console.log('1. Por defecto: solo «Conexión» abierta');
 
   console.log('2. Abrir, cerrar y recordar');
   await pulsa(pg, '#aj-avisos summary');
-  chk((await estados(pg))['aj-avisos'].join() === 'true,Abierto' && await visible(pg, '#aj-av-dias'), 'al tocar «Avisos» se abre, dice «Abierto» y se ve su contenido');
+  chk((await estados(pg))['aj-avisos'].join() === 'true,true' && await visible(pg, '#aj-av-dias'), 'al tocar «Avisos» se abre, tiene aria-expanded=true y se ve su contenido');
   chk(await guardado(pg) === '["conexion","avisos"]', 'se guarda lo abierto: ' + await guardado(pg));
   await pulsa(pg, '#aj-conexion summary');
-  chk((await estados(pg))['aj-conexion'].join() === 'false,Cerrado' && !(await visible(pg, '#aj-olvidar')), '«Conexión» se cierra y dice «Cerrado»');
+  chk((await estados(pg))['aj-conexion'].join() === 'false,false' && !(await visible(pg, '#aj-olvidar')), '«Conexión» se cierra y tiene aria-expanded=false');
   chk(await guardado(pg) === '["avisos"]', 'cerrar también se recuerda: ' + await guardado(pg));
   await pg.reload(); await pg.waitForSelector('#aj-conexion summary');
   const r = await estados(pg);
-  chk(r['aj-conexion'][0] === false && r['aj-avisos'][0] === true && r['aj-avisos'][1] === 'Abierto' && r['aj-conexion'][1] === 'Cerrado', 'al cerrar y abrir la app queda como se dejó (Conexión cerrada, Avisos abierta)');
+  chk(r['aj-conexion'][0] === false && r['aj-avisos'][0] === true && r['aj-avisos'][1] === 'true' && r['aj-conexion'][1] === 'false', 'al cerrar y abrir la app queda como se dejó (Conexión cerrada, Avisos abierta)');
   await pg.click('#tabs a[data-tab=inicio]'); await pg.waitForSelector('.masters .master');
   await pg.click('#tabs a[data-tab=ajustes]'); await pg.waitForSelector('#aj-avisos summary');
   chk((await estados(pg))['aj-avisos'][0] === true, 'y al cambiar de pestaña y volver');
@@ -55,13 +55,13 @@ console.log('1. Por defecto: solo «Conexión» abierta');
   await pulsa(pg, '#aj-avisos summary');
   chk(await guardado(pg) === '[]', 'todo cerrado se recuerda como lista vacía (no vuelve a los valores por defecto)');
   await pg.reload(); await pg.waitForSelector('#aj-conexion summary');
-  chk(Object.values(await estados(pg)).every(([abierta, t]) => abierta === false && t === 'Cerrado'), 'tras recargar sigue todo cerrado');
+  chk(Object.values(await estados(pg)).every(([abierta, t]) => abierta === false && t === 'false'), 'tras recargar sigue todo cerrado');
 
   console.log('3. Teclado');
   await pg.focus('#aj-firma-tarjeta summary'); await pg.keyboard.press('Enter'); await pg.waitForTimeout(120);
-  chk((await estados(pg))['aj-firma-tarjeta'].join() === 'true,Abierto', 'Enter abre la sección');
+  chk((await estados(pg))['aj-firma-tarjeta'].join() === 'true,true', 'Enter abre la sección');
   await pg.keyboard.press('Space'); await pg.waitForTimeout(120);
-  chk((await estados(pg))['aj-firma-tarjeta'].join() === 'false,Cerrado', 'Espacio la cierra');
+  chk((await estados(pg))['aj-firma-tarjeta'].join() === 'false,false', 'Espacio la cierra');
   await ctx.close();
 }
 
@@ -77,7 +77,7 @@ for (const [guardadoRaro, esperado, que] of [
   await ir(pg);
   const e = await estados(pg);
   chk(JSON.stringify(Object.entries(e).filter(([, v]) => v[0]).map(([k]) => k)) === JSON.stringify(esperado), `${que}: ` + JSON.stringify(Object.entries(e).filter(([, v]) => v[0]).map(([k]) => k)));
-  chk(Object.values(e).every(([abierta, t]) => t === (abierta ? 'Abierto' : 'Cerrado')), `${que}: el texto siempre dice lo que se ve`);
+  chk(Object.values(e).every(([abierta, t]) => t === (abierta ? 'true' : 'false')), `${que}: aria-expanded siempre dice lo que se ve`);
   await ctx.close();
 }
 
@@ -96,7 +96,7 @@ console.log('5. Sin almacenamiento');
   await ir(pg);
   await pg.evaluate(() => { Storage.prototype.setItem = () => { throw new Error('lleno'); }; });
   await pulsa(pg, '#aj-avisos summary');
-  chk((await estados(pg))['aj-avisos'].join() === 'true,Abierto' && await visible(pg, '#aj-av-dias'), 'sin poder guardar, la sección se abre igualmente');
+  chk((await estados(pg))['aj-avisos'].join() === 'true,true' && await visible(pg, '#aj-av-dias'), 'sin poder guardar, la sección se abre igualmente');
   await ctx.close();
 }
 
@@ -108,7 +108,7 @@ console.log('6. A 320 px');
     await ir(pg);
     chk(await sinScrollLateral(pg), `${nombre}: sin scroll lateral`);
     chk(await pg.$$eval('#v-ajustes summary', s => s.every(x => x.getBoundingClientRect().height >= 44 && x.getBoundingClientRect().right <= innerWidth + 0.5 && x.scrollWidth <= x.clientWidth + 1)), `${nombre}: las cabeceras caben y miden 44 px`);
-    chk(await pg.$$eval('#v-ajustes .plegable-estado', s => s.every(x => x.getBoundingClientRect().left >= 0 && x.getBoundingClientRect().right <= innerWidth && x.getBoundingClientRect().height < 30)), `${nombre}: el texto «Abierto/Cerrado» no se corta`);
+    chk(await pg.$$eval('#v-ajustes summary', s => s.every(x => { const c = getComputedStyle(x, '::after'); return c.content !== 'none' && x.textContent.trim() === x.querySelector('h2').textContent.trim() && !/Abierto|Cerrado/.test(x.textContent); })), `${nombre}: la flecha (::after) existe y no hay texto Abierto/Cerrado`);
     if (g !== '[]') chk(await pg.$$eval('#aj-avisos input, #aj-avisos button, #aj-firma, #aj-fi-guardar, #aj-buscar, #dg-copiar', e => e.every(x => x.getBoundingClientRect().height >= 44 && x.getBoundingClientRect().right <= innerWidth)), `${nombre}: campos y botones de dentro: 44 px y dentro de la pantalla`);
     await ctx.close();
   }

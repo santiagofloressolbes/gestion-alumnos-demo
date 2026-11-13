@@ -1,6 +1,7 @@
 // Pestaña Buscar: cuadro de búsqueda y filtros (área, nacionalidad, situación de trabajo) sobre todos los alumnos.
 import { getAlumnos, getListas, recargar } from '../data/index.js';
 import { el } from '../util/dom.js';
+import { desplegable } from './desplegable.js';
 import { filtrar, estadoVacio, filtrosActivos, hayAlgo } from '../util/filtros.js';
 import { fila } from './master.js';
 import { tarjetaError } from './error-datos.js';
@@ -58,7 +59,7 @@ export async function pintarBuscar(raiz) {
     el('h2', {}, 'Ningún alumno coincide'),
     el('p', { class: 'sub' }, 'Prueba con menos palabras o quita algún filtro.'));
 
-  const filtros = el('details', { class: 'filtros' },
+  const filtros = desplegable({ class: 'filtros' },
     resumen,
     el('div', { class: 'filtros-cuerpo' },
       campoSelect('f-area', 'Área', areas, 'area', 'Todas las áreas'),
