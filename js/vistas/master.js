@@ -1,7 +1,7 @@
 // Lista de alumnos de un programa: avatar, nombre y un dato breve.
 import { getAlumnos, getMasters, recargar } from '../data/index.js';
 import { tarjetaError } from './error-datos.js';
-import { el, svgFlecha, plural } from '../util/dom.js';
+import { el, svgFlecha, plural, reemplazar } from '../util/dom.js';
 import { avatar } from '../util/avatar.js';
 import { navegacion } from '../util/navegacion.js';
 import { avisosActivosPorAlumno, etiquetaAviso } from './avisos.js';
@@ -9,16 +9,16 @@ import { avisosActivosPorAlumno, etiquetaAviso } from './avisos.js';
 export const volver = () => el('a', { class: 'volver', href: '#/' }, 'Inicio');
 
 export async function pintarMaster(raiz, nombre) {
-  raiz.replaceChildren(el('p', { class: 'estado', role: 'status' }, 'Cargando alumnos…'));
+  reemplazar(raiz, el('p', { class: 'estado', role: 'status' }, 'Cargando alumnos…'));
   let masters, alumnos;
   try {
     [masters, alumnos] = await Promise.all([getMasters(), getAlumnos()]);
   } catch (e) {
-    raiz.replaceChildren(volver(), tarjetaError(e, () => { recargar().catch(() => {}); pintarMaster(raiz, nombre); }));
+    reemplazar(raiz, volver(), tarjetaError(e, () => { recargar().catch(() => {}); pintarMaster(raiz, nombre); }));
     return;
   }
   if (!masters.some(m => m.nombre === nombre)) {
-    raiz.replaceChildren(volver(), el('div', { class: 'card' },
+    reemplazar(raiz, volver(), el('div', { class: 'card' },
       el('h2', {}, 'Programa no encontrado'),
       el('p', { class: 'sub' }, 'Vuelve al inicio y elige uno de la lista.')));
     return;
@@ -29,7 +29,7 @@ export async function pintarMaster(raiz, nombre) {
 
   const avisosDe = await avisosActivosPorAlumno();
   const programa = masters.find(m => m.nombre === nombre);
-  raiz.replaceChildren(
+  reemplazar(raiz, 
     volver(),
     !programa.enLista && el('p', { class: 'aviso', role: 'note', id: 'ma-fuera-de-lista' }, `El programa «${nombre}» no está en la hoja Listas del Sheet. Añádelo allí o corrígelo en la hoja Alumnos.`),
     el('h2', { class: 'seccion' }, plural(lista.length, 'alumno', 'alumnos')),

@@ -1,7 +1,7 @@
 // Formularios de rondas y aplicaciones: registrar una ronda de difusión, añadir una aplicación y cambiar su estado.
 // Lo que se escribe NO se guarda en el móvil: solo se envía al script cuando se pulsa "Guardar". Nada se borra.
 import { recargar, estadoEscrituraRondas, puedeEscribirRondas, registrarRonda, crearAplicacion, cambiarEstado, aplicarRonda, aplicarAplicacion } from '../data/index.js';
-import { el } from '../util/dom.js';
+import { el, reemplazar } from '../util/dom.js';
 import { navegacion } from '../util/navegacion.js';
 import { norm } from '../util/texto.js';
 import { avatar } from '../util/avatar.js';
@@ -45,10 +45,10 @@ function sinPermiso(raiz, volver) {
   const motivo = estadoEscrituraRondas() === 'script-antiguo'
     ? 'No se pueden guardar rondas ni solicitudes: el script es de una versión anterior o faltan hojas en el Sheet (Rondas, Aplicaciones e Historial). Mira la guía, apartado «Actualizar a la versión con rondas y solicitudes».'
     : 'Estás en la demo y aquí no se puede guardar nada. Conecta con el Sheet de prueba desde Ajustes.';
-  raiz.replaceChildren(volver, el('div', { class: 'card' }, el('h2', {}, 'No se puede guardar'), el('p', { class: 'sub' }, motivo)));
+  reemplazar(raiz, volver, el('div', { class: 'card' }, el('h2', {}, 'No se puede guardar'), el('p', { class: 'sub' }, motivo)));
 }
 const noEncontrado = (raiz, volver, que) =>
-  raiz.replaceChildren(volver, el('div', { class: 'card' }, el('h2', {}, que + ' no encontrada'), el('p', { class: 'sub' }, 'Vuelve atrás y elige otra.')));
+  reemplazar(raiz, volver, el('div', { class: 'card' }, el('h2', {}, que + ' no encontrada'), el('p', { class: 'sub' }, 'Vuelve atrás y elige otra.')));
 
 // Cuenta de caracteres de un cuadro de notas.
 function cuadroNotas(id, etiqueta) {
@@ -74,10 +74,10 @@ function campoFecha(id, etiqueta, hoy, desde, valor) {
 export async function pintarFormRonda(raiz, idOferta, previo = {}) {
   navegacion.sinGuardar = false;
   const volver = el('a', { class: 'volver', href: hrefOferta(idOferta) }, 'Oferta');
-  raiz.replaceChildren(cargando());
+  reemplazar(raiz, cargando());
   let d;
   try { d = await datosRondas(); }
-  catch (err) { raiz.replaceChildren(volver, tarjetaError(err, () => { recargar().catch(() => {}); pintarFormRonda(raiz, idOferta); })); return; }
+  catch (err) { reemplazar(raiz, volver, tarjetaError(err, () => { recargar().catch(() => {}); pintarFormRonda(raiz, idOferta); })); return; }
   const oferta = d.ofertas.find(x => x.id === idOferta);
   if (!oferta) return noEncontrado(raiz, volver, 'Oferta');
   if (!puedeEscribirRondas()) return sinPermiso(raiz, volver);
@@ -118,7 +118,7 @@ export async function pintarFormRonda(raiz, idOferta, previo = {}) {
     }
   };
 
-  raiz.replaceChildren(...[
+  reemplazar(raiz, ...[
     volver,
     previo.aviso && el('p', { class: 'aviso', role: 'status', id: 'ro-aviso' }, previo.aviso),
     el('section', { class: 'card', 'aria-labelledby': 'ro-titulo' },
@@ -139,10 +139,10 @@ export async function pintarFormRonda(raiz, idOferta, previo = {}) {
 export async function pintarFormAplicacion(raiz, idOferta, numeroTxt) {
   navegacion.sinGuardar = false;
   const volver = el('a', { class: 'volver', href: hrefOferta(idOferta) }, 'Oferta');
-  raiz.replaceChildren(cargando());
+  reemplazar(raiz, cargando());
   let d;
   try { d = await datosRondas(); }
-  catch (err) { raiz.replaceChildren(volver, tarjetaError(err, () => { recargar().catch(() => {}); pintarFormAplicacion(raiz, idOferta, numeroTxt); })); return; }
+  catch (err) { reemplazar(raiz, volver, tarjetaError(err, () => { recargar().catch(() => {}); pintarFormAplicacion(raiz, idOferta, numeroTxt); })); return; }
   const oferta = d.ofertas.find(x => x.id === idOferta);
   if (!oferta) return noEncontrado(raiz, volver, 'Oferta');
   const ronda = d.rondas.find(r => r.idOferta === idOferta && Number(r.numero) === Number(numeroTxt));
@@ -182,7 +182,7 @@ export async function pintarFormAplicacion(raiz, idOferta, numeroTxt) {
     const lineas = a ? [
       ...previas.map(x => `Ya tiene una solicitud en la ronda ${x.numeroRonda} de esta oferta (${x.estado || 'sin estado'}).`),
       ...avisosRequisitos(a, oferta)] : [];
-    avisos.replaceChildren(...lineas.map(t => el('p', { class: 'aviso', role: 'note' }, t)));
+    reemplazar(avisos, ...lineas.map(t => el('p', { class: 'aviso', role: 'note' }, t)));
   }
 
   function pintarLista() {
@@ -197,7 +197,7 @@ export async function pintarFormAplicacion(raiz, idOferta, numeroTxt) {
     const el0 = elegido && sinAplicar.find(a => a.id === elegido);
     if (el0 && !visibles.includes(el0)) visibles.unshift(el0);
     cuentaLista.textContent = candidatos.length > MAX_LISTA ? `Se muestran ${MAX_LISTA} de ${candidatos.length}. Escribe para acotar.` : candidatos.length === 1 ? '1 alumno' : `${candidatos.length} alumnos`;
-    lista.replaceChildren(...visibles.map(a => {
+    reemplazar(lista, ...visibles.map(a => {
       const radio = el('input', { type: 'radio', name: 'ap-alumno', id: 'ap-al-' + a.id, value: a.id, onchange: () => { elegido = a.id; decir(''); ok.hidden = true; pintarAvisos(); marcarCambios(); resaltar(); } });
       radio.checked = a.id === elegido;
       const previas = d.aplicaciones.filter(x => x.idOferta === idOferta && x.idAlumno === a.id);
@@ -206,7 +206,7 @@ export async function pintarFormAplicacion(raiz, idOferta, numeroTxt) {
         el('span', { class: 'alumno-texto' }, el('b', {}, nombreAlumno(a)),
           el('span', { class: 'sub' }, [a.master, CATEGORIAS[categoria.get(a.id)], previas.length && `ya tiene solicitud en la ronda ${previas.map(x => x.numeroRonda).join(', ')}`].filter(Boolean).join(' · ')))));
     }));
-    if (!visibles.length) lista.replaceChildren(el('li', { class: 'sub' }, palabras.length ? 'Ningún alumno coincide.' : 'Todos los alumnos ya tienen solicitud en esta ronda.'));
+    if (!visibles.length) reemplazar(lista, el('li', { class: 'sub' }, palabras.length ? 'Ningún alumno coincide.' : 'Todos los alumnos ya tienen solicitud en esta ronda.'));
   }
   const resaltar = () => { for (const l of lista.querySelectorAll('label')) l.classList.toggle('elegido', l.control?.checked === true); };
 
@@ -248,7 +248,7 @@ export async function pintarFormAplicacion(raiz, idOferta, numeroTxt) {
     }
   };
 
-  raiz.replaceChildren(...[
+  reemplazar(raiz, ...[
     volver,
     el('section', { class: 'card', 'aria-labelledby': 'ap-titulo' },
       el('h2', { id: 'ap-titulo' }, 'Añadir solicitud'),
@@ -269,10 +269,10 @@ export async function pintarFormAplicacion(raiz, idOferta, numeroTxt) {
 export async function pintarFormEstado(raiz, id) {
   navegacion.sinGuardar = false;
   const volver = el('a', { class: 'volver', href: '#/aplicacion/' + encodeURIComponent(id) }, 'Solicitud');
-  raiz.replaceChildren(cargando());
+  reemplazar(raiz, cargando());
   let d;
   try { d = await datosRondas(); }
-  catch (err) { raiz.replaceChildren(volver, tarjetaError(err, () => { recargar().catch(() => {}); pintarFormEstado(raiz, id); })); return; }
+  catch (err) { reemplazar(raiz, volver, tarjetaError(err, () => { recargar().catch(() => {}); pintarFormEstado(raiz, id); })); return; }
   const a = d.hay ? d.aplicaciones.find(x => x.id === id) : null;
   if (!a) return noEncontrado(raiz, el('a', { class: 'volver', href: '#/ofertas' }, 'Ofertas'), 'Solicitud');
   if (!puedeEscribirRondas()) return sinPermiso(raiz, volver);
@@ -343,7 +343,7 @@ export async function pintarFormEstado(raiz, id) {
       return terminar(`Estado cambiado a «${mio.estado}».`);
     }
     const ahora = actual.estado + (actual.motivo ? ` (${actual.motivo})` : '');
-    conflicto.replaceChildren(
+    reemplazar(conflicto, 
       el('h3', {}, 'Esta solicitud ha cambiado mientras la editabas'),
       el('p', { class: 'sub' }, 'Ahora está así en el Sheet. Lo que has escrito sigue en el formulario.'),
       el('dl', { class: 'campos' }, el('div', { class: 'campo' }, el('dt', {}, 'Estado en el Sheet'), el('dd', {}, ahora))),
@@ -356,7 +356,7 @@ export async function pintarFormEstado(raiz, id) {
     conflicto.scrollIntoView?.({ block: 'nearest' });
   };
 
-  raiz.replaceChildren(
+  reemplazar(raiz, 
     volver,
     el('section', { class: 'card', 'aria-labelledby': 'es-titulo' },
       el('h2', { id: 'es-titulo' }, 'Cambiar estado'),

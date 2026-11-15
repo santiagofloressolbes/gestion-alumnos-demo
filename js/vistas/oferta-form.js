@@ -1,7 +1,7 @@
 // Formulario para dar de alta o editar una oferta. Lo que se escribe NO se guarda en el móvil:
 // solo se envía al script cuando se pulsa "Guardar". Las ofertas no se borran: se cierran cambiando el estado.
 import { getOfertas, getListas, recargar, guardarOferta, aplicarOferta, puedeEscribirOfertas, estadoEscrituraOfertas } from '../data/index.js';
-import { el } from '../util/dom.js';
+import { el, reemplazar } from '../util/dom.js';
 import { navegacion } from '../util/navegacion.js';
 import { CAMPOS, validarOferta, mensajeCampo, normalizarTexto, miles } from '../util/ofertas.js';
 import { hoyLocal, fechaLarga } from './entrevista.js';
@@ -15,24 +15,24 @@ const recortadas = o => Object.fromEntries(CAMPOS.map(c => [c.clave, normalizarT
 export async function pintarFormOferta(raiz, id) {
   navegacion.sinGuardar = false;
   const volver = el('a', { class: 'volver', href: id ? '#/oferta/' + encodeURIComponent(id) : '#/ofertas' }, id ? 'Oferta' : 'Ofertas');
-  raiz.replaceChildren(el('p', { class: 'estado', role: 'status' }, 'Cargando…'));
+  reemplazar(raiz, el('p', { class: 'estado', role: 'status' }, 'Cargando…'));
   let ofertas, listas;
   try {
     [ofertas, listas] = await Promise.all([getOfertas(), getListas()]);
   } catch (err) {
-    raiz.replaceChildren(volver, tarjetaError(err, () => { recargar().catch(() => {}); pintarFormOferta(raiz, id); }));
+    reemplazar(raiz, volver, tarjetaError(err, () => { recargar().catch(() => {}); pintarFormOferta(raiz, id); }));
     return;
   }
   if (!puedeEscribirOfertas()) {
     const motivo = estadoEscrituraOfertas() === 'script-antiguo'
       ? 'No se pueden guardar ofertas: el script de Google es de una versión anterior. Actualiza Code.gs con la guía («Actualizar a la versión con ofertas»).'
       : 'Estás en la demo y aquí no se puede guardar nada. Conecta con el Sheet de prueba desde Ajustes.';
-    raiz.replaceChildren(volver, el('div', { class: 'card' }, el('h2', {}, 'No se puede guardar'), el('p', { class: 'sub' }, motivo)));
+    reemplazar(raiz, volver, el('div', { class: 'card' }, el('h2', {}, 'No se puede guardar'), el('p', { class: 'sub' }, motivo)));
     return;
   }
   const oferta = id ? ofertas.find(x => x.id === id) : null;
   if (id && !oferta) {
-    raiz.replaceChildren(volver, el('div', { class: 'card' }, el('h2', {}, 'Oferta no encontrada'), el('p', { class: 'sub' }, 'Vuelve a la lista y elige otra.')));
+    reemplazar(raiz, volver, el('div', { class: 'card' }, el('h2', {}, 'Oferta no encontrada'), el('p', { class: 'sub' }, 'Vuelve a la lista y elige otra.')));
     return;
   }
 
@@ -143,7 +143,7 @@ export async function pintarFormOferta(raiz, id) {
     if (igual(actual, mias)) { aplicarOferta(id, actual); return terminar(id, 'Guardado en el Sheet.'); }   // ya estaba guardado (p. ej. se cortó la respuesta)
     const antes = base || inicial;
     const cambiados = CAMPOS.filter(c => actual[c.clave] !== antes[c.clave]);
-    conflicto.replaceChildren(
+    reemplazar(conflicto, 
       el('h3', {}, 'Esta oferta ha cambiado mientras la editabas'),
       el('p', { class: 'sub' }, 'Esto es lo que ha cambiado en el Sheet. Lo que has escrito sigue en el formulario.'),
       el('p', { class: 'sub' }, 'Si guardas tu versión, solo cambian los campos que has tocado tú. Los demás se quedan como están en el Sheet.'),
@@ -160,7 +160,7 @@ export async function pintarFormOferta(raiz, id) {
     conflicto.scrollIntoView?.({ block: 'nearest' });
   };
 
-  raiz.replaceChildren(
+  reemplazar(raiz, 
     volver,
     el('section', { class: 'card', 'aria-labelledby': 'of-form-titulo' },
       el('h2', { id: 'of-form-titulo' }, id ? 'Editar oferta' : 'Nueva oferta'),

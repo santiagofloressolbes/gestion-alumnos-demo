@@ -1,7 +1,7 @@
 // Compartir perfiles: se eligen los alumnos y los datos, se ve EXACTAMENTE el texto que saldrá y se comparte o se copia.
 // No se envía nada a ningún servidor ni se guarda nada: el texto sale por el menú de compartir del móvil o por el portapapeles.
 import { recargar } from '../data/index.js';
-import { el } from '../util/dom.js';
+import { el, reemplazar } from '../util/dom.js';
 import { navegacion } from '../util/navegacion.js';
 import { avisoFlotante, copiarTexto as copiarAlPortapapeles } from '../util/trabajo.js';
 import { CAMPOS_BASE, CAMPOS_SENSIBLES, BASE_POR_DEFECTO, MAX_PERFILES, textoPerfiles, nombreCompleto, sensiblesMarcados, cvSinHttps } from '../util/compartir.js';
@@ -9,21 +9,21 @@ import { datosRondas } from './rondas.js';
 import { tarjetaError } from './error-datos.js';
 
 export async function pintarCompartir(raiz, { idOferta = '', idAlumno = '' } = {}) {
-  raiz.replaceChildren(el('p', { class: 'estado', role: 'status' }, 'Cargando…'));
+  reemplazar(raiz, el('p', { class: 'estado', role: 'status' }, 'Cargando…'));
   let d;
   const hrefVolver = idAlumno ? '#/alumno/' + encodeURIComponent(idAlumno) : idOferta ? '#/oferta/' + encodeURIComponent(idOferta) : '#/ofertas';
   const volver = el('a', { class: 'volver', href: hrefVolver }, idAlumno ? 'Ficha' : 'Oferta');
   try { d = await datosRondas(); }
-  catch (err) { raiz.replaceChildren(volver, tarjetaError(err, () => { recargar().catch(() => {}); pintarCompartir(raiz, { idOferta, idAlumno }); })); return; }
+  catch (err) { reemplazar(raiz, volver, tarjetaError(err, () => { recargar().catch(() => {}); pintarCompartir(raiz, { idOferta, idAlumno }); })); return; }
   const oferta = idOferta ? d.ofertas.find(o => o.id === idOferta) || null : null;
   if (idOferta && !oferta) {
-    raiz.replaceChildren(el('a', { class: 'volver', href: '#/ofertas' }, 'Ofertas'), el('div', { class: 'card' }, el('h2', {}, 'Oferta no encontrada'), el('p', { class: 'sub' }, 'Vuelve a la lista y elige otra.')));
+    reemplazar(raiz, el('a', { class: 'volver', href: '#/ofertas' }, 'Ofertas'), el('div', { class: 'card' }, el('h2', {}, 'Oferta no encontrada'), el('p', { class: 'sub' }, 'Vuelve a la lista y elige otra.')));
     return;
   }
   const ids = idAlumno ? [idAlumno] : navegacion.compartir?.idOferta === idOferta ? navegacion.compartir.ids : [];
   const elegidos = ids.map(id => d.alumnos.find(a => a.id === id)).filter(Boolean);
   if (!elegidos.length) {
-    raiz.replaceChildren(volver, el('div', { class: 'card', id: 'cp-nadie' },
+    reemplazar(raiz, volver, el('div', { class: 'card', id: 'cp-nadie' },
       el('h2', {}, 'No hay alumnos elegidos'),
       el('p', { class: 'sub' }, 'Elige a quien quieras en «Alumnos que encajan», en la ficha de la oferta, y vuelve aquí.'),
       el('a', { class: 'secondary', href: hrefVolver }, idAlumno ? 'Volver a la ficha' : 'Volver a la oferta')));
@@ -62,7 +62,7 @@ export async function pintarCompartir(raiz, { idOferta = '', idAlumno = '' } = {
     vista.textContent = actual || '(No hay ningún alumno marcado.)';
     const sens = sensiblesMarcados(campos);
     const sinCV = cvSinHttps(quienes, campos);
-    avisoSensible.replaceChildren(...[
+    reemplazar(avisoSensible, ...[
       sens.length ? `Has marcado datos sensibles (${sens.map(c => c.etiqueta.toLowerCase()).join(', ')}). Compártelos solo si la persona lo sabe y lo permite.` : '',
       sinCV && sinCV.length ? `Sin enlace https, se deja fuera el CV de: ${sinCV.join(', ')}.` : '',
     ].filter(Boolean).map(t => el('span', { class: 'bloque' }, t)));
@@ -91,7 +91,7 @@ export async function pintarCompartir(raiz, { idOferta = '', idAlumno = '' } = {
     else decir('No se ha podido copiar. Mantén pulsado el texto de la vista previa y elige «Copiar».', false);
   }
 
-  raiz.replaceChildren(...[
+  reemplazar(raiz, ...[
     volver,
     el('section', { class: 'card', 'aria-labelledby': 'cp-titulo' },
       el('h2', { id: 'cp-titulo' }, alumnos.length === 1 ? 'Compartir un perfil' : `Compartir ${alumnos.length} perfiles`),

@@ -1,7 +1,7 @@
 // Pestaña Ofertas: lista (más recientes primero) con filtros, y ficha de una oferta. Solo lectura.
 import { getOfertas, getListas, recargar, puedeEscribirOfertas, estadoEscrituraOfertas } from '../data/index.js';
 import { navegacion } from '../util/navegacion.js';
-import { el, svgFlecha, plural } from '../util/dom.js';
+import { el, svgFlecha, plural, reemplazar } from '../util/dom.js';
 import { desplegable } from './desplegable.js';
 import { filtrar, estadoVacio, filtrosActivos, hayAlgo, enlaceOferta } from '../util/ofertas.js';
 import { fechaLarga } from './entrevista.js';
@@ -14,12 +14,12 @@ const volverAOfertas = () => el('a', { class: 'volver', href: '#/ofertas' }, 'Of
 const insignia = estado => el('span', { class: 'insignia' + (estado === 'Abierta' ? ' abierta' : '') }, estado || 'Sin estado');
 
 export async function pintarOfertas(raiz) {
-  raiz.replaceChildren(el('p', { class: 'estado', role: 'status' }, 'Cargando ofertas…'));
+  reemplazar(raiz, el('p', { class: 'estado', role: 'status' }, 'Cargando ofertas…'));
   let ofertas, listas;
   try {
     [ofertas, listas] = await Promise.all([getOfertas(), getListas()]);
   } catch (err) {
-    raiz.replaceChildren(tarjetaError(err, () => { recargar().catch(() => {}); pintarOfertas(raiz); }));
+    reemplazar(raiz, tarjetaError(err, () => { recargar().catch(() => {}); pintarOfertas(raiz); }));
     return;
   }
 
@@ -80,12 +80,12 @@ export async function pintarOfertas(raiz) {
     limpiar.hidden = !hayAlgo(e);
     cuenta.textContent = hayAlgo(e) ? `${res.length} de ${plural(ofertas.length, 'oferta', 'ofertas')}` : plural(ofertas.length, 'oferta', 'ofertas');
     vacio.hidden = res.length > 0 || ofertas.length === 0;
-    lista.replaceChildren(...res.map(fila));
+    reemplazar(lista, ...res.map(fila));
   }
 
   const aviso = navegacion.aviso; navegacion.aviso = '';
   // replaceChildren convierte un false o un texto vacío en texto visible: los elementos opcionales se filtran antes.
-  raiz.replaceChildren(...[
+  reemplazar(raiz, ...[
     aviso && el('p', { class: 'ok', role: 'status' }, aviso),
     puedeEscribirOfertas() && el('a', { class: 'primary nueva-oferta', href: '#/oferta/nueva' }, 'Nueva oferta'),
     estadoEscrituraOfertas() === 'script-antiguo' && el('p', { class: 'aviso', role: 'note' },
@@ -123,15 +123,15 @@ function campo(etiqueta, valor, { texto = false, vacio = 'No indicado' } = {}) {
 }
 
 export async function pintarOferta(raiz, id) {
-  raiz.replaceChildren(el('p', { class: 'estado', role: 'status' }, 'Cargando oferta…'));
+  reemplazar(raiz, el('p', { class: 'estado', role: 'status' }, 'Cargando oferta…'));
   let o = null, d = null;
   try { d = await datosRondas(); o = d.ofertas.find(x => x.id === id) || null; }
   catch (err) {
-    raiz.replaceChildren(volverAOfertas(), tarjetaError(err, () => { recargar().catch(() => {}); pintarOferta(raiz, id); }));
+    reemplazar(raiz, volverAOfertas(), tarjetaError(err, () => { recargar().catch(() => {}); pintarOferta(raiz, id); }));
     return;
   }
   if (!o) {
-    raiz.replaceChildren(volverAOfertas(), el('div', { class: 'card' },
+    reemplazar(raiz, volverAOfertas(), el('div', { class: 'card' },
       el('h2', {}, 'Oferta no encontrada'),
       el('p', { class: 'sub' }, 'Vuelve a la lista y elige otra.')));
     return;
@@ -140,7 +140,7 @@ export async function pintarOferta(raiz, id) {
   const enlace = enlaceOferta(o.enlace);
   const aviso = navegacion.aviso; navegacion.aviso = '';
   // replaceChildren convierte un null en el texto "null": los apartados opcionales se filtran antes.
-  raiz.replaceChildren(...[
+  reemplazar(raiz, ...[
     volverAOfertas(),
     aviso && el('p', { class: 'ok aviso-ok', role: 'status' }, aviso),
 

@@ -1,7 +1,7 @@
 // Pantalla de Acceso: escribir la dirección del script y la clave, o entrar en el modo demo.
 // La dirección y la clave solo se guardan en este móvil, y solo si el script las da por buenas.
 import { conectar, usarDemo, getModo, urlGuardada } from '../data/index.js';
-import { el } from '../util/dom.js';
+import { el, reemplazar } from '../util/dom.js';
 
 // Recarga la app limpia (sin datos en memoria y sin nada en la dirección).
 const reiniciar = () => location.replace(location.pathname);
@@ -41,7 +41,7 @@ export function pintarAcceso(raiz) {
     mensaje,
     boton);
 
-  raiz.replaceChildren(
+  reemplazar(raiz, 
     getModo() && el('a', { class: 'volver', href: '#/' }, 'Volver'),
     el('section', { class: 'card', 'aria-labelledby': 'ac-titulo' },
       el('h2', { id: 'ac-titulo' }, 'Conectar con el Sheet de prueba'),

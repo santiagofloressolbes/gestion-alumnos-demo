@@ -1,6 +1,6 @@
 // Avisos de alumnos en pantalla: la tarjeta de Inicio, la lista de cada tipo, la marca en la lista del programa y la tarjeta de la ficha.
 // Un aviso nunca bloquea nada: solo informa, dice por qué ha saltado y se puede silenciar 30 días (solo en este móvil).
-import { el, svgFlecha, plural } from '../util/dom.js';
+import { el, svgFlecha, plural, reemplazar } from '../util/dom.js';
 import { avatar } from '../util/avatar.js';
 import { navegacion } from '../util/navegacion.js';
 import { avisoFlotante } from '../util/trabajo.js';
@@ -55,7 +55,7 @@ export async function pintarAvisosInicio(caja) {
   let e = null;
   try { e = estadoAvisos(await datosRondas()); } catch { e = null; }
   caja.hidden = !e;
-  caja.replaceChildren(...(e ? contenidoInicio(e) : []));
+  reemplazar(caja, ...(e ? contenidoInicio(e) : []));
 }
 
 export const cajaAvisosInicio = () => el('section', { class: 'card', id: 'in-avisos', 'aria-labelledby': 'in-av-titulo', hidden: true });
@@ -99,18 +99,18 @@ function bloqueAviso(a, alumno, e, alCambiar, { conEnlace }) {
 /* ---- Pantalla de cada tipo de aviso ---- */
 
 export async function pintarAvisos(raiz, tipo) {
-  raiz.replaceChildren(el('p', { class: 'estado', role: 'status' }, 'Cargando avisos…'));
+  reemplazar(raiz, el('p', { class: 'estado', role: 'status' }, 'Cargando avisos…'));
   const volver = el('a', { class: 'volver', href: '#/' }, 'Inicio');
   if (!TIPOS_VALIDOS.includes(tipo)) {
-    raiz.replaceChildren(volver, el('div', { class: 'card' }, el('h2', {}, 'Aviso no encontrado'), el('p', { class: 'sub' }, 'Vuelve al inicio y elige uno.')));
+    reemplazar(raiz, volver, el('div', { class: 'card' }, el('h2', {}, 'Aviso no encontrado'), el('p', { class: 'sub' }, 'Vuelve al inicio y elige uno.')));
     return;
   }
   let d;
   try { d = await datosRondas(); }
-  catch (err) { raiz.replaceChildren(volver, tarjetaError(err, () => { recargar().catch(() => {}); pintarAvisos(raiz, tipo); })); return; }
+  catch (err) { reemplazar(raiz, volver, tarjetaError(err, () => { recargar().catch(() => {}); pintarAvisos(raiz, tipo); })); return; }
   const e = estadoAvisos(d);
   if (!e) {
-    raiz.replaceChildren(volver, el('div', { class: 'card' }, el('h2', {}, 'Sin datos de rondas'), el('p', { class: 'sub' }, 'Los avisos se calculan con las rondas y las solicitudes, y todavía no hay.')));
+    reemplazar(raiz, volver, el('div', { class: 'card' }, el('h2', {}, 'Sin datos de rondas'), el('p', { class: 'sub' }, 'Los avisos se calculan con las rondas y las solicitudes, y todavía no hay.')));
     return;
   }
   const estado = el('p', { class: 'ok', role: 'status', id: 'av-estado', hidden: true });
@@ -122,7 +122,7 @@ export async function pintarAvisos(raiz, tipo) {
     ordenar(items).map(({ a, al }) => el('li', { class: 'aviso-item' }, bloqueAviso(a, al, e, alCambiar, { conEnlace: true }))));
 
   const activos = delTipo(e.activos), silenciados = delTipo(e.silenciados);
-  raiz.replaceChildren(...[
+  reemplazar(raiz, ...[
     volver,
     el('h2', { class: 'seccion' }, `${TITULO_TIPO[tipo]} · ${alumnosTexto(activos.length).toLowerCase()}`),
     el('p', { class: 'sub', id: 'av-periodo' }, textoPeriodo(e)),
@@ -143,8 +143,8 @@ export function tarjetaAvisosAlumno(alumno, d) {
     const e = estadoAvisos(d);
     const suyos = e ? avisosDe(e.avisos, alumno.id) : [];
     seccion.hidden = !suyos.length;
-    if (!suyos.length) { seccion.replaceChildren(); return; }
-    seccion.replaceChildren(
+    if (!suyos.length) { reemplazar(seccion); return; }
+    reemplazar(seccion, 
       el('h2', { id: 'al-av-titulo' }, suyos.length === 1 ? 'Aviso' : 'Avisos'),
       el('p', { class: 'sub' }, 'Solo informa: no bloquea nada.'),
       mensaje && el('p', { class: 'ok', role: 'status', id: 'al-av-estado' }, mensaje),

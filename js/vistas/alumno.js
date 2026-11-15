@@ -4,7 +4,7 @@ import { tarjetaError } from './error-datos.js';
 import { tarjetaEntrevista } from './entrevista.js';
 import { datosRondas, tarjetaAplicaciones } from './rondas.js';
 import { tarjetaOfertasQueEncajan } from './match.js';
-import { el } from '../util/dom.js';
+import { el, reemplazar } from '../util/dom.js';
 import { avatar } from '../util/avatar.js';
 import { enlaceCV } from '../util/cv.js';
 import { navegacion } from '../util/navegacion.js';
@@ -24,16 +24,16 @@ const tarjeta = (titulo, ...campos) =>
     el('dl', { class: 'campos' }, campos.filter(Boolean)));
 
 export async function pintarAlumno(raiz, id) {
-  raiz.replaceChildren(el('p', { class: 'estado', role: 'status' }, 'Cargando ficha…'));
+  reemplazar(raiz, el('p', { class: 'estado', role: 'status' }, 'Cargando ficha…'));
   let a = null, d = null;
   try { d = await datosRondas(); a = d.alumnos.find(x => x.id === id) || null; }
   catch (e) {
-    raiz.replaceChildren(el('a', { class: 'volver', href: '#/' }, 'Inicio'),
+    reemplazar(raiz, el('a', { class: 'volver', href: '#/' }, 'Inicio'),
       tarjetaError(e, () => { recargar().catch(() => {}); pintarAlumno(raiz, id); }));
     return;
   }
   if (!a) {
-    raiz.replaceChildren(el('a', { class: 'volver', href: '#/' }, 'Inicio'),
+    reemplazar(raiz, el('a', { class: 'volver', href: '#/' }, 'Inicio'),
       el('div', { class: 'card' }, el('h2', {}, 'Alumno no encontrado'),
         el('p', { class: 'sub' }, 'Vuelve al inicio y elige un programa.')));
     return;
@@ -42,7 +42,7 @@ export async function pintarAlumno(raiz, id) {
   const nacionalidades = [a.nacionalidadPrincipal, a.nacionalidadSecundaria].filter(Boolean).join(' · ');
   const cv = enlaceCV(a);
 
-  raiz.replaceChildren(...[
+  reemplazar(raiz, ...[
     navegacion.origen === 'buscar'
       ? el('a', { class: 'volver', href: '#/buscar' }, 'Buscar')
       : navegacion.origen === 'avisos'

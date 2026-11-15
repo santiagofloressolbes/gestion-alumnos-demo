@@ -1,6 +1,6 @@
 // Ajustes: la conexión con el Sheet, la versión de la app (con "Buscar actualización") y el aviso de demostración.
 import { getModo, olvidarAcceso } from '../data/index.js';
-import { el } from '../util/dom.js';
+import { el, reemplazar } from '../util/dom.js';
 import { ocupar } from '../util/trabajo.js';
 import { buscarActualizacion } from '../util/actualizar.js';
 import { VERSION } from '../version.js';
@@ -22,7 +22,7 @@ export function pintarAjustes(raiz) {
       : 'No se ha podido comprobar si hay una versión nueva. Inténtalo otra vez en un momento.';
   } }, 'Buscar actualización');
 
-  raiz.replaceChildren(
+  reemplazar(raiz, 
     plegable({ id: 'aj-conexion', clave: 'conexion', idTitulo: 'cx-titulo', titulo: 'Conexión', clase: 'conexion' },
       el('p', { class: 'sub' }, demo
         ? 'Estás viendo la demo, con datos de ejemplo de la app. No se puede guardar nada.'

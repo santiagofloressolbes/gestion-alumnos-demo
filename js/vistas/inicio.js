@@ -1,7 +1,7 @@
 // Inicio: los programas agrupados en secciones desplegables (Másteres, MBA…). La lista y la categoría de cada programa vienen de la hoja Listas.
 // Se ven TODOS los programas de la lista, aunque tengan 0 alumnos. Un programa que un alumno tiene pero no está en la lista sale en «Otros programas».
 import { getMasters, recargar } from '../data/index.js';
-import { el, svgFlecha, plural } from '../util/dom.js';
+import { el, svgFlecha, plural, reemplazar } from '../util/dom.js';
 import { agruparProgramas } from '../util/programas.js';
 import { tarjetaError } from './error-datos.js';
 import { desplegable } from './desplegable.js';
@@ -47,12 +47,12 @@ function seccion(g, i, guardadas, raiz) {
 }
 
 export async function pintarInicio(raiz) {
-  raiz.replaceChildren(el('p', { class: 'estado', role: 'status' }, 'Cargando datos…'));
+  reemplazar(raiz, el('p', { class: 'estado', role: 'status' }, 'Cargando datos…'));
   let masters;
   try {
     masters = await getMasters();
   } catch (e) {
-    raiz.replaceChildren(tarjetaError(e, () => { recargar().catch(() => {}); pintarInicio(raiz); }));
+    reemplazar(raiz, tarjetaError(e, () => { recargar().catch(() => {}); pintarInicio(raiz); }));
     return;
   }
 
@@ -61,7 +61,7 @@ export async function pintarInicio(raiz) {
   const guardadas = abiertasGuardadas();
 
   const cajaAvisos = cajaAvisosInicio();
-  raiz.replaceChildren(
+  reemplazar(raiz, 
     cajaAvisos,
     el('h2', { class: 'seccion' }, 'Elige un programa'),
     el('div', { class: 'grupos', id: 'grupos' },

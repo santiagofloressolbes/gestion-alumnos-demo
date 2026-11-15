@@ -1,7 +1,7 @@
 // Tarjeta "Entrevista" de la ficha: ver y (si la conexión lo permite) editar las notas y la fecha.
 // Lo que se escribe NO se guarda en el móvil: solo se envía al script cuando se pulsa "Guardar".
 import { guardarEntrevista, aplicarEntrevista, puedeEscribir } from '../data/index.js';
-import { el } from '../util/dom.js';
+import { el, reemplazar } from '../util/dom.js';
 import { ocupar, llevarA } from '../util/trabajo.js';
 
 const MAX_NOTAS = 2000;
@@ -47,7 +47,7 @@ export function tarjetaEntrevista(a) {
   const ver = (aviso = '') => {
     const hay = !!(a.notasEntrevista.trim() || a.fechaUltimaEntrevista);
     // replaceChildren convierte un null en el texto "null": lo opcional se filtra antes.
-    caja.replaceChildren(...[
+    reemplazar(caja, ...[
       el('h2', { id: 'en-titulo' }, 'Entrevista'),
       el('dl', { class: 'campos' },
         campo('Última entrevista', fechaLarga(a.fechaUltimaEntrevista) || 'Sin entrevista registrada', !a.fechaUltimaEntrevista),
@@ -122,7 +122,7 @@ export function tarjetaEntrevista(a) {
         aplicarEntrevista(a.id, actual.notas, fA);
         return ver('Guardado en el Sheet.');
       }
-      conflicto.replaceChildren(
+      reemplazar(conflicto, 
         el('h3', {}, 'Esta entrevista ha cambiado mientras la editabas'),
         el('p', { class: 'sub' }, 'Esto es lo que hay ahora en el Sheet. Lo que has escrito sigue en el cuadro de arriba.'),
         el('dl', { class: 'campos' }, campo('Fecha', fechaLarga(fA) || 'Sin fecha', !fA), campo('Notas', nA || 'Sin notas', !nA, true)),
@@ -132,7 +132,7 @@ export function tarjetaEntrevista(a) {
       conflicto.scrollIntoView?.({ block: 'nearest' });
     };
 
-    caja.replaceChildren(
+    reemplazar(caja, 
       el('h2', { id: 'en-titulo' }, 'Editar entrevista'),
       el('form', { novalidate: true, onsubmit: ev => { ev.preventDefault(); if (!guardar.disabled) enviar(); } },
         el('div', { class: 'campo-form' }, el('label', { for: 'en-notas' }, 'Notas'), textarea, cuenta),

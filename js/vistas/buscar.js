@@ -1,6 +1,6 @@
 // Pestaña Buscar: cuadro de búsqueda y filtros (área, nacionalidad, situación de trabajo) sobre todos los alumnos.
 import { getAlumnos, getListas, recargar } from '../data/index.js';
-import { el } from '../util/dom.js';
+import { el, reemplazar } from '../util/dom.js';
 import { desplegable } from './desplegable.js';
 import { filtrar, estadoVacio, filtrosActivos, hayAlgo } from '../util/filtros.js';
 import { fila } from './master.js';
@@ -11,12 +11,12 @@ let construida = false;   // la pantalla se construye una vez: así se conservan
 
 export async function pintarBuscar(raiz) {
   if (construida) return;
-  raiz.replaceChildren(el('p', { class: 'estado', role: 'status' }, 'Cargando alumnos…'));
+  reemplazar(raiz, el('p', { class: 'estado', role: 'status' }, 'Cargando alumnos…'));
   let alumnos, listas;
   try {
     [alumnos, listas] = await Promise.all([getAlumnos(), getListas()]);
   } catch (e) {
-    raiz.replaceChildren(tarjetaError(e, () => { recargar().catch(() => {}); pintarBuscar(raiz); }));
+    reemplazar(raiz, tarjetaError(e, () => { recargar().catch(() => {}); pintarBuscar(raiz); }));
     return;
   }
   construida = true;
@@ -79,10 +79,10 @@ export async function pintarBuscar(raiz) {
     limpiar.hidden = !hayAlgo(e);
     cuenta.textContent = hayAlgo(e) ? `${res.length} de ${alumnos.length} alumnos` : `${alumnos.length} alumnos`;
     vacio.hidden = res.length > 0;
-    lista.replaceChildren(...res.map(a => fila(a, 'buscar', true)));
+    reemplazar(lista, ...res.map(a => fila(a, 'buscar', true)));
   }
 
-  raiz.replaceChildren(
+  reemplazar(raiz, 
     el('div', { class: 'card buscador', role: 'search' },
       el('div', { class: 'campo-form' }, el('label', { for: 'q' }, 'Buscar alumno'), q),
       filtros),

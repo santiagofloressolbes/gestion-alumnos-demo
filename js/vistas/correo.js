@@ -2,7 +2,7 @@
 // No se envía nada desde la app ni se guarda nada: el texto sale por el portapapeles o por la app de correo del móvil.
 // Nunca incluye notas de entrevista, motivos de descarte, situación de trabajo ni estatus migratorio (js/util/correo.js solo lee 5 campos).
 import { recargar } from '../data/index.js';
-import { el } from '../util/dom.js';
+import { el, reemplazar } from '../util/dom.js';
 import { copiarTexto, avisoFlotante } from '../util/trabajo.js';
 import { nombreAlumno } from '../util/rondas.js';
 import { leerFirma } from '../util/preferencias.js';
@@ -11,27 +11,27 @@ import { datosRondas, insigniaEstado } from './rondas.js';
 import { tarjetaError } from './error-datos.js';
 
 export async function pintarCorreo(raiz, id) {
-  raiz.replaceChildren(el('p', { class: 'estado', role: 'status' }, 'Cargando borrador…'));
+  reemplazar(raiz, el('p', { class: 'estado', role: 'status' }, 'Cargando borrador…'));
   const volver = el('a', { class: 'volver', href: '#/aplicacion/' + encodeURIComponent(id) }, 'Solicitud');
   const volverOfertas = el('a', { class: 'volver', href: '#/ofertas' }, 'Ofertas');
   let d;
   try { d = await datosRondas(); }
-  catch (err) { raiz.replaceChildren(volverOfertas, tarjetaError(err, () => { recargar().catch(() => {}); pintarCorreo(raiz, id); })); return; }
+  catch (err) { reemplazar(raiz, volverOfertas, tarjetaError(err, () => { recargar().catch(() => {}); pintarCorreo(raiz, id); })); return; }
   const a = d.hay ? d.aplicaciones.find(x => x.id === id) : null;
   if (!a) {
-    raiz.replaceChildren(volverOfertas, el('div', { class: 'card' }, el('h2', {}, 'Solicitud no encontrada'), el('p', { class: 'sub' }, 'Vuelve a las ofertas y elige otra.')));
+    reemplazar(raiz, volverOfertas, el('div', { class: 'card' }, el('h2', {}, 'Solicitud no encontrada'), el('p', { class: 'sub' }, 'Vuelve a las ofertas y elige otra.')));
     return;
   }
   const alumno = d.alumnos.find(x => x.id === a.idAlumno);
   const oferta = d.ofertas.find(x => x.id === a.idOferta);
   if (!alumno || !oferta) {
-    raiz.replaceChildren(volver, el('div', { class: 'card' }, el('h2', {}, 'Faltan datos'),
+    reemplazar(raiz, volver, el('div', { class: 'card' }, el('h2', {}, 'Faltan datos'),
       el('p', { class: 'sub' }, 'No se encuentra el alumno o la oferta de esta solicitud en el Sheet, y sin ellos no se puede armar el borrador.')));
     return;
   }
   const tipo = tipoDeEstado(a.estado);
   if (!tipo) {
-    raiz.replaceChildren(volver, el('div', { class: 'card', id: 'co-sin-borrador' }, el('h2', {}, 'Esta solicitud no tiene borrador'),
+    reemplazar(raiz, volver, el('div', { class: 'card', id: 'co-sin-borrador' }, el('h2', {}, 'Esta solicitud no tiene borrador'),
       el('p', { class: 'sub' }, `Solo hay borradores para solicitudes en proceso (Recibida, En revisión, Enviada a la empresa o Entrevista) o descartadas. El estado de esta es «${a.estado || 'sin estado'}».`)));
     return;
   }
@@ -72,7 +72,7 @@ export async function pintarCorreo(raiz, id) {
     else decir('No se ha podido copiar. Mantén pulsado el texto de la vista previa y elige «Copiar».', false);
   }
 
-  raiz.replaceChildren(...[
+  reemplazar(raiz, ...[
     volver,
     el('section', { class: 'card', 'aria-labelledby': 'co-titulo' },
       el('h2', { id: 'co-titulo' }, 'Borrador de seguimiento'),

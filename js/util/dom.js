@@ -12,6 +12,13 @@ export function el(etiqueta, atributos = {}, ...hijos) {
   return e;
 }
 
+// Pinta los hijos en un contenedor (como replaceChildren) pero IGNORANDO lo que no es contenido: null, undefined, false, true y ''.
+// replaceChildren, a pelo, escribe «false» o «null» como texto: un `cond && el(...)` con cond falso enseñaba la palabra «false».
+// Por eso la app NO usa replaceChildren directamente (una prueba lo vigila); se usa siempre esta función.
+export function reemplazar(contenedor, ...hijos) {
+  contenedor.replaceChildren(...hijos.flat(Infinity).filter(h => h != null && h !== false && h !== true && h !== ''));
+}
+
 export function svgFlecha() {
   const ns = 'http://www.w3.org/2000/svg';
   const s = document.createElementNS(ns, 'svg');

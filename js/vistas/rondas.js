@@ -1,7 +1,7 @@
 // Rondas de difusión y aplicaciones, solo lectura: el apartado de la ficha de la oferta, el del alumno y el detalle de una aplicación.
 import { getAlumnos, getOfertas, getListas, getRondas, getAplicaciones, getHistorial, hayRondas, recargar, getEstadoFuente, puedeEscribirRondas, estadoEscrituraRondas } from '../data/index.js';
 import { navegacion } from '../util/navegacion.js';
-import { el, svgFlecha, plural } from '../util/dom.js';
+import { el, svgFlecha, plural, reemplazar } from '../util/dom.js';
 import { tipoDeEstado } from '../util/correo.js';
 import { rondasDeOferta, aplicacionesDeRonda, aplicacionesDeAlumno, resumenEstados, historialDe, nombreAlumno, claseEstado, ESTADO_DESCARTE } from '../util/rondas.js';
 import { fechaLarga } from './entrevista.js';
@@ -100,16 +100,16 @@ function campo(etiqueta, valor, { texto = false, vacio = 'No indicado' } = {}) {
 }
 
 export async function pintarAplicacion(raiz, id) {
-  raiz.replaceChildren(el('p', { class: 'estado', role: 'status' }, 'Cargando solicitud…'));
+  reemplazar(raiz, el('p', { class: 'estado', role: 'status' }, 'Cargando solicitud…'));
   let d;
   try { d = await datosRondas(); }
   catch (err) {
-    raiz.replaceChildren(el('a', { class: 'volver', href: '#/ofertas' }, 'Ofertas'), tarjetaError(err, () => { recargar().catch(() => {}); pintarAplicacion(raiz, id); }));
+    reemplazar(raiz, el('a', { class: 'volver', href: '#/ofertas' }, 'Ofertas'), tarjetaError(err, () => { recargar().catch(() => {}); pintarAplicacion(raiz, id); }));
     return;
   }
   const a = d.hay ? d.aplicaciones.find(x => x.id === id) : null;
   if (!a) {
-    raiz.replaceChildren(el('a', { class: 'volver', href: '#/ofertas' }, 'Ofertas'), el('div', { class: 'card' },
+    reemplazar(raiz, el('a', { class: 'volver', href: '#/ofertas' }, 'Ofertas'), el('div', { class: 'card' },
       el('h2', {}, 'Solicitud no encontrada'), el('p', { class: 'sub' }, 'Vuelve a las ofertas y elige otra.')));
     return;
   }
@@ -124,7 +124,7 @@ export async function pintarAplicacion(raiz, id) {
   const nombreAl = alumno ? nombreAlumno(alumno) : `(alumno ${a.idAlumno}, ya no está en el Sheet)`;
   const nombreOf = oferta ? [oferta.titulo || '(sin título)', oferta.empresa].filter(Boolean).join(' · ') : `(oferta ${a.idOferta}, ya no está en el Sheet)`;
 
-  raiz.replaceChildren(...[
+  reemplazar(raiz, ...[
     volver,
     aviso && el('p', { class: 'ok aviso-ok', role: 'status' }, aviso),
     el('section', { class: 'card cabecera cabecera-oferta', 'aria-label': 'Solicitud' },
