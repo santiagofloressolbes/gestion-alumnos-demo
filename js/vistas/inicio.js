@@ -36,8 +36,8 @@ function seccion(g, i, guardadas, raiz) {
         el('h2', { class: 'grupo-titulo' }, g.categoria),
         el('span', { class: 'sub' }, `${plural(g.programas.length, 'programa', 'programas')} · ${plural(g.alumnos, 'alumno', 'alumnos')}`))),
     el('div', { class: 'grupo-cuerpo' },
-      g.otros && el('p', { class: 'aviso', role: 'note' }, 'Estos programas no están en la hoja Listas del Sheet (o no tienen categoría). Añádelos o corrígelos allí.'),
-      el('nav', { class: 'masters', 'aria-label': g.categoria }, g.programas.map(botonPrograma))));
+      el('nav', { class: 'masters', 'aria-label': g.categoria }, g.programas.map(botonPrograma)),
+      g.otros && el('p', { class: 'aviso aviso-alerta', role: 'note' }, 'Estos programas no están en la hoja Listas del Sheet (o no tienen categoría). Añádelos o corrígelos allí.')));
   d.addEventListener('toggle', () => {
     if (d.open === abierta) return;   // el aviso inicial del navegador no es una elección de la persona
     abierta = d.open;

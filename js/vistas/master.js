@@ -31,11 +31,11 @@ export async function pintarMaster(raiz, nombre) {
   const programa = masters.find(m => m.nombre === nombre);
   reemplazar(raiz, 
     volver(),
-    !programa.enLista && el('p', { class: 'aviso', role: 'note', id: 'ma-fuera-de-lista' }, `El programa «${nombre}» no está en la hoja Listas del Sheet. Añádelo allí o corrígelo en la hoja Alumnos.`),
     el('h2', { class: 'seccion' }, plural(lista.length, 'alumno', 'alumnos')),
     lista.length
       ? el('ul', { class: 'alumnos', 'aria-label': 'Alumnos de ' + nombre }, lista.map(a => fila(a, 'master', false, avisosDe(a.id))))
-      : el('div', { class: 'card' }, el('p', { class: 'sub' }, 'Este programa todavía no tiene alumnos.')));
+      : el('div', { class: 'card' }, el('p', { class: 'sub' }, 'Este programa todavía no tiene alumnos.')),
+    !programa.enLista && el('p', { class: 'aviso aviso-alerta', role: 'note', id: 'ma-fuera-de-lista' }, `El programa «${nombre}» no está en la hoja Listas del Sheet. Añádelo allí o corrígelo en la hoja Alumnos.`));
 }
 
 // Dato breve: a qué área quiere ir y si busca prácticas o empleo. En la búsqueda se añade el programa.

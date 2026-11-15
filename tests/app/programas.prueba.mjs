@@ -27,6 +27,15 @@ const ir = async (pg, hash, sel) => { await pg.goto(BASE + hash); await pg.waitF
 const abrirTodo = pg => pg.evaluate(() => document.querySelectorAll('details.grupo-programas').forEach(d => { d.open = true; }));
 const secciones = pg => pg.$$eval('details.grupo-programas', ds => ds.map(d => ({ cat: d.dataset.categoria, abierta: d.open, aria: d.querySelector('summary').getAttribute('aria-expanded'), nombres: [...d.querySelectorAll('.master b')].map(b => b.textContent), subs: [...d.querySelectorAll('.master .sub')].map(b => b.textContent) })));
 const sinErrores = (log, t) => chk(log.consola.length === 0, t + (log.consola.length ? ' → ' + log.consola.join(' | ') : ''));
+// Color real del aviso en pantalla: contraste entre su texto y su fondo, y que el fondo es el rojo de acento del tema (--act-bg).
+const colorAviso = (pg, sel) => pg.evaluate(s => {
+  const e = document.querySelector(s), c = getComputedStyle(e);
+  const rgb = t => t.match(/\d+(\.\d+)?/g).slice(0, 3).map(Number);
+  const lum = ([r, g, b]) => { const f = v => { v /= 255; return v <= 0.03928 ? v / 12.92 : ((v + 0.055) / 1.055) ** 2.4; }; return 0.2126 * f(r) + 0.7152 * f(g) + 0.0722 * f(b); };
+  const t = lum(rgb(c.color)), f = lum(rgb(c.backgroundColor));
+  const rojo = rgb(getComputedStyle(document.documentElement).getPropertyValue('--act-bg').trim().replace(/^#(..)(..)(..)$/, (m, a, b, d) => `rgb(${parseInt(a, 16)},${parseInt(b, 16)},${parseInt(d, 16)})`));
+  return { ratio: (Math.max(t, f) + 0.05) / (Math.min(t, f) + 0.05), fondoRojo: rgb(c.backgroundColor).join() === rojo.join(), peso: c.fontWeight };
+}, sel);
 const nAlumnos = async pg => { await pg.waitForTimeout(400); return pg.$$eval('#v-master .alumnos .alumno', a => a.length); };   // la lista se pinta tras esperar los avisos
 
 console.log('1. Todos los programas de la lista aparecen, también con 0 alumnos');
@@ -110,14 +119,19 @@ console.log('4. Un programa desconocido (que un alumno tiene y no está en Lista
   chk(s.length === 5 && s[4].cat === 'Otros programas', 'aparece una 5.ª sección «Otros programas» al final');
   chk(s[4].abierta && JSON.stringify(s[4].nombres) === JSON.stringify(['Programa que ya no existe']), 'está abierta y trae el programa desconocido');
   chk(/no están en la hoja Listas/.test(await pg.innerText('details[data-categoria="Otros programas"]')), 'dice que no está en la hoja Listas');
+  chk(await pg.evaluate(() => { const d = document.querySelector('details[data-categoria="Otros programas"]'), a = d.querySelector('.aviso-alerta'), n = d.querySelector('nav.masters'); return !!a && !!(n.compareDocumentPosition(a) & Node.DOCUMENT_POSITION_FOLLOWING); }), 'el aviso de «Otros programas» va DEBAJO de los programas');
+  { const a = await colorAviso(pg, 'details[data-categoria="Otros programas"] .aviso-alerta'); chk(a.ratio >= 4.5 && a.fondoRojo, `Inicio: el aviso es rojo de acento con contraste ${a.ratio.toFixed(2)}:1 (mínimo 4,5)`); }
   chk(s[1].nombres.join() === 'MBA en español,MBA en inglés', '«MBA en español» sigue en su sitio (con 0 alumnos)');
   chk(await pg.$$eval('.estado', e => e.some(x => x.textContent.startsWith('15 programas · 30 alumnos'))), 'el pie cuenta 15 programas');
   await pg.click('details[data-categoria="Otros programas"] .master'); await pg.waitForSelector('.alumnos .alumno');
   chk(await nAlumnos(pg) === 8, 'su lista abre con sus 8 alumnos');
   chk(/no está en la hoja Listas/.test(await pg.innerText('#v-master')), 'la lista del programa también lo avisa');
+  chk(await pg.evaluate(() => { const a = document.querySelector('#ma-fuera-de-lista'), l = document.querySelector('#v-master .alumnos'); return !!a && !!l && !!(l.compareDocumentPosition(a) & Node.DOCUMENT_POSITION_FOLLOWING); }), 'el aviso de la lista del programa va DEBAJO de los alumnos');
+  { const a = await colorAviso(pg, '#ma-fuera-de-lista'); chk(a.ratio >= 4.5 && a.fondoRojo, `lista del programa: el aviso es rojo de acento con contraste ${a.ratio.toFixed(2)}:1 (mínimo 4,5)`); }
   await pg.click('.alumnos .alumno >> nth=0'); await pg.waitForSelector('#v-alumno .volver');
   chk(/Programa que ya no existe/.test(await pg.innerText('#v-alumno')), 'la ficha enseña el programa tal cual');
   chk(/no está en la hoja Listas/.test(await pg.innerText('#v-alumno')), 'y la ficha avisa de que no está en Listas');
+  { const a = await colorAviso(pg, '#al-programa-fuera'); chk(a.ratio >= 4.5 && a.fondoRojo, `ficha: el aviso es rojo de acento con contraste ${a.ratio.toFixed(2)}:1 (mínimo 4,5)`); }
   await pg.goto(BASE + '#/master/Inventado'); await pg.waitForSelector('#v-master .card');
   chk(/no encontrado/i.test(await pg.innerText('#v-master')), 'una dirección con un programa que no existe: «no encontrado», sin fallar');
   sinErrores(log, 'sin errores en la consola');

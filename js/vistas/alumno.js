@@ -60,7 +60,7 @@ export async function pintarAlumno(raiz, id) {
         : el('span', { class: 'primary desactivado', role: 'link', 'aria-disabled': 'true' }, 'Sin CV'),
       el('a', { class: 'secondary', id: 'al-compartir', href: `#/alumno/${encodeURIComponent(a.id)}/compartir` }, 'Compartir perfil')),
 
-    a.master && !(d.listas.programas || []).some(p => p.nombre === a.master) && el('p', { class: 'aviso', role: 'note', id: 'al-programa-fuera' },
+    a.master && !(d.listas.programas || []).some(p => p.nombre === a.master) && el('p', { class: 'aviso aviso-alerta', role: 'note', id: 'al-programa-fuera' },
       `El programa «${a.master}» no está en la hoja Listas del Sheet. Añádelo allí o corrígelo en la hoja Alumnos.`),
 
     tarjetaAvisosAlumno(a, d),
