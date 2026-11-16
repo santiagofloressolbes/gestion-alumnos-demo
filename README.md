@@ -34,7 +34,7 @@ La idea es que quien acompaña a los alumnos pueda, desde el móvil y en pocos t
 | **Registrar una ronda y añadir solicitudes** | "Registrar nueva ronda" y, dentro de cada ronda, "Añadir solicitud": se busca al alumno, se elige y se guarda. |
 | **Cambiar el estado de una solicitud** | En su detalle, "Cambiar estado". Todo queda apuntado en un historial con fecha y nota, que no se borra. |
 | **Ver las solicitudes de un alumno** | En su ficha, en el apartado "Solicitudes". |
-| **Ver qué alumnos encajan con una oferta** | En la ficha de la oferta, la tarjeta "Alumnos que encajan" reparte a **todos** los alumnos en tres grupos (encaja, encaja con reservas, no encaja) y cada fila explica por qué. En la ficha del alumno, "Ofertas que encajan" hace lo mismo al revés. |
+| **Ver qué alumnos encajan con una oferta** | En la ficha de la oferta, la tarjeta "Alumnos que encajan" reparte a **todos** los alumnos en tres grupos (encaja, encaja con reservas, no encaja) y cada fila explica por qué, con su semáforo, su puntuación ("Encaje 82 %") y los datos que faltan. En la ficha del alumno, "Ofertas que encajan" hace lo mismo al revés. |
 | **Compartir perfiles** | En la ficha de la oferta se marcan hasta 10 alumnos (o, en la ficha de un alumno, "Compartir perfil"), se ve una vista previa con el texto exacto y se envía con el menú de compartir del móvil o se copia. |
 | **Ver avisos sobre los alumnos** | En Inicio, la tarjeta **Avisos** cuenta los alumnos «sin solicitudes» y los que «aplican a todo». Al tocar uno se ve quién es y **por qué ha saltado**, con los números. También sale una marca en la lista del máster y una tarjeta en la ficha. Solo informan: no bloquean nada. Se pueden **silenciar 30 días**. |
 | **Preparar un correo de seguimiento** | En el detalle de una solicitud, **Borrador de correo** (si está en proceso o descartada): se elige español o inglés, se ve el texto exacto y se copia o se abre en la app de correo. No incluye notas, motivos de descarte, situación de trabajo ni estatus migratorio. |
@@ -69,16 +69,22 @@ Esto está pensado para crecer por partes. Aún no hay:
 
 ## Cómo funcionan "Alumnos que encajan" y "Compartir perfiles"
 
-**Alumnos que encajan.** Para cada alumno se miran cuatro cosas y se escribe el motivo de cada una:
+**Alumnos que encajan.** Para cada alumno se miran **ocho cosas** y se escribe el motivo de cada una, con un semáforo (verde cumple, amarillo afín o a revisar, rojo no coincide) y los puntos que da:
 
-| Qué se mira | Cómo se decide |
-|---|---|
-| Área | Si la oferta es del área a la que **quiere ir**, encaja. Si solo tiene **experiencia** en ella, se revisa. Si no, no coincide. |
-| Prácticas o empleo | Lo que busca el alumno (Prácticas, Empleo o Ambas) frente al tipo de la oferta. |
-| Nacionalidad | Si la oferta pide un país, el alumno debe tenerlo (principal o secundaria). Si pide **Unión Europea (UE/EEE)**, vale cualquier país de la UE o del EEE, o que su situación sea "Ciudadano UE o español". **Suiza se revisa a mano** (no es UE ni EEE, aunque tiene un acuerdo de libre circulación). |
-| Permiso de trabajo | Si la oferta lo pide: cumple quien es ciudadano UE o residente con permiso. **"Permiso de estudiante" se revisa** (puede valer para unas prácticas, nunca se da por perdido). No cumple solo quien "Necesita permiso de trabajo". |
+| Qué se mira | Peso | Cómo se decide |
+|---|---|---|
+| Área | 30 | Si la oferta es del área a la que **quiere ir**, encaja. Si solo tiene **experiencia** en ella, o es un área **afín** (hoja Afinidad), se revisa. |
+| Subárea | 10 | Su experiencia en la subárea de la oferta (hoja Áreas). |
+| Habilidades | 20 | Las etiquetas de la oferta frente a las del alumno (lista cerrada: hoja Etiquetas; coincidencia exacta, sin sinónimos). |
+| Idiomas | 15 | Cada idioma con su nivel (A1 a C2 o nativo). |
+| Formación | 5 | Grado, Máster o Doctorado que pide la oferta frente a su formación previa. |
+| Prácticas o empleo | 10 | Lo que busca el alumno frente al tipo de la oferta. |
+| Nacionalidad | 5 | Si la oferta pide un país, el alumno debe tenerlo. Si pide **Unión Europea (UE/EEE)**, vale cualquier país de la UE o del EEE (hoja Países), o que su situación sea "Ciudadano UE o español". **Suiza se revisa a mano.** |
+| Permiso de trabajo | 5 | Lo decide la hoja **Reglas migratorias** (situación, tipo de oferta y país de la oferta, con su fecha de validación; una regla de más de 12 meses se marca para revalidar). **"Permiso de estudiante" se revisa** y nunca se da por perdido. |
 
-Si algo no consta (por ejemplo, un alumno sin nacionalidad), se pone **"a revisar"**, no "no cumple". Si todo cuadra, el alumno "encaja"; si nada falla pero hay algo que mirar, "encaja con reservas"; si algo no cuadra, "no encaja". **Nadie desaparece de la lista:** los tres grupos suman todos los alumnos, y los avisos de "Añadir solicitud" usan exactamente estas mismas reglas. Es una ayuda para mirar, no una decisión.
+**Lo que no consta no suma ni resta.** Si falta un dato (un alumno sin idiomas escritos, un país que no está en la hoja Países…), ese criterio sale **"Sin datos"** (a revisar): no da puntos y **nunca cuenta como "no cumple"**. La puntuación («Encaje 82 %») se calcula solo sobre los criterios con datos, y la fila avisa «datos incompletos». Lo que la oferta no pide sale «No aplica».
+
+Los alumnos se reparten en tres grupos según los cuatro criterios básicos (área, prácticas o empleo, nacionalidad y permiso): "encaja", "encaja con reservas" y "no encaja"; dentro de cada grupo van ordenados por puntuación. **Nadie desaparece de la lista**, y los avisos de "Añadir solicitud" usan exactamente las mismas reglas. Siempre se ve el aviso **«Orientativo, verifica la situación real»**: es una ayuda para mirar, y si alguien puede trabajar o no lo decide siempre una persona. La tabla exacta está en [docs/REGLAS-MATCH.md](docs/REGLAS-MATCH.md).
 
 **Compartir perfiles.** Siempre pasa por una **vista previa** con el texto exacto que se enviará. Por defecto solo salen nombre, programa, área y qué busca. Nacionalidad, situación de trabajo, resumen de experiencia y enlace al CV (solo si es `https`) son **datos sensibles** y vienen desmarcados. Las notas de entrevista, el historial y los motivos de descarte **nunca** se incluyen. El máximo es de 10 alumnos por envío. La app no guarda nada de lo compartido.
 

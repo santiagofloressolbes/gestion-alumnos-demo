@@ -162,3 +162,18 @@ Sirve para que una oferta pueda pedir «nacionalidad de la UE o del EEE» sin el
 5. En la hoja **Alumnos**, la columna `Máster` lleva el programa de cada persona, escrito **igual** que en Listas. Si no coincide, Inicio lo enseña en «Otros programas» y la ficha avisa.
 6. Las columnas de categoría e idioma van en la **misma fila** que su programa. Si una fila queda sin categoría, ese programa sale en «Otros programas».
 7. En la app, «Ajustes» → «Buscar actualización» (o cierra y abre dos veces) y comprueba Inicio.
+
+---
+
+## Hojas de reglas del match (versión 25)
+
+**El script cambia solo para LEER cinco hojas nuevas** (Países, Áreas, Afinidad, Reglas migratorias y Etiquetas). No escribe nada nuevo, no cambia el guardado de ofertas ni de entrevistas y no toca Listas. La dirección y la clave no cambian.
+
+Los datos para el Sheet y los pasos están en `docs/importar-sheet/` (`PASOS.md`). El script se actualiza así:
+
+1. Abre el proyecto en Apps Script y el archivo `Code.gs`.
+2. Borra todo su contenido y pega el de `docs/apps-script/Code.gs`. **Guardar.** (Si usas una copia con tu clave en otro archivo, no la pegues ahí: la clave vive en las propiedades del script, no en el código.)
+3. **Implementar → Gestionar implementaciones →** el lápiz → «Versión»: **Nueva versión** → **Implementar**. No crees una implementación nueva: cambiaría la dirección.
+4. En la app, «Ajustes» → «Buscar actualización».
+
+Si no actualizas el script, la app sigue funcionando con las reglas de siempre (no ve las hojas nuevas). Si una de las hojas no existe o está vacía, el script no la envía y la app usa sus reglas de respaldo.
