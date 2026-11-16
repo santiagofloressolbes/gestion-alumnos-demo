@@ -7,12 +7,12 @@
  *   - Lee las hojas Alumnos, Ofertas y Listas y las devuelve a la app.
  *   - Hoja Alumnos: escribe SOLO 2 columnas ("Notas de entrevista" y "Fecha última entrevista"),
  *     y solo en la fila del alumno indicado. No crea ni borra filas de alumnos.
- *   - Hoja Ofertas: da de alta una oferta (añade una fila al final) o edita las 11 columnas de una oferta.
+ *   - Hoja Ofertas: da de alta una oferta (añade una fila al final) o edita las 16 columnas de una oferta (11 de siempre + 5 del perfil del puesto).
  *     Nunca borra filas. El ID de una oferta nueva lo pone este script (O011, O012...).
  *   - Hojas Rondas, Aplicaciones e Historial (si existen): registra una ronda de difusión de una oferta, crea la aplicación
  *     de un alumno a una ronda y cambia su estado. Solo AÑADE filas (a Historial, siempre) y, en una aplicación, cambia las
  *     2 celdas de estado y motivo. Nunca borra filas. Los ID los pone este script (R001, AP001, H001...).
- *   - No toca ninguna otra hoja ni columna (la hoja Listas solo se lee).
+ *   - No toca ninguna otra hoja ni columna (las hojas Listas, Países, Áreas y Etiquetas solo se leen).
  *
  * La CLAVE no está en este archivo: se guarda en Configuración del proyecto > Propiedades del script
  * (nombre: CLAVE). Este archivo es público y no debe contener nunca ninguna clave.
@@ -31,7 +31,8 @@ const HOJA_OFERTAS = 'Ofertas';
 const HOJAS_MATCH = { paises: 'Países', areas: 'Áreas', afinidad: 'Afinidad', reglas: 'Reglas migratorias', etiquetas: 'Etiquetas' };
 const COL_ID_OFERTA = 'ID oferta';
 // Funciones de escritura que ofrece este script (la app las consulta para saber qué puede hacer).
-const SOPORTA = ['guardarEntrevista', 'guardarOferta'];
+// 'perfilOferta' = sabe guardar el perfil del puesto (5 campos nuevos de una oferta). Un script antiguo no lo anuncia y la app no envía esos campos.
+const SOPORTA = ['guardarEntrevista', 'guardarOferta', 'perfilOferta'];
 
 // Rondas de difusión, aplicaciones e historial. Sus funciones solo se anuncian si existen las 3 hojas.
 const HOJA_RONDAS = 'Rondas';
@@ -62,7 +63,19 @@ const CAMPOS_OFERTA = [
   { col: 'Fecha de recepción', clave: 'fechaRecepcion', fecha: true, obligatorio: true },
   { col: 'Estado de la oferta', clave: 'estado', lista: 'Estado de la oferta', obligatorio: true },
   { col: 'Enlace o descripción', clave: 'enlace', max: 500, enlace: true, obligatorio: false },
+  // Perfil del puesto (3E-2). Opcionales: la petición puede no traerlos (app antigua) y la columna puede no existir en el Sheet.
+  { col: 'País de la oferta', clave: 'paisOferta', max: 100, perfil: 'pais', obligatorio: false },
+  { col: 'Subárea', clave: 'subarea', max: 100, perfil: 'subarea', obligatorio: false },
+  { col: 'Etiquetas', clave: 'etiquetas', max: 300, perfil: 'etiquetas', obligatorio: false },
+  { col: 'Idiomas', clave: 'idiomas', max: 200, perfil: 'idiomas', obligatorio: false },
+  { col: 'Nivel de formación', clave: 'nivelFormacion', max: 40, perfil: 'nivel', obligatorio: false },
 ];
+const NIVELES_FORMACION = ['Sin requisito', 'Grado', 'Máster', 'Doctorado'];
+const MAX_ETIQUETAS = 8;
+const MAX_IDIOMAS = 6;
+const GRUPO_DE_GRUPOS = 'Grupo de países';   // en la hoja Países, las filas con este grupo (p. ej. «Unión Europea (UE/EEE)») no son un país
+// Hojas de apoyo (solo lectura): clave -> hoja y columna con los valores válidos. Si la hoja o la columna faltan, ese campo se valida solo como texto.
+const APOYO = { paises: ['Países', 'País'], subareas: ['Áreas', 'Subárea'], etiquetas: ['Etiquetas', 'Etiqueta'] };
 
 const MAX_NOTAS = 2000;                 // caracteres
 const MAX_CUERPO = 10000;               // tamaño máximo de una petición
@@ -230,7 +243,8 @@ function guardarEntrevista(c) {
 /* ------------------------------------------------------------ escritura: ofertas */
 
 // Alta (sin "id") o edición (con "id") de una oferta. La petición lleva:
-//   oferta: { empresa, tipoOrganizacion, area, titulo, tipo, ubicacion, requisitoNacionalidad, requisitoPermiso, fechaRecepcion, estado, enlace }
+//   oferta: { empresa, tipoOrganizacion, area, titulo, tipo, ubicacion, requisitoNacionalidad, requisitoPermiso, fechaRecepcion, estado, enlace,
+//             y, opcionales (perfil del puesto): paisOferta, subarea, etiquetas, idiomas, nivelFormacion }
 //   anteriores (solo al editar): los mismos campos tal como la app los conocía, para detectar cambios ajenos.
 function guardarOferta(c) {
   const crear = c.id === undefined || c.id === null || c.id === '';
@@ -238,15 +252,23 @@ function guardarOferta(c) {
   if (!crear && (typeof c.id !== 'string' || !c.id.trim() || c.id.length > 40)) throw fallo('peticion');
   if (!objetoPlano(c.oferta)) throw fallo('peticion');
   if (!crear && !objetoPlano(c.anteriores)) throw fallo('peticion');
-  CAMPOS_OFERTA.forEach(function (f) {
+  // Los 5 campos del perfil del puesto solo cuentan si la petición los trae (una app antigua no los envía: entonces no se tocan).
+  let activos = CAMPOS_OFERTA.filter(function (f) { return !f.perfil || c.oferta[f.clave] !== undefined; });
+  activos.forEach(function (f) {
     if (typeof c.oferta[f.clave] !== 'string') throw fallo('peticion');
     if (!crear && typeof c.anteriores[f.clave] !== 'string') throw fallo('peticion');
   });
 
-  // 2) Validación del contenido (las listas se leen de la hoja Listas)
+  // 2) Validación del contenido (las listas se leen de la hoja Listas y las hojas de apoyo Países, Áreas y Etiquetas, si existen).
+  // Al editar, un valor de nacionalidad o de perfil que NO ha cambiado no se vuelve a comparar con las listas: no se rechaza una oferta
+  // válida de antes solo porque una lista haya cambiado desde entonces.
   const listas = leerListas();
+  const apoyo = leerApoyo();
   const nuevo = {};
-  CAMPOS_OFERTA.forEach(function (f) { nuevo[f.clave] = validarCampoOferta(f, c.oferta[f.clave], listas); });
+  activos.forEach(function (f) {
+    const sinCambio = !crear && (f.perfil || f.lista === 'Nacionalidad') && normalizarTexto(c.oferta[f.clave]).trim() === c.anteriores[f.clave].trim();
+    nuevo[f.clave] = validarCampoOferta(f, c.oferta[f.clave], listas, apoyo, sinCambio);
+  });
 
   // 3) Localizar la hoja y las columnas por su nombre
   const h = hoja(HOJA_OFERTAS);
@@ -255,17 +277,20 @@ function guardarOferta(c) {
   const cId = cab.indexOf(COL_ID_OFERTA);
   if (cId < 0) throw fallo('columna', { columna: COL_ID_OFERTA });
   const cols = {};
-  CAMPOS_OFERTA.forEach(function (f) {
-    cols[f.clave] = cab.indexOf(f.col);
+  activos.forEach(function (f) { cols[f.clave] = cab.indexOf(f.col); });
+  activos.forEach(function (f) {
+    // Una columna del perfil que no existe todavía en el Sheet solo es un problema si hay algo que guardar en ella.
+    if (cols[f.clave] < 0 && f.perfil && nuevo[f.clave] === '') return;
     if (cols[f.clave] < 0) throw fallo('columna', { columna: f.col });
   });
+  activos = activos.filter(function (f) { return cols[f.clave] >= 0; });
 
   let id, fila, escribir;
   if (crear) {
     // 4a) Alta: ID nuevo (el siguiente libre) y una fila al final
     id = siguienteIdOferta(valores, cId);
     fila = valores.length + 1;
-    escribir = CAMPOS_OFERTA.map(function (f) { return f.clave; });
+    escribir = activos.map(function (f) { return f.clave; });
   } else {
     // 4b) Edición: la fila tiene que existir una sola vez y no haber cambiado desde que la app la leyó
     id = c.id.trim();
@@ -275,11 +300,11 @@ function guardarOferta(c) {
     if (filas.length > 1) throw fallo('id-duplicado');
     const i = filas[0];
     const actual = {};
-    CAMPOS_OFERTA.forEach(function (f) { actual[f.clave] = valorTexto(valores[i][cols[f.clave]]).trim(); });
-    const cambioAjeno = CAMPOS_OFERTA.some(function (f) { return actual[f.clave] !== c.anteriores[f.clave].trim(); });
+    activos.forEach(function (f) { actual[f.clave] = valorTexto(valores[i][cols[f.clave]]).trim(); });
+    const cambioAjeno = activos.some(function (f) { return actual[f.clave] !== c.anteriores[f.clave].trim(); });
     if (cambioAjeno) throw fallo('conflicto', { id: id, oferta: actual });
     fila = i + 1;
-    escribir = CAMPOS_OFERTA.filter(function (f) { return actual[f.clave] !== nuevo[f.clave].trim(); }).map(function (f) { return f.clave; });
+    escribir = activos.filter(function (f) { return actual[f.clave] !== nuevo[f.clave].trim(); }).map(function (f) { return f.clave; });
   }
 
   // 5) Escribir SOLO las celdas necesarias de esa fila, como texto plano (sin fórmulas)
@@ -294,13 +319,16 @@ function guardarOferta(c) {
     celda.setValue(nuevo[clave]);
   });
   SpreadsheetApp.flush();
-  return { ok: true, id: id, creada: crear, oferta: nuevo };
+  const devuelta = {};
+  activos.forEach(function (f) { devuelta[f.clave] = nuevo[f.clave]; });
+  return { ok: true, id: id, creada: crear, oferta: devuelta };
 }
 
 function objetoPlano(o) { return Object.prototype.toString.call(o) === '[object Object]'; }
 
 // Valida un campo y devuelve el texto que se guardará (sin espacios sobrantes, y sin poder ser una fórmula).
-function validarCampoOferta(f, bruto, listas) {
+// "apoyo" = valores de las hojas Países, Áreas y Etiquetas (leerApoyo). "sinCambio" = al editar, el valor es el mismo que ya había.
+function validarCampoOferta(f, bruto, listas, apoyo, sinCambio) {
   const v = normalizarTexto(bruto).trim();
   if (!v) {
     if (f.obligatorio) throw fallo('requerido', { campo: f.clave });
@@ -309,6 +337,14 @@ function validarCampoOferta(f, bruto, listas) {
   if (/[\u0000-\u001F\u007F]/.test(v)) throw fallo('caracteres', { campo: f.clave });   // también rechaza saltos de línea: son campos de una línea
   if (/<[\/!?a-zA-Z]/.test(v)) throw fallo('html', { campo: f.clave });
   if (f.max && v.length > f.max) throw fallo('largo', { campo: f.clave });
+  if (f.perfil) return sinCambio ? v : validarPerfil(f, v, apoyo || {});
+  if (f.lista === 'Nacionalidad') {
+    // Vale lo que esté en Listas > Nacionalidad O en la hoja Países (países y filas de grupo como «Unión Europea (UE/EEE)»).
+    const validas = (listas.Nacionalidad || []).concat((apoyo && apoyo.paises) || []);
+    if (!listas.Nacionalidad && !(apoyo && apoyo.paises)) throw fallo('columna', { columna: f.lista });
+    if (!sinCambio && validas.indexOf(v) < 0) throw fallo('lista', { campo: f.clave });
+    return v;
+  }
   if (f.lista) {
     if (!listas[f.lista]) throw fallo('columna', { columna: f.lista });
     if (listas[f.lista].indexOf(v) < 0) throw fallo('lista', { campo: f.clave });
@@ -321,6 +357,87 @@ function validarCampoOferta(f, bruto, listas) {
   }
   if (f.enlace && /^(javascript|data|vbscript|file|http):/i.test(v)) throw fallo('enlace', { campo: f.clave });
   return /^[=+\-@]/.test(v) ? ' ' + v : v;
+}
+
+const comoTexto = function (v) { return /^[=+\-@]/.test(v) ? ' ' + v : v; };
+// La grafía de la lista (sin mirar mayúsculas) o null si el valor no está.
+function enLista(lista, v) {
+  const k = v.toLowerCase();
+  for (let i = 0; i < lista.length; i++) if (lista[i].toLowerCase() === k) return lista[i];
+  return null;
+}
+const IDIOMA = /^([A-Za-zÀ-ÖØ-öø-ÿ][A-Za-zÀ-ÖØ-öø-ÿ .'-]{0,29}?)(?:\s+(A1|A2|B1|B2|C1|C2|nativo))?$/i;
+
+// Perfil del puesto: país, subárea, etiquetas, idiomas y nivel de formación. Devuelve el texto que se guardará.
+// Con la hoja de apoyo, el valor TIENE que estar en ella (y se guarda con la grafía de la hoja); sin la hoja, solo se miran las reglas de texto.
+function validarPerfil(f, v, apoyo) {
+  const mal = function (codigo) { return fallo(codigo, { campo: f.clave }); };
+  if (f.perfil === 'pais' || f.perfil === 'subarea') {
+    const lista = f.perfil === 'pais' ? apoyo.paisesReales : apoyo.subareas;
+    if (!lista) return comoTexto(v);
+    const x = enLista(lista, v);
+    if (!x) throw mal('lista');
+    return x;
+  }
+  if (f.perfil === 'nivel') {
+    const x = enLista(NIVELES_FORMACION, v);
+    if (!x) throw mal('lista');
+    return x;
+  }
+  const partes = v.split(/[;,]/).map(function (p) { return p.trim(); }).filter(Boolean);
+  const vistos = {}, salida = [];
+  if (f.perfil === 'etiquetas') {
+    partes.forEach(function (p) {
+      if (vistos[p.toLowerCase()]) return;
+      vistos[p.toLowerCase()] = true;
+      let x = p;
+      if (apoyo.etiquetas) { x = enLista(apoyo.etiquetas, p); if (!x) throw mal('lista'); }
+      else if (p.length > 40) throw mal('largo');
+      salida.push(x);
+    });
+    if (salida.length > MAX_ETIQUETAS) throw mal('demasiadas');
+  } else {   // idiomas: «Inglés B2; Español nativo» (idioma y, si se quiere, nivel A1–C2 o nativo)
+    partes.forEach(function (p) {
+      const m = IDIOMA.exec(p);
+      if (!m) throw mal('idiomas');
+      const nombre = m[1].trim();
+      if (vistos[nombre.toLowerCase()]) throw mal('idiomas');
+      vistos[nombre.toLowerCase()] = true;
+      salida.push(m[2] ? nombre + ' ' + (m[2].toLowerCase() === 'nativo' ? 'nativo' : m[2].toUpperCase()) : nombre);
+    });
+    if (salida.length > MAX_IDIOMAS) throw mal('demasiadas');
+  }
+  const texto = salida.join('; ');
+  if (texto.length > f.max) throw mal('largo');
+  return comoTexto(texto);
+}
+
+function tablaSiExiste(nombre) {
+  if (!SpreadsheetApp.getActive().getSheetByName(nombre)) return null;
+  try { return leerTabla(nombre); } catch (e) { return null; }   // hoja vacía: se trata como si no existiera
+}
+
+// Valores válidos de las hojas de apoyo (solo lectura). Cada clave es null si la hoja, la columna o los valores no existen.
+//   paises: todos los de la columna País (incluidas filas de grupo) · paisesReales: sin las filas de grupo · subareas · etiquetas
+function leerApoyo() {
+  const out = { paises: null, paisesReales: null, subareas: null, etiquetas: null };
+  const valores = function (t, columna, admite) {
+    const i = t ? t.cabecera.indexOf(columna) : -1;
+    if (i < 0) return null;
+    const v = [];
+    t.filas.forEach(function (fila) {
+      const x = (fila[i] || '').trim();
+      if (x && (!admite || admite(fila)) && v.indexOf(x) < 0) v.push(x);
+    });
+    return v.length ? v : null;
+  };
+  const tp = tablaSiExiste(APOYO.paises[0]);
+  const g = tp ? tp.cabecera.indexOf('Grupo') : -1;
+  out.paises = valores(tp, APOYO.paises[1]);
+  out.paisesReales = valores(tp, APOYO.paises[1], function (fila) { return g < 0 || (fila[g] || '').trim() !== GRUPO_DE_GRUPOS; });
+  out.subareas = valores(tablaSiExiste(APOYO.subareas[0]), APOYO.subareas[1]);
+  out.etiquetas = valores(tablaSiExiste(APOYO.etiquetas[0]), APOYO.etiquetas[1]);
+  return out;
 }
 
 // { "Nombre de la columna": [valores sin repetir] } de la hoja Listas. Solo lectura.
@@ -599,6 +716,13 @@ function comprobarConfiguracion() {
   informe.listas = {};
   CAMPOS_OFERTA.filter(function (f) { return f.lista; }).forEach(function (f) { informe.listas[f.lista] = cabL.indexOf(f.lista) >= 0 ? 'ok' : 'FALTA LA COLUMNA EN LISTAS'; });
   [LISTA_ESTADOS, LISTA_MOTIVOS].forEach(function (n) { informe.listas[n] = cabL.indexOf(n) >= 0 ? 'ok' : 'FALTA LA COLUMNA EN LISTAS'; });
+  // Hojas de apoyo del perfil del puesto (opcionales: si faltan, esos campos se guardan como texto sin comparar con una lista).
+  const ap = leerApoyo();
+  informe.apoyoPerfil = {
+    'Países': ap.paises ? ap.paises.length + ' valores' : 'no hay (el país y la nacionalidad se validan solo como texto / con Listas)',
+    'Áreas > Subárea': ap.subareas ? ap.subareas.length + ' valores' : 'no hay (la subárea se valida solo como texto)',
+    'Etiquetas': ap.etiquetas ? ap.etiquetas.length + ' valores' : 'no hay (las etiquetas se validan solo como texto)',
+  };
   const l = leerListasSiExisten();
   informe.estados = {};
   informe.estados[ESTADO_INICIAL] = l[LISTA_ESTADOS] && l[LISTA_ESTADOS].indexOf(ESTADO_INICIAL) >= 0 ? 'ok' : 'FALTA EN LA LISTA';

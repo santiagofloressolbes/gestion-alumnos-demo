@@ -451,12 +451,12 @@ datosRotos(d2 => { d2.rondas.filas[0][3] = '2026-10-01'; }, 'ronda enviada antes
 
 titulo('18. Rondas: qué anuncia el script y compatibilidad con la versión anterior');
 m = crearMundo();
-igual(m.llamar(base(m, { action: 'ping' })).soporta, ['guardarEntrevista', 'guardarOferta', 'registrarRonda', 'crearAplicacion', 'cambiarEstado'], 'con las 3 hojas creadas, anuncia las 3 funciones nuevas');
+igual(m.llamar(base(m, { action: 'ping' })).soporta, ['guardarEntrevista', 'guardarOferta', 'perfilOferta', 'registrarRonda', 'crearAplicacion', 'cambiarEstado'], 'con las 3 hojas creadas, anuncia las 3 funciones nuevas');
 for (const hojaFalta of ['Rondas', 'Aplicaciones', 'Historial']) {
   m = crearMundo({ ajustar: h => { delete h[hojaFalta]; } });
   const dx = m.llamar(base(m, { action: 'data' }));
   ok(dx.ok === true && dx.rondas === undefined && dx.aplicaciones === undefined && dx.historial === undefined, `sin la hoja ${hojaFalta}: data funciona igual que antes (sin datos de rondas)`);
-  igual(dx.soporta, ['guardarEntrevista', 'guardarOferta'], `sin la hoja ${hojaFalta}: no anuncia las funciones de rondas (la app no enseñará botones)`);
+  igual(dx.soporta, ['guardarEntrevista', 'guardarOferta', 'perfilOferta'], `sin la hoja ${hojaFalta}: no anuncia las funciones de rondas (la app no enseñará botones)`);
   igual((hojaFalta === 'Rondas' ? ronda(m, 'O004', 1, '2026-10-30') : aplica(m, 'A003', 'O002', 2, '2026-10-30')).error, 'hoja', `sin la hoja ${hojaFalta}: la función que la usa dice qué hoja falta`);
 }
 m = crearMundo({ ajustar: h => { delete h.Rondas; delete h.Aplicaciones; delete h.Historial; } });
@@ -734,6 +734,93 @@ inf3 = crearMundo({ ajustar: h => { h.Listas.m.forEach(f => { if (f[9] === 'Desc
 ok(inf3.estados.Descartado === 'FALTA EN LA LISTA' && inf3.estados.Recibida === 'ok', 'avisa si se ha renombrado "Descartado"');
 inf3 = crearMundo({ ajustar: h => { delete h.Listas; } }).sandbox.comprobarConfiguracion();
 ok(inf3.estados.Recibida === 'FALTA EN LA LISTA', 'sin hoja Listas la comprobación no se rompe');
+
+titulo('26b. Perfil del puesto (3E-2): 16 campos');
+const PERFIL = () => ({ paisOferta: 'España', subarea: 'Venta de patrocinios', etiquetas: 'Patrocinio; Negociación', idiomas: 'Inglés B2; Español nativo', nivelFormacion: 'Grado' });
+const CONPERFIL = () => ({ ...OFERTA(), ...PERFIL() });
+m = crearMundo();
+antes = m.foto();
+r = guardarOf(m, null, CONPERFIL());
+ok(r.ok === true && r.id === 'O011' && r.oferta.etiquetas === 'Patrocinio; Negociación' && r.oferta.paisOferta === 'España', 'alta con perfil: guarda y devuelve los 16 campos');
+igual(m.celdasCambiadas(antes, m.foto()).sort(), Array.from({ length: 17 }, (_, i) => `Ofertas!12,${i + 1}`).sort(), 'alta con perfil: 17 celdas (ID + 16), todas de la fila nueva');
+ok(filaOf(m, 'O011')['Nivel de formación'] === 'Grado' && filaOf(m, 'O011').Idiomas === 'Inglés B2; Español nativo' && filaOf(m, 'O011')['Subárea'] === 'Venta de patrocinios', 'los 5 valores están en sus columnas');
+ok(m.registro.escrituras.filter(e => e.tipo === 'formato').every(e => e.valor === '@'), 'todo como texto plano');
+// la grafía de la hoja manda (mayúsculas distintas), sin repetidas
+r = guardarOf(m, null, { ...CONPERFIL(), etiquetas: 'patrocinio, NEGOCIACIÓN; Patrocinio', paisOferta: 'españa', nivelFormacion: 'máster', idiomas: 'Inglés b2, Francés' });
+ok(r.ok === true && r.oferta.etiquetas === 'Patrocinio; Negociación' && r.oferta.paisOferta === 'España' && r.oferta.nivelFormacion === 'Máster' && r.oferta.idiomas === 'Inglés B2; Francés', 'normaliza a la grafía de la hoja: ' + JSON.stringify(r.oferta));
+r = guardarOf(m, null, { ...OFERTA(), paisOferta: '', subarea: '', etiquetas: '', idiomas: '', nivelFormacion: '' });
+ok(r.ok === true && r.oferta.etiquetas === '', 'perfil vacío: vale');
+// app antigua (11 campos): sigue funcionando y NO toca las columnas del perfil
+m = crearMundo(); antes = m.foto();
+r = guardarOf(m, 'O001', { ...o1(), estado: 'Cerrada' }, o1());
+ok(r.ok === true && r.oferta.paisOferta === undefined && m.celdasCambiadas(antes, m.foto()).length === 1, 'petición de 11 campos: edita solo lo suyo y no toca el perfil');
+// edición con perfil: solo cambia lo cambiado
+m = crearMundo();
+const antO1 = () => ({ ...o1(), paisOferta: 'España', subarea: 'Antipiratería digital', etiquetas: 'Investigación digital; Python', idiomas: 'Inglés B2', nivelFormacion: 'Grado' });
+antes = m.foto();
+r = guardarOf(m, 'O001', { ...antO1(), etiquetas: 'Python' }, antO1());
+ok(r.ok === true && m.celdasCambiadas(antes, m.foto()).length === 1 && filaOf(m, 'O001').Etiquetas === 'Python', 'editar con perfil: una sola celda');
+r = guardarOf(m, 'O001', { ...antO1(), etiquetas: 'Python' }, antO1());
+ok(r.error === 'conflicto' && r.oferta.etiquetas === 'Python', 'el control de cambios ajenos incluye los campos del perfil');
+// Validaciones del perfil (sin escribir nada)
+const maloP = (campos, esperado, nombre, campo) => {
+  const mm = crearMundo(); const a = mm.foto();
+  const rr = guardarOf(mm, null, { ...CONPERFIL(), ...campos });
+  ok(rr.error === esperado && rr.campo === campo && mm.celdasCambiadas(a, mm.foto()).length === 0 && mm.registro.escrituras.length === 0, `${nombre}: "${esperado}" en ${campo}, sin escribir`);
+};
+maloP({ etiquetas: 'Patrocinio; Inventada' }, 'lista', 'etiqueta que no está en la hoja Etiquetas', 'etiquetas');
+maloP({ etiquetas: 'Excel; Python; CRM; Contabilidad; Patrocinio; Negociación; Atención al cliente; Análisis de vídeo; Derecho de contratos' }, 'demasiadas', 'más de 8 etiquetas', 'etiquetas');
+maloP({ paisOferta: 'Narnia' }, 'lista', 'país que no está en Países', 'paisOferta');
+maloP({ paisOferta: 'Unión Europea (UE/EEE)' }, 'lista', 'una fila de grupo no es un país', 'paisOferta');
+maloP({ subarea: 'Pastelería' }, 'lista', 'subárea que no está en Áreas', 'subarea');
+maloP({ nivelFormacion: 'Bachillerato' }, 'lista', 'nivel fuera de Sin requisito/Grado/Máster/Doctorado', 'nivelFormacion');
+for (const mal of ['Inglés Z9', 'Inglés B2 C1', '123', 'Inglés; Inglés B2', 'Inglés B3']) maloP({ idiomas: mal }, 'idiomas', `idiomas con formato no válido («${mal}»)`, 'idiomas');
+maloP({ idiomas: ['A', 'B', 'C', 'D', 'E', 'F', 'G'].map(x => 'Idioma' + x).join('; ') }, 'demasiadas', 'más de 6 idiomas', 'idiomas');
+maloP({ etiquetas: 'Patrocinio<b>' }, 'html', 'HTML en etiquetas', 'etiquetas');
+maloP({ idiomas: 'Inglés B2\nFrancés' }, 'caracteres', 'salto de línea en idiomas', 'idiomas');
+maloP({ subarea: 'x'.repeat(101) }, 'largo', 'subárea demasiado larga', 'subarea');
+for (const valido of ['Inglés', 'Inglés C1; Español nativo', 'Chino mandarín B1', 'inglés b2']) { const mm = crearMundo(); ok(guardarOf(mm, null, { ...CONPERFIL(), idiomas: valido }).ok === true, `idiomas válidos: «${valido}»`); }
+// Hojas de apoyo ausentes: el campo se valida solo como texto y la nacionalidad cae a Listas
+const sin = (...hs) => crearMundo({ ajustar: h => hs.forEach(n => { delete h[n]; }) });
+m = sin('Etiquetas', 'Áreas', 'Países');
+r = guardarOf(m, null, { ...CONPERFIL(), etiquetas: 'Lo que sea; Otra', paisOferta: 'Narnia', subarea: 'Pastelería', requisitoNacionalidad: 'Francia' });
+ok(r.ok === true && r.oferta.etiquetas === 'Lo que sea; Otra' && r.oferta.paisOferta === 'Narnia', 'sin las 3 hojas de apoyo: el perfil se guarda como texto');
+igual(guardarOf(m, null, { ...CONPERFIL(), nivelFormacion: 'Bachillerato' }).error, 'lista', '... pero el nivel sigue siendo de lista fija');
+igual(guardarOf(m, null, { ...CONPERFIL(), idiomas: 'Inglés Z9' }).error, 'idiomas', '... y los idiomas siguen con su formato');
+ok(guardarOf(m, null, { ...OFERTA(), requisitoNacionalidad: 'Unión Europea (UE/EEE)' }).ok === true, 'sin Países, la nacionalidad se valida con Listas (donde está UE/EEE)');
+igual(guardarOf(m, null, { ...OFERTA(), requisitoNacionalidad: 'Narnia' }).error, 'lista', '... y rechaza lo que no está en Listas');
+m = crearMundo({ ajustar: h => { h['Etiquetas'].m.length = 1; } });
+ok(guardarOf(m, null, { ...CONPERFIL(), etiquetas: 'Inventada' }).ok === true, 'hoja Etiquetas con solo la cabecera: se trata como ausente');
+// Columnas del perfil que aún no existen en el Sheet
+m = crearMundo({ ajustar: h => { h.Ofertas.m.forEach(f => { f.length = 12; }); } });
+r = guardarOf(m, null, { ...OFERTA(), paisOferta: '', subarea: '', etiquetas: '', idiomas: '', nivelFormacion: '' });
+ok(r.ok === true && m.hojas.Ofertas.m[11].length === 12, 'sin las 5 columnas en el Sheet y perfil vacío: guarda las 11 de siempre');
+antes = m.foto();
+r = guardarOf(m, null, CONPERFIL());
+ok(r.error === 'columna' && r.columna === 'País de la oferta' && m.celdasCambiadas(antes, m.foto()).length === 0, 'sin las columnas y con perfil que guardar: error de columna, sin escribir');
+// Nacionalidad: Países (con filas de grupo) o Listas
+m = crearMundo({ ajustar: h => { h.Listas.m[18][h.Listas.m[0].indexOf('Nacionalidad')] = ''; } });   // quita la fila UE/EEE de Listas: solo queda en Países
+r = guardarOf(m, null, { ...OFERTA(), requisitoNacionalidad: 'Unión Europea (UE/EEE)' });
+ok(r.ok === true && r.oferta.requisitoNacionalidad === 'Unión Europea (UE/EEE)', 'nacionalidad «Unión Europea (UE/EEE)»: vale (sale de la hoja Países aunque no esté en Listas)');
+ok(guardarOf(m, null, { ...OFERTA(), requisitoNacionalidad: 'México' }).ok === true, 'un país de Países vale como nacionalidad');
+igual(guardarOf(m, null, { ...OFERTA(), requisitoNacionalidad: 'Narnia' }).error, 'lista', 'una nacionalidad que no está en ninguna de las dos listas se rechaza');
+m = crearMundo({ ajustar: h => { const i = h.Listas.m[0].indexOf('Nacionalidad'); h.Listas.m[1][i] = 'Valdivia'; } });
+ok(guardarOf(m, null, { ...OFERTA(), requisitoNacionalidad: 'Valdivia' }).ok === true, 'un valor solo de Listas > Nacionalidad también vale (la unión no quita nada)');
+// editar una oferta con valores que ya no están en ninguna lista: lo que no se toca no se rechaza
+m = crearMundo({ ajustar: h => { const c = h.Ofertas.m[0].indexOf('Requisito de nacionalidad'); h.Ofertas.m[1][c] = 'Valdivia'; h.Ofertas.m[1][h.Ofertas.m[0].indexOf('Etiquetas')] = 'Etiqueta antigua'; } });
+const viejo = () => ({ ...antO1(), requisitoNacionalidad: 'Valdivia', etiquetas: 'Etiqueta antigua' });
+r = guardarOf(m, 'O001', { ...viejo(), estado: 'Cerrada' }, viejo());
+ok(r.ok === true && filaOf(m, 'O001')['Estado de la oferta'] === 'Cerrada', 'editar otra cosa en una oferta con nacionalidad y etiqueta antiguas: no se rechaza');
+r = guardarOf(m, 'O001', { ...viejo(), etiquetas: 'Otra inventada', estado: 'Cerrada' }, { ...viejo(), estado: 'Cerrada' });
+igual(r.error, 'lista', '... pero si cambias la etiqueta, la nueva sí tiene que estar en la lista');
+// fórmulas
+m = crearMundo({ ajustar: h => { h['Etiquetas'].m.length = 1; } });
+r = guardarOf(m, null, { ...CONPERFIL(), etiquetas: '=HYPERLINK("x")' });
+ok(r.ok === true && r.oferta.etiquetas.startsWith(' =') && m.registro.formulas.length === 0, 'un texto que empieza por = se guarda sin poder ser fórmula');
+// comprobación de configuración
+const inf4 = crearMundo().sandbox.comprobarConfiguracion();
+ok(/valores/.test(inf4.apoyoPerfil['Etiquetas']) && Object.values(inf4.columnasOfertas).every(x => x === 'ok'), 'comprobarConfiguracion informa de las hojas de apoyo y de las 16 columnas');
+ok(/no hay/.test(sin('Etiquetas').sandbox.comprobarConfiguracion().apoyoPerfil['Etiquetas']), '... y avisa si falta una');
 
 titulo('27. Que no se escape la clave');
 m = crearMundo();
