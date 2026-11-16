@@ -2,6 +2,8 @@
 // Solo se leen los campos de esta lista. Las notas de entrevista, el historial y los motivos de descarte NO están aquí a propósito:
 // no hay forma de que acaben en el texto, ni marcando casillas.
 
+import { historia, linea } from './historia.js';
+
 export const MAX_PERFILES = 10;
 
 // Lo que se incluye por defecto (no sensible) y lo que hay que marcar a mano (sensible).
@@ -18,9 +20,10 @@ export const CAMPOS_SENSIBLES = [
   { clave: 'cv', etiqueta: 'Enlace al CV' },
 ];
 export const BASE_POR_DEFECTO = CAMPOS_BASE.map(c => c.clave);
-
-// Una sola línea: sin saltos ni espacios de más (lo que viene del Sheet no puede inventarse líneas nuevas del mensaje).
-const linea = t => String(t ?? '').replace(/[\u0000-\u001F\u007F]+/g, ' ').replace(/\s+/g, ' ').trim();
+// Texto armado por la app (no es un dato del Sheet): sale solo si se marca la casilla. Va aparte, siempre desmarcado.
+export const CAMPOS_EXTRA = [
+  { clave: 'historia', etiqueta: 'Incluir historia', nota: 'Un párrafo armado con plantillas: programa, área a la que quiere ir, subáreas, habilidades, idiomas y formación. No usa el texto libre «Por qué» ni datos sensibles.' },
+];
 
 // El enlace al CV solo se incluye si es una dirección https válida; si no, se deja fuera (nunca http, javascript:, data:…).
 export function enlaceHttps(t) {
@@ -33,6 +36,7 @@ export const nombreCompleto = a => linea(`${a.nombre ?? ''} ${a.apellidos ?? ''}
 function lineasDe(a, campos) {
   const L = [];
   const si = c => campos.has(c);
+  if (si('historia')) { const h = historia(a); if (h) L.push(['Historia', h]); }   // primero: abre el perfil
   if (si('master') && linea(a.master)) L.push(['Programa', linea(a.master)]);
   if (si('area')) {
     const destino = linea(a.areaDestino), exp = linea(a.areaExperiencia);

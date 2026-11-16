@@ -4,7 +4,7 @@ import { recargar } from '../data/index.js';
 import { el, reemplazar } from '../util/dom.js';
 import { navegacion } from '../util/navegacion.js';
 import { avisoFlotante, copiarTexto as copiarAlPortapapeles } from '../util/trabajo.js';
-import { CAMPOS_BASE, CAMPOS_SENSIBLES, BASE_POR_DEFECTO, MAX_PERFILES, textoPerfiles, nombreCompleto, sensiblesMarcados, cvSinHttps } from '../util/compartir.js';
+import { CAMPOS_BASE, CAMPOS_SENSIBLES, CAMPOS_EXTRA, BASE_POR_DEFECTO, MAX_PERFILES, textoPerfiles, nombreCompleto, sensiblesMarcados, cvSinHttps } from '../util/compartir.js';
 import { datosRondas } from './rondas.js';
 import { tarjetaError } from './error-datos.js';
 
@@ -39,9 +39,11 @@ export async function pintarCompartir(raiz, { idOferta = '', idAlumno = '' } = {
 
   const casilla = (c, marcada, sensible) => el('li', {}, el('label', { for: 'cp-c-' + c.clave, class: sensible ? 'sensible' : null },
     el('input', { type: 'checkbox', id: 'cp-c-' + c.clave, value: c.clave, checked: marcada, onchange: refrescar }),
-    el('span', { class: 'alumno-texto' }, el('b', {}, c.etiqueta), sensible && el('span', { class: 'sub' }, 'Dato sensible'))));
+    el('span', { class: 'alumno-texto' }, el('b', {}, c.etiqueta), sensible && el('span', { class: 'sub' }, 'Dato sensible'), c.nota && el('span', { class: 'sub' }, c.nota))));
   const listaBase = el('ul', { class: 'elegir elegir-cp', 'aria-label': 'Datos que se incluyen' }, CAMPOS_BASE.map(c => casilla(c, BASE_POR_DEFECTO.includes(c.clave), false)));
   const listaSensible = el('ul', { class: 'elegir elegir-cp', 'aria-label': 'Datos sensibles' }, CAMPOS_SENSIBLES.map(c => casilla(c, false, true)));
+
+  const listaExtra = el('ul', { class: 'elegir elegir-cp', 'aria-label': 'Texto adicional' }, CAMPOS_EXTRA.map(c => casilla(c, false, false)));
 
   const avisoSensible = el('p', { class: 'aviso', role: 'note', id: 'cp-sensible', hidden: true });
   const vista = el('pre', { class: 'vista-previa', id: 'cp-vista', tabindex: '0', 'aria-label': 'Texto que se va a compartir' });
@@ -57,7 +59,7 @@ export async function pintarCompartir(raiz, { idOferta = '', idAlumno = '' } = {
 
   function refrescar() {
     const quienes = marcados(incluido).map(id => alumnos.find(a => a.id === id)).filter(Boolean);
-    const campos = [...marcados(listaBase), ...marcados(listaSensible)];
+    const campos = [...marcados(listaBase), ...marcados(listaSensible), ...marcados(listaExtra)];
     actual = quienes.length ? textoPerfiles({ alumnos: quienes, campos, oferta }) : '';
     vista.textContent = actual || '(No hay ningún alumno marcado.)';
     const sens = sensiblesMarcados(campos);
@@ -106,6 +108,8 @@ export async function pintarCompartir(raiz, { idOferta = '', idAlumno = '' } = {
       listaBase,
       el('h3', { class: 'sub-titulo' }, 'Datos sensibles (desmarcados)'),
       listaSensible,
+      el('h3', { class: 'sub-titulo' }, 'Texto adicional (desmarcado)'),
+      listaExtra,
       avisoSensible,
       el('p', { class: 'sub' }, 'Las notas de entrevista, el historial y los motivos de descarte nunca se incluyen.')),
     el('section', { class: 'card', 'aria-labelledby': 'cp-prev' },

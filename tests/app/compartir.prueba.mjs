@@ -135,7 +135,7 @@ const escrituras = log => log.peticiones.filter(p => /^guardar|^registrar|^crear
   const marcadas = await pg.$$eval('#v-compartir input[id^=cp-c-]:checked', i => i.map(x => x.value));
   chk(marcadas.join() === 'nombre,master,area,disponibilidad', 'por defecto marcados: nombre, máster, área, disponibilidad: ' + marcadas);
   const sens = await pg.$$eval('#v-compartir input[id^=cp-c-]:not(:checked)', i => i.map(x => x.value));
-  chk(sens.join() === 'nacionalidad,situacion,experiencia,cv', 'desmarcados: nacionalidad, situación, resumen de experiencia y CV: ' + sens);
+  chk(sens.join() === 'nacionalidad,situacion,experiencia,cv,historia', 'desmarcados: nacionalidad, situación, resumen de experiencia, CV y la historia (casilla aparte): ' + sens);
   chk((await pg.innerText('#v-compartir')).match(/Dato sensible/g)?.length === 4, 'cada dato sensible lo dice con texto: "Dato sensible" ×4');
   chk(await pg.isHidden('#cp-sensible'), 'sin datos sensibles marcados, no hay aviso de sensibles');
   chk(/ya no se controla quién lo lee ni lo reenvía/.test(await pg.innerText('#cp-aviso')) && /no guarda un registro de lo que compartes/.test(await pg.innerText('#cp-aviso')), 'aviso de privacidad visible: sale de la app y no hay registro');
