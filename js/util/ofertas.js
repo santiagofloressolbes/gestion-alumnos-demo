@@ -43,7 +43,68 @@ export const CAMPOS = [
   { clave: 'fechaRecepcion', etiqueta: 'Fecha de recepción', fecha: true, obligatorio: true },
   { clave: 'estado', etiqueta: 'Estado', lista: 'estadosOferta', obligatorio: true },
   { clave: 'enlace', etiqueta: 'Enlace o descripción', max: 500, enlace: true, obligatorio: false },
+  // Perfil del puesto (3E-2): lo que el match compara con cada alumno. Todos opcionales.
+  { clave: 'paisOferta', etiqueta: 'País de la oferta', max: 100, perfil: true, obligatorio: false },
+  { clave: 'subarea', etiqueta: 'Subárea', max: 100, perfil: true, obligatorio: false },
+  { clave: 'etiquetas', etiqueta: 'Etiquetas del puesto', max: 300, perfil: true, obligatorio: false },
+  { clave: 'idiomas', etiqueta: 'Idiomas', max: 200, perfil: true, obligatorio: false },
+  { clave: 'nivelFormacion', etiqueta: 'Nivel de formación', max: 40, perfil: true, fijo: true, obligatorio: false },
 ];
+// Los campos que se envían al script: sin el perfil si el script no sabe guardarlo.
+export const camposActivos = conPerfil => (conPerfil ? CAMPOS : CAMPOS.filter(c => !c.perfil));
+
+export const NIVELES_FORMACION = ['Sin requisito', 'Grado', 'Máster', 'Doctorado'];
+export const MAX_ETIQUETAS = 8;
+export const MAX_IDIOMAS = 6;
+export const GRUPO_DE_GRUPOS = 'Grupo de países';   // filas de la hoja Países que no son un país (p. ej. «Unión Europea (UE/EEE)»)
+// Idioma y, si se quiere, nivel (A1–C2 o «nativo»): «Inglés B2». El mismo formato que acepta el script y que entiende el match.
+const IDIOMA = /^([A-Za-zÀ-ÖØ-öø-ÿ][A-Za-zÀ-ÖØ-öø-ÿ .'-]{0,29}?)(?:\s+(A1|A2|B1|B2|C1|C2|nativo))?$/i;
+
+// Una lista escrita en una celda: valores separados por «;» o «,».
+export const partesLista = t => String(t ?? '').split(/[;,]/).map(x => x.trim()).filter(Boolean);
+const unicos = xs => { const vistos = new Set(); return xs.filter(x => { const k = norm(x); if (vistos.has(k)) return false; vistos.add(k); return true; }); };
+
+// '' si los idiomas están bien; si no, el código del error ('idiomas' = formato; 'demasiadas').
+export function revisarIdiomas(t) {
+  const ps = partesLista(t), vistos = new Set();
+  for (const p of ps) {
+    const m = IDIOMA.exec(p);
+    if (!m) return 'idiomas';
+    const n = m[1].trim().toLowerCase();
+    if (vistos.has(n)) return 'idiomas';
+    vistos.add(n);
+  }
+  return ps.length > MAX_IDIOMAS ? 'demasiadas' : '';
+}
+export const revisarEtiquetas = t => (unicos(partesLista(t)).length > MAX_ETIQUETAS ? 'demasiadas' : '');
+
+// Las listas de apoyo (hojas Países, Áreas y Etiquetas) tal como las usa el formulario. Una lista vacía = esa hoja no está: el campo es de texto.
+export function apoyoPerfil(listas) {
+  const m = listas?.match || {};
+  const paisesHoja = (m.paises || []).filter(p => p.pais);
+  const esGrupo = p => norm(p.grupo) === norm(GRUPO_DE_GRUPOS);
+  const grupos = unicos(paisesHoja.filter(esGrupo).map(p => p.pais));
+  const paises = unicos(paisesHoja.filter(p => !esGrupo(p)).map(p => p.pais)).sort((a, b) => a.localeCompare(b, 'es'));
+  const subareas = (m.areas || []).filter(a => a.subarea).map(a => ({ area: a.area, subarea: a.subarea }));
+  const etiquetas = unicos((m.etiquetas || []).map(e => e.etiqueta ?? e).filter(Boolean)).sort((a, b) => a.localeCompare(b, 'es'));
+  // Nacionalidad que pide una oferta: las filas de grupo primero y después países de Países ∪ Listas > Nacionalidad (el script valida contra las dos).
+  const resto = unicos([...paises, ...(listas?.nacionalidades || [])].filter(x => !grupos.some(g => norm(g) === norm(x)))).sort((a, b) => a.localeCompare(b, 'es'));
+  return { paises, subareas, etiquetas, grupos, nacionalidades: [...grupos, ...resto] };
+}
+
+// Avisos (no bloquean): algo del perfil que no está en la lista de su hoja. Si esa hoja existe, el script lo rechazará al guardar.
+export function avisosPerfil(v, listas) {
+  const a = apoyoPerfil(listas), fuera = [];
+  const no = (lista, x) => !lista.some(y => norm(y) === norm(x));
+  if (v.paisOferta && a.paises.length && no(a.paises, v.paisOferta)) fuera.push({ campo: 'paisOferta', texto: `El país «${v.paisOferta}» no está en la hoja Países. Elige uno de la lista o añádelo antes en esa hoja.` });
+  if (v.subarea && a.subareas.length) {
+    const filas = a.subareas.filter(s => norm(s.subarea) === norm(v.subarea));
+    if (!filas.length) fuera.push({ campo: 'subarea', texto: `La subárea «${v.subarea}» no está en la hoja Áreas. Elige una de la lista o añádela antes en esa hoja.` });
+    else if (v.area && !filas.some(s => norm(s.area) === norm(v.area))) fuera.push({ campo: 'subarea', texto: `La subárea «${v.subarea}» es de «${filas[0].area}», no de «${v.area}». Se puede guardar, pero conviene revisarlo.` });
+  }
+  if (a.etiquetas.length) for (const e of partesLista(v.etiquetas)) if (no(a.etiquetas, e)) fuera.push({ campo: 'etiquetas', texto: `La etiqueta «${e}» no está en la hoja Etiquetas. Quítala o añádela antes en esa hoja.` });
+  return fuera;
+}
 const ETIQUETA = Object.fromEntries(CAMPOS.map(c => [c.clave, c.etiqueta]));
 const MAX = Object.fromEntries(CAMPOS.filter(c => c.max).map(c => [c.clave, c.max]));
 const ISO = /^(\d{4})-(\d{2})-(\d{2})$/;
@@ -59,7 +120,14 @@ export function mensajeCampo(codigo, clave) {
     case 'caracteres': return `${c} no admite saltos de línea ni caracteres raros.`;
     case 'html': return `${c} lleva un «<» seguido de una letra o una barra, y la app lo toma por código. Quítalo y vuelve a guardar.`;
     case 'largo': return `${c} es demasiado larga (máximo ${miles(MAX[clave] || 0)} caracteres).`;
-    case 'lista': return `${c}: elige un valor de la lista. Si no está, añádelo antes en la hoja Listas del Sheet.`;
+    case 'lista': {
+      const hoja = { paisOferta: 'Países', subarea: 'Áreas', etiquetas: 'Etiquetas' }[clave];
+      if (clave === 'nivelFormacion') return `${c}: elige Sin requisito, Grado, Máster o Doctorado.`;
+      if (clave === 'requisitoNacionalidad') return `${c}: elige un valor de la lista. Si no está, añádelo antes en la hoja Países (o en Listas) del Sheet.`;
+      return hoja ? `${c}: hay un valor que no está en la hoja ${hoja}. Elige de la lista o añádelo antes en esa hoja.` : `${c}: elige un valor de la lista. Si no está, añádelo antes en la hoja Listas del Sheet.`;
+    }
+    case 'demasiadas': return clave === 'etiquetas' ? `${c}: máximo ${MAX_ETIQUETAS} etiquetas.` : `${c}: máximo ${MAX_IDIOMAS} idiomas.`;
+    case 'idiomas': return `${c}: escribe cada idioma con su nivel (A1–C2 o nativo), separados por «;». Por ejemplo: «Inglés B2; Español nativo». No repitas un idioma.`;
     case 'fecha': return `${c}: elige una fecha válida.`;
     case 'fecha-futura': return `${c} no puede ser futura.`;
     case 'enlace': return `${c} no puede empezar por http: ni por otros prefijos raros. Usa https:// o escribe una descripción.`;
@@ -83,7 +151,10 @@ export function validarOferta(v, listas, hoy) {
     if (/[\u0000-\u001F\u007F]/.test(x)) return mal('caracteres');
     if (/<[\/!?a-zA-Z]/.test(x)) return mal('html');
     if (f.max && x.length > f.max) return mal('largo');
-    if (f.lista && !(listas[f.lista] || []).includes(x)) return mal('lista');
+    if (f.lista && !(listas[f.lista] || []).includes(x) && !(f.clave === 'requisitoNacionalidad' && apoyoPerfil(listas).nacionalidades.includes(x))) return mal('lista');
+    if (f.fijo && !NIVELES_FORMACION.includes(x)) return mal('lista');
+    if (f.clave === 'idiomas' && revisarIdiomas(x)) return mal(revisarIdiomas(x));
+    if (f.clave === 'etiquetas' && revisarEtiquetas(x)) return mal('demasiadas');
     if (f.fecha) {
       if (!fechaValida(x)) return mal('fecha');
       if (x > hoy) return mal('fecha-futura');

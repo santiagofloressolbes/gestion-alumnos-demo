@@ -100,10 +100,12 @@ export const puedeEscribir = () => estado.modo === 'script' && estado.puedeEscri
 
 /* ---- Escritura: ofertas (alta y edición; nunca se borran: se cierran cambiando el estado) ---- */
 
-const CAMPOS_OFERTA = Object.values(esquemas.OFERTA).filter(k => k !== 'id');
+const CAMPOS_OFERTA = [...Object.values(esquemas.OFERTA).filter(k => k !== 'id'), ...Object.values(esquemas.OFERTA_OPC)];   // los 11 de siempre + los 5 del perfil del puesto
 // ¿Esta conexión sabe guardar ofertas? Un script antiguo no lo anuncia: entonces no se enseñan los botones.
 export const puedeEscribirOfertas = () => puedeEscribir() && estado.soporta.includes('guardarOferta');
 // 'conectado' | 'script-antiguo' | 'solo-lectura' (demo): para explicar por qué no hay botones.
+// ¿El script sabe guardar el perfil del puesto (país, subárea, etiquetas, idiomas, nivel)? Un script anterior lo ignoraría en silencio, así que no se le envía.
+export const soportaPerfilOferta = () => puedeEscribirOfertas() && estado.soporta.includes('perfilOferta');
 export const estadoEscrituraOfertas = () => (puedeEscribirOfertas() ? 'conectado' : estado.modo === 'script' && estado.puedeEscribir ? 'script-antiguo' : 'solo-lectura');
 
 // Crea (id vacío) o edita una oferta. "anteriores" = lo que se cree que hay ahora en el Sheet (al editar);
@@ -140,9 +142,10 @@ export const estadoEscrituraRondas = () => (puedeEscribirRondas() ? 'conectado' 
 // Pone en memoria lo que hay ahora en el Sheet (tras guardar, o al descartar un cambio propio por un conflicto).
 export function aplicarOferta(id, oferta) {
   if (!enMemoria) return;
-  const limpio = { id };
-  for (const k of CAMPOS_OFERTA) limpio[k] = String(oferta[k] ?? '').trim();
   const i = enMemoria.ofertas.findIndex(x => x.id === id);
+  // Solo se pone lo que el script devolvió: si no devolvió el perfil (no lo envió o no existe la columna), lo que había se queda.
+  const limpio = { id };
+  for (const k of CAMPOS_OFERTA) if (k in oferta || i < 0) limpio[k] = String(oferta[k] ?? '').trim();
   if (i >= 0) Object.assign(enMemoria.ofertas[i], limpio);
   else enMemoria.ofertas.push(limpio);
 }
