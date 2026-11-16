@@ -21,11 +21,11 @@ const alumno = () => ({ id: 'A1', nombre: 'Lucía', apellidos: 'Quintero', maste
 console.log('1. La plantilla');
 {
   const h = H.historia(alumno());
-  igual(h, 'Cursa MBA en inglés. Quiere orientar su carrera hacia Producto y tecnología. Tiene experiencia en Producto digital y Experiencia de usuario. Entre sus habilidades: Scrum, Gestión de proyectos, Excel. Idiomas: Español nativo, Inglés C1. Formación previa: Grado en Ingeniería Informática.', 'historia completa, con las frases de la plantilla');
+  igual(h, 'Subáreas: Producto digital, Experiencia de usuario. Habilidades: Scrum, Gestión de proyectos, Excel. Idiomas: Español, Inglés. Formación: Grado en Ingeniería Informática.', 'la historia de Lucía, corta y sin lo que ya sale debajo (programa, a dónde quiere ir, experiencia en, busca)');
   igual(H.historia({}), '', 'sin ningún dato: vacía');
   igual(H.historia(null), '', 'sin alumno: vacía');
   // si falta un dato, se omite SU frase (y solo esa)
-  const frases = { master: /Cursa/, areaDestino: /Quiere orientar/, subareasExperiencia: /Tiene experiencia en/, etiquetas: /habilidades/, idiomas: /Idiomas:/, formacionPrevia: /Formación previa/ };
+  const frases = { subareasExperiencia: /Subáreas:/, etiquetas: /Habilidades:/, idiomas: /Idiomas:/, formacionPrevia: /Formación:/ };
   for (const [campo, re] of Object.entries(frases)) {
     for (const vacio of ['', '   ', undefined, null, ';', ' ; ; ']) {
       const x = H.historia({ ...alumno(), [campo]: vacio });
@@ -33,11 +33,11 @@ console.log('1. La plantilla');
       chk(!/undefined|null|NaN|\bfalse\b|\btrue\b|  |\.\./.test(x), `sin «${campo}» (${JSON.stringify(vacio)}): sin «undefined», dobles espacios ni puntos dobles`);
     }
   }
-  igual(H.historia({ master: 'Máster en X' }), 'Cursa Máster en X.', 'con un solo dato: una sola frase');
-  igual(H.historia({ subareasExperiencia: 'Ingeniería; Hospitality' }), 'Tiene experiencia en Ingeniería y Hospitality.', 'unir: «y»');
-  igual(H.historia({ subareasExperiencia: 'Finanzas; Ingeniería' }), 'Tiene experiencia en Finanzas e Ingeniería.', 'unir: «e» delante de «i»');
-  igual(H.historia({ subareasExperiencia: 'A; B; C; D; E' }), 'Tiene experiencia en A, B y C.', 'como mucho 3 subáreas');
-  igual(H.historia({ etiquetas: 'a; b; c; d; e; f; g; h' }), 'Entre sus habilidades: a, b, c, d, e, f.', 'como mucho 6 habilidades');
+  igual(H.historia({ formacionPrevia: 'Máster en X' }), 'Formación: Máster en X.', 'con un solo dato: una sola frase');
+  igual(H.historia({ master: 'MBA en inglés', areaDestino: 'Finanzas', areaExperiencia: 'Derecho', disponibilidad: 'Empleo' }), '', 'el programa, el área, la experiencia y lo que busca ya NO están en la historia (salen en sus líneas)');
+  igual(H.historia({ subareasExperiencia: 'Ingeniería; Hospitality' }), 'Subáreas: Ingeniería, Hospitality.', 'subáreas con el formato «Subáreas: A, B» (sin prefijo repetido como «Tiene experiencia en»)');
+  igual(H.historia({ subareasExperiencia: 'A; B; C; D; E' }), 'Subáreas: A, B, C.', 'como mucho 3 subáreas');
+  igual(H.historia({ etiquetas: 'a; b; c; d; e; f; g; h' }), 'Habilidades: a, b, c, d, e, f.', 'como mucho 6 habilidades');
   igual(H.historia({ etiquetas: 'Excel; excel; Excel' }).includes('Excel, excel'), false, 'sin repetidas exactas');
   // una sola línea, sin saltos, sin textos largos, sin puntos dobles
   const raro = H.historia({ master: 'MBA\nen\r\ninglés\u0000.', formacionPrevia: 'Grado ' + 'muy largo '.repeat(40) });
@@ -48,6 +48,22 @@ console.log('1. La plantilla');
   chk(!/\b(él|ella|alumno|alumna|estudiante|chico|chica)\b/i.test(h), 'redacción sin género');
 }
 
+/* 1b. Idiomas: solo el nombre, sin nivel (v27) */
+console.log('1b. Idiomas sin nivel');
+{
+  const id = t => H.historia({ idiomas: t });
+  igual(id('Español nativo; Italiano nativo; Inglés C1'), 'Idiomas: Español, Italiano, Inglés.', '«Italiano nativo» sale como «Italiano»: sin «nativo» ni nivel');
+  igual(id('Italiano (nativo); Inglés (B2)'), 'Idiomas: Italiano, Inglés.', 'también entre paréntesis');
+  igual(id('Italiano nativa; Francés lengua materna; Alemán materna; Chino native; Árabe bilingüe'), 'Idiomas: Italiano, Francés, Alemán, Chino, Árabe.', 'nativa, lengua materna, materna, native y bilingüe también se quitan');
+  igual(id('Inglés A1; Francés A2; Alemán B1; Ruso B2; Chino C1; Árabe C2'), 'Idiomas: Inglés, Francés, Alemán, Ruso, Chino.', 'los seis niveles A1–C2 se quitan (y el máximo de 5 idiomas se mantiene)');
+  igual(id('Italiano nativo; italiano; ITALIANO C2'), 'Idiomas: Italiano.', 'sin repetir un idioma que solo se distinguía por su nivel');
+  igual(id('Inglés'), 'Idiomas: Inglés.', 'un idioma sin nivel queda igual');
+  igual(id('nativo; C1'), '', 'si solo había niveles, no sale la frase');
+  for (const t of ['Español nativo; Italiano nativo; Inglés C1', 'Italiano (nativo)', 'Francés lengua materna', 'Árabe bilingüe', 'Chino C2', 'Alemán native']) chk(!/nativ|native|materna|biling|[ABC][12]/i.test(id(t)), 'sin rastro de nivel en la salida de «' + t + '»');
+  // el nivel NO se pierde en otros sitios: la ficha y el match siguen leyéndolo del alumno
+  chk(!/nativ|[ABC][12]/.test(H.historia(alumno())), 'la historia de Lucía («Español nativo; Inglés C1» en el Sheet) no lleva niveles');
+}
+
 /* 2. Lo que se lee del alumno */
 console.log('2. Qué campos lee');
 {
@@ -56,7 +72,7 @@ console.log('2. Qué campos lee');
   H.historia(espia);
   chk([...leidos].every(k => H.CAMPOS_HISTORIA.includes(k)), 'solo se leen campos de la lista blanca: ' + [...leidos].join(', '));
   igual([...leidos].sort(), [...H.CAMPOS_HISTORIA].sort(), 'y se leen todos');
-  igual(H.CAMPOS_HISTORIA, ['master', 'areaDestino', 'subareasExperiencia', 'etiquetas', 'idiomas', 'formacionPrevia'], 'la lista blanca es exactamente: programa, área destino, subáreas, etiquetas, idiomas y formación');
+  igual(H.CAMPOS_HISTORIA, ['subareasExperiencia', 'etiquetas', 'idiomas', 'formacionPrevia'], 'la lista blanca es exactamente: subáreas, etiquetas, idiomas y formación');
   // el código (sin comentarios) no nombra ningún campo sensible
   const codigo = fs.readFileSync(new URL('../../js/util/historia.js', import.meta.url), 'utf8').split('\n').map(l => l.replace(/\/\/.*$/, '')).join('\n');
   const prohibidos = ['porQue', 'notasEntrevista', 'situacionTrabajo', 'nacionalidad', 'resumenExperiencia', 'enlaceCV', 'areaExperiencia', 'historial', 'motivo', 'estado', 'disponibilidad', 'nombre', 'apellidos'];
@@ -74,9 +90,9 @@ console.log('3. En el texto de compartir');
   igual(C.CAMPOS_EXTRA.map(c => c.clave), ['historia'], 'hay una casilla extra: «historia»');
   chk(!C.BASE_POR_DEFECTO.includes('historia') && !sensibles.includes('historia'), 'no está entre las casillas por defecto ni entre las sensibles');
   const sin = C.textoPerfiles({ alumnos: [a], campos: C.BASE_POR_DEFECTO });
-  chk(!/Historia:|Cursa|Quiere orientar|habilidades/.test(sin), 'por defecto NO sale la historia');
+  chk(!/Historia:|Subáreas:|Habilidades:|Idiomas:/.test(sin), 'por defecto NO sale la historia');
   const con = C.textoPerfiles({ alumnos: [a], campos: [...C.BASE_POR_DEFECTO, 'historia'] });
-  chk(/\n   Historia: Cursa MBA en inglés\. Quiere orientar/.test(con), 'con la casilla marcada, sale como primera línea del perfil: ' + JSON.stringify(con));
+  chk(/\n   Historia: Subáreas: Producto digital, Experiencia de usuario\. Habilidades:/.test(con) && !/Cursa|Quiere orientar|habilidades\./.test(con.split('Programa:')[0]), 'con la casilla marcada, sale como primera línea del perfil: ' + JSON.stringify(con));
   chk(con.indexOf('Historia:') < con.indexOf('Programa:'), '... antes que el resto de datos');
   chk(con.split('\n').filter(l => /Historia:/.test(l)).length === 1 && !/\n\n\n/.test(con), 'una sola línea de historia, sin huecos raros');
   igual(C.textoPerfiles({ alumnos: [a], campos: ['historia'] }).includes('Lucía'), false, 'la historia no trae el nombre (sale solo si se marca «Nombre»)');
@@ -113,7 +129,7 @@ console.log('4. La pantalla');
   chk(!/Historia:/.test(await pg.innerText('#cp-vista')), 'sin marcarla, la vista previa no lleva historia');
   await pg.check('#cp-c-historia');
   const v = await pg.innerText('#cp-vista');
-  chk(/Historia: Cursa MBA en inglés\./.test(v) && /Quiere orientar su carrera hacia Producto y tecnología/.test(v) && /Scrum, Gestión de proyectos, Excel/.test(v), 'marcada, la vista previa lleva la historia de Lucía: ' + v.replace(/\n/g, ' / '));
+  chk(/Historia: Subáreas: Producto digital, Experiencia de usuario\./.test(v) && /Scrum, Gestión de proyectos, Excel/.test(v) && /Idiomas: Español, Inglés\./.test(v) && !/nativo|C1/.test(v) && !/Cursa|Quiere orientar/.test(v), 'marcada, la vista previa lleva la historia de Lucía: ' + v.replace(/\n/g, ' / '));
   chk(await pg.isHidden('#cp-sensible'), 'la historia no cuenta como dato sensible (no sale el aviso de sensibles)');
   // marcar todo lo sensible: la vista previa sigue sin canarios de lo que no se puede compartir
   for (const c of ['nacionalidad', 'situacion', 'experiencia', 'cv']) await pg.check('#cp-c-' + c);

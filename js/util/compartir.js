@@ -22,7 +22,7 @@ export const CAMPOS_SENSIBLES = [
 export const BASE_POR_DEFECTO = CAMPOS_BASE.map(c => c.clave);
 // Texto armado por la app (no es un dato del Sheet): sale solo si se marca la casilla. Va aparte, siempre desmarcado.
 export const CAMPOS_EXTRA = [
-  { clave: 'historia', etiqueta: 'Incluir historia', nota: 'Un párrafo armado con plantillas: programa, área a la que quiere ir, subáreas, habilidades, idiomas y formación. No usa el texto libre «Por qué» ni datos sensibles.' },
+  { clave: 'historia', etiqueta: 'Incluir historia', nota: 'Un párrafo corto armado con plantillas: subáreas, habilidades, idiomas (sin nivel) y formación. Lo que ya sale en las líneas de debajo no se repite. No usa el texto libre «Por qué» ni datos sensibles.' },
 ];
 
 // El enlace al CV solo se incluye si es una dirección https válida; si no, se deja fuera (nunca http, javascript:, data:…).

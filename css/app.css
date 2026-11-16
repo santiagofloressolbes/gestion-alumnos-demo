@@ -70,15 +70,15 @@ main{flex:1;min-height:0;overflow-y:auto;overflow-x:hidden;-webkit-overflow-scro
 
 /* etiquetas */
 .chips{display:flex;flex-wrap:wrap;gap:.5rem}
-.chip{display:inline-flex;align-items:center;min-height:2.75rem;padding:0 1rem;border-radius:6.1875rem;background:var(--card);color:var(--cink);border:1.5px solid var(--line);font-size:.9375rem;font-weight:600}
+.chip{display:inline-flex;align-items:center;min-height:2.75rem;padding:0 1rem;border-radius:6.1875rem;background:var(--card);color:var(--cink);border:1.5px solid var(--line);font-size:1rem;font-weight:600}
 .chip.on{background:var(--act-bg);border-color:var(--act-bg);color:var(--act-fg)}
 
 /* aviso de versión nueva */
-#upd{position:absolute;left:24px;right:24px;bottom:calc(var(--sab) + 4.5rem);display:flex;align-items:center;justify-content:space-between;gap:1rem;padding:.5rem .5rem .5rem 1rem;border-radius:1rem;background:var(--card);border:1.5px solid var(--line);font-size:.9375rem}
+#upd{position:absolute;left:24px;right:24px;bottom:calc(var(--sab) + 4.5rem);display:flex;align-items:center;justify-content:space-between;gap:1rem;padding:.5rem .5rem .5rem 1rem;border-radius:1rem;background:var(--card);border:1.5px solid var(--line);font-size:1rem}
 #upd .secondary{width:auto;min-height:2.75rem}
 
 /* aviso flotante: la confirmación se ve siempre, aunque la pantalla esté desplazada */
-.flotante{position:fixed;left:24px;right:24px;top:calc(var(--sat) + .5rem);z-index:20;margin:0;padding:1rem 1.25rem;border-radius:1rem;background:var(--card);color:var(--cink);border:1.5px solid var(--tab-on);box-shadow:0 .5rem 1.5rem rgba(0,0,0,.5);font-size:.9375rem;font-weight:600;cursor:pointer}
+.flotante{position:fixed;left:24px;right:24px;top:calc(var(--sat) + .5rem);z-index:20;margin:0;padding:1rem 1.25rem;border-radius:1rem;background:var(--card);color:var(--cink);border:1.5px solid var(--tab-on);box-shadow:0 .5rem 1.5rem rgba(0,0,0,.5);font-size:1rem;font-weight:600;cursor:pointer}
 button:disabled{opacity:.7;cursor:progress}
 
 @media (prefers-reduced-motion:no-preference){ .primary,.secondary{transition:filter .15s} }
@@ -136,7 +136,7 @@ button:disabled{opacity:.7;cursor:progress}
 .filtros-cuerpo{padding-top:1rem}
 .filtros-cuerpo .campo-form:last-child{margin-bottom:0}
 .opciones{display:flex;flex-wrap:wrap;gap:.5rem}
-.opcion{min-height:2.75rem;padding:0 1rem;border-radius:6.1875rem;background:var(--inp);color:var(--cink);border:1.5px solid var(--line);font-size:.9375rem;font-weight:600}
+.opcion{min-height:2.75rem;padding:0 1rem;border-radius:6.1875rem;background:var(--inp);color:var(--cink);border:1.5px solid var(--line);font-size:1rem;font-weight:600}
 .opcion[aria-pressed=true]{background:var(--act-bg);border-color:var(--act-bg);color:var(--act-fg)}
 #v-buscar > .secondary{margin-top:1rem}
 .cuenta{margin:1rem 0}
@@ -163,7 +163,7 @@ button:disabled{opacity:.7;cursor:progress}
 #app.acceso #tabs{display:none}
 .demo{flex:none;margin:.5rem 24px 0;padding:.5rem 1rem;border-radius:1rem;background:var(--card);border:1.5px solid var(--tab-on);font-size:.875rem;color:var(--cink)}
 .demo[hidden]{display:none}
-.error{margin:0 0 1rem;color:var(--tab-on);font-weight:600;font-size:.9375rem}
+.error{margin:0 0 1rem;color:var(--tab-on);font-weight:600;font-size:1rem}
 .error[hidden]{display:none}
 .campo-form .enlace{margin-top:.25rem}
 .card .primary+.enlace,.card .enlace+.primary{margin-top:.5rem}
@@ -175,7 +175,7 @@ button:disabled{opacity:.7;cursor:progress}
 .campo-form textarea{display:block;font-family:var(--sans);width:100%;min-height:9rem;padding:.75rem 1rem;border-radius:1rem;border:1.5px solid var(--line);background:var(--inp);color:var(--cink);font-size:1rem;line-height:1.5;resize:vertical}   /* 16 px: el iPhone no amplía al enfocar */
 .cuenta{margin:.25rem 0 0;font-size:.8125rem;color:var(--cmuted);text-align:right}
 .cuenta.exceso{color:var(--tab-on);font-weight:700}
-.ok{margin:1rem 0 0;color:var(--cink);font-weight:600;font-size:.9375rem}
+.ok{margin:1rem 0 0;color:var(--cink);font-weight:600;font-size:1rem}
 .card .campos+.secondary{margin-top:1rem}
 .conflicto{margin:0 0 1rem;padding:1rem;border-radius:1rem;border:1.5px solid var(--tab-on)}
 .conflicto[hidden]{display:none}
@@ -198,7 +198,7 @@ button:disabled{opacity:.7;cursor:progress}
 .historial{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:1rem}
 .historial li{display:flex;flex-direction:column;gap:.125rem;padding-left:1rem;border-left:3px solid var(--line)}
 .historial .sub{margin:0}
-.nota-historial{font-size:.9375rem;overflow-wrap:anywhere;white-space:pre-line}
+.nota-historial{font-size:1rem;overflow-wrap:anywhere;white-space:pre-line}
 .card .campos+.secondary,.card .secondary+.secondary{margin-top:.5rem}
 
 /* Formularios de rondas */
@@ -243,7 +243,7 @@ button:disabled{opacity:.7;cursor:progress}
 .sel-compartir{flex:none;display:flex;align-items:center;justify-content:center;width:2.75rem;min-height:4.5rem;cursor:pointer}
 .elegir-cp{max-height:none;margin-bottom:1rem}
 .elegir-cp label.sensible{border-style:dashed}
-.sub-titulo{margin:1rem 0 .5rem;font-size:.9375rem}
+.sub-titulo{margin:1rem 0 .5rem;font-size:1rem}
 #cp-sensible{margin:0 0 1rem}
 #cp-sensible .bloque{display:block}
 #cp-sensible .bloque+.bloque{margin-top:.5rem}
@@ -310,7 +310,7 @@ button:disabled{opacity:.7;cursor:progress}
 .aviso.aviso-alerta{display:flex;align-items:flex-start;gap:.75rem}
 .aviso.aviso-alerta .icono-aviso{margin-top:.125rem}
 #in-avisos.con-seguimiento{border:2px solid var(--seg)}
-.aviso-datos{margin:0 0 1rem;padding:1rem;border-radius:1rem;background:var(--act-bg);color:var(--act-fg);font-weight:600;font-size:.9375rem;overflow-wrap:anywhere}
+.aviso-datos{margin:0 0 1rem;padding:1rem;border-radius:1rem;background:var(--act-bg);color:var(--act-fg);font-weight:600;font-size:1rem;overflow-wrap:anywhere}
 .aviso-datos .enlace,.aviso-datos .sub{color:var(--act-fg)}
 .aviso-datos .sub{margin:.25rem 0 0;font-size:.8125rem;font-weight:400}
 .aviso-datos-lista{margin:0 0 .25rem;padding-left:1.25rem}
@@ -331,7 +331,7 @@ button:disabled{opacity:.7;cursor:progress}
 .fila-match .alumno{padding:.75rem;gap:.5rem}
 .fila-match .alumno svg{flex:none}
 .fila-match,.fila-match *{overflow-wrap:anywhere}
-.motivo{font-size:.8125rem;line-height:1.35}
+.motivo{line-height:1.35}
 .motivo b{font-weight:700}
 .motivo.no b{color:var(--g-no)}
 .motivo.revisar b{color:var(--g-reservas)}
