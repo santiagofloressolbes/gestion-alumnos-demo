@@ -159,7 +159,7 @@ Sirve para que una oferta pueda pedir «nacionalidad de la UE o del EEE» sin el
 2. La columna de programas puede llamarse **`Programa`** o **`Máster`** (la app acepta las dos). Escribe ahí un programa por fila, con el nombre exacto, sin celdas vacías entre medias. El orden de las filas es el orden en Inicio.
 3. A la derecha de la última columna, en la primera fila, escribe el encabezado **`Categoría del programa`**. En la fila de cada programa, escribe su categoría (por ejemplo `Másteres`, `MBA`, `LaLiga Executive Education`, `Formación para Jugadores`), escrita siempre igual. Las categorías salen en Inicio en el orden en que aparecen.
 4. A su derecha, escribe el encabezado **`Idioma del programa`**. Pon `en` en los programas cuyo correo de seguimiento deba salir en inglés. Vacío o `es`: español. (Si se deja vacío, vale la palabra «inglés» o «English» en el nombre del programa).
-5. En la hoja **Alumnos**, la columna `Máster` lleva el programa de cada persona, escrito **igual** que en Listas. Si no coincide, Inicio lo enseña en «Otros programas» y la ficha avisa.
+5. En la hoja **Alumnos**, la columna `Máster` lleva el programa de cada persona, escrito **igual** que en Listas. Si no coincide, Inicio lo enseña en «Otros programas», la ficha avisa y la tarjeta **Avisos** de Inicio saca un aviso rojo de **datos** («Programa no reconocido») que no se puede silenciar y desaparece solo cuando lo arreglas en el Sheet. Las categorías salen con **MBA la primera**.
 6. Las columnas de categoría e idioma van en la **misma fila** que su programa. Si una fila queda sin categoría, ese programa sale en «Otros programas».
 7. En la app, «Ajustes» → «Buscar actualización» (o cierra y abre dos veces) y comprueba Inicio.
 

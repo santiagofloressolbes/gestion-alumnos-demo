@@ -9,6 +9,7 @@ Este documento es la tabla exacta de lo que hace el match entre una oferta y un 
 3. **Sin IA ni servicios externos.** Todo es una regla escrita aquí y editable en el Sheet. Las etiquetas coinciden por **texto exacto** (sin fijarse en mayúsculas ni tildes); no hay sinónimos ni aproximaciones.
 4. **Un dato que falta o no se reconoce no es un «no cumple».** Se enseña como «Sin datos» (amarillo, «a revisar»), **no suma puntos** y no cuenta en el total.
 5. **Compartir perfiles no cambia:** no saca situación migratoria, notas, historial ni descartes (el match no escribe nada ni envía nada).
+6. **Cómo se ve (v27, solo presentación; las reglas no cambian).** El % de cada fila lleva el color de su grupo (verde «Encaja», ámbar «con reservas», rojo suave «No encaja») y siempre va escrito en texto. Debajo, **una línea con el criterio que decide el grupo**: en «No encaja», el «no» de área, tipo, nacionalidad o permiso; en «con reservas», lo primero que hay que revisar (lo de nacionalidad y permiso va antes); en «Encaja», el primer criterio que cumple. El detalle de los ocho criterios está en «Por qué», y las razones de nacionalidad y permiso largas se acortan con «ver más».
 
 ## Los ocho criterios
 
@@ -252,6 +253,6 @@ Además, la prueba comprueba, para las 10 ofertas, cuántos alumnos salen en cad
 
 - Pesos editables en el Sheet (son fijos).
 - Sinónimos de etiquetas, aproximaciones o IA.
-- «Historia» del alumno por plantillas y compartir con ella (versión 26).
+- «Historia» del alumno por plantillas y compartir con ella (versión 26; en la 27 es más corta y los idiomas salen sin nivel).
 - Editar el perfil de puesto desde la app (versión 26; hoy se rellena en el Sheet).
 - Desplegable de países en «Requisito de nacionalidad» desde la app (versión 26).
