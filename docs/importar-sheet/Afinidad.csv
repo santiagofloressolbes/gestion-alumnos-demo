@@ -1,0 +1,46 @@
+﻿Área A,Área B,Nivel
+Comercial y patrocinio,Marketing y comunicación,Directa
+Comercial y patrocinio,Recursos Humanos,Lejana
+Comercial y patrocinio,Finanzas,Afín
+Comercial y patrocinio,Operaciones y eventos,Afín
+Comercial y patrocinio,Análisis de datos,Lejana
+Comercial y patrocinio,Producto y tecnología,Lejana
+Comercial y patrocinio,Derecho y compliance,Lejana
+Comercial y patrocinio,Antipiratería y seguridad,Lejana
+Comercial y patrocinio,Dirección deportiva y scouting,Afín
+Marketing y comunicación,Recursos Humanos,Lejana
+Marketing y comunicación,Finanzas,Lejana
+Marketing y comunicación,Operaciones y eventos,Lejana
+Marketing y comunicación,Análisis de datos,Afín
+Marketing y comunicación,Producto y tecnología,Afín
+Marketing y comunicación,Derecho y compliance,Lejana
+Marketing y comunicación,Antipiratería y seguridad,Lejana
+Marketing y comunicación,Dirección deportiva y scouting,Lejana
+Recursos Humanos,Finanzas,Lejana
+Recursos Humanos,Operaciones y eventos,Afín
+Recursos Humanos,Análisis de datos,Lejana
+Recursos Humanos,Producto y tecnología,Lejana
+Recursos Humanos,Derecho y compliance,Afín
+Recursos Humanos,Antipiratería y seguridad,Lejana
+Recursos Humanos,Dirección deportiva y scouting,Lejana
+Finanzas,Operaciones y eventos,Lejana
+Finanzas,Análisis de datos,Afín
+Finanzas,Producto y tecnología,Lejana
+Finanzas,Derecho y compliance,Afín
+Finanzas,Antipiratería y seguridad,Lejana
+Finanzas,Dirección deportiva y scouting,Lejana
+Operaciones y eventos,Análisis de datos,Lejana
+Operaciones y eventos,Producto y tecnología,Lejana
+Operaciones y eventos,Derecho y compliance,Lejana
+Operaciones y eventos,Antipiratería y seguridad,Afín
+Operaciones y eventos,Dirección deportiva y scouting,Afín
+Análisis de datos,Producto y tecnología,Afín
+Análisis de datos,Derecho y compliance,Lejana
+Análisis de datos,Antipiratería y seguridad,Lejana
+Análisis de datos,Dirección deportiva y scouting,Afín
+Producto y tecnología,Derecho y compliance,Lejana
+Producto y tecnología,Antipiratería y seguridad,Afín
+Producto y tecnología,Dirección deportiva y scouting,Lejana
+Derecho y compliance,Antipiratería y seguridad,Directa
+Derecho y compliance,Dirección deportiva y scouting,Lejana
+Antipiratería y seguridad,Dirección deportiva y scouting,Lejana

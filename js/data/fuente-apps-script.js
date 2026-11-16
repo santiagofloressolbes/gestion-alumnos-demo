@@ -1,7 +1,7 @@
 // Fuente de datos: el script de Apps Script (puente temporal para datos de PRUEBA) protegido con clave.
 // El Sheet es privado; solo el script lo lee. Cada petición lleva la clave en el cuerpo (nunca en la dirección).
 import { CONFIG } from './config.js';
-import { aObjetos, aListas } from './tablas.js';
+import { aObjetos, aListas, aReglasMatch } from './tablas.js';
 
 const VERSION_ESPERADA = 1;
 
@@ -116,9 +116,10 @@ export function crearFuenteAppsScript(acceso, esquemas) {
       // Las hojas de rondas pueden no existir todavía en el Sheet (o el script ser antiguo): entonces la app funciona como antes.
       const conRondas = esTabla(j.rondas) && esTabla(j.aplicaciones) && esTabla(j.historial);
       return {
-        alumnos: aObjetos('Alumnos', j.alumnos, esquemas.ALUMNO),
-        ofertas: aObjetos('Ofertas', j.ofertas, esquemas.OFERTA),
-        listas: aListas(j.listas, esquemas.LISTAS, esquemas.ALIAS_LISTAS),
+        alumnos: aObjetos('Alumnos', j.alumnos, esquemas.ALUMNO, esquemas.ALUMNO_OPC),
+        ofertas: aObjetos('Ofertas', j.ofertas, esquemas.OFERTA, esquemas.OFERTA_OPC),
+        // Las hojas de reglas del match llegan en j.match (un script antiguo no las envía: entonces se usan las reglas de respaldo).
+        listas: { ...aListas(j.listas, esquemas.LISTAS, esquemas.ALIAS_LISTAS), match: aReglasMatch(j.match && typeof j.match === 'object' ? j.match : {}, esquemas.HOJAS_MATCH) },
         rondas: conRondas ? aObjetos('Rondas', j.rondas, esquemas.RONDA) : [],
         aplicaciones: conRondas ? aObjetos('Aplicaciones', j.aplicaciones, esquemas.APLICACION) : [],
         historial: conRondas ? aObjetos('Historial', j.historial, esquemas.HISTORIAL) : [],

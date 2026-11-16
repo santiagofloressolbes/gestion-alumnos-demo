@@ -94,11 +94,22 @@ m = crearMundo();
 const d = m.llamar(base(m, { action: 'data' }));
 ok(d.ok && d.puedeEscribir === true, 'data responde ok e indica que se puede escribir');
 igual([d.alumnos.filas.length, d.ofertas.filas.length], [30, 10], '30 alumnos y 10 ofertas');
-ok(d.alumnos.cabecera.includes('Notas de entrevista') && d.alumnos.cabecera.length === 17, 'cabecera de Alumnos con 17 columnas');
+ok(d.alumnos.cabecera.includes('Notas de entrevista') && d.alumnos.cabecera.length === 21, 'cabecera de Alumnos con 21 columnas (17 de siempre + 4 nuevas del match)');
 ok(d.listas.cabecera[0] === 'Programa' && d.listas.filas.length === 18, 'hoja Listas completa (18 filas)');
 const c1 = d.alumnos.filas.find(f => f[0] === 'A001');
 ok(c1[d.alumnos.cabecera.indexOf('Fecha última entrevista')] === '2026-10-20', 'una fecha guardada como fecha real sale como 2026-10-20');
-ok(d.alumnos.filas.every(f => f.length === 17 && f.every(x => typeof x === 'string')), 'todo sale como texto');
+ok(d.alumnos.filas.every(f => f.length === 21 && f.every(x => typeof x === 'string')), 'todo sale como texto');
+ok(d.ofertas.cabecera.length === 17 && d.ofertas.cabecera.includes('Nivel de formación'), 'Ofertas lleva sus 5 columnas nuevas del match (17 en total)');
+igual(Object.keys(d.match || {}).sort(), ['afinidad', 'areas', 'etiquetas', 'paises', 'reglas'], 'data envía las 5 hojas de reglas del match');
+ok(d.match.paises.cabecera[0] === 'País' && d.match.reglas.filas.length === 20 && d.match.afinidad.filas.length === 45, 'con su contenido (países, 20 reglas, 45 parejas de afinidad)');
+{
+  const sin = crearMundo({ ajustar: h => { delete h['Países']; delete h['Reglas migratorias']; h['Etiquetas'].m.length = 0; } });
+  const r = sin.llamar(base(sin, { action: 'data' }));
+  ok(r.ok && !('paises' in r.match) && !('reglas' in r.match) && !('etiquetas' in r.match) && 'afinidad' in r.match, 'si una hoja no existe o está vacía no se envía, y lo demás sigue funcionando');
+  const solo = crearMundo({ ajustar: h => { for (const n of ['Países', 'Áreas', 'Afinidad', 'Reglas migratorias', 'Etiquetas']) delete h[n]; } });
+  const r2 = solo.llamar(base(solo, { action: 'data' }));
+  ok(r2.ok && Object.keys(r2.match).length === 0 && r2.alumnos.filas.length === 30, 'sin ninguna hoja de reglas: data responde igual (la app usa las reglas de respaldo)');
+}
 m = crearMundo({ ajustar: h => { h.Ofertas.m.push(['', '', '', '', '', '', '', '', '', '', '', '']); } });
 igual(m.llamar(base(m, { action: 'data' })).ofertas.filas.length, 10, 'las filas totalmente vacías se ignoran');
 m = crearMundo({ ajustar: h => { delete h.Listas; } });

@@ -42,6 +42,8 @@ export function crearMundo({ clave = CLAVE_PRUEBA, ajustar, bloqueoOcupado = fal
   const registro = { escrituras: [], formulas: [], errores: [], respuestas: [] };
   const hojas = {};
   for (const n of ['Alumnos', 'Ofertas', 'Listas', 'Rondas', 'Aplicaciones', 'Historial']) hojas[n] = new Hoja(n, leerCSV(leer(`datos-mock/${n}.csv`)), registro);
+  // Hojas opcionales con las reglas del match (el nombre de la hoja lleva tildes; el archivo de datos-mock no).
+  for (const [n, f] of [['Países', 'Paises'], ['Áreas', 'Areas'], ['Afinidad', 'Afinidad'], ['Reglas migratorias', 'ReglasMigratorias'], ['Etiquetas', 'Etiquetas']]) hojas[n] = new Hoja(n, leerCSV(leer(`datos-mock/${f}.csv`)), registro);
   const col = hojas.Alumnos.m[0].indexOf('Fecha última entrevista');
   hojas.Alumnos.m[1][col] = new Date(Date.UTC(2026, 9, 20));   // A001: una fecha que Google guarda como fecha de verdad
   ajustar?.(hojas);

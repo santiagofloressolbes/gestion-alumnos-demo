@@ -1,0 +1,21 @@
+﻿Situación de trabajo,Tipo de oferta,País o grupo de la oferta,Resultado,Motivo,Fecha de validación
+Ciudadano UE o español,,UE,Cumple,Pide permiso de trabajo en vigor y es ciudadano de la UE o español: puede trabajar en cualquier país de la UE.,2026-11-01
+Ciudadano UE o español,,EEE,Cumple,Pide permiso de trabajo en vigor y es ciudadano de la UE o español: puede trabajar en los países del EEE.,2026-11-01
+Ciudadano UE o español,,Suiza,Revisar,"La oferta es de Suiza y {alumno} es ciudadano de la UE o español. Suiza tiene un acuerdo de libre circulación, pero conviene revisar el trámite.",2026-11-01
+Ciudadano UE o español,,Resto,Revisar,La oferta es de fuera de la UE/EEE y {alumno} es ciudadano de la UE o español. Depende del país: conviene revisarlo.,2026-11-01
+Ciudadano UE o español,,,Cumple,Pide permiso de trabajo en vigor y es ciudadano de la UE o español.,2026-11-01
+Residente con permiso de trabajo,,España,Cumple,Pide permiso de trabajo en vigor y es residente con permiso en España.,2026-11-01
+Residente con permiso de trabajo,,UE,Revisar,La oferta es de otro país de la UE y el permiso de {alumno} es de España: conviene revisar si le sirve.,2026-11-01
+Residente con permiso de trabajo,,EEE,Revisar,La oferta es de un país del EEE y el permiso de {alumno} es de España: conviene revisar si le sirve.,2026-11-01
+Residente con permiso de trabajo,,Suiza,Revisar,La oferta es de Suiza y el permiso de {alumno} es de España: conviene revisar si le sirve.,2026-11-01
+Residente con permiso de trabajo,,Resto,Revisar,La oferta es de fuera de la UE/EEE y el permiso de {alumno} es de España: conviene revisar si le sirve.,2026-11-01
+Residente con permiso de trabajo,,,Cumple,Pide permiso de trabajo en vigor y es residente con permiso.,2026-11-01
+Permiso de estudiante,Prácticas,,Revisar,La oferta pide permiso de trabajo en vigor y {alumno} aparece como «Permiso de estudiante». Un permiso de estudiante puede valer para unas prácticas: conviene revisarlo.,2026-11-01
+Permiso de estudiante,Empleo,,Revisar,La oferta es de empleo y {alumno} aparece como «Permiso de estudiante». Un empleo suele necesitar otra autorización: conviene revisarlo.,2026-11-01
+Permiso de estudiante,,,Revisar,La oferta pide permiso de trabajo en vigor y {alumno} aparece como «Permiso de estudiante»: conviene revisarlo.,2026-11-01
+Necesita permiso de trabajo,,España,No cumple,La oferta pide permiso de trabajo en vigor y {alumno} aparece como «Necesita permiso de trabajo».,2026-11-01
+Necesita permiso de trabajo,,,No cumple,La oferta pide permiso de trabajo en vigor y {alumno} aparece como «Necesita permiso de trabajo».,2026-11-01
+Necesita permiso de trabajo,,UE,Revisar,La situación de {alumno} se refiere a España y la oferta es de otro país de la UE: conviene revisarlo.,2026-11-01
+Necesita permiso de trabajo,,EEE,Revisar,La situación de {alumno} se refiere a España y la oferta es de un país del EEE: conviene revisarlo.,2026-11-01
+Necesita permiso de trabajo,,Suiza,Revisar,La situación de {alumno} se refiere a España y la oferta es de Suiza: conviene revisarlo.,2026-11-01
+Necesita permiso de trabajo,,Resto,Revisar,La situación de {alumno} se refiere a España y la oferta es de fuera de la UE/EEE: conviene revisarlo.,2026-11-01

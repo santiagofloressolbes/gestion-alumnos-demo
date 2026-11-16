@@ -10,6 +10,14 @@ export const ALUMNO = {
   'Notas de entrevista': 'notasEntrevista', 'Fecha última entrevista': 'fechaUltimaEntrevista',
   'Disponibilidad': 'disponibilidad',
 };
+// Columnas NUEVAS de la 3E (perfil para el match). Son OPCIONALES: si el Sheet no las tiene todavía, la app funciona igual
+// y esos datos se tratan como «sin datos» (nunca rompen nada ni cuentan como «no cumple»).
+export const ALUMNO_OPC = {
+  'Etiquetas': 'etiquetas', 'Idiomas': 'idiomas', 'Formación previa': 'formacionPrevia', 'Subáreas de experiencia': 'subareasExperiencia',
+};
+export const OFERTA_OPC = {
+  'País de la oferta': 'paisOferta', 'Subárea': 'subarea', 'Etiquetas': 'etiquetas', 'Idiomas': 'idiomas', 'Nivel de formación': 'nivelFormacion',
+};
 export const OFERTA = {
   'ID oferta': 'id', 'Empresa': 'empresa', 'Tipo de organización': 'tipoOrganizacion', 'Área': 'area',
   'Título del puesto': 'titulo', 'Tipo': 'tipo', 'Ubicación': 'ubicacion',
@@ -40,4 +48,13 @@ export const LISTAS = {
   'Tipo de oferta': 'tiposOferta', 'Estado de la oferta': 'estadosOferta', 'Disponibilidad': 'disponibilidades',
   'Requisito de permiso': 'requisitosPermiso',
   'Estado de la aplicación': 'estadosAplicacion', 'Motivo de descarte': 'motivosDescarte',
+};
+
+// Hojas OPCIONALES con las reglas del match (3E). Cada una: nombre de la hoja en el Sheet y sus columnas. Si falta, la app usa las reglas de respaldo del código.
+export const HOJAS_MATCH = {
+  paises: { hoja: 'Países', columnas: { pais: 'País', grupo: 'Grupo' } },
+  areas: { hoja: 'Áreas', columnas: { area: 'Área', subarea: 'Subárea' } },
+  afinidad: { hoja: 'Afinidad', columnas: { a: 'Área A', b: 'Área B', nivel: 'Nivel' } },
+  reglas: { hoja: 'Reglas migratorias', columnas: { situacion: 'Situación de trabajo', tipo: 'Tipo de oferta', lugar: 'País o grupo de la oferta', resultado: 'Resultado', motivo: 'Motivo', fecha: 'Fecha de validación' } },
+  etiquetas: { hoja: 'Etiquetas', columnas: { etiqueta: 'Etiqueta' } },
 };

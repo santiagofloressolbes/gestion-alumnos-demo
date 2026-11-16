@@ -27,6 +27,8 @@ const COL_NOTAS = 'Notas de entrevista';
 const COL_FECHA = 'Fecha última entrevista';
 
 const HOJA_OFERTAS = 'Ofertas';
+// Hojas opcionales con las reglas del match (solo se leen): clave que usa la app → nombre de la hoja en el Sheet.
+const HOJAS_MATCH = { paises: 'Países', areas: 'Áreas', afinidad: 'Afinidad', reglas: 'Reglas migratorias', etiquetas: 'Etiquetas' };
 const COL_ID_OFERTA = 'ID oferta';
 // Funciones de escritura que ofrece este script (la app las consulta para saber qué puede hacer).
 const SOPORTA = ['guardarEntrevista', 'guardarOferta'];
@@ -146,6 +148,13 @@ function leerTodo() {
     datos.aplicaciones = leerTabla(HOJA_APLICACIONES);
     datos.historial = leerTabla(HOJA_HISTORIAL);
   }
+  // Hojas OPCIONALES con las reglas del match (3E). Solo lectura. Si una no existe (o está vacía) no se envía y la app usa sus reglas de respaldo.
+  const match = {};
+  Object.keys(HOJAS_MATCH).forEach(function (clave) {
+    if (!SpreadsheetApp.getActive().getSheetByName(HOJAS_MATCH[clave])) return;
+    try { match[clave] = leerTabla(HOJAS_MATCH[clave]); } catch (e) { /* hoja vacía: se ignora */ }
+  });
+  datos.match = match;
   return datos;
 }
 

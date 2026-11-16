@@ -5,12 +5,14 @@
 const SIN_RECORTAR = new Set(['notasEntrevista']);
 
 // Devuelve objetos con las claves internas. Avisa si falta alguna columna.
-export function aObjetos(nombre, { cabecera, filas }, esquema) {
+// "opcionales": columnas que pueden faltar en la hoja (entonces quedan vacías, sin avisar).
+export function aObjetos(nombre, { cabecera, filas }, esquema, opcionales = {}) {
   const faltan = Object.keys(esquema).filter(c => !cabecera.includes(c));
   if (faltan.length) throw new Error(`En la hoja ${nombre} falta la columna: ${faltan.join(', ')}`);
   return filas.map(f => {
     const o = {};
     for (const [col, clave] of Object.entries(esquema)) { const v = f[cabecera.indexOf(col)] ?? ''; o[clave] = SIN_RECORTAR.has(clave) ? v : v.trim(); }
+    for (const [col, clave] of Object.entries(opcionales)) { const i = cabecera.indexOf(col); o[clave] = i < 0 ? '' : (f[i] ?? '').trim(); }
     return o;
   }).filter(o => o.id);
 }
@@ -33,6 +35,27 @@ export function aListas({ cabecera, filas }, esquema, alias = {}) {
     if (!nombre || vistos.has(nombre)) continue;
     vistos.add(nombre);
     out.programas.push({ nombre, categoria: ic < 0 ? '' : (f[ic] ?? '').trim(), idioma: ii < 0 ? '' : (f[ii] ?? '').trim() });
+  }
+  return out;
+}
+
+// Hojas de reglas del match (todas opcionales): cada una es una tabla { cabecera, filas } o null si no existe.
+// Devuelve listas de objetos con las claves internas. Una hoja que falta, o una columna que falta, da una lista vacía (nunca un error).
+export function aReglasMatch(tablas, hojas) {
+  const out = {};
+  for (const [clave, { columnas }] of Object.entries(hojas)) {
+    const t = tablas?.[clave];
+    out[clave] = [];
+    if (!t || !Array.isArray(t.cabecera) || !Array.isArray(t.filas)) continue;
+    const cab = t.cabecera.map(h => String(h).trim());
+    const idx = Object.fromEntries(Object.entries(columnas).map(([k, nombre]) => [k, cab.indexOf(nombre)]));
+    const [primera] = Object.keys(columnas);
+    if (idx[primera] < 0) continue;
+    for (const f of t.filas) {
+      const o = {};
+      for (const k of Object.keys(columnas)) o[k] = idx[k] < 0 ? '' : String(f[idx[k]] ?? '').trim();
+      if (o[primera]) out[clave].push(o);
+    }
   }
   return out;
 }
