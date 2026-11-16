@@ -226,6 +226,11 @@ button:disabled{opacity:.7;cursor:progress}
 .crit{display:flex;gap:.5rem;align-items:flex-start}
 .crit-signo{flex:none;width:1.25rem;font-weight:700}
 .crit.no{color:var(--cmuted)}
+.crit.na{color:var(--cmuted)}
+.crit-puntos{color:var(--cmuted);white-space:nowrap}
+.match-punt{font-weight:700;color:var(--tab-on)}
+.porque-punt,.porque-aviso{margin:0;padding:0 .5rem .5rem;font-size:.875rem}
+.aviso-orientativo{margin:.5rem 0}
 
 /* ---------- Compartir perfiles ---------- */
 .compartir-barra{margin:0 0 1rem}

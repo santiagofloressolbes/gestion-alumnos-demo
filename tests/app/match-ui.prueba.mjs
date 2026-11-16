@@ -3,7 +3,10 @@
 import { nuevo, chk, terminar, BASE, URL_OK, CLAVE_PRUEBA } from './ayudas.mjs';
 
 const UE = 'Unión Europea (UE/EEE)';
-const COL = { nacP: 6, nacS: 7, sit: 8, expArea: 9, destino: 11, disp: 16 };   // columnas (0-based) de Alumnos
+const COL = { nacP: 6, nacS: 7, sit: 8, expArea: 9, destino: 11, disp: 16, etiquetas: 17, idiomas: 18, formacion: 19, subareas: 20 };   // columnas (0-based) de Alumnos
+// El perfil que pide O005 (Marketing, comunicación y prensa): con él, un alumno que quiere ir a Marketing y es de la UE «encaja» del todo.
+const PERFIL_O005 = ['Redacción; Redes sociales', 'Español nativo; Inglés C1', 'Grado en Comunicación', 'Comunicación y prensa'];
+const conPerfil = fila => { fila[COL.etiquetas] = PERFIL_O005[0]; fila[COL.idiomas] = PERFIL_O005[1]; fila[COL.formacion] = PERFIL_O005[2]; fila[COL.subareas] = PERFIL_O005[3]; };
 const entrar = async ({ modo = 'script', ajustar, ancho = 390 } = {}) => {
   const t = await nuevo();
   if (ajustar) ajustar(t.mundo);
@@ -50,7 +53,7 @@ for (const modo of ['demo', 'script']) {
       modo,
       ajustar: m => {
         // Ana (A023) quiere ir a Marketing: encaja. Marcos (A030, estudiante) con área de O003 pero aún estudiante: reservas.
-        alumno(m, 'A023')[COL.destino] = 'Marketing y comunicación';
+        alumno(m, 'A023')[COL.destino] = 'Marketing y comunicación'; conPerfil(alumno(m, 'A023'));
       },
     });
     await ir(pg, '#/oferta/O005', '#match-alumnos .grupo-match');
@@ -66,7 +69,10 @@ for (const modo of ['demo', 'script']) {
     chk(no.length + res.length + enc.length === 30, 'cada alumno está en un solo grupo');
     // "Por qué": cuatro criterios, con símbolo y palabra
     const crit = await pg.$$eval('#match-alumnos li.fila-match >> nth=0 >> .criterios li', l => l.map(x => x.textContent.replace(/\s+/g, ' ').trim()));
-    chk(crit.length === 4 && crit.every(x => /^[✓!✗] ?(Cumple|Revisar|No cumple):/.test(x)), 'cada fila explica 4 criterios con símbolo y palabra: ' + crit.join(' | '));
+    chk(crit.length === 8 && crit.every(x => /^[✓!✗?–] ?(Área|Subárea|Habilidades|Idiomas|Formación|Prácticas o empleo|Nacionalidad|Permiso de trabajo) · (Cumple|Revisar|No cumple|Sin datos|No aplica):/.test(x)), 'cada fila explica 8 criterios con símbolo, nombre y palabra: ' + crit.join(' | '));
+    chk(crit.every(x => /\((\d+(,\d)? de \d+ puntos|no suma|no cuenta)\)$/.test(x)), 'y cada criterio dice cuántos puntos da (o que no suma / no cuenta)');
+    chk(/Orientativo, verifica la situación real/.test(await pg.innerText('#match-alumnos')), 'el aviso fijo «orientativo, verifica la situación real» está en la tarjeta');
+    chk(await pg.$$eval('#match-alumnos li.fila-match', l => l.every(x => /^Encaje \d+ %|^Sin puntuación/.test(x.querySelector('.match-punt')?.textContent || ''))), 'cada fila enseña su puntuación («Encaje 82 %»)');
     chk(!/\bnull\b|undefined|\[object/.test(await pg.innerText('#match-alumnos')), 'sin "null" ni "undefined"');
     // el resto de la ficha sigue ahí
     chk(/Requisitos/.test(await pg.innerText('#v-oferta')) && /Unión Europea \(UE\/EEE\)/.test(await pg.innerText('#v-oferta')), 'la ficha enseña el requisito "Unión Europea (UE/EEE)"');
@@ -80,10 +86,10 @@ for (const modo of ['demo', 'script']) {
   console.log('2. Suiza, estudiante, datos que faltan y listas largas');
   const { pg, ctx, log } = await entrar({
     ajustar: m => {
-      const a = alumno(m, 'A023'); a[COL.nacP] = 'Suiza'; a[COL.nacS] = ''; a[COL.sit] = 'Residente con permiso de trabajo'; a[COL.destino] = 'Marketing y comunicación';
+      const a = alumno(m, 'A023'); a[COL.nacP] = 'Suiza'; a[COL.nacS] = ''; a[COL.sit] = 'Residente con permiso de trabajo'; a[COL.destino] = 'Marketing y comunicación'; conPerfil(a);
       const c = alumno(m, 'A010'); c[COL.destino] = 'Producto y tecnología'; c[COL.disp] = 'Empleo';                // Carlos: estudiante
       const v = alumno(m, 'A011'); v[COL.nacP] = ''; v[COL.nacS] = ''; v[COL.sit] = ''; v[COL.destino] = 'Marketing y comunicación'; v[COL.disp] = 'Empleo';   // sin datos de trabajo
-      for (let i = 100; i < 140; i++) m.hojas.Alumnos.m.push([`A${i}`, 'iniciales', `Nombre${i}`, `Apellido${i}`, 'MBA en inglés', '2025-2026', 'España', '', 'Ciudadano UE o español', '', '', 'Marketing y comunicación', '', '', '', '', 'Empleo']);
+      for (let i = 100; i < 140; i++) m.hojas.Alumnos.m.push([`A${i}`, 'iniciales', `Nombre${i}`, `Apellido${i}`, 'MBA en inglés', '2025-2026', 'España', '', 'Ciudadano UE o español', '', '', 'Marketing y comunicación', '', '', '', '', 'Empleo', ...PERFIL_O005]);
     },
   });
   await ir(pg, '#/oferta/O005', '#match-alumnos .grupo-match');
@@ -100,7 +106,7 @@ for (const modo of ['demo', 'script']) {
   await ir(pg, '#/oferta/O003', '#match-alumnos .grupo-match');
   await abrirTodo(pg, '#match-alumnos');
   const r3 = await grupoDe(pg, '#match-alumnos', 'reservas');
-  chk(r3.some(x => /Carlos/.test(x) && /Permiso de estudiante/.test(x) && /puede valer para unas prácticas/.test(x)), 'O003: Carlos (permiso de estudiante) va a "reservas", nunca a "No encaja": ' + r3.find(x => /Carlos/.test(x)));
+  chk(r3.some(x => /Carlos/.test(x) && /Permiso de estudiante/.test(x) && /otra autorización/.test(x) && /conviene revisarlo/.test(x)), 'O003 (empleo): Carlos (permiso de estudiante) va a "reservas", nunca a "No encaja": ' + r3.find(x => /Carlos/.test(x)));
   chk(!(await grupoDe(pg, '#match-alumnos', 'no')).some(x => /Carlos/.test(x)), 'y no está en "No encaja"');
   chk(escrituras(log).length === 0 && log.consola.length === 0, 'sin peticiones de guardar y sin errores: ' + log.consola.join(' | '));
   await ctx.close();
@@ -128,7 +134,7 @@ for (const modo of ['demo', 'script']) {
 /* 4. Añadir solicitud: orden, etiquetas y avisos que no contradicen al match */
 {
   console.log('4. Añadir solicitud: orden, etiquetas y avisos');
-  const { pg, ctx } = await entrar({ ajustar: m => { m.hojas.Rondas.m.push(['R006', 'O005', '1', '2026-10-16']); alumno(m, 'A023')[COL.destino] = 'Marketing y comunicación'; } });
+  const { pg, ctx } = await entrar({ ajustar: m => { m.hojas.Rondas.m.push(['R006', 'O005', '1', '2026-10-16']); alumno(m, 'A023')[COL.destino] = 'Marketing y comunicación'; conPerfil(alumno(m, 'A023')); } });
   pg.on('dialog', d => d.accept());   // al salir de un formulario con cambios se acepta descartar
   await ir(pg, '#/oferta/O005/ronda/1/aplicar', '#ap-lista li');
   const subs = await pg.$$eval('#ap-lista li .alumno-texto .sub', s => s.map(x => x.textContent));
@@ -144,7 +150,7 @@ for (const modo of ['demo', 'script']) {
   await abrirTodo(pg, '#match-alumnos');
   const motivos = await pg.$$eval('#match-alumnos li.fila-match', lis => lis.filter(l => /Javier Mendes/.test(l.innerText)).flatMap(l => [...l.querySelectorAll('.crit.no, .crit.revisar')].map(x => x.textContent.replace(/\s+/g, ' ').trim())));
   const reqs = motivos.filter(x => /permiso de trabajo en vigor|pide nacionalidad/.test(x));
-  chk(avisos.length === reqs.length && avisos.length >= 1 && avisos.every(a => reqs.some(r => r.endsWith(a))), 'los avisos de Añadir solicitud son los mismos motivos de requisito que enseña el match: ' + avisos.join(' | '));
+  chk(avisos.length === reqs.length && avisos.length >= 1 && avisos.every(a => reqs.some(r => r.includes(a))), 'los avisos de Añadir solicitud son los mismos motivos de requisito que enseña el match: ' + avisos.join(' | '));
   await ir(pg, '#/oferta/O005/ronda/1/aplicar', '#ap-lista li');
   await pg.fill('#ap-q', 'keller'); await pg.check('#ap-al-A004');
   chk((await pg.$$eval('#ap-avisos .aviso', a => a.length)) === 0, 'Diego (UE, ciudadano UE o español): sin avisos, y en el match cumple');

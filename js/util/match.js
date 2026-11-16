@@ -21,7 +21,7 @@ const PIDE_PERMISO = 'Permiso de trabajo en vigor';
 // Pesos fijos de cada criterio (suman 100). Documentados en docs/REGLAS-MATCH.md.
 export const PESOS = { area: 30, subarea: 10, etiquetas: 20, idiomas: 15, nivel: 5, tipo: 10, nacionalidad: 5, permiso: 5 };
 const GRUPO = { area: 'afinidad', subarea: 'afinidad', etiquetas: 'afinidad', idiomas: 'afinidad', nivel: 'afinidad', tipo: 'afinidad', nacionalidad: 'requisito', permiso: 'requisito' };
-const NUCLEO = ['area', 'tipo', 'nacionalidad', 'permiso'];   // los criterios que deciden el grupo
+export const NUCLEO = ['area', 'tipo', 'nacionalidad', 'permiso'];   // los criterios que deciden el grupo
 const MESES_VIGENCIA = 12;   // una regla migratoria sin validar desde hace más de esto se marca como «sin revisar»
 
 // Países de la UE y del EEE (Islandia, Liechtenstein y Noruega), tal como se escriben en la lista Nacionalidad.

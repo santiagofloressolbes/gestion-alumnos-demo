@@ -55,5 +55,13 @@ console.log('2. Hojas de reglas (opcionales)');
   igual(aReglasMatch({ paises: 'basura', areas: { cabecera: 5, filas: 6 } }, E.HOJAS_MATCH).areas, [], 'un valor raro no rompe nada');
 }
 
+console.log('3. Las reglas migratorias mock siguen vigentes (las pruebas de pantalla lo necesitan)');
+{
+  const t = tabla('datos-mock/ReglasMigratorias.csv'), i = t.cabecera.indexOf('Fecha de validación');
+  const masVieja = t.filas.map(f => f[i]).filter(Boolean).sort()[0];
+  const meses = (Date.now() - Date.parse(masVieja)) / (30.44 * 24 * 3600 * 1000);
+  chk(meses <= 12, `las reglas de datos-mock/ReglasMigratorias.csv se validaron el ${masVieja}, hace más de 12 meses: pon una fecha nueva ahí y en docs/importar-sheet/Reglas migratorias.csv (no es un fallo de la app: las pruebas de pantalla esperan reglas vigentes)`);
+}
+
 console.log(`\n${ok} bien, ${mal} mal`);
 process.exit(mal ? 1 : 0);

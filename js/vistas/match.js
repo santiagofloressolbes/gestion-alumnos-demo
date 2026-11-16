@@ -2,29 +2,58 @@
 // Solo lectura y cálculo. Nadie se oculta: los tres grupos suman todos los alumnos (u ofertas) y cada fila dice por qué.
 import { el, svgFlecha, plural } from '../util/dom.js';
 import { desplegable } from './desplegable.js';
-import { emparejar, ofertasParaAlumno, CATEGORIAS } from '../util/match.js';
+import { emparejar, ofertasParaAlumno, contextoDe, CATEGORIAS, NUCLEO } from '../util/match.js';
 import { nombreAlumno } from '../util/rondas.js';
 import { navegacion } from '../util/navegacion.js';
 import { MAX_PERFILES } from '../util/compartir.js';
 
 const POR_PAGINA = 15;   // filas que se pintan de golpe en cada grupo (con "Ver más")
-const SIGNO = { ok: '✓', revisar: '!', no: '✗' };
-const PALABRA = { ok: 'Cumple', revisar: 'Revisar', no: 'No cumple' };
 const NOTA = 'Es una ayuda para mirar, no una decisión: nadie queda fuera de la lista y cada fila dice por qué.';
+// Aviso fijo: el match orienta y ordena; si alguien puede trabajar o no lo decide siempre una persona.
+export const AVISO_ORIENTATIVO = 'Orientativo, verifica la situación real: la decisión sobre si se puede trabajar en una oferta la toma siempre una persona.';
+const TITULO = { area: 'Área', subarea: 'Subárea', etiquetas: 'Habilidades', idiomas: 'Idiomas', nivel: 'Formación', tipo: 'Prácticas o empleo', nacionalidad: 'Nacionalidad', permiso: 'Permiso de trabajo' };
 
-// Los criterios de una fila: el símbolo y la palabra van siempre en texto (el color nunca es lo único que lo dice).
-function porQue(criterios) {
+// Cómo se dice cada criterio: el símbolo y la palabra van siempre en texto (el color nunca es lo único que lo dice).
+// «Sin datos» = faltan datos: se ve como «a revisar», pero no suma puntos ni cuenta como «no cumple». «No aplica» = la oferta no pide eso.
+function rotulo(c) {
+  if (c.noAplica) return { signo: '–', palabra: 'No aplica', clase: 'na' };
+  if (c.sinDatos) return { signo: '?', palabra: 'Sin datos', clase: 'revisar sin-datos' };
+  return { signo: { ok: '✓', revisar: '!', no: '✗' }[c.estado], palabra: { ok: 'Cumple', revisar: 'Revisar', no: 'No cumple' }[c.estado], clase: c.estado };
+}
+const num = n => String(Math.round(n * 10) / 10).replace('.', ',');
+const puntosDe = c => (c.noAplica ? 'no cuenta' : c.sinDatos ? 'no suma' : `${num(c.peso * c.factor)} de ${c.peso} puntos`);
+
+// La línea de la puntuación de una fila: «Encaje 82 %» y, si faltan datos, «datos incompletos».
+export function textoPuntuacion(p) {
+  if (p.porcentaje == null) return 'Sin puntuación: faltan datos' + (p.incompleto ? ' · datos incompletos' : '');
+  return `Encaje ${p.porcentaje} %` + (p.incompleto ? ' · datos incompletos' : '');
+}
+
+function porQue(r) {
+  const p = r.puntuacion;
   return desplegable({ class: 'porque' },
     el('summary', {}, 'Por qué'),
-    el('ul', { class: 'criterios' }, criterios.map(c => el('li', { class: 'crit ' + c.estado },
-      el('span', { class: 'crit-signo', 'aria-hidden': 'true' }, SIGNO[c.estado]),
-      el('span', {}, el('b', {}, PALABRA[c.estado] + ': '), c.texto)))));
+    el('p', { class: 'sub porque-punt' }, p.porcentaje == null
+      ? 'Sin puntuación: ningún criterio tiene datos.'
+      : `Puntuación: ${p.porcentaje} % (${num(p.puntos)} de ${p.maximo} puntos, sobre ${p.evaluados === 1 ? '1 criterio con datos' : `${p.evaluados} criterios con datos`}).`
+        + (p.incompleto ? ` Datos incompletos: ${p.sinDatos === 1 ? '1 criterio sin datos ni suma ni resta' : `${p.sinDatos} criterios sin datos ni suman ni restan`}.` : '')),
+    el('ul', { class: 'criterios' }, r.criterios.map(c => {
+      const t = rotulo(c);
+      return el('li', { class: 'crit ' + t.clase },
+        el('span', { class: 'crit-signo', 'aria-hidden': 'true' }, t.signo),
+        el('span', {}, el('b', {}, `${TITULO[c.id]} · ${t.palabra}: `), c.texto, el('span', { class: 'crit-puntos' }, ` (${puntosDe(c)})`)));
+    })),
+    el('p', { class: 'sub porque-aviso' }, AVISO_ORIENTATIVO));
 }
 
 // Una línea corta para la fila: lo primero que hay que saber (lo que no encaja o hay que revisar, y si no, el área).
+// Primero lo que decide el grupo (un «no» en área, tipo, nacionalidad o permiso); después lo que hay que verificar de nacionalidad y permiso
+// (lo legal se ve siempre arriba); después cualquier otro «no», lo que hay que revisar, lo que no tiene datos, y si no, el primer criterio que cuenta.
 function resumen(r) {
-  const malo = r.criterios.find(c => c.estado === 'no') || r.criterios.find(c => c.estado === 'revisar');
-  return (malo || r.criterios[0]).texto;
+  const c = r.criterios, legal = x => x.grupo === 'requisito' && x.estado !== 'ok';
+  const malo = c.find(x => x.estado === 'no' && NUCLEO.includes(x.id)) || c.find(x => legal(x) && !x.sinDatos) || c.find(legal) || c.find(x => x.estado === 'no')
+    || c.find(x => x.estado === 'revisar' && !x.sinDatos) || c.find(x => x.estado === 'revisar');
+  return (malo || c.find(x => !x.noAplica) || c[0]).texto;
 }
 
 // Los tres grupos. "fila(r)" pinta cada elemento; "vacio" es lo que se dice cuando no hay nadie en el grupo.
@@ -52,8 +81,18 @@ function grupos(resultados, fila, nombreItem, extra = () => {}) {
 
 /* ---- Ficha de la oferta: alumnos que encajan ---- */
 
+// Avisos del principio de la tarjeta: el aviso fijo y, si alguna fila de las hojas de reglas no se entiende, cuáles.
+function avisosDeTarjeta(ctx) {
+  return [
+    el('p', { class: 'aviso aviso-orientativo', role: 'note' }, AVISO_ORIENTATIVO),
+    ctx.problemas.length && el('p', { class: 'aviso', role: 'note', id: 'match-problemas' },
+      `En las hojas de reglas hay ${ctx.problemas.length === 1 ? '1 fila que no se entiende y no se ha usado' : `${ctx.problemas.length} filas que no se entienden y no se han usado`}: ${ctx.problemas.slice(0, 3).join(' ')}${ctx.problemas.length > 3 ? ' …' : ''}`),
+  ];
+}
+
 export function tarjetaAlumnosQueEncajan(oferta, d) {
-  const res = emparejar(d.alumnos, oferta);
+  const ctx = contextoDe(d.listas);
+  const res = emparejar(d.alumnos, oferta, ctx);
   const yaTiene = new Set(d.aplicaciones.filter(a => a.idOferta === oferta.id).map(a => a.idAlumno));
 
   // Alumnos marcados para compartir su perfil (solo en memoria; al cambiar de oferta se empieza de cero).
@@ -85,13 +124,15 @@ export function tarjetaAlumnosQueEncajan(oferta, d) {
           el('span', { class: 'alumno-texto' },
             el('b', {}, nombreAlumno(a)),
             el('span', { class: 'sub' }, [a.master, yaTiene.has(a.id) && 'ya tiene solicitud en esta oferta'].filter(Boolean).join(' · ')),
+            el('span', { class: 'sub match-punt' }, textoPuntuacion(r.puntuacion)),
             el('span', { class: 'sub' }, resumen(r))),
           svgFlecha()),
-        porQue(r.criterios)));
+        porQue(r)));
   };
   tarjeta = el('section', { class: 'card', id: 'match-alumnos', 'aria-labelledby': 'match-titulo' },
     el('h2', { id: 'match-titulo' }, 'Alumnos que encajan'),
     el('p', { class: 'sub' }, `${plural(d.alumnos.length, 'alumno', 'alumnos')}, ordenados por cómo encajan con esta oferta. ${NOTA}`),
+    avisosDeTarjeta(ctx),
     el('div', { class: 'compartir-barra' }, cuenta, boton),
     grupos(res, fila, 'alumno', actualizar));
   actualizar();
@@ -102,7 +143,8 @@ export function tarjetaAlumnosQueEncajan(oferta, d) {
 
 export function tarjetaOfertasQueEncajan(alumno, d) {
   if (!d.ofertas.length) return null;
-  const res = ofertasParaAlumno(d.ofertas, alumno);
+  const ctx = contextoDe(d.listas);
+  const res = ofertasParaAlumno(d.ofertas, alumno, ctx);
   const fila = r => {
     const o = r.oferta;
     return el('li', { class: 'fila-match' }, el('div', { class: 'fila-match-cuerpo' },
@@ -110,12 +152,14 @@ export function tarjetaOfertasQueEncajan(alumno, d) {
         el('span', { class: 'alumno-texto' },
           el('b', {}, o.titulo || '(sin título)'),
           el('span', { class: 'sub' }, [o.empresa, o.estado === 'Cerrada' && 'cerrada'].filter(Boolean).join(' · ')),
+          el('span', { class: 'sub match-punt' }, textoPuntuacion(r.puntuacion)),
           el('span', { class: 'sub' }, resumen(r))),
         svgFlecha()),
-      porQue(r.criterios)));
+      porQue(r)));
   };
   return el('section', { class: 'card', id: 'match-ofertas', 'aria-labelledby': 'match-of-titulo' },
     el('h2', { id: 'match-of-titulo' }, 'Ofertas que encajan'),
     el('p', { class: 'sub' }, `${plural(d.ofertas.length, 'oferta', 'ofertas')}, ordenadas por cómo encajan con este alumno. ${NOTA}`),
+    avisosDeTarjeta(ctx),
     grupos(res, fila, 'oferta'));
 }
