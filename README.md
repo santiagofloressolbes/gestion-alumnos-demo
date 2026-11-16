@@ -29,7 +29,7 @@ La idea es que quien acompaña a los alumnos pueda, desde el móvil y en pocos t
 | **Buscar y filtrar alumnos** | En la pestaña Buscar se escribe un nombre, un área o un país, y se afina con filtros (área, nacionalidad, situación de trabajo, prácticas o empleo). |
 | **Apuntar notas de entrevista** | En la ficha de un alumno, el botón "Editar entrevista" guarda la nota y la fecha. |
 | **Ver las ofertas** | En la pestaña Ofertas se ve la lista (las más recientes primero) y se puede buscar y filtrar por estado, tipo y área. Cada oferta tiene su ficha. |
-| **Añadir y editar ofertas** | Con "Nueva oferta" y "Editar oferta". Las ofertas no se borran: cuando ya no valen, se cierran. |
+| **Añadir y editar ofertas** | Con "Nueva oferta" y "Editar oferta". Cada oferta lleva su **perfil del puesto** (país, subárea, etiquetas, idiomas y nivel de formación), que el match compara con cada alumno. Las ofertas no se borran: cuando ya no valen, se cierran. |
 | **Ver las rondas de una oferta** | En la ficha de la oferta salen sus rondas (cada vez que se reenvía a los alumnos) y, en cada una, los alumnos que han aplicado y cómo va cada uno. |
 | **Registrar una ronda y añadir solicitudes** | "Registrar nueva ronda" y, dentro de cada ronda, "Añadir solicitud": se busca al alumno, se elige y se guarda. |
 | **Cambiar el estado de una solicitud** | En su detalle, "Cambiar estado". Todo queda apuntado en un historial con fecha y nota, que no se borra. |
@@ -86,7 +86,7 @@ Esto está pensado para crecer por partes. Aún no hay:
 
 Los alumnos se reparten en tres grupos según los cuatro criterios básicos (área, prácticas o empleo, nacionalidad y permiso): "encaja", "encaja con reservas" y "no encaja"; dentro de cada grupo van ordenados por puntuación. **Nadie desaparece de la lista**, y los avisos de "Añadir solicitud" usan exactamente las mismas reglas. Siempre se ve el aviso **«Orientativo, verifica la situación real»**: es una ayuda para mirar, y si alguien puede trabajar o no lo decide siempre una persona. La tabla exacta está en [docs/REGLAS-MATCH.md](docs/REGLAS-MATCH.md).
 
-**Compartir perfiles.** Siempre pasa por una **vista previa** con el texto exacto que se enviará. Por defecto solo salen nombre, programa, área y qué busca. Nacionalidad, situación de trabajo, resumen de experiencia y enlace al CV (solo si es `https`) son **datos sensibles** y vienen desmarcados. Las notas de entrevista, el historial y los motivos de descarte **nunca** se incluyen. El máximo es de 10 alumnos por envío. La app no guarda nada de lo compartido.
+**Compartir perfiles.** Siempre pasa por una **vista previa** con el texto exacto que se enviará. Por defecto solo salen nombre, programa, área y qué busca. Nacionalidad, situación de trabajo, resumen de experiencia y enlace al CV (solo si es `https`) son **datos sensibles** y vienen desmarcados. Las notas de entrevista, el historial y los motivos de descarte **nunca** se incluyen. El máximo es de 10 alumnos por envío. Hay una casilla aparte, desmarcada, **«Incluir historia»**: un párrafo armado con plantillas a partir del programa, el área a la que quiere ir, las subáreas, las habilidades, los idiomas y la formación (nunca el «por qué» ni datos sensibles). La app no guarda nada de lo compartido.
 
 ## Cómo funcionan los avisos y los borradores de correo
 

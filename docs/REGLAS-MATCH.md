@@ -1,4 +1,4 @@
-# Reglas del match (versión 25)
+# Reglas del match (versión 26; las reglas no cambian desde la 25)
 
 Este documento es la tabla exacta de lo que hace el match entre una oferta y un alumno. El código está en `js/util/match.js` y lo comprueban `tests/app/match.prueba.mjs`, `match-reglas.prueba.mjs` y `match-casos.prueba.mjs`.
 

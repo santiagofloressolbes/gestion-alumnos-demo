@@ -187,8 +187,11 @@ const quitarSoporte = (j) => { if (Array.isArray(j.soporta)) j.soporta = j.sopor
   const antes = mundo.foto();
   await pg.fill('#of-f-titulo', 'Cambio con script antiguo'); await guardar(pg); await pg.waitForSelector('#v-oferta .cabecera');
   chk(mundo.celdasCambiadas(antes, mundo.foto()).length === 1 && fila(mundo, 'O001').Etiquetas === 'Investigación digital; Python', 'el perfil que ya tenía no se toca');
-  await pg.goto(BASE + '#/oferta/O001'); await pg.waitForSelector('#match-alumnos .grupo-match');
-  chk(true, 'y el match de esa oferta sigue funcionando');
+  await pg.goto(BASE + '#/oferta/O001'); await pg.waitForSelector('#match-alumnos .grupo-match');   // solo cambia el # : la app sigue en memoria, sin recargar
+  await pg.evaluate(() => { for (const d of document.querySelectorAll('#match-alumnos .grupo-match, #match-alumnos .porque')) d.open = true; });
+  for (let i = 0; i < 20; i++) { const b = await pg.$('#match-alumnos .grupo-match > button:not([hidden])'); if (!b) break; await b.click(); }
+  const crit = await pg.$$eval('#match-alumnos li.fila-match .criterios li', cs => cs.map(c => c.textContent.replace(/\s+/g, ' ')).join(' | '));
+  chk(!/La oferta no pide etiquetas/.test(crit) && !/La oferta no pide idiomas/.test(crit), 'tras guardar con el script anterior, el match (sin recargar) sigue viendo las etiquetas y los idiomas de la oferta: no se borraron en memoria');
   await ctx.close();
 }
 

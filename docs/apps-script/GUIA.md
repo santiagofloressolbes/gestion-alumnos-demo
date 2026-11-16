@@ -177,3 +177,24 @@ Los datos para el Sheet y los pasos están en `docs/importar-sheet/` (`PASOS.md`
 4. En la app, «Ajustes» → «Buscar actualización».
 
 Si no actualizas el script, la app sigue funcionando con las reglas de siempre (no ve las hojas nuevas). Si una de las hojas no existe o está vacía, el script no la envía y la app usa sus reglas de respaldo.
+
+## Perfil del puesto en las ofertas (versión 26)
+
+**El script cambia para GUARDAR cinco datos más de cada oferta:** País de la oferta, Subárea, Etiquetas, Idiomas y Nivel de formación (las columnas que ya añadiste en la versión 25). Sigue sin borrar filas, la dirección y la clave no cambian y no hace falta tocar Listas ni ninguna otra hoja.
+
+Qué valida el script al guardar:
+- **Etiquetas**: cada una tiene que estar en la hoja **Etiquetas** (máximo 8). **País**: en la hoja **Países** (las filas de grupo, como «Unión Europea (UE/EEE)», no son un país). **Subárea**: en la hoja **Áreas**.
+- **Idiomas**: «Inglés B2; Español nativo» (idioma y, si se quiere, nivel A1–C2 o nativo; máximo 6, sin repetir). **Nivel de formación**: Sin requisito, Grado, Máster o Doctorado.
+- **Requisito de nacionalidad**: vale lo que esté en la hoja **Países** (también las filas de grupo) **o** en Listas > Nacionalidad. Ya no hace falta añadir «Unión Europea (UE/EEE)» a Listas.
+- Si una de esas hojas **no existe** (o está vacía), el campo se guarda como texto sin compararlo con ninguna lista. Los idiomas y el nivel se validan siempre.
+- Al **editar**, un valor antiguo que no se toca no se rechaza aunque ya no esté en la lista; solo se comprueba lo que cambias.
+
+Pasos (una sola vez):
+1. **Copia de seguridad.** En el Sheet: Archivo, Hacer una copia ("COPIA SEGURIDAD 3E-2").
+2. **Pega el código nuevo.** Extensiones, Apps Script, `Code.gs`: Ctrl+A, bórralo, pega el de `docs/apps-script/Code.gs` y guarda. **No toques la propiedad `CLAVE`.**
+3. **Comprueba.** Elige `comprobarConfiguracion` y pulsa «Ejecutar». Las 16 columnas de Ofertas deben salir `ok` y `apoyoPerfil` debe contar los valores de Países, Áreas y Etiquetas.
+4. **Publica una nueva versión de la MISMA implementación.** Implementar, Gestionar implementaciones, el lápiz, Versión «Nueva versión», Implementar. No crees una implementación nueva.
+5. En la app, «Ajustes» → «Buscar actualización».
+
+Si no actualizas el script, la app avisa en el formulario de oferta («El perfil del puesto no se puede guardar todavía») y guarda las ofertas sin esos datos, sin tocar los que ya tengan.
+
