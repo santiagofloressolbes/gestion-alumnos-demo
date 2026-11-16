@@ -8,7 +8,7 @@ import { el, reemplazar } from '../util/dom.js';
 import { avatar } from '../util/avatar.js';
 import { enlaceCV } from '../util/cv.js';
 import { navegacion } from '../util/navegacion.js';
-import { tarjetaAvisosAlumno } from './avisos.js';
+import { tarjetaAvisosAlumno, notaDatos } from './avisos.js';
 
 // Una línea "etiqueta / valor". Sin valor: se omite (opcional) o se muestra "No indicado".
 function campo(etiqueta, valor, { opcional = false, texto = false } = {}) {
@@ -60,8 +60,7 @@ export async function pintarAlumno(raiz, id) {
         : el('span', { class: 'primary desactivado', role: 'link', 'aria-disabled': 'true' }, 'Sin CV'),
       el('a', { class: 'secondary', id: 'al-compartir', href: `#/alumno/${encodeURIComponent(a.id)}/compartir` }, 'Compartir perfil')),
 
-    a.master && !(d.listas.programas || []).some(p => p.nombre === a.master) && el('p', { class: 'aviso aviso-alerta', role: 'note', id: 'al-programa-fuera' },
-      `El programa «${a.master}» no está en la hoja Listas del Sheet. Añádelo allí o corrígelo en la hoja Alumnos.`),
+    a.master && !(d.listas.programas || []).some(p => p.nombre === a.master) && notaDatos(`El programa «${a.master}» no está en la hoja Listas del Sheet. Añádelo allí o corrígelo en la hoja Alumnos.`, 'al-programa-fuera'),
 
     tarjetaAvisosAlumno(a, d),
 

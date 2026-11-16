@@ -3,8 +3,8 @@
 import { nuevo, chk, terminar, BASE, URL_OK, CLAVE_PRUEBA } from './ayudas.mjs';
 
 const PROGRAMAS = {
-  'Másteres': ['Transformación Digital e IA en el Deporte', 'Marketing Deportivo / Global Sports Marketing', 'Derecho especializado en Sports & Entertainment', 'Dirección, Metodología y Análisis en el Fútbol', 'Organización de Eventos Deportivos'],
   'MBA': ['MBA en español', 'MBA en inglés'],
+  'Másteres': ['Transformación Digital e IA en el Deporte', 'Marketing Deportivo / Global Sports Marketing', 'Derecho especializado en Sports & Entertainment', 'Dirección, Metodología y Análisis en el Fútbol', 'Organización de Eventos Deportivos'],
   'LaLiga Executive Education': ['IA Aplicada a la Industria Deportiva', 'IA Aplicada a la Industria Deportiva – LALIGA & Grupo Baskonia-Alavés', 'Gestión Integral de la Seguridad en Estadios y Grandes Eventos', 'Venta y Activación de Patrocinios en el Deporte', 'Liderazgo Ejecutivo en la Industria del Deporte'],
   'Formación para Jugadores': ['MBA Sports Management', 'Global Players Program'],
 };
@@ -66,14 +66,15 @@ console.log('2. Abiertas y cerradas: la primera empieza abierta y la elección s
   const { pg, ctx } = await entrar();
   await ir(pg, '#/', '.masters .master');
   const s = await secciones(pg);
-  chk(s[0].abierta && s[0].aria === 'true', 'la primera sección empieza abierta (aria-expanded=true)');
+  chk(s[0].abierta && s[0].aria === 'true', 'la primera sección (MBA) empieza abierta (aria-expanded=true)');
   chk(s.slice(1).every(x => !x.abierta && x.aria === 'false'), 'las demás, cerradas (aria-expanded=false)');
-  await pg.click('details.grupo-programas[data-categoria="MBA"]>summary');
   await pg.click('details.grupo-programas[data-categoria="Másteres"]>summary');
+  await pg.click('details.grupo-programas[data-categoria="MBA"]>summary');
   chk((await secciones(pg)).map(x => x.abierta).join() === 'false,true,false,false', 'tocar la cabecera abre y cierra');
-  chk(await pg.evaluate(() => localStorage.getItem('gad.inicio')) === '["MBA"]', 'se guarda solo el nombre de las abiertas: ["MBA"]');
+  chk(await pg.evaluate(() => localStorage.getItem('gad.inicio')) === '["Másteres"]', 'se guarda solo el nombre de las abiertas: ["Másteres"]');
   await pg.goto(BASE + '#/ajustes'); await pg.goto(BASE + '#/'); await pg.waitForSelector('.masters .master', { state: 'attached' });
   chk((await secciones(pg)).map(x => x.abierta).join() === 'false,true,false,false', 'al volver a Inicio siguen igual');
+  await pg.click('details.grupo-programas[data-categoria="MBA"]>summary');
   await pg.click('details.grupo-programas[data-categoria="MBA"] .master >> nth=1');
   await pg.waitForSelector('.alumnos .alumno');
   chk(await nAlumnos(pg) === 8, 'entrar en «MBA en inglés»: 8 alumnos');
@@ -96,6 +97,7 @@ console.log('3. Un programa con «/» y con «&» se abre y se vuelve a encontra
 {
   const { pg, ctx, log } = await entrar();
   await ir(pg, '#/', '.masters .master');
+  await pg.click('details.grupo-programas[data-categoria="Másteres"]>summary');   // v27: MBA va primera y abierta; Másteres empieza cerrada
   await pg.click('details.grupo-programas[data-categoria="Másteres"] .master >> nth=1');
   await pg.waitForSelector('.alumnos .alumno');
   chk(await nAlumnos(pg) === 7, '«Marketing Deportivo / Global Sports Marketing»: 7 alumnos');
@@ -121,7 +123,7 @@ console.log('4. Un programa desconocido (que un alumno tiene y no está en Lista
   chk(/no están en la hoja Listas/.test(await pg.innerText('details[data-categoria="Otros programas"]')), 'dice que no está en la hoja Listas');
   chk(await pg.evaluate(() => { const d = document.querySelector('details[data-categoria="Otros programas"]'), a = d.querySelector('.aviso-alerta'), n = d.querySelector('nav.masters'); return !!a && !!(n.compareDocumentPosition(a) & Node.DOCUMENT_POSITION_FOLLOWING); }), 'el aviso de «Otros programas» va DEBAJO de los programas');
   { const a = await colorAviso(pg, 'details[data-categoria="Otros programas"] .aviso-alerta'); chk(a.ratio >= 4.5 && a.fondoRojo, `Inicio: el aviso es rojo de acento con contraste ${a.ratio.toFixed(2)}:1 (mínimo 4,5)`); }
-  chk(s[1].nombres.join() === 'MBA en español,MBA en inglés', '«MBA en español» sigue en su sitio (con 0 alumnos)');
+  chk(s[0].nombres.join() === 'MBA en español,MBA en inglés', '«MBA en español» sigue en su sitio (con 0 alumnos)');
   chk(await pg.$$eval('.estado', e => e.some(x => x.textContent.startsWith('15 programas · 30 alumnos'))), 'el pie cuenta 15 programas');
   await pg.click('details[data-categoria="Otros programas"] .master'); await pg.waitForSelector('.alumnos .alumno');
   chk(await nAlumnos(pg) === 8, 'su lista abre con sus 8 alumnos');

@@ -5,7 +5,7 @@ import { el, svgFlecha, plural, reemplazar } from '../util/dom.js';
 import { agruparProgramas } from '../util/programas.js';
 import { tarjetaError } from './error-datos.js';
 import { desplegable } from './desplegable.js';
-import { cajaAvisosInicio, pintarAvisosInicio } from './avisos.js';
+import { cajaAvisosInicio, pintarAvisosInicio, notaDatos } from './avisos.js';
 
 // Qué secciones están abiertas se recuerda en ESTE móvil (clave gad.inicio: solo los nombres de las categorías abiertas).
 // Sin nada guardado: la primera sección y «Otros programas» (si existe) empiezan abiertas.
@@ -37,7 +37,7 @@ function seccion(g, i, guardadas, raiz) {
         el('span', { class: 'sub' }, `${plural(g.programas.length, 'programa', 'programas')} · ${plural(g.alumnos, 'alumno', 'alumnos')}`))),
     el('div', { class: 'grupo-cuerpo' },
       el('nav', { class: 'masters', 'aria-label': g.categoria }, g.programas.map(botonPrograma)),
-      g.otros && el('p', { class: 'aviso aviso-alerta', role: 'note' }, 'Estos programas no están en la hoja Listas del Sheet (o no tienen categoría). Añádelos o corrígelos allí.')));
+      g.otros && notaDatos('Estos programas no están en la hoja Listas del Sheet (o no tienen categoría). Añádelos o corrígelos allí.')));
   d.addEventListener('toggle', () => {
     if (d.open === abierta) return;   // el aviso inicial del navegador no es una elección de la persona
     abierta = d.open;
@@ -61,13 +61,14 @@ export async function pintarInicio(raiz) {
   const guardadas = abiertasGuardadas();
 
   const cajaAvisos = cajaAvisosInicio();
-  reemplazar(raiz, 
-    cajaAvisos,
+  // v27: primero los programas (MBA, el primero) y debajo la tarjeta de Avisos.
+  reemplazar(raiz,
     el('h2', { class: 'seccion' }, 'Elige un programa'),
     el('div', { class: 'grupos', id: 'grupos' },
       grupos.length
         ? grupos.map((g, i) => seccion(g, i, guardadas, raiz))
         : el('div', { class: 'card' }, el('p', { class: 'sub' }, 'La hoja Listas todavía no tiene programas.'))),
+    cajaAvisos,
     el('p', { class: 'estado' }, `${plural(masters.length, 'programa', 'programas')} · ${plural(total, 'alumno', 'alumnos')} · datos ficticios`));
   await pintarAvisosInicio(cajaAvisos);   // si no hay rondas o algo falla, la tarjeta no se enseña y Inicio sigue igual
 }

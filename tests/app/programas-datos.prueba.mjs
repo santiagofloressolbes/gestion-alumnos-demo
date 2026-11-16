@@ -27,10 +27,15 @@ igual(leer(['Programa', 'Categoría del programa'], [['  A  ', '  X  ']]).progra
 
 console.log('2. Agrupar por categoría');
 const P = (nombre, categoria, alumnos = 0, enLista = true) => ({ nombre, categoria, idioma: '', enLista, alumnos });
-const g = agruparProgramas([P('a', 'Másteres', 2), P('b', 'MBA'), P('c', 'Másteres', 1), P('d', 'Jugadores')]);
-igual(g.map(x => x.categoria), ['Másteres', 'MBA', 'Jugadores'], 'las categorías, en el orden de Listas');
+const g = agruparProgramas([P('a', 'Másteres', 2), P('b', 'Ejecutiva'), P('c', 'Másteres', 1), P('d', 'Jugadores')]);
+igual(g.map(x => x.categoria), ['Másteres', 'Ejecutiva', 'Jugadores'], 'las categorías, en el orden de Listas');
 igual(g[0].programas.map(p => p.nombre), ['a', 'c'], 'los programas de una categoría, en su orden');
 igual(g.map(x => x.alumnos), [3, 0, 0], 'alumnos por categoría (los programas con 0 alumnos salen igual)');
+// v27: la categoría MBA va la primera; el resto conserva el orden de Listas; «Otros programas» sigue al final.
+const gm = agruparProgramas([P('a', 'Másteres', 2), P('b', 'Jugadores'), P('c', 'MBA', 1), P('d', 'Suelto', 0, false)]);
+igual(gm.map(x => x.categoria), ['MBA', 'Másteres', 'Jugadores', 'Otros programas'], 'MBA va la primera, el resto en el orden de Listas y «Otros programas» al final');
+igual(agruparProgramas([P('c', 'mba ', 1), P('a', 'Másteres')]).map(x => x.categoria), ['mba ', 'Másteres'], 'MBA se reconoce sin fijarse en mayúsculas ni espacios');
+igual(agruparProgramas([P('a', 'Másteres'), P('b', 'Jugadores')]).map(x => x.categoria), ['Másteres', 'Jugadores'], 'sin categoría MBA no cambia nada');
 chk(g.every(x => x.otros === false), 'ninguno es «otros»');
 const h = agruparProgramas([P('a', 'MBA', 1), P('x', '', 0), P('y', '', 4, false), P('z', 'MBA', 1, false)]);
 igual(h.map(x => x.categoria), ['MBA', 'Otros programas'], 'sin categoría o fuera de Listas: grupo «Otros programas» al final');

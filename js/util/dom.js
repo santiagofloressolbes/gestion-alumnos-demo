@@ -31,3 +31,19 @@ export function svgFlecha() {
 }
 
 export const plural = (n, uno, varios) => `${n} ${n === 1 ? uno : varios}`;
+
+// Iconos de los dos tipos de aviso (v27). El color nunca es lo único que los distingue: la forma y la palabra («Datos» / «Seguimiento») también.
+//   'datos'       → triángulo con «!» (algo está mal en el Sheet).
+//   'seguimiento' → reloj (algo que mirar con el tiempo).
+export function svgAviso(tipo) {
+  const ns = 'http://www.w3.org/2000/svg';
+  const s = document.createElementNS(ns, 'svg');
+  s.setAttribute('viewBox', '0 0 24 24');
+  s.setAttribute('aria-hidden', 'true');
+  s.setAttribute('class', 'icono-aviso ' + tipo);
+  const trazos = tipo === 'datos'
+    ? ['M12 3.5L2.8 20h18.4L12 3.5z', 'M12 10v4.5', 'M12 17.6v.1']
+    : ['M12 3a9 9 0 1 0 0 18 9 9 0 0 0 0-18z', 'M12 7.5V12l3 2'];
+  for (const d of trazos) { const p = document.createElementNS(ns, 'path'); p.setAttribute('d', d); s.append(p); }
+  return s;
+}

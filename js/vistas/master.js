@@ -4,7 +4,7 @@ import { tarjetaError } from './error-datos.js';
 import { el, svgFlecha, plural, reemplazar } from '../util/dom.js';
 import { avatar } from '../util/avatar.js';
 import { navegacion } from '../util/navegacion.js';
-import { avisosActivosPorAlumno, etiquetaAviso } from './avisos.js';
+import { avisosActivosPorAlumno, etiquetaAviso, notaDatos } from './avisos.js';
 
 export const volver = () => el('a', { class: 'volver', href: '#/' }, 'Inicio');
 
@@ -35,7 +35,7 @@ export async function pintarMaster(raiz, nombre) {
     lista.length
       ? el('ul', { class: 'alumnos', 'aria-label': 'Alumnos de ' + nombre }, lista.map(a => fila(a, 'master', false, avisosDe(a.id))))
       : el('div', { class: 'card' }, el('p', { class: 'sub' }, 'Este programa todavía no tiene alumnos.')),
-    !programa.enLista && el('p', { class: 'aviso aviso-alerta', role: 'note', id: 'ma-fuera-de-lista' }, `El programa «${nombre}» no está en la hoja Listas del Sheet. Añádelo allí o corrígelo en la hoja Alumnos.`));
+    !programa.enLista && notaDatos(`El programa «${nombre}» no está en la hoja Listas del Sheet. Añádelo allí o corrígelo en la hoja Alumnos.`, 'ma-fuera-de-lista'));
 }
 
 // Dato breve: a qué área quiere ir y si busca prácticas o empleo. En la búsqueda se añade el programa.
