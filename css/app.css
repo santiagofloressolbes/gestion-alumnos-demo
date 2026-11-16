@@ -207,7 +207,6 @@ button:disabled{opacity:.7;cursor:progress}
 .elegir{list-style:none;margin:0 0 1rem;padding:0;display:flex;flex-direction:column;gap:.5rem;max-height:18rem;overflow-y:auto;overscroll-behavior:contain}
 .elegir label{display:flex;align-items:center;gap:.75rem;min-height:3.5rem;padding:.5rem 1rem;border-radius:1rem;border:1.5px solid var(--line);background:var(--inp);color:var(--cink);cursor:pointer}
 .elegir label.elegido{border-color:var(--tab-on)}
-.elegir input[type=radio]{flex:none;width:1.25rem;height:1.25rem;accent-color:var(--act-bg)}
 .elegir .alumno-texto{min-width:0}
 .elegir .alumno-texto .sub{margin:0}
 .elegir .avatar{width:2.25rem;height:2.25rem;font-size:.8125rem}
@@ -230,8 +229,11 @@ button:disabled{opacity:.7;cursor:progress}
 .crit-signo{flex:none;width:1.25rem;font-weight:700}
 .crit.no{color:var(--cmuted)}
 .crit.na{color:var(--cmuted)}
-.crit-puntos{color:var(--cmuted);white-space:nowrap}
-.match-punt{font-weight:700;color:var(--tab-on)}
+.crit-puntos{color:var(--cmuted)}
+.match-punt{font-weight:700}   /* v27: el color lo pone el grupo (verde, ámbar o rojo suave), nunca el rojo de acento para todo */
+.match-punt.g-encaja{color:var(--g-encaja)}
+.match-punt.g-reservas{color:var(--g-reservas)}
+.match-punt.g-no{color:var(--g-no)}
 .porque-punt,.porque-aviso{margin:0;padding:0 .5rem .5rem;font-size:.875rem}
 .aviso-orientativo{margin:.5rem 0}
 
@@ -239,9 +241,7 @@ button:disabled{opacity:.7;cursor:progress}
 .compartir-barra{margin:0 0 1rem}
 .compartir-barra .sub{margin:0 0 .5rem}
 .sel-compartir{flex:none;display:flex;align-items:center;justify-content:center;width:2.75rem;min-height:4.5rem;cursor:pointer}
-.sel-compartir input{width:1.25rem;height:1.25rem;accent-color:var(--act-bg)}
 .elegir-cp{max-height:none;margin-bottom:1rem}
-.elegir-cp input[type=checkbox]{flex:none;width:1.25rem;height:1.25rem;accent-color:var(--act-bg)}
 .elegir-cp label.sensible{border-style:dashed}
 .sub-titulo{margin:1rem 0 .5rem;font-size:.9375rem}
 #cp-sensible{margin:0 0 1rem}
@@ -299,7 +299,7 @@ button:disabled{opacity:.7;cursor:progress}
 .campo-form fieldset{border:0;margin:0;padding:0;min-width:0}
 .campo-form fieldset legend{padding:0}
 .campo-form .elegir{margin:.25rem 0 0}
-.campo-form .elegir input[type=checkbox]{display:inline-block;flex:none;width:1.25rem;min-height:0;height:1.25rem;padding:0;accent-color:var(--act-bg)}
+
 
 
 /* ---------- v27: avisos de DATOS (rojo, relleno, triángulo) y de SEGUIMIENTO (naranja, borde, reloj) ---------- */
@@ -318,3 +318,31 @@ button:disabled{opacity:.7;cursor:progress}
 .aviso-seguimiento .sub{margin:0 0 .75rem}
 .card-seguimiento{border:2px solid var(--seg)}
 .aviso-item{border-left:4px solid var(--seg)}
+
+
+/* ---------- v27, parte B: tarjetas del match que respetan el ancho, motivo en una línea, «ver más» y casillas con la paleta ---------- */
+#match-alumnos,#match-ofertas{padding:1rem .75rem}
+#match-alumnos>h2,#match-alumnos>.sub,#match-alumnos>.aviso,#match-ofertas>h2,#match-ofertas>.sub,#match-ofertas>.aviso,#match-alumnos>.compartir-barra{margin-left:.25rem;margin-right:.25rem}
+.grupo-match{min-width:0;max-width:100%;overflow:hidden}
+.grupo-match>ul,.grupo-match>.sub,.grupo-match>.secondary{margin-left:.25rem;margin-right:.25rem;min-width:0}
+.match-lista{gap:.5rem}
+.fila-match{min-width:0;gap:.25rem}
+.fila-match-cuerpo,.fila-match .alumno,.fila-match .alumno-texto,.criterios,.crit,.crit-texto{min-width:0;max-width:100%}
+.fila-match .alumno{padding:.75rem;gap:.5rem}
+.fila-match .alumno svg{flex:none}
+.fila-match,.fila-match *{overflow-wrap:anywhere}
+.motivo{font-size:.8125rem;line-height:1.35}
+.motivo b{font-weight:700}
+.motivo.no b{color:var(--g-no)}
+.motivo.revisar b{color:var(--g-reservas)}
+.motivo.ok b{color:var(--g-encaja)}
+.ver-mas{display:inline-flex;align-items:center;min-height:2.75rem;padding:0 .5rem;color:var(--tab-on);font-weight:700;font-size:.875rem;text-decoration:underline}
+.porque-punt,.porque-aviso{padding-left:.5rem;padding-right:.5rem}
+
+/* Casillas y botones de elección con la paleta (en lugar de las negras del navegador). El toque cubre la fila o la etiqueta entera: ≥ 44 px. */
+input.casilla,.campo-form input.casilla{-webkit-appearance:none;appearance:none;flex:none;display:inline-block;width:1.5rem;height:1.5rem;min-height:0;margin:0;padding:0;border:2px solid var(--muted);border-radius:.5rem;background:var(--inp) center/1rem 1rem no-repeat;cursor:pointer}
+input.casilla[type=radio]{border-radius:50%}
+input.casilla:checked{background-color:var(--act-bg);border-color:var(--act-bg);background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23FFFFFF' stroke-width='3.5' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M5 12.5l4.5 4.5L19 7'/%3E%3C/svg%3E")}
+input.casilla[type=radio]:checked{background-image:radial-gradient(circle,#FFFFFF 0 .25rem,transparent .3rem)}
+.crit.ok{margin:0;font-weight:400}
+input.casilla:disabled{opacity:.45;cursor:not-allowed}

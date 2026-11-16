@@ -112,7 +112,7 @@ export async function pintarFormOferta(raiz, id) {
       const lista = el('fieldset', { class: 'campo-etiquetas', id: 'of-f-etiquetas', tabindex: '-1', 'aria-describedby': 'of-a-etiquetas' },
         el('legend', { class: 'etiqueta' }, c.etiqueta + ' (opcional, máximo 8)'),
         el('ul', { class: 'elegir' }, [...apoyo.etiquetas, ...extra].map((e, i) => el('li', {}, el('label', { for: 'of-et-' + i },
-          el('input', { type: 'checkbox', id: 'of-et-' + i, value: e, checked: puestas.has(e) }), el('span', {}, extra.includes(e) ? e + ' (no está en la lista)' : e))))));
+          el('input', { type: 'checkbox', class: 'casilla', id: 'of-et-' + i, value: e, checked: puestas.has(e) }), el('span', {}, extra.includes(e) ? e + ' (no está en la lista)' : e))))));
       // Se guardan en el orden en que ya estaban (las nuevas, al final): así no se reescribe la celda si no se toca nada.
       const orden = e => { const i = [...puestas].indexOf(e); return i < 0 ? 1e6 : i; };
       // Para el resto de la pantalla, las etiquetas son un valor de texto como cualquier otro: «A; B».

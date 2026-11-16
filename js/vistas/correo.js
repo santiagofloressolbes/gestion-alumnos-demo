@@ -48,7 +48,7 @@ export async function pintarCorreo(raiz, id) {
   const copiar = el('button', { class: 'secondary', type: 'button', id: 'co-copiar', onclick: () => copiarBorrador() }, 'Copiar');
   const decir = (t, bien) => { estado.textContent = bien ? t : ''; estado.hidden = !(bien && t); error.textContent = bien ? '' : t; error.hidden = !t || bien; };
 
-  const radios = IDIOMAS.map(i => ({ ...i, input: el('input', { type: 'radio', name: 'co-idioma', id: 'co-idioma-' + i.clave, value: i.clave, checked: i.clave === idioma, onchange: () => { idioma = i.clave; refrescar(); } }) }));
+  const radios = IDIOMAS.map(i => ({ ...i, input: el('input', { type: 'radio', class: 'casilla', name: 'co-idioma', id: 'co-idioma-' + i.clave, value: i.clave, checked: i.clave === idioma, onchange: () => { idioma = i.clave; refrescar(); } }) }));
   const listaIdiomas = el('ul', { class: 'elegir elegir-cp', 'aria-label': 'Idioma del borrador' },
     radios.map(r => el('li', {}, el('label', { for: 'co-idioma-' + r.clave }, r.input, el('span', { class: 'alumno-texto' }, el('b', {}, r.etiqueta))))));
 

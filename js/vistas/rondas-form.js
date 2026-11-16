@@ -198,7 +198,7 @@ export async function pintarFormAplicacion(raiz, idOferta, numeroTxt) {
     if (el0 && !visibles.includes(el0)) visibles.unshift(el0);
     cuentaLista.textContent = candidatos.length > MAX_LISTA ? `Se muestran ${MAX_LISTA} de ${candidatos.length}. Escribe para acotar.` : candidatos.length === 1 ? '1 alumno' : `${candidatos.length} alumnos`;
     reemplazar(lista, ...visibles.map(a => {
-      const radio = el('input', { type: 'radio', name: 'ap-alumno', id: 'ap-al-' + a.id, value: a.id, onchange: () => { elegido = a.id; decir(''); ok.hidden = true; pintarAvisos(); marcarCambios(); resaltar(); } });
+      const radio = el('input', { type: 'radio', class: 'casilla', name: 'ap-alumno', id: 'ap-al-' + a.id, value: a.id, onchange: () => { elegido = a.id; decir(''); ok.hidden = true; pintarAvisos(); marcarCambios(); resaltar(); } });
       radio.checked = a.id === elegido;
       const previas = d.aplicaciones.filter(x => x.idOferta === idOferta && x.idAlumno === a.id);
       return el('li', {}, el('label', { for: radio.id, class: a.id === elegido ? 'elegido' : null }, radio,

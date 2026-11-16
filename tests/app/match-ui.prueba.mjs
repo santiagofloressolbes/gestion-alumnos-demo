@@ -32,6 +32,8 @@ async function abrirTodo(pg, raiz) {
     if (!b) break;
     await b.click();
   }
+  // v27: la fila solo enseña el comienzo del motivo; el texto completo está en «Por qué» (la razón migratoria larga, tras «ver más»). Se abre todo para leerlo entero.
+  await pg.evaluate(r => { for (const d of document.querySelectorAll(r + ' .porque')) d.open = true; for (const b of document.querySelectorAll(r + ' .ver-mas')) b.click(); }, raiz);
 }
 const grupoDe = (pg, raiz, nombre) => pg.$$eval(raiz + ' .grupo-match li.fila-match', (lis, n) => lis.filter(l => l.closest('.grupo-match').dataset.grupo === n).map(l => l.innerText.replace(/\s+/g, ' ')), nombre);
 const desbordes = pg => pg.evaluate(() => {

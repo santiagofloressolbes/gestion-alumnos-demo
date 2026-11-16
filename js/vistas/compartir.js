@@ -33,12 +33,12 @@ export async function pintarCompartir(raiz, { idOferta = '', idAlumno = '' } = {
 
   let actual = '';   // el texto exacto: lo que se ve en la vista previa es lo que se copia y lo que va al menú de compartir
   const incluido = el('ul', { class: 'elegir elegir-cp', 'aria-label': 'Alumnos incluidos' });
-  const filaAlumno = a => el('li', {}, el('label', { for: 'cp-al-' + a.id }, el('input', { type: 'checkbox', id: 'cp-al-' + a.id, value: a.id, checked: true, onchange: refrescar }),
+  const filaAlumno = a => el('li', {}, el('label', { for: 'cp-al-' + a.id }, el('input', { type: 'checkbox', class: 'casilla', id: 'cp-al-' + a.id, value: a.id, checked: true, onchange: refrescar }),
     el('span', { class: 'alumno-texto' }, el('b', {}, nombreCompleto(a)), el('span', { class: 'sub' }, a.master || ''))));
   incluido.append(...alumnos.map(filaAlumno));
 
   const casilla = (c, marcada, sensible) => el('li', {}, el('label', { for: 'cp-c-' + c.clave, class: sensible ? 'sensible' : null },
-    el('input', { type: 'checkbox', id: 'cp-c-' + c.clave, value: c.clave, checked: marcada, onchange: refrescar }),
+    el('input', { type: 'checkbox', class: 'casilla', id: 'cp-c-' + c.clave, value: c.clave, checked: marcada, onchange: refrescar }),
     el('span', { class: 'alumno-texto' }, el('b', {}, c.etiqueta), sensible && el('span', { class: 'sub' }, 'Dato sensible'), c.nota && el('span', { class: 'sub' }, c.nota))));
   const listaBase = el('ul', { class: 'elegir elegir-cp', 'aria-label': 'Datos que se incluyen' }, CAMPOS_BASE.map(c => casilla(c, BASE_POR_DEFECTO.includes(c.clave), false)));
   const listaSensible = el('ul', { class: 'elegir elegir-cp', 'aria-label': 'Datos sensibles' }, CAMPOS_SENSIBLES.map(c => casilla(c, false, true)));

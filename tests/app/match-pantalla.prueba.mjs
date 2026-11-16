@@ -18,6 +18,7 @@ const ir = async (pg, hash, sel) => { await pg.goto(BASE + hash); await pg.waitF
 const abrirTodo = async (pg, raiz) => {
   await pg.evaluate(r => { for (const d of document.querySelectorAll(r + ' .grupo-match, ' + r + ' .porque')) d.open = true; }, raiz);
   for (let i = 0; i < 20; i++) { const b = await pg.$(raiz + ' .grupo-match > button:not([hidden])'); if (!b) break; await b.click(); }
+  await pg.evaluate(r => { for (const d of document.querySelectorAll(r + ' .porque')) d.open = true; for (const b of document.querySelectorAll(r + ' .ver-mas')) b.click(); }, raiz);   // v27: «ver más» abierto para leer la razón entera
 };
 const fila = (pg, raiz, nombre) => pg.$$eval(raiz + ' li.fila-match', (l, n) => l.filter(x => x.innerText.includes(n)).map(x => ({ texto: x.innerText.replace(/\s+/g, ' '), crit: [...x.querySelectorAll('.criterios li')].map(c => c.textContent.replace(/\s+/g, ' ').trim()), grupo: x.closest('.grupo-match').dataset.grupo }))[0], nombre);
 const hoja = (m, nombre) => m.hojas[nombre].m;
