@@ -1,16 +1,17 @@
 // Formulario para dar de alta o editar una oferta. Lo que se escribe NO se guarda en el móvil:
 // solo se envía al script cuando se pulsa "Guardar". Las ofertas no se borran: se cierran cambiando el estado.
-import { getOfertas, getListas, recargar, guardarOferta, aplicarOferta, puedeEscribirOfertas, estadoEscrituraOfertas } from '../data/index.js';
+import { getOfertas, getListas, recargar, guardarOferta, aplicarOferta, puedeEscribirOfertas, estadoEscrituraOfertas, soportaPerfilOferta } from '../data/index.js';
 import { el, reemplazar } from '../util/dom.js';
 import { navegacion } from '../util/navegacion.js';
-import { CAMPOS, validarOferta, mensajeCampo, normalizarTexto, miles } from '../util/ofertas.js';
+import { CAMPOS, camposActivos, validarOferta, mensajeCampo, normalizarTexto, miles, apoyoPerfil, avisosPerfil, partesLista, NIVELES_FORMACION } from '../util/ofertas.js';
 import { hoyLocal, fechaLarga } from './entrevista.js';
 import { tarjetaError } from './error-datos.js';
 import { ocupar } from '../util/trabajo.js';
 
 const ir = hash => { location.hash = hash; };
-const igual = (a, b) => CAMPOS.every(c => a[c.clave] === b[c.clave]);
-const recortadas = o => Object.fromEntries(CAMPOS.map(c => [c.clave, normalizarTexto(o[c.clave])]));
+let CS = CAMPOS;   // los campos de ESTA pantalla: sin el perfil del puesto si el script no sabe guardarlo
+const igual = (a, b) => CS.every(c => a[c.clave] === b[c.clave]);
+const recortadas = o => Object.fromEntries(CS.map(c => [c.clave, normalizarTexto(o[c.clave])]));
 
 export async function pintarFormOferta(raiz, id) {
   navegacion.sinGuardar = false;
@@ -30,6 +31,9 @@ export async function pintarFormOferta(raiz, id) {
     reemplazar(raiz, volver, el('div', { class: 'card' }, el('h2', {}, 'No se puede guardar'), el('p', { class: 'sub' }, motivo)));
     return;
   }
+  const conPerfil = soportaPerfilOferta();
+  CS = camposActivos(conPerfil);
+  const apoyo = apoyoPerfil(listas);
   const oferta = id ? ofertas.find(x => x.id === id) : null;
   if (id && !oferta) {
     reemplazar(raiz, volver, el('div', { class: 'card' }, el('h2', {}, 'Oferta no encontrada'), el('p', { class: 'sub' }, 'Vuelve a la lista y elige otra.')));
@@ -62,8 +66,8 @@ export async function pintarFormOferta(raiz, id) {
   };
 
   const campoLista = c => {
-    let valores = [...(listas[c.lista] || [])];
-    if (c.clave === 'requisitoNacionalidad') valores.sort((a, b) => a.localeCompare(b, 'es'));
+    // La nacionalidad que pide una oferta sale de la hoja Países (con filas de grupo como «Unión Europea (UE/EEE)») y de Listas: el script valida contra las dos.
+    const valores = c.clave === 'requisitoNacionalidad' ? [...apoyo.nacionalidades] : [...(listas[c.lista] || [])];
     const actual = inicial[c.clave];
     const fuera = actual && !valores.includes(actual);   // un valor del Sheet que ya no está en Listas: se enseña, pero habrá que cambiarlo
     const vacia = c.clave === 'requisitoNacionalidad' ? 'Sin requisito de nacionalidad' : 'Elige…';
@@ -84,8 +88,57 @@ export async function pintarFormOferta(raiz, id) {
     return el('div', { class: 'campo-form' }, el('label', { for: input.id }, c.etiqueta), input);
   };
 
-  const campos = CAMPOS.map(c => (c.lista ? campoLista(c) : c.fecha ? campoFecha(c) : campoTexto(c)));
-  const leer = () => Object.fromEntries(CAMPOS.map(c => [c.clave, normalizarTexto(entradas[c.clave].value)]));
+  /* ---- perfil del puesto: con la hoja de apoyo, se elige de su lista; sin ella, es un campo de texto ---- */
+  const avisos = {};   // un párrafo de aviso (no bloquea) por campo del perfil
+  const parrafoAviso = c => { avisos[c.clave] = el('p', { class: 'cuenta exceso', id: 'of-a-' + c.clave, role: 'status', hidden: true }); return avisos[c.clave]; };
+  const desplegable = (c, opciones, vacia, estaEnLista) => {
+    const actual = inicial[c.clave];
+    const sel = el('select', { id: 'of-f-' + c.clave, 'aria-describedby': 'of-a-' + c.clave }, el('option', { value: '' }, vacia), opciones,
+      actual && !estaEnLista(actual) && el('option', { value: actual }, actual + ' (no está en la lista)'));
+    sel.value = actual;
+    entradas[c.clave] = sel;
+    return el('div', { class: 'campo-form' }, el('label', { for: sel.id }, c.etiqueta + ' (opcional)'), sel, parrafoAviso(c));
+  };
+  const campoPerfil = c => {
+    if (c.clave === 'paisOferta' && apoyo.paises.length) return desplegable(c, apoyo.paises.map(p => el('option', { value: p }, p)), 'Sin indicar', x => apoyo.paises.includes(x));
+    if (c.clave === 'nivelFormacion') return desplegable(c, NIVELES_FORMACION.map(n => el('option', { value: n }, n)), 'Sin indicar', x => NIVELES_FORMACION.includes(x));
+    if (c.clave === 'subarea' && apoyo.subareas.length) {
+      const areas = [...new Set(apoyo.subareas.map(x => x.area))];
+      return desplegable(c, areas.map(a => el('optgroup', { label: a }, apoyo.subareas.filter(x => x.area === a).map(x => el('option', { value: x.subarea }, x.subarea)))), 'Sin indicar', x => apoyo.subareas.some(y => y.subarea === x));
+    }
+    if (c.clave === 'etiquetas' && apoyo.etiquetas.length) {
+      const puestas = new Set(partesLista(inicial.etiquetas));
+      const extra = [...puestas].filter(e => !apoyo.etiquetas.includes(e));
+      const lista = el('fieldset', { class: 'campo-etiquetas', id: 'of-f-etiquetas', tabindex: '-1', 'aria-describedby': 'of-a-etiquetas' },
+        el('legend', { class: 'etiqueta' }, c.etiqueta + ' (opcional, máximo 8)'),
+        el('ul', { class: 'elegir' }, [...apoyo.etiquetas, ...extra].map((e, i) => el('li', {}, el('label', { for: 'of-et-' + i },
+          el('input', { type: 'checkbox', id: 'of-et-' + i, value: e, checked: puestas.has(e) }), el('span', {}, extra.includes(e) ? e + ' (no está en la lista)' : e))))));
+      // Se guardan en el orden en que ya estaban (las nuevas, al final): así no se reescribe la celda si no se toca nada.
+      const orden = e => { const i = [...puestas].indexOf(e); return i < 0 ? 1e6 : i; };
+      // Para el resto de la pantalla, las etiquetas son un valor de texto como cualquier otro: «A; B».
+      Object.defineProperty(lista, 'value', { get: () => [...lista.querySelectorAll('input:checked')].map(x => x.value).sort((a, b) => orden(a) - orden(b)).join('; '), set: v => { const p = new Set(partesLista(v)); lista.querySelectorAll('input').forEach(x => { x.checked = p.has(x.value); }); } });
+      entradas.etiquetas = lista;
+      return el('div', { class: 'campo-form' }, lista, parrafoAviso(c));
+    }
+    const t = campoTexto(c);
+    const pista = { idiomas: 'Un idioma con su nivel (A1–C2 o nativo), separados por «;». Por ejemplo: «Inglés B2; Español nativo».', etiquetas: 'Separadas por «;» (no hay hoja Etiquetas en el Sheet). Máximo 8.', paisOferta: 'Escribe el país (no hay hoja Países en el Sheet).', subarea: 'Escribe la subárea (no hay hoja Áreas en el Sheet).' }[c.clave];
+    if (pista) t.append(el('p', { class: 'sub ayuda' }, pista));
+    t.append(parrafoAviso(c));
+    return t;
+  };
+  const pintarAvisos = () => {
+    if (!conPerfil) return;
+    for (const a of Object.values(avisos)) { a.hidden = true; a.textContent = ''; }
+    for (const a of avisosPerfil(leer(), listas)) { const p = avisos[a.campo]; if (p) { p.hidden = false; p.append(p.textContent ? ' ' + a.texto : a.texto); } }
+  };
+  const campos = CS.flatMap(c => {
+    const campo = c.perfil ? campoPerfil(c) : c.lista ? campoLista(c) : c.fecha ? campoFecha(c) : campoTexto(c);
+    return c.clave === 'paisOferta' ? [el('h3', { class: 'sub-seccion' }, 'Perfil del puesto'), el('p', { class: 'sub ayuda' }, 'Lo que el match compara con cada alumno. Todo es opcional: lo que dejes vacío no cuenta en la puntuación.'), campo] : [campo];
+  });
+  const avisoScript = puedeEscribirOfertas() && !conPerfil
+    ? el('div', { class: 'card', id: 'of-sin-perfil' }, el('h3', {}, 'El perfil del puesto no se puede guardar todavía'), el('p', { class: 'sub' }, 'El script de Google es de una versión anterior a esta función. Actualiza Code.gs con la guía («Perfil del puesto en las ofertas»). Mientras tanto, la oferta se guarda sin esos datos y los que ya tenga no se tocan.'))
+    : null;
+  const leer = () => Object.fromEntries(CS.map(c => [c.clave, normalizarTexto(entradas[c.clave].value)]));
 
   /* ---- estado de la pantalla ---- */
   const error = el('p', { class: 'error', role: 'alert', hidden: true });
@@ -98,7 +151,7 @@ export async function pintarFormOferta(raiz, id) {
   } }, 'Cancelar');
   const decir = (t, campo) => { error.textContent = t; error.hidden = !t; if (t && campo) entradas[campo]?.focus(); };
   const controles = () => [guardar, cancelar, ...Object.values(entradas), ...conflicto.querySelectorAll('button')];
-  const marcarCambios = () => { navegacion.sinGuardar = !igual(leer(), inicial); };
+  const marcarCambios = () => { navegacion.sinGuardar = !igual(leer(), inicial); pintarAvisos(); };
 
   const terminar = (idFinal, aviso) => {
     navegacion.sinGuardar = false;
@@ -142,17 +195,17 @@ export async function pintarFormOferta(raiz, id) {
     const actual = recortadas(actualBruto);
     if (igual(actual, mias)) { aplicarOferta(id, actual); return terminar(id, 'Guardado en el Sheet.'); }   // ya estaba guardado (p. ej. se cortó la respuesta)
     const antes = base || inicial;
-    const cambiados = CAMPOS.filter(c => actual[c.clave] !== antes[c.clave]);
+    const cambiados = CS.filter(c => actual[c.clave] !== antes[c.clave]);
     reemplazar(conflicto, 
       el('h3', {}, 'Esta oferta ha cambiado mientras la editabas'),
       el('p', { class: 'sub' }, 'Esto es lo que ha cambiado en el Sheet. Lo que has escrito sigue en el formulario.'),
       el('p', { class: 'sub' }, 'Si guardas tu versión, solo cambian los campos que has tocado tú. Los demás se quedan como están en el Sheet.'),
-      el('dl', { class: 'campos' }, (cambiados.length ? cambiados : CAMPOS).map(c => el('div', { class: 'campo' },
+      el('dl', { class: 'campos' }, (cambiados.length ? cambiados : CS).map(c => el('div', { class: 'campo' },
         el('dt', {}, c.etiqueta),
         el('dd', { class: actual[c.clave] ? '' : 'vacio' }, (c.fecha ? fechaLarga(actual[c.clave]) : actual[c.clave]) || 'Vacío')))),
       el('button', { class: 'primary', type: 'button', onclick: ev => {
         // Mis cambios sobre lo que hay ahora: lo que no toqué se queda como está en el Sheet.
-        for (const c of CAMPOS) if (mias[c.clave] === inicial[c.clave]) ponerValor(entradas[c.clave], actual[c.clave]);
+        for (const c of CS) if (mias[c.clave] === inicial[c.clave]) ponerValor(entradas[c.clave], actual[c.clave]);
         base = actual; enviar(ev.currentTarget);
       } }, 'Guardar mi versión'),
       el('button', { class: 'secondary', type: 'button', onclick: () => { aplicarOferta(id, actual); terminar(id, 'Listo: ahora ves lo que hay en el Sheet. Tus cambios no se han guardado.'); } }, 'Quedarme con la del Sheet'));
@@ -165,7 +218,8 @@ export async function pintarFormOferta(raiz, id) {
     el('section', { class: 'card', 'aria-labelledby': 'of-form-titulo' },
       el('h2', { id: 'of-form-titulo' }, id ? 'Editar oferta' : 'Nueva oferta'),
       el('form', { novalidate: true, oninput: marcarCambios, onchange: marcarCambios, onsubmit: ev => { ev.preventDefault(); if (!guardar.disabled) enviar(); } },
-        campos, error, conflicto, guardar, cancelar)));
+        campos, avisoScript, error, conflicto, guardar, cancelar)));
+  pintarAvisos();
   entradas.empresa.focus();
 }
 
