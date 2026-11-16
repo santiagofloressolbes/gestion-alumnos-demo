@@ -12,7 +12,7 @@ import {
 import { hoyLocal, fechaLarga } from './entrevista.js';
 import { datosRondas, insigniaEstado } from './rondas.js';
 import { tarjetaError } from './error-datos.js';
-import { emparejar, CATEGORIAS } from '../util/match.js';
+import { emparejar, contextoDe, CATEGORIAS } from '../util/match.js';
 import { ocupar, avisoFlotante, llevarA } from '../util/trabajo.js';
 
 const ir = hash => { location.hash = hash; };
@@ -181,7 +181,7 @@ export async function pintarFormAplicacion(raiz, idOferta, numeroTxt) {
     const previas = a ? d.aplicaciones.filter(x => x.idOferta === idOferta && x.idAlumno === a.id) : [];
     const lineas = a ? [
       ...previas.map(x => `Ya tiene una solicitud en la ronda ${x.numeroRonda} de esta oferta (${x.estado || 'sin estado'}).`),
-      ...avisosRequisitos(a, oferta)] : [];
+      ...avisosRequisitos(a, oferta, contextoDe(d.listas))] : [];
     reemplazar(avisos, ...lineas.map(t => el('p', { class: 'aviso', role: 'note' }, t)));
   }
 
@@ -189,7 +189,7 @@ export async function pintarFormAplicacion(raiz, idOferta, numeroTxt) {
     const palabras = norm(buscar.value).split(/\s+/).filter(Boolean);
     const sinAplicar = alumnosSinAplicar(d.alumnos, d.aplicaciones, idOferta, ronda.numero);
     // Los que mejor encajan con la oferta, primero; nadie se quita de la lista (el match solo ordena y etiqueta).
-    const emp = emparejar(sinAplicar, oferta), categoria = new Map(emp.map(r => [r.alumno.id, r.categoria]));
+    const emp = emparejar(sinAplicar, oferta, contextoDe(d.listas)), categoria = new Map(emp.map(r => [r.alumno.id, r.categoria]));
     const candidatos = emp.map(r => r.alumno)
       .filter(a => { const t = norm(`${nombreAlumno(a)} ${a.master}`); return palabras.every(p => t.includes(p)); });
     // El alumno elegido siempre sigue a la vista aunque la búsqueda cambie.

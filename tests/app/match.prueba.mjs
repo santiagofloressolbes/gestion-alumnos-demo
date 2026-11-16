@@ -68,7 +68,7 @@ igual(M.evaluar(al({ areaDestino: 'Finanzas', areaExperiencia: 'Producto y tecno
 igual(M.evaluar(al({ areaDestino: 'Finanzas', areaExperiencia: 'Finanzas' }), of()).categoria, 'no', 'área distinta: no encaja');
 igual(M.evaluar(al({ situacionTrabajo: 'Permiso de estudiante', disponibilidad: 'Empleo' }), pide).categoria, 'no', 'un "no" gana a un "a revisar"');
 chk(M.evaluar(al({ areaDestino: 'Finanzas', areaExperiencia: 'Finanzas' }), of()).criterios.every(c => c.texto && c.texto.length > 10), 'todos los criterios llevan su motivo escrito, también el que no encaja');
-chk(M.evaluar(al(), of()).criterios.length === 4, 'siempre los cuatro criterios');
+chk(M.evaluar(al(), of()).criterios.length === 8, 'siempre los ocho criterios (los que la oferta no pide salen como "no aplica")');
 
 console.log('match.js: nunca oculta a nadie');
 const todos = [al({ id: 'B', nombre: 'Berta', apellidos: 'X', areaDestino: 'Finanzas', areaExperiencia: 'Finanzas' }), al({ id: 'A', nombre: 'Ana', apellidos: 'Y' }),

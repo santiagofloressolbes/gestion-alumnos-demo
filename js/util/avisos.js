@@ -64,7 +64,7 @@ export function umbralesSaneados(crudo) {
 
 // Devuelve { periodo, avisos }. Cada aviso: { id: 'A001|sin-solicitudes', tipo, idAlumno, motivo }.
 // "hoy" y "umbrales" se pasan siempre (así el resultado no depende del reloj del móvil dentro de las funciones).
-export function calcularAvisos({ alumnos = [], ofertas = [], rondas = [], aplicaciones = [], hoy, umbrales = UMBRALES_POR_DEFECTO }) {
+export function calcularAvisos({ alumnos = [], ofertas = [], rondas = [], aplicaciones = [], hoy, umbrales = UMBRALES_POR_DEFECTO, contextoMatch }) {
   const vacio = { periodo: null, avisos: [] };
   if (!valida(hoy)) return vacio;
   const fechasRondas = rondas.map(r => r.fecha).filter(valida).sort();
@@ -99,7 +99,7 @@ export function calcularAvisos({ alumnos = [], ofertas = [], rondas = [], aplica
     if (enPeriodo.length >= umbrales.solicitudes && difundidas.size && aplicadas.size * 100 >= umbrales.porcentaje * difundidas.size) {
       const pct = Math.round(aplicadas.size * 100 / difundidas.size);
       // Dato extra (no decide nada): de esas ofertas, a cuántas el match dice "no encaja".
-      const noEncajan = [...aplicadas].filter(id => ofertaPorId.has(id) && evaluar(alumno, ofertaPorId.get(id)).categoria === 'no').length;
+      const noEncajan = [...aplicadas].filter(id => ofertaPorId.has(id) && evaluar(alumno, ofertaPorId.get(id), contextoMatch).categoria === 'no').length;
       avisos.push({
         id: `${alumno.id}|${TIPOS.aplicaTodo}`, tipo: TIPOS.aplicaTodo, idAlumno: alumno.id,
         motivo: `${enPeriodo.length === 1 ? '1 solicitud' : `${enPeriodo.length} solicitudes`} ${cuando}, a ${aplicadas.size} de las ${difundidas.size} ofertas difundidas (${pct} %).`

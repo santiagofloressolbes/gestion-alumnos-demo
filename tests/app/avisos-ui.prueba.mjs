@@ -105,7 +105,7 @@ console.log('6. «Aplica a todo»');
   await pg.click('#in-av-aplica-a-todo'); await pg.waitForSelector('#v-avisos .aviso-item');
   chk(await pg.$$eval('#v-avisos .aviso-item', l => l.length) === 1 && await pg.$('#v-avisos a[href="#/alumno/A001"]') !== null, 'la lista tiene a A001');
   const m = await pg.innerText('#v-avisos .aviso-motivo');
-  chk(m === '5 solicitudes en los últimos 30 días, a 3 de las 3 ofertas difundidas (100 %). De ellas, 3 no encajan según el match. Salta con 5 o más solicitudes y un 80 % o más de las ofertas.', 'el motivo lleva los números, el dato del match y la regla: ' + m);
+  chk(m === '5 solicitudes en los últimos 30 días, a 3 de las 3 ofertas difundidas (100 %). De ellas, 2 no encajan según el match. Salta con 5 o más solicitudes y un 80 % o más de las ofertas.', 'el motivo lleva los números, el dato del match y la regla: ' + m);
   await ir(pg, '#/master/' + encodeURIComponent('MBA en inglés'), '#v-master .alumno');
   chk(/Aviso: aplica a todo/.test(await pg.innerText('#v-master a[href="#/alumno/A001"]')), 'la lista del máster marca a A001: «Aviso: aplica a todo»');
   await pg.click('#v-master a[href="#/alumno/A001"]'); await pg.waitForSelector('#al-avisos:not([hidden])');

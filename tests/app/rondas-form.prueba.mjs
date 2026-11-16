@@ -265,6 +265,7 @@ const sinClaveEnUrl = log => log.peticiones.every(p => !p.url.includes(CLAVE_PRU
   chk(await pg.isChecked('#ap-al-A150'), 'el elegido sigue a la vista y marcado aunque cambie la búsqueda');
   // texto peligroso en un nombre
   await formApl(pg, 'O002', 2);
+  await pg.fill('#ap-q', 'img');   // con la puntuación nueva ya no está entre los 40 primeros: se busca
   chk(await pg.evaluate(() => !window.__hack && !document.querySelector('#ap-lista img')) && (await texto(pg, '#ap-lista')).includes('<img src=x'), 'un nombre con HTML se ve como texto y no se ejecuta');
   chk(log.consola.length === 0, 'sin errores de consola/CSP: ' + log.consola.join(' | '));
   await ctx.close();

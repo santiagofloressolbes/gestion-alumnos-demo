@@ -10,6 +10,7 @@ import { leerUmbrales, leerSilencios, silenciar, quitarSilencio } from '../util/
 import { datosRondas } from './rondas.js';
 import { tarjetaError } from './error-datos.js';
 import { recargar } from '../data/index.js';
+import { contextoDe } from '../util/match.js';
 
 export const TIPOS_VALIDOS = Object.values(TIPOS);
 
@@ -17,7 +18,7 @@ export const TIPOS_VALIDOS = Object.values(TIPOS);
 export function estadoAvisos(d, hoy = hoyISO()) {
   if (!d.hay) return null;
   const umbrales = leerUmbrales();
-  const { periodo, avisos } = calcularAvisos({ alumnos: d.alumnos, ofertas: d.ofertas, rondas: d.rondas, aplicaciones: d.aplicaciones, hoy, umbrales });
+  const { periodo, avisos } = calcularAvisos({ alumnos: d.alumnos, ofertas: d.ofertas, rondas: d.rondas, aplicaciones: d.aplicaciones, hoy, umbrales, contextoMatch: contextoDe(d.listas) });
   const silencios = leerSilencios();
   return { hoy, umbrales, periodo, avisos, silencios, ...repartir(avisos, silencios, hoy) };
 }
