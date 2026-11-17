@@ -56,3 +56,13 @@ Sin este paso la app sigue funcionando, pero con las reglas de siempre (no ve la
 ## F. Comprobarlo en el iPhone
 
 19. En la app, **Ajustes > Buscar actualización** (debe poner «Versión 25»). Abre una oferta: verás a los alumnos con su porcentaje de encaje, el semáforo de cada criterio dentro de «Por qué» y el aviso «Orientativo, verifica la situación real».
+
+## G. Una demo más grande (50 alumnos y 18 ofertas), solo para un Sheet de PRUEBA
+
+Si quieres probar el match y las listas con más datos, hay dos archivos más: `Alumnos - demo ampliada.csv` (**50 alumnos**, con las 21 columnas) y `Ofertas - demo ampliada.csv` (**18 ofertas**, con las 17 columnas, perfil del puesto incluido). Son los 30 alumnos y las 10 ofertas de siempre, sin tocar, más 20 alumnos (2 por cada programa que antes no tenía ninguno, así que los 14 programas tienen alumnos) y 8 ofertas nuevas. Todo es ficticio.
+
+20. **Solo en un Sheet de prueba** (nunca en uno con datos reales): abre la hoja **Alumnos**, **Archivo > Importar > Subir**, elige `Alumnos - demo ampliada.csv` y, en «Ubicación de la importación», **Reemplazar hoja actual**. No marques «Convertir texto en números, fechas y fórmulas».
+21. Haz lo mismo en **Ofertas** con `Ofertas - demo ampliada.csv`.
+22. Las hojas Rondas, Aplicaciones e Historial no cambian: sus ID (A001 a A030, O001 a O010) siguen existiendo.
+
+**No hace falta** hacer nada en `datos-mock/` ni en la app: la demo que viene con la app sigue siendo la de 30 alumnos y 10 ofertas. Estos archivos no se importan solos.
