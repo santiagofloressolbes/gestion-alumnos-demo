@@ -38,6 +38,14 @@ main:focus{outline:none}
 #app{background:var(--bg);display:flex;flex-direction:column;position:fixed;top:0;bottom:0;left:0;right:0;width:100%;max-width:560px;margin:0 auto;padding-left:var(--sal);padding-right:var(--sar)}
 header{flex:none;display:flex;align-items:center;min-height:calc(var(--sat) + 3rem);padding:calc(var(--sat) + .25rem) 24px 0}
 header h1{font:700 1.25rem/1.3 var(--sans);margin:0;letter-spacing:-.01em;min-width:0;overflow-wrap:anywhere;display:-webkit-box;-webkit-box-orient:vertical;-webkit-line-clamp:2;line-clamp:2;overflow:hidden}
+/* v28: botón «Actualizar datos». Se ve pequeño (icono de 20 px) pero se toca en 44 px. */
+.refrescar{flex:none;display:flex;align-items:center;justify-content:center;width:2.75rem;height:2.75rem;margin:0 -10px 0 auto;border-radius:1rem;color:var(--tab-ink)}
+.refrescar svg{width:1.25rem;height:1.25rem;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+.refrescar.girando{color:var(--ink);opacity:.85}
+@media (prefers-reduced-motion:no-preference){ .refrescar.girando svg{animation:girar .9s linear infinite} }
+@keyframes girar{to{transform:rotate(360deg)}}
+.refrescar-aviso{flex:none;margin:.5rem 24px 0;padding:.5rem 1rem;border-radius:1rem;background:var(--card);border:1.5px solid var(--line);font-size:.875rem;color:var(--cink)}
+.refrescar-aviso.mal{border-color:var(--tab-on)}
 main{flex:1;min-height:0;overflow-y:auto;overflow-x:hidden;-webkit-overflow-scrolling:touch;overscroll-behavior:contain;padding:.5rem 24px 24px}
 .view{display:none} .view.on{display:block}
 

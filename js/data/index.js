@@ -56,6 +56,15 @@ export async function getMasters() {
 // Vuelve a pedir los datos (botón "Reintentar").
 export function recargar() { carga = null; enMemoria = null; return datos(); }
 
+// Botón "Actualizar datos" (v28): vuelve a leer el Sheet SIN borrar antes lo que ya hay en memoria.
+// Si la carga falla, los datos anteriores se quedan (a diferencia de recargar(), que los borra). Nada se guarda en el móvil.
+export async function refrescar() {
+  if (!getModo()) throw errorDatos('sin-acceso');
+  const nuevos = await cargarTodo();   // solo si sale bien se sustituyen los datos (cargarTodo no toca enMemoria si falla)
+  carga = Promise.resolve(nuevos);
+  return nuevos;
+}
+
 /* ---- Acceso ---- */
 
 // Comprueba la dirección y la clave con el script y, solo si valen, las guarda en este móvil.

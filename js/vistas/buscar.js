@@ -8,6 +8,14 @@ import { tarjetaError } from './error-datos.js';
 
 const OPCIONES_AREA = [['ambas', 'Cualquiera'], ['destino', 'Quiere ir'], ['experiencia', 'Experiencia']];
 let construida = false;   // la pantalla se construye una vez: así se conservan lo escrito, los filtros y el foco
+let ultimoEstado = null;  // el estado de la búsqueda al construirse (para no perderlo al actualizar los datos)
+let recuperar = null;     // lo escrito y los filtros que se ponen de nuevo al reconstruir tras "Actualizar datos"
+
+// "Actualizar datos" (v28): la pantalla se vuelve a construir con los alumnos nuevos, pero conservando el texto y los filtros.
+export function reiniciarBuscar() {
+  if (construida && ultimoEstado) recuperar = { ...ultimoEstado };
+  construida = false;
+}
 
 export async function pintarBuscar(raiz) {
   if (construida) return;
@@ -22,6 +30,8 @@ export async function pintarBuscar(raiz) {
   construida = true;
 
   const e = estadoVacio();
+  ultimoEstado = e;
+  if (recuperar) { Object.assign(e, recuperar); }
   const unicos = (lista, extra) => [...new Set([...lista, ...extra])].filter(Boolean);
   // Solo se ofrecen valores que algún alumno tiene (más los de la hoja Listas, para el orden).
   const usadas = (campos) => new Set(alumnos.flatMap(a => campos.map(c => a[c])).filter(Boolean));
@@ -87,5 +97,12 @@ export async function pintarBuscar(raiz) {
       el('div', { class: 'campo-form' }, el('label', { for: 'q' }, 'Buscar alumno'), q),
       filtros),
     limpiar, cuenta, vacio, lista);
+  if (recuperar) {
+    q.value = e.texto || '';
+    for (const [id, clave] of [['f-area', 'area'], ['f-nac', 'nacionalidad'], ['f-sit', 'situacion'], ['f-disp', 'disponibilidad']]) {
+      const s = raiz.querySelector('#' + id); if (s) { s.value = e[clave] || ''; if (s.value !== (e[clave] || '')) e[clave] = ''; }
+    }
+    recuperar = null;
+  }
   pintarResultados();
 }

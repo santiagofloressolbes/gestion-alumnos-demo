@@ -3,7 +3,8 @@ import { pintarInicio } from './vistas/inicio.js';
 import { pintarMaster } from './vistas/master.js';
 import { pintarAlumno } from './vistas/alumno.js';
 import { pintarCV } from './vistas/cv.js';
-import { pintarBuscar } from './vistas/buscar.js';
+import { pintarBuscar, reiniciarBuscar } from './vistas/buscar.js';
+import { iniciarRefrescar } from './vistas/refrescar.js';
 import { pintarAcceso } from './vistas/acceso.js';
 import { pintarAjustes, AVISO_LEGAL } from './vistas/ajustes.js';
 import { pintarOfertas, pintarOferta } from './vistas/ofertas.js';
@@ -19,6 +20,7 @@ import { getModo } from './data/index.js';
 const $ = s => document.querySelector(s);
 let inicioPintado = false;
 let vistaPrevia = null;
+let vistaActual = '';
 const scrollLista = { buscar: 0, ofertas: 0 };   // para volver a la búsqueda o a las ofertas en el mismo punto
 function rutaActual() {
   const h = location.hash.replace(/^#\/?/, '');
@@ -87,6 +89,8 @@ async function pintar() {
   if (r.vista === 'oferta-form') await pintarFormOferta($('#v-oferta-form'), r.valor);
   if (r.vista === 'ofertas') { await pintarOfertas($('#v-ofertas')); if (vistaPrevia === 'oferta') $('#main').scrollTop = scrollLista.ofertas; }
   vistaPrevia = r.vista;
+  vistaActual = r.vista;
+  boton.mostrar();
 }
 
 // Un formulario con cambios sin guardar pregunta antes de salir (tocar otra pestaña, "atrás"...). Si se cancela, se vuelve a la dirección anterior.
@@ -101,6 +105,16 @@ window.addEventListener('hashchange', () => {
   pintar();
 });
 window.addEventListener('beforeunload', e => { if (navegacion.sinGuardar) { e.preventDefault(); e.returnValue = ''; } });
+// Botón "Actualizar datos": tras leer el Sheet se repinta la pantalla actual en el mismo punto (scroll y búsqueda se conservan).
+const boton = iniciarRefrescar({
+  vistaActual: () => vistaActual,
+  alActualizar: async () => {
+    const y = $('#main').scrollTop;
+    inicioPintado = false; reiniciarBuscar();
+    await pintar();
+    $('#main').scrollTop = y;
+  },
+});
 pintar();
 
 // Sin pellizco para ampliar (el iPhone ignora user-scalable=no): se cancelan los gestos de zoom.
