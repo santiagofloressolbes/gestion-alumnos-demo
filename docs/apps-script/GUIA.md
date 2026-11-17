@@ -198,3 +198,6 @@ Pasos (una sola vez):
 
 Si no actualizas el script, la app avisa en el formulario de oferta («El perfil del puesto no se puede guardar todavía») y guarda las ofertas sin esos datos, sin tocar los que ya tengan.
 
+## Actualizar los datos sin cerrar la app (versión 28)
+
+**El script y el Sheet no cambian.** Si editas el Sheet con la app abierta, toca el botón de las **dos flechas circulares** (arriba a la derecha) y la app vuelve a leerlo: no hace falta cerrarla. Gira mientras carga; si falla, dice por qué y se siguen viendo los datos de antes. No aparece en la demo ni en las pantallas donde estás escribiendo (formularios, notas de entrevista, borrador de correo), para que no pierdas lo escrito. No se actualiza sola, y no guarda ninguna copia de los datos en el móvil.
