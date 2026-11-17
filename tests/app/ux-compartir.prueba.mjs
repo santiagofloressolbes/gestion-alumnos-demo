@@ -65,7 +65,7 @@ console.log('11-12. En pantalla');
   chk(/Programa: /.test(await pg.innerText('#cp-vista')) && /Quiere ir a: /.test(await pg.innerText('#cp-vista')) && /Busca: /.test(await pg.innerText('#cp-vista')), 'por defecto salen las líneas Programa, Quiere ir a y Busca');
   await pg.check('#cp-c-historia');
   const v = await pg.innerText('#cp-vista');
-  const h = (v.match(/Resumen: ([^\n]*)/) || [])[1] || '';
+  const h = (v.match(/Perfil: ([^\n]*)/) || [])[1] || '';
   chk(/^Subáreas: /.test(h) && /Idiomas: Italiano, Inglés, Francés\./.test(h), 'la historia en pantalla: «' + h + '»');
   chk(!NIVEL.test(v), 'en toda la vista previa no hay «nativo» ni niveles de idioma');
   chk(!h.includes('MBA en inglés') && !h.includes('Producto y tecnología') && !/Prácticas/.test(h), 'la historia no repite el programa, el área ni lo que busca');

@@ -36,7 +36,7 @@ export const nombreCompleto = a => linea(`${a.nombre ?? ''} ${a.apellidos ?? ''}
 function lineasDe(a, campos) {
   const L = [];
   const si = c => campos.has(c);
-  if (si('historia')) { const h = historia(a); if (h) L.push(['Resumen', h]); }   // primero: abre el perfil
+  if (si('historia')) { const h = historia(a); if (h) L.push(['Perfil', h]); }   // primero: abre el perfil
   if (si('master') && linea(a.master)) L.push(['Programa', linea(a.master)]);
   if (si('area')) {
     const destino = linea(a.areaDestino), exp = linea(a.areaExperiencia);
@@ -60,7 +60,7 @@ export function textoPerfiles({ alumnos, campos, oferta = null }) {
   const c = new Set(campos);
   const t = [];
   t.push(alumnos.length === 1 ? 'Perfil de un alumno' : `Perfiles de ${alumnos.length} alumnos`);
-  if (oferta) t.push('Oferta: ' + [linea(oferta.titulo) || 'Sin dato', linea(oferta.empresa)].filter(Boolean).join(' · '));
+  if (oferta) t.push('Oferta: ' + [linea(oferta.titulo) || 'Sin título', linea(oferta.empresa)].filter(Boolean).join(' · '));
   alumnos.slice(0, MAX_PERFILES).forEach((a, i) => {
     t.push('');
     t.push(c.has('nombre') ? `${i + 1}. ${nombreCompleto(a) || 'Sin dato'}` : `${i + 1}.`);

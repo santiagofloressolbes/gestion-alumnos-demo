@@ -76,7 +76,7 @@ export async function pintarCorreo(raiz, id) {
     volver,
     el('section', { class: 'card', 'aria-labelledby': 'co-titulo' },
       el('h2', { id: 'co-titulo' }, 'Borrador de seguimiento'),
-      el('p', { class: 'sub' }, `${nombreAlumno(alumno)} · ${[oferta.titulo || 'Sin dato', oferta.empresa].filter(Boolean).join(' · ')}`),
+      el('p', { class: 'sub' }, `${nombreAlumno(alumno)} · ${[oferta.titulo || 'Sin título', oferta.empresa].filter(Boolean).join(' · ')}`),
       el('div', { class: 'estado-actual' }, insigniaEstado(a.estado), el('span', { class: 'sub' }, tipo === TIPOS_CORREO.enProceso ? 'Correo de seguimiento' : 'Correo de cierre con oferta de ayuda')),
       el('p', { class: 'aviso', role: 'note', id: 'co-privacidad' }, 'El borrador no incluye notas, motivo de descarte ni datos de trabajo. Solo el nombre, el puesto, la empresa y el estado. Léelo antes de enviarlo.')),
     el('section', { class: 'card', 'aria-labelledby': 'co-idioma-titulo' },

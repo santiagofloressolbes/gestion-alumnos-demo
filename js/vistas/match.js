@@ -203,7 +203,7 @@ export function tarjetaOfertasQueEncajan(alumno, d) {
     return el('li', { class: 'fila-match' }, el('div', { class: 'fila-match-cuerpo' },
       el('a', { class: 'alumno oferta', href: '#/oferta/' + encodeURIComponent(o.id) },
         el('span', { class: 'alumno-texto' },
-          el('b', {}, o.titulo || 'Sin dato'),
+          el('b', {}, o.titulo || 'Sin título'),
           el('span', { class: 'sub' }, [o.empresa, o.estado === 'Cerrada' && 'cerrada'].filter(Boolean).join(' · ')),
           el('span', { class: 'sub match-punt g-' + r.categoria }, textoPuntuacion(r.puntuacion, r.categoria)),
           motivo(r)),

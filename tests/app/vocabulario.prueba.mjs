@@ -2,6 +2,7 @@
 // «difundir», «salta», «No indicado», «No encaja»…). Dos partes:
 //   1. Estática: todas las cadenas con texto de js/ e index.html (sin comentarios).
 //   2. En el navegador: el texto de las pantallas de verdad (con los datos de ejemplo), también lo que está dentro de los «Por qué».
+// Excepción de vocabulario: un título de oferta vacío se ve «Sin título» (no «Sin dato»). No está prohibido; solo «(sin título)» con paréntesis.
 // Excepciones (justificadas, ver EXCEPCIONES): identificadores y valores de datos que NO son texto para la persona.
 import fs from 'node:fs';
 import path from 'node:path';

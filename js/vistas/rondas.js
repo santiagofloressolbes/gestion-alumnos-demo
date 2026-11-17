@@ -33,7 +33,7 @@ function filaAplicacion(a, d, desde) {
   const oferta = d.ofertas.find(x => x.id === a.idOferta);
   const titulo = desde === 'oferta'
     ? (alumno ? nombreAlumno(alumno) : `(alumno ${a.idAlumno}: sin dato)`)
-    : (oferta ? (oferta.titulo || 'Sin dato') : `(oferta ${a.idOferta}: sin dato)`);
+    : (oferta ? (oferta.titulo || 'Sin título') : `(oferta ${a.idOferta}: sin dato)`);
   const sub = desde === 'oferta' ? '' : [oferta?.empresa, 'Ronda ' + a.numeroRonda].filter(Boolean).join(' · ');
   return el('li', {}, el('a', { class: 'alumno oferta', href: '#/aplicacion/' + encodeURIComponent(a.id), onclick: mover(desde) },
     el('span', { class: 'alumno-texto' },
@@ -122,7 +122,7 @@ export async function pintarAplicacion(raiz, id) {
     ? el('a', { class: 'volver', href: '#/alumno/' + encodeURIComponent(alumno.id) }, nombreAlumno(alumno))
     : el('a', { class: 'volver', href: oferta ? '#/oferta/' + encodeURIComponent(oferta.id) : '#/ofertas' }, oferta ? 'Oferta' : 'Ofertas');
   const nombreAl = alumno ? nombreAlumno(alumno) : `(alumno ${a.idAlumno}: sin dato)`;
-  const nombreOf = oferta ? [oferta.titulo || 'Sin dato', oferta.empresa].filter(Boolean).join(' · ') : `(oferta ${a.idOferta}: sin dato)`;
+  const nombreOf = oferta ? [oferta.titulo || 'Sin título', oferta.empresa].filter(Boolean).join(' · ') : `(oferta ${a.idOferta}: sin dato)`;
 
   reemplazar(raiz, ...[
     volver,

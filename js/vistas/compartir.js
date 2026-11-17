@@ -97,7 +97,7 @@ export async function pintarCompartir(raiz, { idOferta = '', idAlumno = '' } = {
     volver,
     el('section', { class: 'card', 'aria-labelledby': 'cp-titulo' },
       el('h2', { id: 'cp-titulo' }, alumnos.length === 1 ? 'Compartir un perfil' : `Compartir ${alumnos.length} perfiles`),
-      oferta && el('p', { class: 'sub' }, [oferta.titulo || 'Sin dato', oferta.empresa].filter(Boolean).join(' · ')),
+      oferta && el('p', { class: 'sub' }, [oferta.titulo || 'Sin título', oferta.empresa].filter(Boolean).join(' · ')),
       el('p', { class: 'aviso', role: 'note', id: 'cp-aviso' },
         'Lo que compartas sale de la app y ya no podrás controlar quién lo lee. Comparte solo lo necesario y pide permiso a cada persona. La app no guarda registro de lo compartido.')),
     el('section', { class: 'card', 'aria-labelledby': 'cp-quien' },

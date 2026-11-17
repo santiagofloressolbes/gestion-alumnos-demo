@@ -107,7 +107,7 @@ function fila(o) {
   const donde = [o.empresa, o.ubicacion].filter(Boolean).join(' · ');
   return el('li', {}, el('a', { class: 'alumno oferta', href: '#/oferta/' + encodeURIComponent(o.id) },
     el('span', { class: 'alumno-texto' },
-      el('b', {}, o.titulo || 'Sin dato'),
+      el('b', {}, o.titulo || 'Sin título'),
       donde && el('span', { class: 'sub' }, donde),
       el('span', { class: 'sub' }, [o.tipo, o.area].filter(Boolean).join(' · ')),
       el('span', { class: 'oferta-pie' }, insignia(o.estado), o.fechaRecepcion && el('span', { class: 'sub' }, fechaLarga(o.fechaRecepcion)))),
@@ -145,7 +145,7 @@ export async function pintarOferta(raiz, id) {
     aviso && el('p', { class: 'ok aviso-ok', role: 'status' }, aviso),
 
     el('section', { class: 'card cabecera cabecera-oferta', 'aria-label': 'Oferta' },
-      el('h2', { class: 'nombre' }, o.titulo || 'Sin dato'),
+      el('h2', { class: 'nombre' }, o.titulo || 'Sin título'),
       el('p', { class: 'sub' }, [o.empresa, o.ubicacion].filter(Boolean).join(' · ')),
       el('div', { class: 'chips' }, insignia(o.estado), o.tipo && el('span', { class: 'chip' }, o.tipo)),
       enlace.tipo === 'enlace'

@@ -157,6 +157,8 @@ Solo se mira si la oferta pide «Permiso de trabajo en vigor»; si no, **No apli
 | `Motivo` | La frase que se enseña. `{alumno}` se cambia por el nombre. |
 | `Fecha de validación` | Cuándo se comprobó la regla (AAAA-MM-DD o DD/MM/AAAA). |
 
+> **Nota sobre «No cumple».** El valor de la columna `Resultado` de la hoja de reglas migratorias se queda como «No cumple» (no se ha tocado). La app lo enseña como **«No coincide»**. Es una diferencia conocida: se revisará al migrar los datos a Microsoft.
+
 **Qué fila vale:** la de la misma situación que sea **más concreta**: país > grupo > cualquiera, y a igual concreción, la que nombra el tipo de oferta. Si el país de la oferta no consta, solo valen las filas sin país. Si el país **consta pero no está en la hoja Países**, solo vale una fila que lo nombre tal cual; si no hay, queda **Sin dato**.
 
 | Condición | Estado |
