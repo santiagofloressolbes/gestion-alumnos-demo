@@ -71,7 +71,9 @@ console.log('2. Abiertas y cerradas: la primera empieza abierta y la elección s
   await pg.click('details.grupo-programas[data-categoria="Másteres"]>summary');
   await pg.click('details.grupo-programas[data-categoria="MBA"]>summary');
   chk((await secciones(pg)).map(x => x.abierta).join() === 'false,true,false,false', 'tocar la cabecera abre y cierra');
-  chk(await pg.evaluate(() => localStorage.getItem('gad.inicio')) === '["Másteres"]', 'se guarda solo el nombre de las abiertas: ["Másteres"]');
+  // El guardado va en el evento «toggle», que el navegador entrega un instante después del clic: se espera en vez de leer al momento (fallaba 2 de cada 8 veces, también en la v27).
+  const guardado = await pg.waitForFunction(() => localStorage.getItem('gad.inicio') === '["Másteres"]', null, { timeout: 3000 }).then(() => true, () => false);
+  chk(guardado, 'se guarda solo el nombre de las abiertas: ["Másteres"] (' + await pg.evaluate(() => localStorage.getItem('gad.inicio')) + ')');
   await pg.goto(BASE + '#/ajustes'); await pg.goto(BASE + '#/'); await pg.waitForSelector('.masters .master', { state: 'attached' });
   chk((await secciones(pg)).map(x => x.abierta).join() === 'false,true,false,false', 'al volver a Inicio siguen igual');
   await pg.click('details.grupo-programas[data-categoria="MBA"]>summary');
