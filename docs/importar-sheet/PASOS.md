@@ -1,6 +1,6 @@
-# Cómo poner en el Sheet los datos nuevos del match (versión 25)
+# Cómo poner en el Sheet los datos de ejemplo del match
 
-Todo son datos ficticios, para probar y juzgar el match en el iPhone. En el cierre se regenerarán con los programas y las personas reales.
+Todo son datos ficticios, para probar y juzgar el match en el iPhone. Siguen siendo ficticios: no se sustituyen por personas reales.
 
 **No hace falta tocar la hoja Listas** (ni una fila). Todo va en hojas nuevas o en columnas añadidas al final de Alumnos y Ofertas.
 
@@ -55,7 +55,7 @@ Sin este paso la app sigue funcionando, pero con las reglas de siempre (no ve la
 
 ## F. Comprobarlo en el iPhone
 
-19. En la app, **Ajustes > Buscar actualización** (debe poner «Versión 25»). Abre una oferta: verás a los alumnos con su porcentaje de encaje, el semáforo de cada criterio dentro de «Por qué» y el aviso «Orientativo, verifica la situación real».
+19. En la app, **Ajustes > Buscar actualización** (debe poner la versión actual de la app). Abre una oferta: verás a los alumnos con su porcentaje de encaje, el semáforo de cada criterio dentro de «Por qué» y el aviso «Orientativo, verifica la situación real».
 
 ## G. Una demo más grande (50 alumnos y 18 ofertas), solo para un Sheet de PRUEBA
 

@@ -12,7 +12,7 @@ El script es un "portero" que vive dentro de tu Google Sheet de prueba. La app l
 |---|---|
 | Leer las hojas Alumnos, Ofertas y Listas. | Crear ni borrar alumnos. |
 | Hoja Alumnos: escribir **solo** "Notas de entrevista" y "Fecha última entrevista", en la fila del alumno indicado. | Borrar ninguna fila. |
-| Hoja Ofertas: **añadir una fila nueva** (con ID que pone el script: O011, O012…) o editar las 11 columnas de una oferta. | Tocar ninguna otra hoja (Listas solo se lee) ni archivo de tu Drive. |
+| Hoja Ofertas: **añadir una fila nueva** (con ID que pone el script: O011, O012…) o editar los campos de una oferta (los 11 de siempre y, desde la versión 26, los 5 del perfil del puesto). | Tocar ninguna otra hoja (Listas solo se lee) ni archivo de tu Drive. |
 | Hojas Rondas, Aplicaciones e Historial: **añadir filas** (con ID que pone el script: R001, AP001, H001…) y cambiar el **estado y el motivo** de una solicitud. | Cambiar ni borrar filas de Rondas o de Historial, ni otras columnas de Solicitudes. |
 | Rechazar textos con HTML, demasiado largos, con fechas futuras o con valores que no estén en Listas. | Enviar correos ni conectarse a otras páginas. |
 
@@ -85,7 +85,7 @@ Los avisos de alumnos, los borradores de correo y la firma se calculan **dentro 
 
 ## Cómo se ha probado
 
-En `tests/apps-script/` hay un simulador de Google y 389 comprobaciones que ejecutan este mismo `Code.gs`: clave buena y mala, bloqueo, textos con HTML, límites de longitud y fecha, fórmulas, conflictos y que **solo** cambian las celdas previstas (2 en una entrevista; en una oferta, las 12 de la fila nueva o solo las que cambias; en una solicitud nueva, 8 celdas más 7 de su historial). También comprueban que, si Google falla a mitad de guardar, se deshace todo y no queda una solicitud sin su historial. Para repetirlas: `node tests/apps-script/pruebas.mjs`.
+En `tests/apps-script/` hay un simulador de Google y 439 comprobaciones que ejecutan este mismo `Code.gs`: clave buena y mala, bloqueo, textos con HTML, límites de longitud y fecha, fórmulas, conflictos y que **solo** cambian las celdas previstas (2 en una entrevista; en una oferta, las 12 de la fila nueva (17 con el perfil del puesto) o solo las que cambias; en una solicitud nueva, 8 celdas más 7 de su historial). También comprueban que, si Google falla a mitad de guardar, se deshace todo y no queda una solicitud sin su historial. Para repetirlas: `node tests/apps-script/pruebas.mjs`.
 
 ## Límites que conviene saber
 

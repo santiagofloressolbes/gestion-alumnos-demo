@@ -8,7 +8,7 @@ Una aplicación para el móvil que ayuda a **consultar a los alumnos de los prog
 
 **Todos los datos que se ven son inventados.** Los nombres de las personas, las empresas y las ofertas son de ejemplo. No hay ni una sola persona real dentro.
 
-Dirección para probarla: https://santiagofloressolbes.github.io/gestion-alumnos-demo/
+La dirección para probarla te la da quien la administra.
 
 ## Para qué sirve
 
@@ -85,7 +85,7 @@ Esto está pensado para crecer por partes. Aún no hay:
 
 **Lo que no consta no suma ni resta.** Si falta un dato (un alumno sin idiomas escritos, un país que no está en la hoja Países…), ese criterio sale **"Sin datos"** (a revisar): no da puntos y **nunca cuenta como "no cumple"**. La puntuación («Encaje 82 %») se calcula solo sobre los criterios con datos, y la fila avisa «datos incompletos». Lo que la oferta no pide sale «No aplica».
 
-Los alumnos se reparten en tres grupos según los cuatro criterios básicos (área, prácticas o empleo, nacionalidad y permiso): "encaja", "encaja con reservas" y "no encaja"; dentro de cada grupo van ordenados por puntuación. Cada fila enseña el **% de encaje con el color de su grupo** (verde, ámbar o rojo suave) y, en **una línea**, el motivo que decide el grupo (por ejemplo «✗ Área · No cumple»); el detalle completo está en «Por qué», y la razón migratoria larga se acorta con «ver más». **Nadie desaparece de la lista**, y los avisos de "Añadir solicitud" usan exactamente las mismas reglas. Siempre se ve el aviso **«Orientativo, verifica la situación real»**: es una ayuda para mirar, y si alguien puede trabajar o no lo decide siempre una persona. La tabla exacta está en [docs/REGLAS-MATCH.md](docs/REGLAS-MATCH.md).
+Los alumnos se reparten en tres grupos según los cuatro criterios básicos (área, tipo, nacionalidad y permiso): "encaja", "encaja con reservas" y "no encaja"; dentro de cada grupo van ordenados por puntuación. Cada fila enseña el **% con el color de su grupo** (verde y ámbar; en «No encaja» se llama «Afinidad» y va en gris) y, en **una línea**, lo que falla (por ejemplo «✗ No cumple: tipo, nacionalidad, permiso» o, con un solo fallo, «✗ Área · No cumple»); el detalle completo está en «Por qué», y la razón migratoria larga se acorta con «ver más». **Nadie desaparece de la lista**, y los avisos de "Añadir solicitud" usan exactamente las mismas reglas. Siempre se ve el aviso **«Orientativo, verifica la situación real»**: es una ayuda para mirar, y si alguien puede trabajar o no lo decide siempre una persona. La tabla exacta está en [docs/REGLAS-MATCH.md](docs/REGLAS-MATCH.md).
 
 **Compartir perfiles.** Siempre pasa por una **vista previa** con el texto exacto que se enviará. Por defecto solo salen nombre, programa, área y qué busca. Nacionalidad, situación de trabajo, resumen de experiencia y enlace al CV (solo si es `https`) son **datos sensibles** y vienen desmarcados. Las notas de entrevista, el historial y los motivos de descarte **nunca** se incluyen. El máximo es de 10 alumnos por envío. Hay una casilla aparte, desmarcada, **«Incluir historia»**: un párrafo corto armado con plantillas a partir de las subáreas, las habilidades, los idiomas y la formación (sin repetir el programa, el área ni lo que busca, que ya salen en sus líneas; los idiomas van **sin nivel ni «nativo»**, para no insinuar nacionalidad; nunca el «por qué» ni datos sensibles). La app no guarda nada de lo compartido.
 
@@ -111,7 +111,7 @@ Al abrir la app por primera vez, se elige una de las dos:
 
 ## Instalarla en el iPhone
 
-1. Abre la dirección de arriba en **Safari**.
+1. Abre la dirección de la app (te la da quien la administra) en **Safari**.
 2. Pulsa el botón de compartir (el cuadrado con una flecha hacia arriba).
 3. Elige **"Añadir a pantalla de inicio"**.
 4. A partir de ahí se abre como una app más.

@@ -1,4 +1,4 @@
-# Reglas del match (versión 28; las reglas no cambian desde la 25)
+# Reglas del match (versión 29; las reglas no cambian desde la 25)
 
 Este documento es la tabla exacta de lo que hace el match entre una oferta y un alumno. El código está en `js/util/match.js` y lo comprueban `tests/app/match.prueba.mjs`, `match-reglas.prueba.mjs` y `match-casos.prueba.mjs`.
 
@@ -214,13 +214,13 @@ El porcentaje se calcula **igual en los tres grupos**, con la fórmula de arriba
 | Encaje y Encaje con reservas | **Encaje 82 %** | el del grupo (verde, ámbar) |
 | No encaja | **Afinidad 64 %** | gris |
 
-**Por qué en «No encaja» se llama «Afinidad».** El % suma lo que cumple cada criterio **que tiene datos**: las afinidades de perfil (área 30, subárea 10, habilidades 20, idiomas 15, formación 5 y prácticas o empleo 10) **y** los dos requisitos (nacionalidad 5 y permiso 5). Un alumno cuyo grupo es «No encaja» ha fallado un criterio básico (área, prácticas o empleo, nacionalidad o permiso), pero puede tener un % alto porque cumple casi todo lo demás. Ese número dice **cuánto se parece su perfil a lo que pide la oferta, no si puede ocupar el puesto**, que ya decidió el grupo. Por eso no se llama «Encaje» ni va en verde, ámbar o rojo, y se ve en gris. El orden dentro del grupo no cambia: sigue siendo por ese %. (No hay que confundirlo con la hoja **Afinidad** del Sheet, que es la tabla de áreas afines: solo comparten el nombre.)
+**Por qué en «No encaja» se llama «Afinidad».** El % suma lo que cumple cada criterio **que tiene datos**: las afinidades de perfil (área 30, subárea 10, habilidades 20, idiomas 15, formación 5 y tipo 10) **y** los dos requisitos (nacionalidad 5 y permiso 5). Un alumno cuyo grupo es «No encaja» ha fallado un criterio básico (área, prácticas o empleo, nacionalidad o permiso), pero puede tener un % alto porque cumple casi todo lo demás. Ese número dice **cuánto se parece su perfil a lo que pide la oferta, no si puede ocupar el puesto**, que ya decidió el grupo. Por eso no se llama «Encaje» ni va en verde, ámbar o rojo, y se ve en gris. El orden dentro del grupo no cambia: sigue siendo por ese %. (No hay que confundirlo con la hoja **Afinidad** del Sheet, que es la tabla de áreas afines: solo comparten el nombre.)
 
 **Los criterios que fallan, en la fila.** En «No encaja» la fila nombra **todos** los criterios básicos en rojo, abreviados: «✗ No cumple: tipo, nacionalidad, permiso». En «Encaje con reservas» nombra lo que no cumple y lo que hay que revisar (también lo que no tiene datos): «✗ No cumple: subárea · ! Revisar: idiomas, permiso». Los nombres son: área, subárea, habilidades, idiomas, formación, tipo, nacionalidad y permiso, en el orden de «Por qué». Si solo falla uno, la fila sigue enseñando ese criterio con el comienzo de su razón. El detalle de cada uno está siempre en «Por qué».
 
 ## Grupos y orden
 
-El **grupo** lo deciden solo los cuatro criterios básicos (área, prácticas o empleo, nacionalidad y permiso):
+El **grupo** lo deciden solo los cuatro criterios básicos (área, tipo, nacionalidad y permiso):
 
 | Grupo | Cuándo |
 |---|---|
