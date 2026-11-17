@@ -23,7 +23,7 @@ const hojas = Object.fromEntries(Object.entries({ paises: 'Paises', areas: 'Area
 const ctx = M.contextoDe({ match: aReglasMatch(hojas, E.HOJAS_MATCH) });
 const foto = JSON.parse(fs.readFileSync(path.join(RAIZ, 'tests/app/fixtures/match-calculo-v27.json'), 'utf8')).pares;
 // Los rótulos que enseña la pantalla (js/vistas/match.js, TITULO).
-const TITULO = { area: 'Área', subarea: 'Subárea', etiquetas: 'Habilidades', idiomas: 'Idiomas', nivel: 'Formación', tipo: 'Prácticas o empleo', nacionalidad: 'Nacionalidad', permiso: 'Permiso de trabajo' };
+const TITULO = { area: 'Área', subarea: 'Subárea', etiquetas: 'Habilidades', idiomas: 'Idiomas', nivel: 'Formación', tipo: 'Tipo', nacionalidad: 'Nacionalidad', permiso: 'Permiso de trabajo' };
 
 console.log('1. El cálculo no cambia (300 pares de los datos de ejemplo)');
 {

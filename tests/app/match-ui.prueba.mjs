@@ -71,7 +71,7 @@ for (const modo of ['demo', 'script']) {
     chk(no.length + res.length + enc.length === 30, 'cada alumno está en un solo grupo');
     // "Por qué": cuatro criterios, con símbolo y palabra
     const crit = await pg.$$eval('#match-alumnos li.fila-match >> nth=0 >> .criterios li', l => l.map(x => x.textContent.replace(/\s+/g, ' ').trim()));
-    chk(crit.length === 8 && crit.every(x => /^[✓!✗?–] ?(Área|Subárea|Habilidades|Idiomas|Formación|Prácticas o empleo|Nacionalidad|Permiso de trabajo) · (Cumple|Revisar|No cumple|Sin datos|No aplica):/.test(x)), 'cada fila explica 8 criterios con símbolo, nombre y palabra: ' + crit.join(' | '));
+    chk(crit.length === 8 && crit.every(x => /^[✓!✗?–] ?(Área|Subárea|Habilidades|Idiomas|Formación|Tipo|Nacionalidad|Permiso de trabajo) · (Cumple|Revisar|No cumple|Sin datos|No aplica):/.test(x)), 'cada fila explica 8 criterios con símbolo, nombre y palabra: ' + crit.join(' | '));
     chk(crit.every(x => /\((\d+(,\d)? de \d+ puntos|no suma|no cuenta)\)$/.test(x)), 'y cada criterio dice cuántos puntos da (o que no suma / no cuenta)');
     chk(/Orientativo, verifica la situación real/.test(await pg.innerText('#match-alumnos')), 'el aviso fijo «orientativo, verifica la situación real» está en la tarjeta');
     chk(await pg.$$eval('#match-alumnos li.fila-match', l => l.every(x => /^(Encaje|Afinidad) \d+ %|^Sin puntuación/.test(x.querySelector('.match-punt')?.textContent || ''))), 'cada fila enseña su puntuación («Encaje 82 %»)');

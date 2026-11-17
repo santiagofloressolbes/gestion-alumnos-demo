@@ -125,7 +125,7 @@ console.log('6. Si falla: motivo claro y los datos anteriores se quedan');
   chk(filas > 20, `la búsqueda tiene ${filas} alumnos antes`);
   ctrl.fallarTodo = 5;
   await pg.click('#refrescar');
-  await pg.waitForFunction(() => /No se han podido actualizar/.test(document.getElementById('refrescar-aviso').textContent));
+  await pg.waitForFunction(() => /Sin conexión/.test(document.getElementById('refrescar-aviso').textContent));
   const av = await pg.evaluate(() => { const a = document.getElementById('refrescar-aviso'); return { t: a.textContent, rol: a.getAttribute('role'), oculto: a.hidden }; });
   chk(!av.oculto && av.rol === 'alert', 'el error se anuncia (role=alert)');
   chk(/datos anteriores/.test(av.t) && /conexi|red|internet/i.test(av.t), 'dice qué pasó y que se siguen viendo los datos anteriores: ' + av.t);
@@ -141,7 +141,7 @@ console.log('6. Si falla: motivo claro y los datos anteriores se quedan');
   // Una pantalla sin datos nuevos tampoco se queda vacía si falla (Inicio)
   await pg.evaluate(() => { location.hash = '#/'; }); await pg.waitForTimeout(500);
   ctrl.fallarTodo = 5; await pg.click('#refrescar');
-  await pg.waitForFunction(() => /No se han podido/.test(document.getElementById('refrescar-aviso').textContent));
+  await pg.waitForFunction(() => /Sin conexión/.test(document.getElementById('refrescar-aviso').textContent));
   chk(await pg.$$eval('#v-inicio details, #v-inicio .card', l => l.length) > 0, 'Inicio sigue con sus programas tras un fallo');
   chk(log.consola.every(c => /Failed to load resource|net::ERR/.test(c)), 'solo los errores de red esperados en la consola: ' + log.consola.join(' | '));
 }
@@ -195,6 +195,56 @@ for (const [ancho, alto] of [[320, 640], [844, 390]]) {
   await ir(pg, '#/ofertas', '#v-ofertas li, #v-ofertas .card');
   const r = await pg.evaluate(() => { const b = document.getElementById('refrescar').getBoundingClientRect(); return { dentro: b.left >= 0 && b.right <= innerWidth + 1 && b.top >= 0, lateral: document.documentElement.scrollWidth > innerWidth }; });
   chk(r.dentro && !r.lateral, `${ancho} × ${alto}: el botón cabe y no hay scroll lateral`);
+}
+
+console.log('11. v29: el error, en dos frases cortas y con «Cerrar»');
+{
+  const { pg, ctrl, log } = await entrar({ ancho: 390 });
+  await ir(pg, '#/ofertas', '#v-ofertas li, #v-ofertas .card');
+  ctrl.fallarTodo = 5;
+  await pg.click('#refrescar');
+  await pg.waitForFunction(() => !document.getElementById('refrescar-aviso').hidden && /conexión/.test(document.getElementById('refrescar-texto').textContent));
+  const t = await pg.innerText('#refrescar-texto');
+  chk(t === 'Sin conexión: se siguen viendo los datos anteriores. Vuelve a intentarlo cuando tengas internet.', 'sin conexión: la frase exacta («' + t + '»)');
+  chk((t.match(/no se h/gi) || []).length === 0, 'sin «No se han podido… No se ha podido…»');
+  const c = await pg.evaluate(() => { const b = document.getElementById('refrescar-cerrar'), r = b.getBoundingClientRect(), a = document.getElementById('refrescar-aviso').getBoundingClientRect(); return { visible: !b.hidden, w: r.width, h: r.height, dentro: r.left >= a.left && r.right <= a.right + 1, texto: b.textContent, rol: document.getElementById('refrescar-aviso').getAttribute('role'), lateral: document.documentElement.scrollWidth > innerWidth }; });
+  chk(c.visible && c.texto === 'Cerrar' && c.w >= 44 && c.h >= 44 && c.dentro, `hay un botón «Cerrar» de ${Math.round(c.w)} × ${Math.round(c.h)} px dentro del aviso`);
+  chk(c.rol === 'alert' && !c.lateral, 'el aviso se anuncia (alert) y no hay scroll lateral');
+  chk((await contraste(pg, '#refrescar-cerrar')) >= 4.5 && (await contraste(pg, '#refrescar-texto')) >= 4.5, 'texto y «Cerrar» con contraste de al menos 4,5:1');
+  await pg.click('#refrescar-cerrar');
+  chk(await pg.evaluate(() => document.getElementById('refrescar-aviso').hidden && document.activeElement === document.getElementById('refrescar')), '«Cerrar» quita el aviso y devuelve el foco al botón de actualizar');
+  ctrl.fallarTodo = 5; await pg.click('#refrescar');
+  await pg.waitForFunction(() => /conexión/.test(document.getElementById('refrescar-texto').textContent));
+  ctrl.fallarTodo = 0; await pg.click('#refrescar');
+  await pg.waitForFunction(() => /Datos actualizados/.test(document.getElementById('refrescar-texto').textContent));
+  chk(await pg.evaluate(() => document.getElementById('refrescar-cerrar').hidden), 'al volver a intentarlo, el error se va y «Cerrar» no se ve en el aviso de éxito');
+  chk(log.consola.every(x => /Failed to load resource|net::ERR/.test(x)), 'solo errores de red esperados en la consola');
+
+  // Otros errores: el mismo formato de dos frases y con «Cerrar»
+  for (const [codigo, esperado] of [['servidor', /^No se han podido actualizar los datos\. El script de Google ha fallado por dentro\..* Se siguen viendo los datos anteriores\.$/], ['version', /^No se han podido actualizar los datos\. El script es de una versión.* Se siguen viendo los datos anteriores\.$/]]) {
+    ctrl.alResponder = () => ({ ok: false, error: codigo });
+    await pg.click('#refrescar');
+    await pg.waitForFunction(() => /No se han podido/.test(document.getElementById('refrescar-texto').textContent));
+    const x = await pg.innerText('#refrescar-texto');
+    chk(esperado.test(x) && (x.match(/No se h/g) || []).length === 1, `error «${codigo}»: ${x.slice(0, 90)}…`);
+    chk(await pg.evaluate(() => !document.getElementById('refrescar-cerrar').hidden), `error «${codigo}»: con «Cerrar»`);
+    await pg.click('#refrescar-cerrar');
+  }
+  ctrl.alResponder = null;
+  // Todos los textos posibles, sin repetir ni dejar basura
+  const todos = await pg.evaluate(async () => {
+    const { textoError } = await import('./js/vistas/refrescar.js');
+    const msg = { hoja: 'Falta la hoja «Alumnos» en el Sheet.', ocupado: 'Google está ocupado y no se ha guardado nada.', config: 'El script no tiene la clave bien configurada.' };
+    return ['red', 'tiempo', 'respuesta', 'servidor', 'version', 'hoja', 'columna', 'html', 'ocupado', 'config', 'bloqueado'].map(codigo => ({ codigo, t: textoError({ codigo, message: msg[codigo] || 'Mensaje de ' + codigo + ' sin punto' }) })).concat([{ codigo: '(sin mensaje)', t: textoError({}) }, { codigo: '(nada)', t: textoError(undefined) }]);
+  });
+  chk(todos.every(x => /se siguen viendo los datos anteriores\./i.test(x.t)), 'todos los textos dicen que se siguen viendo los datos anteriores');
+  chk(todos.every(x => (x.t.match(/no se h(a|an) podido/gi) || []).length <= 1), 'ninguno repite «no se ha(n) podido»');
+  chk(todos.every(x => !/undefined|null|\[object|\.\./.test(x.t) && /[.]$/.test(x.t)), 'ninguno con basura y todos acaban en punto');
+  chk(todos.find(x => x.codigo === 'red').t.length < 110 && todos.find(x => x.codigo === 'tiempo').t.startsWith('Google tarda demasiado en responder: se siguen viendo'), 'las de conexión y tiempo son frases cortas');
+  await pg.setViewportSize({ width: 320, height: 640 });
+  ctrl.fallarTodo = 5; await pg.click('#refrescar');
+  await pg.waitForFunction(() => /conexión/.test(document.getElementById('refrescar-texto').textContent));
+  chk(await pg.evaluate(() => { const b = document.getElementById('refrescar-cerrar').getBoundingClientRect(); return b.right <= innerWidth && b.left >= 0 && document.documentElement.scrollWidth <= innerWidth; }), 'a 320 px el aviso y «Cerrar» caben');
 }
 
 await terminar();

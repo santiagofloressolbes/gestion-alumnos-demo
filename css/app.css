@@ -44,8 +44,10 @@ header h1{font:700 1.25rem/1.3 var(--sans);margin:0;letter-spacing:-.01em;min-wi
 .refrescar.girando{color:var(--ink);opacity:.85}
 @media (prefers-reduced-motion:no-preference){ .refrescar.girando svg{animation:girar .9s linear infinite} }
 @keyframes girar{to{transform:rotate(360deg)}}
-.refrescar-aviso{flex:none;margin:.5rem 24px 0;padding:.5rem 1rem;border-radius:1rem;background:var(--card);border:1.5px solid var(--line);font-size:.875rem;color:var(--cink)}
+.refrescar-aviso{flex:none;display:flex;align-items:center;justify-content:space-between;gap:.5rem;margin:.5rem 24px 0;padding:.5rem .5rem .5rem 1rem;border-radius:1rem;background:var(--card);border:1.5px solid var(--line);font-size:.875rem;color:var(--cink)}
 .refrescar-aviso.mal{border-color:var(--tab-on)}
+.refrescar-aviso span{min-width:0;overflow-wrap:anywhere}
+.refrescar-cerrar{flex:none;min-height:2.75rem;min-width:2.75rem;padding:0 .75rem;border-radius:1rem;font-weight:700;font-size:.875rem;color:var(--tab-on)}   /* v29: «Cerrar» del error, zona táctil de 44 px */
 main{flex:1;min-height:0;overflow-y:auto;overflow-x:hidden;-webkit-overflow-scrolling:touch;overscroll-behavior:contain;padding:.5rem 24px 24px}
 .view{display:none} .view.on{display:block}
 

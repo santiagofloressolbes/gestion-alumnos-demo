@@ -11,7 +11,7 @@ const POR_PAGINA = 15;   // filas que se pintan de golpe en cada grupo (con "Ver
 const NOTA = 'Es una ayuda para mirar, no una decisión: nadie queda fuera de la lista y cada fila dice por qué.';
 // Aviso fijo: el match orienta y ordena; si alguien puede trabajar o no lo decide siempre una persona.
 export const AVISO_ORIENTATIVO = 'Orientativo, verifica la situación real: la decisión sobre si se puede trabajar en una oferta la toma siempre una persona.';
-const TITULO = { area: 'Área', subarea: 'Subárea', etiquetas: 'Habilidades', idiomas: 'Idiomas', nivel: 'Formación', tipo: 'Prácticas o empleo', nacionalidad: 'Nacionalidad', permiso: 'Permiso de trabajo' };
+const TITULO = { area: 'Área', subarea: 'Subárea', etiquetas: 'Habilidades', idiomas: 'Idiomas', nivel: 'Formación', tipo: 'Tipo', nacionalidad: 'Nacionalidad', permiso: 'Permiso de trabajo' };
 
 // Cómo se dice cada criterio: el símbolo y la palabra van siempre en texto (el color nunca es lo único que lo dice).
 // «Sin datos» = faltan datos: se ve como «a revisar», pero no suma puntos ni cuenta como «no cumple». «No aplica» = la oferta no pide eso.
@@ -81,7 +81,8 @@ export function criterioDecisivo(r) {
 // Los criterios que fallan, con nombre corto, para la línea de la fila (v28).
 //   «No encaja»: los «no» de área, tipo, nacionalidad y permiso (los que deciden el grupo).
 //   «Encaja con reservas»: los «no» (de perfil) y lo que hay que revisar (incluye lo que no tiene datos).
-const NOMBRE_CORTO = { area: 'área', subarea: 'subárea', etiquetas: 'habilidades', idiomas: 'idiomas', nivel: 'formación', tipo: 'tipo', nacionalidad: 'nacionalidad', permiso: 'permiso' };
+// v29: un solo nombre por criterio: el de la fila sale del mismo que el del detalle («Por qué»), en minúscula («Permiso de trabajo» se abrevia a «permiso»).
+const NOMBRE_CORTO = Object.fromEntries(Object.entries(TITULO).map(([id, t]) => [id, id === 'permiso' ? 'permiso' : t.toLowerCase()]));
 export function criteriosQueFallan(r) {
   const c = r.criterios.filter(x => !x.noAplica);
   if (r.categoria === 'no') return { no: c.filter(x => x.estado === 'no' && NUCLEO.includes(x.id)), revisar: [] };

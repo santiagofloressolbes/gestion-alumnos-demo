@@ -268,4 +268,35 @@ console.log('13. v28: «Idiomas · Revisar: Idiomas: …» ya no repite la palab
   await ctx.close();
 }
 
+console.log('14. v29: cada criterio tiene un solo nombre, en la fila y en el detalle');
+{
+  const { pg, ctx } = await entrar();
+  const abreviado = t => (t === 'Permiso de trabajo' ? 'permiso' : t.toLowerCase());
+  let comprobadas = 0, tipoFilas = 0;
+  for (const [hash, raiz] of [['#/oferta/O004', '#match-alumnos'], ['#/oferta/O005', '#match-alumnos'], ['#/oferta/O006', '#match-alumnos'], ['#/alumno/A001', '#match-ofertas'], ['#/alumno/A010', '#match-ofertas']]) {
+    await ir(pg, hash, raiz + ' .grupo-match'); await abrirTodo(pg);
+    const filas = await pg.$$eval(raiz + ' li.fila-match', ls => ls.map(l => ({
+      titulos: Object.fromEntries([...l.querySelectorAll('.crit')].map(c => [c.dataset.criterio, c.querySelector('b').textContent.split(' · ')[0]])),
+      linea: l.querySelector('.motivo').textContent.replace(/\s+/g, ' ').trim(), ids: (l.querySelector('.motivo').dataset.criterios || '').split(' ').filter(Boolean), principal: l.querySelector('.motivo').dataset.criterio,
+    })));
+    const malas = [];
+    for (const f of filas) {
+      if (f.ids.length > 1) {
+        const nombres = f.linea.replace(/^[✗!] No cumple: /, '').replace(/ · ! Revisar: /, ', ').replace(/^! Revisar: /, '').split(', ');
+        if (nombres.length !== f.ids.length || !f.ids.every((id, i) => nombres[i] === abreviado(f.titulos[id]))) malas.push(`«${f.linea}» no sale de ${f.ids.map(i => f.titulos[i]).join(', ')}`);
+        if (f.ids.includes('tipo')) tipoFilas++;
+        comprobadas++;
+      } else if (f.principal) {
+        const simbolo = (/^[✓!✗?–] /.exec(f.linea) || [''])[0];
+        if (!f.linea.startsWith(`${simbolo}${f.titulos[f.principal]} ·`)) malas.push(`«${f.linea}» no empieza por el nombre del detalle «${f.titulos[f.principal]}»`);
+      }
+    }
+    chk(malas.length === 0, `${hash}: el nombre de cada criterio en la fila sale del mismo del detalle (${filas.length} filas) ${malas.slice(0, 2).join(' | ')}`);
+    chk(filas.every(f => f.titulos.tipo === 'Tipo'), `${hash}: el criterio de tipo se llama «Tipo» en el detalle`);
+    chk(!/Prácticas o empleo/.test(await pg.innerText(raiz)), `${hash}: ni rastro del nombre antiguo «Prácticas o empleo»`);
+  }
+  chk(comprobadas >= 5, `se han comparado ${comprobadas} filas con varios fallos (${tipoFilas} con «tipo»)`);
+  await ctx.close();
+}
+
 await terminar();

@@ -22,7 +22,7 @@ Cada criterio da un estado (semáforo) y un motivo escrito. Los cuatro primeros 
 | 3 | **Habilidades** | 20 | perfil | `Etiquetas` de la oferta con `Etiquetas` del alumno, usando la hoja **Etiquetas**. |
 | 4 | **Idiomas** | 15 | perfil | `Idiomas` de la oferta con `Idiomas` del alumno (con nivel). |
 | 5 | **Formación** | 5 | perfil | `Nivel de formación` de la oferta con «Formación previa» del alumno. |
-| 6 | **Prácticas o empleo** | 10 | básico | `Tipo` de la oferta con «Disponibilidad» del alumno. |
+| 6 | **Tipo** (prácticas o empleo) | 10 | básico | `Tipo` de la oferta con «Disponibilidad» del alumno. |
 | 7 | **Nacionalidad** | 5 | básico | «Requisito de nacionalidad» de la oferta con las nacionalidades del alumno, usando la hoja **Países**. |
 | 8 | **Permiso de trabajo** | 5 | básico | «Requisito de permiso de trabajo» de la oferta con la «Situación de trabajo en España» del alumno, usando la hoja **Reglas migratorias**. |
 
@@ -111,7 +111,7 @@ La oferta pide `Nivel de formación`: **Sin requisito, Grado, Máster o Doctorad
 | Un nivel por debajo | Revisar (50 %) |
 | Dos niveles por debajo | No cumple |
 
-### 6. Prácticas o empleo (peso 10)
+### 6. Tipo: prácticas o empleo (peso 10)
 
 | Condición | Estado |
 |---|---|

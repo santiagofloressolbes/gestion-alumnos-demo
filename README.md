@@ -79,7 +79,7 @@ Esto está pensado para crecer por partes. Aún no hay:
 | Habilidades | 20 | Las etiquetas de la oferta frente a las del alumno (lista cerrada: hoja Etiquetas; coincidencia exacta, sin sinónimos). |
 | Idiomas | 15 | Cada idioma con su nivel (A1 a C2 o nativo). |
 | Formación | 5 | Grado, Máster o Doctorado que pide la oferta frente a su formación previa. |
-| Prácticas o empleo | 10 | Lo que busca el alumno frente al tipo de la oferta. |
+| Tipo (prácticas o empleo) | 10 | Lo que busca el alumno frente al tipo de la oferta. |
 | Nacionalidad | 5 | Si la oferta pide un país, el alumno debe tenerlo. Si pide **Unión Europea (UE/EEE)**, vale cualquier país de la UE o del EEE (hoja Países), o que su situación sea "Ciudadano UE o español". **Suiza se revisa a mano.** |
 | Permiso de trabajo | 5 | Lo decide la hoja **Reglas migratorias** (situación, tipo de oferta y país de la oferta, con su fecha de validación; una regla de más de 12 meses se marca para revalidar). **"Permiso de estudiante" se revisa** y nunca se da por perdido. |
 
