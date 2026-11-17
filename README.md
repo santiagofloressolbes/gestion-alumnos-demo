@@ -135,4 +135,5 @@ Al abrir la app por primera vez, se elige una de las dos:
 | [docs/apps-script/GUIA.md](docs/apps-script/GUIA.md) | Quien administra la hoja de prueba | Paso a paso para poner en marcha la conexión con clave. |
 | [docs/PREPARAR-LALIGA.md](docs/PREPARAR-LALIGA.md) | Quien impulsa el proyecto | Qué se puede preparar hoy sin datos reales y qué depende de LaLiga y TI (Microsoft Forms y Entra ID). |
 | [docs/PREGUNTAS-TI.md](docs/PREGUNTAS-TI.md) | Equipo de TI | Las preguntas que hay que contestar antes de usar datos reales. |
+| [docs/VISIBILIDAD-REPO.md](docs/VISIBILIDAD-REPO.md) | Quien mantiene la app | Dos opciones para el repositorio (seguir público con datos ficticios o pasar a privado) y qué cambia con cada una. Preparado, sin ejecutar. |
 | [DECISIONES.md](DECISIONES.md) | Quien mantiene la app | Qué se decidió, por qué, y los riesgos conocidos. |
