@@ -74,7 +74,7 @@ for (const modo of ['demo', 'script']) {
     chk(crit.length === 8 && crit.every(x => /^[✓!✗?–] ?(Área|Subárea|Habilidades|Idiomas|Formación|Prácticas o empleo|Nacionalidad|Permiso de trabajo) · (Cumple|Revisar|No cumple|Sin datos|No aplica):/.test(x)), 'cada fila explica 8 criterios con símbolo, nombre y palabra: ' + crit.join(' | '));
     chk(crit.every(x => /\((\d+(,\d)? de \d+ puntos|no suma|no cuenta)\)$/.test(x)), 'y cada criterio dice cuántos puntos da (o que no suma / no cuenta)');
     chk(/Orientativo, verifica la situación real/.test(await pg.innerText('#match-alumnos')), 'el aviso fijo «orientativo, verifica la situación real» está en la tarjeta');
-    chk(await pg.$$eval('#match-alumnos li.fila-match', l => l.every(x => /^Encaje \d+ %|^Sin puntuación/.test(x.querySelector('.match-punt')?.textContent || ''))), 'cada fila enseña su puntuación («Encaje 82 %»)');
+    chk(await pg.$$eval('#match-alumnos li.fila-match', l => l.every(x => /^(Encaje|Afinidad) \d+ %|^Sin puntuación/.test(x.querySelector('.match-punt')?.textContent || ''))), 'cada fila enseña su puntuación («Encaje 82 %»)');
     chk(!/\bnull\b|undefined|\[object/.test(await pg.innerText('#match-alumnos')), 'sin "null" ni "undefined"');
     // el resto de la ficha sigue ahí
     chk(/Requisitos/.test(await pg.innerText('#v-oferta')) && /Unión Europea \(UE\/EEE\)/.test(await pg.innerText('#v-oferta')), 'la ficha enseña el requisito "Unión Europea (UE/EEE)"');

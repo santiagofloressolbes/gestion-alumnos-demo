@@ -71,16 +71,16 @@ console.log('6. El % de encaje lleva el color de su grupo');
   const col = await pg.evaluate(() => {
     const r = getComputedStyle(document.documentElement), v = n => r.getPropertyValue(n).trim().toLowerCase();
     const hex = h => { const m = h.match(/^#(..)(..)(..)$/); return `rgb(${parseInt(m[1], 16)}, ${parseInt(m[2], 16)}, ${parseInt(m[3], 16)})`; };
-    const esperado = { encaja: hex(v('--g-encaja')), reservas: hex(v('--g-reservas')), no: hex(v('--g-no')) }, rojo = hex(v('--tab-on'));
+    const esperado = { encaja: hex(v('--g-encaja')), reservas: hex(v('--g-reservas')), no: hex(v('--cmuted')) }, rojo = hex(v('--tab-on'));
     return [...document.querySelectorAll('#match-alumnos .grupo-match')].map(g => ({ g: g.dataset.grupo, n: g.querySelectorAll('.match-punt').length,
       ok: [...g.querySelectorAll('.match-punt')].every(p => getComputedStyle(p).color === esperado[g.dataset.grupo] && getComputedStyle(p).color !== rojo), color: esperado[g.dataset.grupo] }));
   });
-  chk(col.every(c => c.n > 0 && c.ok), 'cada % lleva el color de su grupo y ninguno el rojo de acento: ' + JSON.stringify(col));
+  chk(col.every(c => c.n > 0 && c.ok), 'cada % lleva el color de su grupo (verde, ámbar y, en «No encaja», gris) y ninguno el rojo de acento: ' + JSON.stringify(col));
   chk(new Set(col.map(c => c.color)).size === 3, 'los tres grupos tienen tres colores distintos');
   const ratios = [];
   for (const g of ['encaja', 'reservas', 'no']) ratios.push(await contraste(pg, `#match-alumnos .grupo-match[data-grupo=${g}] .match-punt`));
   chk(ratios.every(x => x >= 4.5), 'contraste de cada % ≥ 4,5: ' + ratios.map(x => x.toFixed(1)).join(' / '));
-  chk(await pg.$$eval('#match-alumnos .match-punt', l => l.every(x => /^(Encaje \d+ %|Sin puntuación)/.test(x.textContent))), 'el % sigue escrito en texto (el color no es lo único)');
+  chk(await pg.$$eval('#match-alumnos .match-punt', l => l.every(x => /^((Encaje|Afinidad) \d+ %|Sin puntuación)/.test(x.textContent))), 'el % sigue escrito en texto (el color no es lo único)');
   await ir(pg, '#/alumno/A001', '#match-ofertas .grupo-match'); await abrirTodo(pg);
   chk(await pg.$$eval('#match-ofertas .grupo-match', gs => gs.every(g => [...g.querySelectorAll('.match-punt')].every(p => p.classList.contains('g-' + g.dataset.grupo)))), 'en la ficha del alumno también: cada % lleva la clase de su grupo');
   await ctx.close();
@@ -189,6 +189,62 @@ console.log('10. Ningún «0» suelto');
   await ir(pg, '#/alumno/A001', '#match-ofertas .grupo-match');
   const b = await suelto();
   chk(b.length === 0, 'ficha del alumno: ningún «0» suelto ' + b.join(','));
+  await ctx.close();
+}
+
+console.log('11. v28: «Afinidad» (gris) en «No encaja» y todos los criterios que fallan en la fila');
+{
+  const { pg, ctx } = await entrar();
+  const NOMBRE = { area: 'área', subarea: 'subárea', etiquetas: 'habilidades', idiomas: 'idiomas', nivel: 'formación', tipo: 'tipo', nacionalidad: 'nacionalidad', permiso: 'permiso' };
+  const NUCLEO = ['area', 'tipo', 'nacionalidad', 'permiso'];
+  let multiples = 0, conRevisarYNo = 0, filasTotal = 0;
+  for (const [hash, raiz] of [['#/oferta/O004', '#match-alumnos'], ['#/oferta/O005', '#match-alumnos'], ['#/oferta/O006', '#match-alumnos'], ['#/alumno/A001', '#match-ofertas'], ['#/alumno/A010', '#match-ofertas']]) {
+    await ir(pg, hash, raiz + ' .grupo-match'); await abrirTodo(pg);
+    const filas = await pg.$$eval(raiz + ' li.fila-match', ls => ls.map(l => ({
+      g: l.closest('.grupo-match').dataset.grupo,
+      punt: l.querySelector('.match-punt').textContent, color: getComputedStyle(l.querySelector('.match-punt')).color,
+      no: [...l.querySelectorAll('.criterios .crit.no')].map(c => c.dataset.criterio),
+      revisar: [...l.querySelectorAll('.criterios .crit.revisar')].map(c => c.dataset.criterio),
+      linea: l.querySelector('.motivo').textContent.replace(/\s+/g, ' ').trim(), ids: l.querySelector('.motivo').dataset.criterios || '',
+    })));
+    const gris = await pg.evaluate(() => { const v = getComputedStyle(document.documentElement).getPropertyValue('--cmuted').trim(); const m = v.match(/^#(..)(..)(..)$/); return `rgb(${parseInt(m[1], 16)}, ${parseInt(m[2], 16)}, ${parseInt(m[3], 16)})`; });
+    filasTotal += filas.length;
+    chk(filas.filter(f => f.g === 'no').every(f => /^(Afinidad \d+ %|Sin puntuación)/.test(f.punt)), `${hash}: en «No encaja» el % se llama «Afinidad» (${filas.filter(f => f.g === 'no').length} filas)`);
+    chk(filas.filter(f => f.g !== 'no').every(f => /^(Encaje \d+ %|Sin puntuación)/.test(f.punt)), `${hash}: en «Encaja» y «con reservas» sigue «Encaje»`);
+    chk(filas.filter(f => f.g === 'no').every(f => f.color === gris), `${hash}: la «Afinidad» va en gris`);
+    chk(filas.every(f => !/Afinidad de perfil/.test(f.punt)), `${hash}: el rótulo es «Afinidad» a secas`);
+    // La línea de la fila lista TODOS los criterios que fallan, y son los mismos que marca «Por qué».
+    const malas = [];
+    for (const f of filas) {
+      if (f.g === 'encaja') continue;
+      const no = f.g === 'no' ? f.no.filter(i => NUCLEO.includes(i)) : f.no, rev = f.g === 'no' ? [] : f.revisar;
+      if (no.length + rev.length < 2) continue;   // con uno solo se queda la línea de siempre, con el comienzo de la razón
+      multiples++; if (no.length && rev.length) conRevisarYNo++;
+      const esperado = [no.length && `✗ No cumple: ${no.map(i => NOMBRE[i]).join(', ')}`, rev.length && `! Revisar: ${rev.map(i => NOMBRE[i]).join(', ')}`].filter(Boolean).join(' · ');
+      if (f.linea !== esperado) malas.push(`«${f.linea}» ≠ «${esperado}»`);
+      if (f.ids !== [...no, ...rev].join(' ')) malas.push('data-criterios ' + f.ids);
+    }
+    chk(malas.length === 0, `${hash}: la línea de cada fila con varios fallos los nombra todos y en el orden de «Por qué» ${malas.slice(0, 2).join(' | ')}`);
+    const unico = filas.filter(f => f.g !== 'encaja' && (f.g === 'no' ? f.no.filter(i => NUCLEO.includes(i)).length : f.no.length + f.revisar.length) === 1);
+    chk(unico.every(f => /^[✗!?] \S.* · (No cumple|Revisar|Sin datos)/.test(f.linea)), `${hash}: con un solo fallo se conserva «✗ Área · No cumple» y el comienzo de la razón (${unico.length} filas)`);
+    chk(filas.filter(f => f.g === 'no').every(f => !/Revisar/.test(f.linea.split(' · ')[0]) || /No cumple/.test(f.linea)), `${hash}: «No encaja» nombra los «no», no los «a revisar»`);
+  }
+  chk(multiples >= 5, `hay filas con varios criterios que fallan para comprobar (${multiples} de ${filasTotal})`);
+  chk(conRevisarYNo >= 1, `y al menos una con «No cumple» y «Revisar» a la vez (${conRevisarYNo})`);
+  // Ni encaja ni nombres de criterios que la oferta no pide
+  chk(await pg.$$eval('#match-ofertas li.fila-match', ls => ls.every(l => !/NaN|undefined|null/.test(l.querySelector('.motivo').textContent))), 'ninguna línea con basura');
+  await ctx.close();
+}
+
+console.log('12. v28: las líneas con varios fallos caben en 320 px');
+{
+  const { pg, ctx } = await entrar({ ancho: 320 });
+  for (const [hash, raiz] of [['#/oferta/O005', '#match-alumnos'], ['#/alumno/A001', '#match-ofertas']]) {
+    await ir(pg, hash, raiz + ' .grupo-match'); await abrirTodo(pg);
+    const a = await desborde(pg, raiz);
+    chk(a.malos.length === 0 && !a.lateral && !a.pagina, `${hash} a 320 px: nada se sale del recuadro ${a.malos.join(' | ')}`);
+    chk(await pg.$$eval(raiz + ' .motivo', l => l.every(x => x.scrollHeight <= x.clientHeight + 1)), `${hash}: la línea de motivo no se corta`);
+  }
   await ctx.close();
 }
 

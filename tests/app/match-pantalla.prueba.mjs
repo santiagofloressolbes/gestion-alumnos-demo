@@ -30,7 +30,7 @@ for (const modo of ['demo', 'script']) {
   await ir(pg, '#/oferta/O007', '#match-alumnos .grupo-match');
   await abrirTodo(pg, '#match-alumnos');
   const tomas = await fila(pg, '#match-alumnos', 'Tomás Lacerda');
-  chk(tomas && /Encaje \d+ % · datos incompletos/.test(tomas.texto), 'Tomás (sin idiomas escritos): se ve «Encaje N % · datos incompletos»: ' + tomas?.texto);
+  chk(tomas && /(Encaje|Afinidad) \d+ % · datos incompletos/.test(tomas.texto), 'Tomás (sin idiomas escritos): se ve «Encaje N % · datos incompletos» (en «No encaja», «Afinidad»): ' + tomas?.texto);
   const idi = tomas.crit.find(c => /Idiomas/.test(c));
   chk(/^\?/.test(idi) && /Sin datos/.test(idi) && /\(no suma\)$/.test(idi), 'y el criterio de idiomas sale «Sin datos» y «no suma»: ' + idi);
   chk(tomas.grupo !== 'no' || /nacionalidad/.test(tomas.texto), 'si está en «No encaja» es por un requisito de verdad (nacionalidad), no por el dato que falta');
@@ -40,12 +40,12 @@ for (const modo of ['demo', 'script']) {
   chk(/Orientativo, verifica la situación real/.test(await pg.innerText('#match-alumnos .aviso-orientativo')), 'el aviso fijo «Orientativo, verifica la situación real» está arriba');
   chk(await pg.$$eval('#match-alumnos .porque .porque-aviso', l => l.length) === 30, 'y se repite dentro de cada «Por qué»');
   chk(!(await pg.$('#match-problemas')), 'con las hojas bien, no sale ningún aviso de filas raras');
-  const orden = await pg.$$eval('#match-alumnos li.fila-match', l => l.map(x => ({ g: x.closest('.grupo-match').dataset.grupo, p: +((/Encaje (\d+) %/.exec(x.innerText) || [])[1] ?? -1) })));
+  const orden = await pg.$$eval('#match-alumnos li.fila-match', l => l.map(x => ({ g: x.closest('.grupo-match').dataset.grupo, p: +((/(?:Encaje|Afinidad) (\d+) %/.exec(x.innerText) || [])[1] ?? -1) })));
   const rank = { encaja: 0, reservas: 1, no: 2 };
   chk(orden.every((x, i) => i === 0 || rank[x.g] > rank[orden[i - 1].g] || (rank[x.g] === rank[orden[i - 1].g] && x.p <= orden[i - 1].p)), 'orden: por grupo y, dentro del grupo, de mayor a menor puntuación');
   await ir(pg, '#/alumno/A014', '#match-ofertas .grupo-match');
   await abrirTodo(pg, '#match-ofertas');
-  chk(await pg.$$eval('#match-ofertas li.fila-match', l => l.length === 10 && l.every(x => /Encaje \d+ %|Sin puntuación/.test(x.querySelector('.match-punt')?.textContent || ''))), 'la ficha del alumno: las 10 ofertas, cada una con su puntuación');
+  chk(await pg.$$eval('#match-ofertas li.fila-match', l => l.length === 10 && l.every(x => /(Encaje|Afinidad) \d+ %|Sin puntuación/.test(x.querySelector('.match-punt')?.textContent || ''))), 'la ficha del alumno: las 10 ofertas, cada una con su puntuación');
   chk(/Orientativo, verifica la situación real/.test(await pg.innerText('#match-ofertas .aviso-orientativo')), 'y también lleva el aviso fijo');
   chk(escrituras(log).length === 0 && log.consola.length === 0, 'sin peticiones de guardar y sin errores: ' + log.consola.join(' | '));
   await ctx.close();

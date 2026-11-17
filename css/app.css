@@ -241,7 +241,7 @@ button:disabled{opacity:.7;cursor:progress}
 .match-punt{font-weight:700}   /* v27: el color lo pone el grupo (verde, ámbar o rojo suave), nunca el rojo de acento para todo */
 .match-punt.g-encaja{color:var(--g-encaja)}
 .match-punt.g-reservas{color:var(--g-reservas)}
-.match-punt.g-no{color:var(--g-no)}
+.match-punt.g-no{color:var(--cmuted)}   /* v28: en «No encaja» es «Afinidad», en gris: no mide si puede ocupar la oferta */
 .porque-punt,.porque-aviso{margin:0;padding:0 .5rem .5rem;font-size:.875rem}
 .aviso-orientativo{margin:.5rem 0}
 
@@ -344,6 +344,7 @@ button:disabled{opacity:.7;cursor:progress}
 .motivo.no b{color:var(--g-no)}
 .motivo.revisar b{color:var(--g-reservas)}
 .motivo.ok b{color:var(--g-encaja)}
+.motivo b.m-revisar{color:var(--g-reservas)}   /* v28: con varios fallos, cada trozo lleva su color */
 .ver-mas{display:inline-flex;align-items:center;min-height:2.75rem;padding:0 .5rem;color:var(--tab-on);font-weight:700;font-size:.875rem;text-decoration:underline}
 .porque-punt,.porque-aviso{padding-left:.5rem;padding-right:.5rem}
 

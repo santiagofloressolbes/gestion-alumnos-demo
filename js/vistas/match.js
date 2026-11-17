@@ -24,9 +24,10 @@ const num = n => String(Math.round(n * 10) / 10).replace('.', ',');
 const puntosDe = c => (c.noAplica ? 'no cuenta' : c.sinDatos ? 'no suma' : `${num(c.peso * c.factor)} de ${c.peso} puntos`);
 
 // La línea de la puntuación de una fila: «Encaje 82 %» y, si faltan datos, «datos incompletos».
-export function textoPuntuacion(p) {
+// En «No encaja» (v28) se llama «Afinidad» y va en gris: el % no dice si la persona puede ocupar la oferta, solo cuánto se parece su perfil.
+export function textoPuntuacion(p, categoria) {
   if (p.porcentaje == null) return 'Sin puntuación: faltan datos' + (p.incompleto ? ' · datos incompletos' : '');
-  return `Encaje ${p.porcentaje} %` + (p.incompleto ? ' · datos incompletos' : '');
+  return `${categoria === 'no' ? 'Afinidad' : 'Encaje'} ${p.porcentaje} %` + (p.incompleto ? ' · datos incompletos' : '');
 }
 
 // Aviso corto dentro de cada «Por qué» (el aviso completo está arriba, en la tarjeta): la decisión sobre si se puede trabajar la toma siempre una persona.
@@ -77,9 +78,30 @@ export function criterioDecisivo(r) {
   return malo || c.find(x => !x.noAplica) || c[0];
 }
 
-// La línea corta de la fila: «✗ Área · No cumple» y el comienzo de la razón. El detalle completo está en «Por qué».
+// Los criterios que fallan, con nombre corto, para la línea de la fila (v28).
+//   «No encaja»: los «no» de área, tipo, nacionalidad y permiso (los que deciden el grupo).
+//   «Encaja con reservas»: los «no» (de perfil) y lo que hay que revisar (incluye lo que no tiene datos).
+const NOMBRE_CORTO = { area: 'área', subarea: 'subárea', etiquetas: 'habilidades', idiomas: 'idiomas', nivel: 'formación', tipo: 'tipo', nacionalidad: 'nacionalidad', permiso: 'permiso' };
+export function criteriosQueFallan(r) {
+  const c = r.criterios.filter(x => !x.noAplica);
+  if (r.categoria === 'no') return { no: c.filter(x => x.estado === 'no' && NUCLEO.includes(x.id)), revisar: [] };
+  if (r.categoria === 'reservas') return { no: c.filter(x => x.estado === 'no'), revisar: c.filter(x => x.estado === 'revisar') };
+  return { no: [], revisar: [] };
+}
+const nombres = lista => lista.map(x => NOMBRE_CORTO[x.id]).join(', ');
+
+// La línea corta de la fila. Con varios fallos: «✗ No cumple: tipo, nacionalidad, permiso · ! Revisar: idiomas».
+// Con uno solo (o en «Encaja»): «✗ Área · No cumple» y el comienzo de la razón. El detalle completo está en «Por qué».
 const MAX_MOTIVO = 70;
 function motivo(r) {
+  const f = criteriosQueFallan(r);
+  if (f.no.length + f.revisar.length > 1) {
+    const todos = [...f.no, ...f.revisar];
+    return el('span', { class: 'sub motivo ' + (f.no.length ? 'no' : 'revisar'), 'data-criterio': criterioDecisivo(r).id, 'data-criterios': todos.map(x => x.id).join(' ') },
+      f.no.length > 0 && el('b', { class: 'm-no' }, `✗ No cumple: ${nombres(f.no)}`),
+      f.no.length > 0 && f.revisar.length > 0 && ' · ',
+      f.revisar.length > 0 && el('b', { class: 'm-revisar' }, `! Revisar: ${nombres(f.revisar)}`));
+  }
   const c = criterioDecisivo(r), t = rotulo(c);
   const corto = c.texto.length <= MAX_MOTIVO ? c.texto : c.texto.slice(0, MAX_MOTIVO).replace(/\s+\S*$/, '') + '…';
   return el('span', { class: 'sub motivo ' + t.clase, 'data-criterio': c.id },
@@ -154,7 +176,7 @@ export function tarjetaAlumnosQueEncajan(oferta, d) {
           el('span', { class: 'alumno-texto' },
             el('b', {}, nombreAlumno(a)),
             el('span', { class: 'sub' }, [a.master, yaTiene.has(a.id) && 'ya tiene solicitud en esta oferta'].filter(Boolean).join(' · ')),
-            el('span', { class: 'sub match-punt g-' + r.categoria }, textoPuntuacion(r.puntuacion)),
+            el('span', { class: 'sub match-punt g-' + r.categoria }, textoPuntuacion(r.puntuacion, r.categoria)),
             motivo(r)),
           svgFlecha()),
         porQue(r)));
@@ -182,7 +204,7 @@ export function tarjetaOfertasQueEncajan(alumno, d) {
         el('span', { class: 'alumno-texto' },
           el('b', {}, o.titulo || '(sin título)'),
           el('span', { class: 'sub' }, [o.empresa, o.estado === 'Cerrada' && 'cerrada'].filter(Boolean).join(' · ')),
-          el('span', { class: 'sub match-punt g-' + r.categoria }, textoPuntuacion(r.puntuacion)),
+          el('span', { class: 'sub match-punt g-' + r.categoria }, textoPuntuacion(r.puntuacion, r.categoria)),
           motivo(r)),
         svgFlecha()),
       porQue(r)));
