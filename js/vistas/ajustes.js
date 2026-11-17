@@ -26,9 +26,9 @@ export function pintarAjustes(raiz) {
     plegable({ id: 'aj-conexion', clave: 'conexion', idTitulo: 'cx-titulo', titulo: 'Conexión', clase: 'conexion' },
       el('p', { class: 'sub' }, demo
         ? 'Estás viendo la demo, con datos de ejemplo de la app. No se puede guardar nada.'
-        : 'Conectado al Sheet de prueba. La dirección y la clave están guardadas solo en este móvil.'),
+        : 'Conectado a los datos. La dirección y la clave se guardan solo en este móvil.'),
       demo
-        ? el('a', { class: 'secondary', href: '#/acceso' }, 'Conectar con el Sheet de prueba')
+        ? el('a', { class: 'secondary', href: '#/acceso' }, 'Conectar con los datos')
         : el('button', { class: 'secondary', type: 'button', id: 'aj-olvidar', onclick: () => {
             if (!confirm('¿Olvidar el acceso en este móvil? Tendrás que volver a escribir la dirección y la clave.')) return;
             olvidarAcceso();
@@ -38,7 +38,7 @@ export function pintarAjustes(raiz) {
     tarjetaFirma(),
     plegable({ id: 'aj-version-tarjeta', clave: 'version', idTitulo: 'ver-titulo', titulo: 'Versión de la app' },
       el('p', { class: 'version', id: 'aj-version' }, 'Versión ' + VERSION),
-      el('p', { class: 'sub' }, '¿Has publicado cambios y no los ves? Pulsa aquí para traerlos. No hace falta cerrar la app.'),
+      el('p', { class: 'sub' }, '¿No ves los últimos cambios? Pulsa aquí para traerlos. No hace falta cerrar la app.'),
       buscar, resultado),
     el('section', { class: 'card', 'aria-labelledby': 'av-titulo' },
       el('h2', { id: 'av-titulo' }, 'Aviso'),

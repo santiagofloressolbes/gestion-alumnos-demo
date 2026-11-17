@@ -83,7 +83,7 @@ import { b, nuevo, chk, almacen, conectar, terminar, BASE, URL_OK, CLAVE_PRUEBA 
   chk(suma === total, `alumnos en pantalla (${suma}) = filas del Sheet (${total})`);
   chk(!/Conexión/.test(textoInicio), 'Inicio ya no lleva la tarjeta Conexión (está en Ajustes)');
   await pg.click('#tabs a[data-tab=ajustes]'); await pg.waitForSelector('#v-ajustes .conexion');
-  chk(/Conectado al Sheet de prueba/.test(await pg.innerText('#v-ajustes')), 'tarjeta Conexión (en Ajustes)');
+  chk(/Conectado a los datos/.test(await pg.innerText('#v-ajustes')), 'tarjeta Conexión (en Ajustes)');
   await pg.click('#tabs a[data-tab=inicio]'); await pg.waitForSelector('.masters .master');
   // Todas las peticiones: POST, text/plain, solo script.google.com, sin clave en la URL
   chk(log.peticiones.length >= 2, 'ping + data: ' + log.peticiones.length);

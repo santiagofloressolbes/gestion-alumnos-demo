@@ -18,7 +18,7 @@ console.log('1. Valores por defecto y etiquetas');
   await ir(pg);
   chk(JSON.stringify(await vals(pg)) === JSON.stringify(['30', '3', '5', '80']), 'por defecto: 30 días, 3 ofertas, 5 solicitudes y 80 %: ' + await vals(pg));
   chk(await pg.$$eval('#aj-avisos label', l => l.length) === 4 && await pg.$$eval('#aj-avisos input', i => i.every(x => document.querySelector(`label[for=${x.id}]`))), 'cada campo tiene su etiqueta');
-  chk(/nunca bloquean ni ocultan/.test(await pg.innerText('#aj-avisos')), 'dice que los avisos no bloquean nada');
+  chk(/Son solo avisos/.test(await pg.innerText('#aj-avisos')), 'dice que son solo avisos');
   chk(/solo en este móvil/.test(await pg.innerText('#aj-avisos')), 'dice que se guarda solo en este móvil');
   chk(await guardado(pg, 'gad.avisos') === null, 'sin cambios no hay nada guardado');
   chk(await pg.getAttribute('#aj-av-dias', 'inputmode') === 'numeric', 'teclado numérico en el iPhone');
@@ -61,7 +61,7 @@ console.log('1. Valores por defecto y etiquetas');
   console.log('4. Valores por defecto');
   await pg.click('#aj-av-defecto');
   chk(JSON.stringify(await vals(pg)) === JSON.stringify(['30', '3', '5', '80']) && await guardado(pg, 'gad.avisos') === null, '«Valores por defecto» los restablece y borra lo guardado');
-  chk(/restablecidos/.test(await pg.innerText('#aj-av-ok')) && !(await visible(pg, '#aj-av-dias-error')), 'lo dice y quita los errores');
+  chk(/recuperados/.test(await pg.innerText('#aj-av-ok')) && !(await visible(pg, '#aj-av-dias-error')), 'lo dice y quita los errores');
 
   console.log('5. La firma');
   await pg.fill('#aj-firma', '  Ana   <b>Pérez</b>  ');

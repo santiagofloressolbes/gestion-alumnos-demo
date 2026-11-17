@@ -63,7 +63,7 @@ const visible = (pg, sel) => pg.evaluate(s => { const e = document.querySelector
   let { pg, ctx } = await entrar('script');
   await ir(pg, '#/ajustes', '#v-ajustes .card');
   const t = await pg.innerText('#v-ajustes');
-  chk(/Conectado al Sheet de prueba/.test(t) && await visible(pg, '#aj-olvidar') && /Olvidar acceso/.test(t), 'conexión: estado y "Olvidar acceso"');
+  chk(/Conectado a los datos/.test(t) && await visible(pg, '#aj-olvidar') && /Olvidar acceso/.test(t), 'conexión: estado y "Olvidar acceso"');
   chk(await pg.innerText('#aj-version') === 'Versión ' + /VERSION = '(\d+)'/.exec(leer('js/version.js'))[1], 'enseña la versión de la app: ' + await pg.innerText('#aj-version'));
   chk(await visible(pg, '#aj-buscar') && await pg.innerText('#aj-buscar') === 'Buscar actualización', 'botón "Buscar actualización"');
   chk(await pg.innerText('#aj-aviso') === LEGAL, 'aviso de demostración completo en Ajustes');
@@ -72,7 +72,7 @@ const visible = (pg, sel) => pg.evaluate(s => { const e = document.querySelector
   await ctx.close();
   ({ pg, ctx } = await entrar('demo'));
   await ir(pg, '#/ajustes', '#v-ajustes .card');
-  chk(/Estás viendo la demo/.test(await pg.innerText('#v-ajustes')) && (await pg.$$('#aj-olvidar')).length === 0 && /Conectar con el Sheet de prueba/.test(await pg.innerText('#v-ajustes')), 'demo: lo explica y ofrece conectar (sin "Olvidar acceso")');
+  chk(/Estás viendo la demo/.test(await pg.innerText('#v-ajustes')) && (await pg.$$('#aj-olvidar')).length === 0 && /Conectar con los datos/.test(await pg.innerText('#v-ajustes')), 'demo: lo explica y ofrece conectar (sin "Olvidar acceso")');
   await ctx.close();
   // olvidar acceso desde Ajustes
   ({ pg, ctx } = await entrar('script', false));

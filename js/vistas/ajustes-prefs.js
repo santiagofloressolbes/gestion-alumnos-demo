@@ -5,10 +5,10 @@ import { UMBRALES_POR_DEFECTO, LIMITES, validarUmbrales } from '../util/avisos.j
 import { leerUmbrales, guardarUmbrales, restablecerUmbrales, leerFirma, guardarFirma, limpiarFirma, MAX_FIRMA } from '../util/preferencias.js';
 
 const CAMPOS = [
-  { clave: 'dias', etiqueta: 'Días que se miran', ayuda: 'Cuántos días hacia atrás cuentan las solicitudes y las ofertas difundidas.' },
-  { clave: 'ofertas', etiqueta: 'Ofertas difundidas mínimas (para «Sin solicitudes»)', ayuda: 'Si en esos días se difundieron menos ofertas, nadie salta por no haber aplicado.' },
-  { clave: 'solicitudes', etiqueta: 'Solicitudes mínimas (para «Aplica a todo»)', ayuda: 'Cuántas solicitudes hace falta haber enviado en esos días.' },
-  { clave: 'porcentaje', etiqueta: 'Porcentaje de las ofertas difundidas (para «Aplica a todo»), en %', ayuda: 'A qué parte de las ofertas difundidas ha aplicado.' },
+  { clave: 'dias', etiqueta: 'Días que se revisan', ayuda: 'Cuántos días atrás se cuentan las solicitudes y las ofertas enviadas.' },
+  { clave: 'ofertas', etiqueta: 'Ofertas enviadas (mínimo)', ayuda: 'Si se enviaron menos ofertas, no se avisa de «Sin solicitudes».' },
+  { clave: 'solicitudes', etiqueta: 'Solicitudes (mínimo)', ayuda: 'Solicitudes necesarias para avisar de «Ha solicitado casi todas las ofertas».' },
+  { clave: 'porcentaje', etiqueta: 'Porcentaje de ofertas solicitadas (%)', ayuda: 'Qué parte de las ofertas enviadas ha solicitado.' },
 ];
 export const mensajeUmbral = (codigo, clave) => {
   const [min, max] = LIMITES[clave];
@@ -60,12 +60,12 @@ export function tarjetaAvisos() {
     limpiarErrores();
     restablecerUmbrales();
     for (const c of CAMPOS) inputs[c.clave].value = String(UMBRALES_POR_DEFECTO[c.clave]);
-    decir('Valores por defecto restablecidos.', true);
+    decir('Valores recuperados.', true);
   };
 
   const enter = e => { if (e.key === 'Enter' && e.target.tagName === 'INPUT') { e.preventDefault(); guardar(); } };   // Enter en un campo = Guardar (sin <form>, para no mezclarse con los formularios de la app)
   return plegable({ id: 'aj-avisos', clave: 'avisos', idTitulo: 'aj-av-titulo', titulo: 'Avisos de alumnos' },
-    el('p', { class: 'sub' }, '«Sin solicitudes»: en esos días se difundieron ofertas y el alumno no ha aplicado a ninguna. «Aplica a todo»: ha aplicado a casi todas. Son solo avisos: nunca bloquean ni ocultan nada.'),
+    el('p', { class: 'sub' }, '«Sin solicitudes»: se enviaron ofertas y el alumno no ha solicitado ninguna. «Ha solicitado casi todas las ofertas»: ha solicitado casi todas las enviadas. Son solo avisos.'),
     el('div', { role: 'group', 'aria-labelledby': 'aj-av-titulo', onkeydown: enter },
       filas, error, estado,
       el('button', { class: 'primary', type: 'button', id: 'aj-av-guardar', onclick: guardar }, 'Guardar'),
