@@ -2,6 +2,12 @@
 
 Este documento es la tabla exacta de lo que hace el match entre una oferta y un alumno. El código está en `js/util/match.js` y lo comprueban `tests/app/match.prueba.mjs`, `match-reglas.prueba.mjs` y `match-casos.prueba.mjs`.
 
+## Resumen para quien no es técnico
+
+Para cada alumno se miran **ocho criterios** (área, subárea, habilidades, idiomas, formación, tipo, nacionalidad y permiso de trabajo). Cada uno lleva su semáforo (verde cumple, amarillo afín o a revisar, rojo no coincide), su motivo escrito y los puntos que da. **Lo que no consta no suma ni resta:** un dato que falta sale como «Sin datos» (a revisar), nunca como «no cumple», y la fila avisa «datos incompletos». Lo que la oferta no pide sale «No aplica».
+
+Los alumnos se reparten en tres grupos según los cuatro criterios básicos (área, tipo, nacionalidad y permiso): «Encaja», «Encaja con reservas» y «No encaja»; dentro de cada grupo van ordenados por puntuación. **Nadie desaparece de la lista**, y los avisos de «Añadir solicitud» usan exactamente las mismas reglas. Siempre se ve el aviso **«Orientativo, verifica la situación real»**: es una ayuda para mirar, y si alguien puede trabajar o no lo decide siempre una persona. Lo que sigue es la tabla exacta.
+
 ## Principios
 
 1. **Orienta y ordena; nunca oculta ni descarta a nadie.** Todos los alumnos (u ofertas) salen siempre, cada uno con su motivo.
@@ -9,7 +15,7 @@ Este documento es la tabla exacta de lo que hace el match entre una oferta y un 
 3. **Sin IA ni servicios externos.** Todo es una regla escrita aquí y editable en el Sheet. Las etiquetas coinciden por **texto exacto** (sin fijarse en mayúsculas ni tildes); no hay sinónimos ni aproximaciones.
 4. **Un dato que falta o no se reconoce no es un «no cumple».** Se enseña como «Sin datos» (amarillo, «a revisar»), **no suma puntos** y no cuenta en el total.
 5. **Compartir perfiles no cambia:** no saca situación migratoria, notas, historial ni descartes (el match no escribe nada ni envía nada).
-6. **Cómo se ve (v27, solo presentación; las reglas no cambian).** El % de cada fila lleva el color de su grupo (verde «Encaja», ámbar «con reservas», rojo suave «No encaja») y siempre va escrito en texto. Debajo, **una línea con el criterio que decide el grupo**: en «No encaja», el «no» de área, tipo, nacionalidad o permiso; en «con reservas», lo primero que hay que revisar (lo de nacionalidad y permiso va antes); en «Encaja», el primer criterio que cumple. El detalle de los ocho criterios está en «Por qué», y las razones de nacionalidad y permiso largas se acortan con «ver más».
+6. **Cómo se ve (solo presentación; no cambia el cálculo).** El % de cada fila va siempre escrito en texto y lleva el color de su grupo: verde «Encaje» y ámbar «con reservas». En «No encaja» se llama **«Afinidad»** y va en gris (ver más abajo). Debajo, **una línea con lo que falla**, con los criterios abreviados («✗ No cumple: tipo, nacionalidad, permiso»): en «No encaja», los criterios básicos en rojo; en «con reservas», lo que no cumple y lo que hay que revisar («! Revisar: idiomas»); con un solo fallo, el criterio con el comienzo de su razón («✗ Área · No cumple …»); en «Encaje», el primer criterio que cumple. El detalle de los ocho criterios está en «Por qué», y las razones de nacionalidad y permiso largas se acortan con «ver más».
 
 ## Los ocho criterios
 
