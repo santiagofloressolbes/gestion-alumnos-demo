@@ -93,7 +93,7 @@ console.log('13e. Estados vacíos con texto claro');
   chk(/Este programa todavía no tiene alumnos\./.test(await texto('#v-master')), 'Programa sin alumnos: lo dice');
   await pg.goto(BASE + '#/alumno/A001/compartir'); await pg.waitForSelector('#v-compartir .vista-previa');
   await pg.evaluate(() => document.querySelectorAll('#v-compartir .elegir-cp input').forEach(i => { if (i.id.startsWith('cp-al-')) { i.checked = false; i.dispatchEvent(new Event('change', { bubbles: true })); } }));
-  chk(/\(No hay ningún alumno marcado\.\)/.test(await texto('#cp-vista')) && await pg.isDisabled('#cp-copiar'), 'Compartir sin nadie marcado: lo dice y «Copiar» queda desactivado');
+  chk(/No hay ningún alumno marcado\./.test(await texto('#cp-vista')) && await pg.isDisabled('#cp-copiar'), 'Compartir sin nadie marcado: lo dice y «Copiar» queda desactivado');
   await pg.goto(BASE + '#/oferta/O005/compartir'); await pg.waitForSelector('#cp-nadie');
   chk(/No hay alumnos elegidos/.test(await texto('#cp-nadie')) && await pg.isVisible('#cp-nadie a.secondary'), 'Compartir desde la oferta sin elegir: dice cómo hacerlo y ofrece volver');
   await pg.goto(BASE + '#/oferta/O005'); await pg.waitForSelector('#match-alumnos .grupo-match');

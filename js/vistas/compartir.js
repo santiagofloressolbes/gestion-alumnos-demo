@@ -52,7 +52,7 @@ export async function pintarCompartir(raiz, { idOferta = '', idAlumno = '' } = {
   const puedeCompartir = typeof navigator.share === 'function';
   const compartir = el('button', { class: 'primary', type: 'button', id: 'cp-compartir', onclick: () => enviar(), disabled: !puedeCompartir }, 'Compartir');
   const copiar = el('button', { class: 'secondary', type: 'button', id: 'cp-copiar', onclick: () => copiarTexto() }, 'Copiar');
-  const sinMenu = !puedeCompartir && el('p', { class: 'sub', id: 'cp-sin-menu' }, 'Este navegador no tiene el menú de compartir. Usa «Copiar».');
+  const sinMenu = !puedeCompartir && el('p', { class: 'sub', id: 'cp-sin-menu' }, 'Este navegador no puede compartir directamente. Pulsa «Copiar».');
 
   const marcados = lista => [...lista.querySelectorAll('input:checked')].map(i => i.value);
   const decir = (t, bien) => { estado.textContent = bien ? t : ''; estado.hidden = !(bien && t); error.textContent = bien ? '' : t; error.hidden = !t || bien; };
@@ -61,12 +61,12 @@ export async function pintarCompartir(raiz, { idOferta = '', idAlumno = '' } = {
     const quienes = marcados(incluido).map(id => alumnos.find(a => a.id === id)).filter(Boolean);
     const campos = [...marcados(listaBase), ...marcados(listaSensible), ...marcados(listaExtra)];
     actual = quienes.length ? textoPerfiles({ alumnos: quienes, campos, oferta }) : '';
-    vista.textContent = actual || '(No hay ningún alumno marcado.)';
+    vista.textContent = actual || 'No hay ningún alumno marcado.';
     const sens = sensiblesMarcados(campos);
     const sinCV = cvSinHttps(quienes, campos);
     reemplazar(avisoSensible, ...[
-      sens.length ? `Has marcado datos sensibles (${sens.map(c => c.etiqueta.toLowerCase()).join(', ')}). Compártelos solo si la persona lo sabe y lo permite.` : '',
-      sinCV && sinCV.length ? `Sin enlace https, se deja fuera el CV de: ${sinCV.join(', ')}.` : '',
+      sens.length ? `Has marcado datos sensibles (${sens.map(c => c.etiqueta.toLowerCase()).join(', ')}). Compártelos solo con permiso de la persona.` : '',
+      sinCV && sinCV.length ? (sinCV.length === 1 ? `El CV de ${sinCV[0]} no se incluye: su enlace no empieza por https.` : `El CV de ${sinCV.join(', ')} no se incluye: sus enlaces no empiezan por https.`) : '',
     ].filter(Boolean).map(t => el('span', { class: 'bloque' }, t)));
     avisoSensible.hidden = !avisoSensible.childNodes.length;
     compartir.disabled = !puedeCompartir || !quienes.length;
@@ -79,17 +79,17 @@ export async function pintarCompartir(raiz, { idOferta = '', idAlumno = '' } = {
     const texto = actual;
     try {
       await navigator.share({ title: 'Perfiles de alumnos', text: texto });
-      decir('Compartido. Desde ahora el texto ya no se controla desde la app.', true);
+      decir('Compartido.', true);
     } catch (e) {
       if (e && e.name === 'AbortError') return decir('No se ha compartido nada.', true);
-      decir('No se ha podido abrir el menú de compartir. Usa «Copiar».', false);
+      decir('No se ha podido compartir. Prueba con «Copiar».', false);
     }
   }
 
   async function copiarTexto() {
     if (!actual) return;
     const bien = await copiarAlPortapapeles(actual);   // solo texto plano (ver util/trabajo.js)
-    if (bien) { decir('Copiado. Pégalo donde quieras: desde ahora el texto ya no se controla desde la app.', true); avisoFlotante('Copiado.'); }
+    if (bien) { decir('Copiado. Pégalo donde quieras.', true); avisoFlotante('Copiado.'); }
     else decir('No se ha podido copiar. Mantén pulsado el texto de la vista previa y elige «Copiar».', false);
   }
 
@@ -97,18 +97,18 @@ export async function pintarCompartir(raiz, { idOferta = '', idAlumno = '' } = {
     volver,
     el('section', { class: 'card', 'aria-labelledby': 'cp-titulo' },
       el('h2', { id: 'cp-titulo' }, alumnos.length === 1 ? 'Compartir un perfil' : `Compartir ${alumnos.length} perfiles`),
-      oferta && el('p', { class: 'sub' }, [oferta.titulo || '(sin título)', oferta.empresa].filter(Boolean).join(' · ')),
+      oferta && el('p', { class: 'sub' }, [oferta.titulo || 'Sin dato', oferta.empresa].filter(Boolean).join(' · ')),
       el('p', { class: 'aviso', role: 'note', id: 'cp-aviso' },
-        'Lo que compartas sale de la app: desde ese momento ya no se controla quién lo lee ni lo reenvía. Comparte solo lo necesario. Con personas reales hace falta su permiso, y esta app no guarda un registro de lo que compartes.')),
+        'Lo que compartas sale de la app y ya no podrás controlar quién lo lee. Comparte solo lo necesario y pide permiso a cada persona. La app no guarda registro de lo compartido.')),
     el('section', { class: 'card', 'aria-labelledby': 'cp-quien' },
       el('h2', { id: 'cp-quien' }, `Alumnos (máximo ${MAX_PERFILES})`),
       incluido),
     el('section', { class: 'card', 'aria-labelledby': 'cp-datos' },
       el('h2', { id: 'cp-datos' }, 'Qué datos se incluyen'),
       listaBase,
-      el('h3', { class: 'sub-titulo' }, 'Datos sensibles (desmarcados)'),
+      el('h3', { class: 'sub-titulo' }, 'Datos sensibles'),
       listaSensible,
-      el('h3', { class: 'sub-titulo' }, 'Texto adicional (desmarcado)'),
+      el('h3', { class: 'sub-titulo' }, 'Texto adicional'),
       listaExtra,
       avisoSensible,
       el('p', { class: 'sub' }, 'Las notas de entrevista, el historial y los motivos de descarte nunca se incluyen.')),

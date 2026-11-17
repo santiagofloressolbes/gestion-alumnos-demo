@@ -22,7 +22,7 @@ export const CAMPOS_SENSIBLES = [
 export const BASE_POR_DEFECTO = CAMPOS_BASE.map(c => c.clave);
 // Texto armado por la app (no es un dato del Sheet): sale solo si se marca la casilla. Va aparte, siempre desmarcado.
 export const CAMPOS_EXTRA = [
-  { clave: 'historia', etiqueta: 'Incluir historia', nota: 'Un párrafo corto armado con plantillas: subáreas, habilidades, idiomas (sin nivel) y formación. Lo que ya sale en las líneas de debajo no se repite. No usa el texto libre «Por qué» ni datos sensibles.' },
+  { clave: 'historia', etiqueta: 'Incluir resumen del perfil', nota: 'Una línea con subáreas, habilidades, idiomas (sin nivel) y formación. No usa el texto «Por qué» ni datos sensibles.' },
 ];
 
 // El enlace al CV solo se incluye si es una dirección https válida; si no, se deja fuera (nunca http, javascript:, data:…).
@@ -36,7 +36,7 @@ export const nombreCompleto = a => linea(`${a.nombre ?? ''} ${a.apellidos ?? ''}
 function lineasDe(a, campos) {
   const L = [];
   const si = c => campos.has(c);
-  if (si('historia')) { const h = historia(a); if (h) L.push(['Historia', h]); }   // primero: abre el perfil
+  if (si('historia')) { const h = historia(a); if (h) L.push(['Resumen', h]); }   // primero: abre el perfil
   if (si('master') && linea(a.master)) L.push(['Programa', linea(a.master)]);
   if (si('area')) {
     const destino = linea(a.areaDestino), exp = linea(a.areaExperiencia);
@@ -60,10 +60,10 @@ export function textoPerfiles({ alumnos, campos, oferta = null }) {
   const c = new Set(campos);
   const t = [];
   t.push(alumnos.length === 1 ? 'Perfil de un alumno' : `Perfiles de ${alumnos.length} alumnos`);
-  if (oferta) t.push('Oferta: ' + [linea(oferta.titulo) || '(sin título)', linea(oferta.empresa)].filter(Boolean).join(' · '));
+  if (oferta) t.push('Oferta: ' + [linea(oferta.titulo) || 'Sin dato', linea(oferta.empresa)].filter(Boolean).join(' · '));
   alumnos.slice(0, MAX_PERFILES).forEach((a, i) => {
     t.push('');
-    t.push(c.has('nombre') ? `${i + 1}. ${nombreCompleto(a) || '(sin nombre)'}` : `${i + 1}.`);
+    t.push(c.has('nombre') ? `${i + 1}. ${nombreCompleto(a) || 'Sin dato'}` : `${i + 1}.`);
     for (const [k, v] of lineasDe(a, c)) t.push(`   ${k}: ${v}`);
   });
   t.push('');

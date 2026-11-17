@@ -94,7 +94,7 @@ const escrituras = log => log.peticiones.filter(p => /^guardar|^registrar|^crear
   const { pg, ctx, log } = await entrar({ ajustar: preparar });
   await ir(pg, '#/oferta/O002', '#match-alumnos .grupo-match');
   await abrirTodo(pg);
-  chk(await pg.isDisabled('#cp-ir') && /Marca a quien quieras/.test(await pg.innerText('#cp-cuenta')), 'sin nadie marcado, el botón está desactivado y explica qué hacer');
+  chk(await pg.isDisabled('#cp-ir') && /Marca los alumnos cuyo perfil quieras compartir/.test(await pg.innerText('#cp-cuenta')), 'sin nadie marcado, el botón está desactivado y explica qué hacer');
   const casillas = await pg.$$eval('#match-alumnos input.cp-sel', i => i.map(x => ({ visible: x.getBoundingClientRect().width > 0 })));
   chk(casillas.length > 0, 'cada alumno tiene su casilla');
   const cajas = await pg.$$eval('#match-alumnos .sel-compartir', l => l.slice(0, 3).map(x => [Math.round(x.getBoundingClientRect().width), Math.round(x.getBoundingClientRect().height)]));
@@ -138,7 +138,7 @@ const escrituras = log => log.peticiones.filter(p => /^guardar|^registrar|^crear
   chk(sens.join() === 'nacionalidad,situacion,experiencia,cv,historia', 'desmarcados: nacionalidad, situación, resumen de experiencia, CV y la historia (casilla aparte): ' + sens);
   chk((await pg.innerText('#v-compartir')).match(/Dato sensible/g)?.length === 4, 'cada dato sensible lo dice con texto: "Dato sensible" ×4');
   chk(await pg.isHidden('#cp-sensible'), 'sin datos sensibles marcados, no hay aviso de sensibles');
-  chk(/ya no se controla quién lo lee ni lo reenvía/.test(await pg.innerText('#cp-aviso')) && /no guarda un registro de lo que compartes/.test(await pg.innerText('#cp-aviso')), 'aviso de privacidad visible: sale de la app y no hay registro');
+  chk(/ya no podrás controlar quién lo lee/.test(await pg.innerText('#cp-aviso')) && /La app no guarda registro de lo compartido/.test(await pg.innerText('#cp-aviso')), 'aviso de privacidad visible: sale de la app y no hay registro');
   chk(/Las notas de entrevista, el historial y los motivos de descarte nunca se incluyen/.test(await pg.innerText('#v-compartir')), 'dice que notas, historial y descartes nunca se incluyen');
   let t = await vista(pg);
   chk(/1\. Lucía Quintero/.test(t) && /2\. Mateo Ferrer/.test(t) && /3\. Valentina Aguirre/.test(t) && /Programa: /.test(t) && /Busca: /.test(t), 'el texto tiene los 3 perfiles');
@@ -151,8 +151,8 @@ const escrituras = log => log.peticiones.filter(p => /^guardar|^registrar|^crear
   chk(!/sin-https\.org|javascript:/.test(t) && !/CV: http:/.test(t), 'un CV con http, o con javascript:, se deja fuera');
   chk(await pg.isVisible('#cp-sensible'), 'el aviso de datos sensibles se ve al marcarlos');
   const aviso = await pg.innerText('#cp-sensible');
-  chk(/datos sensibles \(nacionalidad, situación de trabajo en españa, resumen de experiencia, enlace al cv\)/i.test(aviso) && /la persona lo sabe y lo permite/.test(aviso), 'avisa de los datos sensibles marcados: ' + aviso.replace(/\n/g, ' '));
-  chk(/Sin enlace https, se deja fuera el CV de: .*Mateo Ferrer.*Valentina Aguirre|Sin enlace https, se deja fuera el CV de: .*Valentina Aguirre.*Mateo Ferrer/.test(aviso), 'y de a quién se le deja fuera el CV: ' + aviso.replace(/\n/g, ' '));
+  chk(/datos sensibles \(nacionalidad, situación de trabajo en españa, resumen de experiencia, enlace al cv\)/i.test(aviso) && /solo con permiso de la persona/.test(aviso), 'avisa de los datos sensibles marcados: ' + aviso.replace(/\n/g, ' '));
+  chk(/El CV de .*Mateo Ferrer.*Valentina Aguirre no se incluye|El CV de .*Valentina Aguirre.*Mateo Ferrer no se incluye/.test(aviso), 'y de a quién se le deja fuera el CV: ' + aviso.replace(/\n/g, ' '));
   chk(CANARIOS.every(c => !t.includes(c)), 'con TODO marcado: ningún canario (notas de entrevista, por qué, notas, motivo de descarte, historial)');
   chk(!t.includes(CLAVE_PRUEBA) && !/script\.google\.com|AKfycb/.test(t), 'ni la clave ni la dirección del script');
   // quitar un alumno y todos
@@ -181,7 +181,7 @@ const escrituras = log => log.peticiones.filter(p => /^guardar|^registrar|^crear
   const enviado = await pg.evaluate(() => window.__share);
   chk(enviado.length === 1 && enviado[0].text === await vista(pg), 'Compartir envía al menú del móvil EXACTAMENTE el texto de la vista previa');
   chk(enviado[0].title === 'Perfiles de alumnos' && Object.keys(enviado[0]).sort().join() === 'text,title', 'solo título y texto (sin enlaces ni archivos)');
-  chk(/Compartido\. Desde ahora el texto ya no se controla/.test(await pg.innerText('#cp-estado')), 'lo confirma y recuerda que ya no se controla');
+  chk(/^Compartido\.$/.test(await pg.innerText('#cp-estado')), 'lo confirma (el aviso de que ya no se controla está arriba, una sola vez)');
   await pg.evaluate(() => { window.__modoShare = 'cancelar'; });
   await pg.click('#cp-compartir');
   await pg.waitForFunction(() => /No se ha compartido nada/.test(document.querySelector('#cp-estado').textContent));
@@ -189,7 +189,7 @@ const escrituras = log => log.peticiones.filter(p => /^guardar|^registrar|^crear
   await pg.evaluate(() => { window.__modoShare = 'fallar'; });
   await pg.click('#cp-compartir');
   await pg.waitForSelector('#cp-error:not([hidden])');
-  chk(/No se ha podido abrir el menú de compartir\. Usa «Copiar»/.test(await pg.innerText('#cp-error')), 'si falla el menú: lo dice y manda a Copiar');
+  chk(/No se ha podido compartir\. Prueba con «Copiar»/.test(await pg.innerText('#cp-error')), 'si falla el menú: lo dice y manda a Copiar');
   // Copiar
   await pg.click('#cp-copiar');
   await pg.waitForSelector('#cp-estado:not([hidden])');
@@ -207,7 +207,7 @@ const escrituras = log => log.peticiones.filter(p => /^guardar|^registrar|^crear
   console.log('5. Navegador sin menú de compartir y sin portapapeles');
   const { pg, ctx } = await entrar({ sinShare: true, sinClipboard: true, ajustar: preparar });
   await ir(pg, '#/alumno/A001/compartir', '#cp-vista');
-  chk(await pg.isDisabled('#cp-compartir') && /no tiene el menú de compartir/.test(await pg.innerText('#cp-sin-menu')), 'sin menú de compartir: botón desactivado y explica que se use Copiar');
+  chk(await pg.isDisabled('#cp-compartir') && /no puede compartir directamente/.test(await pg.innerText('#cp-sin-menu')), 'sin menú de compartir: botón desactivado y explica que se use Copiar');
   await pg.click('#cp-copiar');
   await pg.waitForSelector('#cp-estado:not([hidden])');
   chk(await pg.evaluate(() => window.__copiado) === await vista(pg), 'sin portapapeles moderno: el respaldo copia el mismo texto');

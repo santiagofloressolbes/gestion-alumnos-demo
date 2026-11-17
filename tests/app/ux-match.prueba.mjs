@@ -185,7 +185,7 @@ console.log('10. Ningún «0» suelto');
   const a = await suelto();
   chk(a.length === 0, 'ficha de la oferta: ningún texto que sea solo «0» ' + a.join(','));
   chk(!/(^|\n)0(\n|$)/.test(await pg.innerText('#match-alumnos')), 'y tampoco en una línea sola del texto visible');
-  chk(/^Marca a quien quieras para compartir su perfil \(máximo 10\)\.$/.test(await pg.innerText('#cp-cuenta')), 'sin nadie marcado, el contador lo dice con palabras (no «0»)');
+  chk(/^Marca los alumnos cuyo perfil quieras compartir \(máximo 10\)\.$/.test(await pg.innerText('#cp-cuenta')), 'sin nadie marcado, el contador lo dice con palabras (no «0»)');
   await ir(pg, '#/alumno/A001', '#match-ofertas .grupo-match');
   const b = await suelto();
   chk(b.length === 0, 'ficha del alumno: ningún «0» suelto ' + b.join(','));

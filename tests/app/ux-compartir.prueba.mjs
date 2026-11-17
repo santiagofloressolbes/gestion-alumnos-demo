@@ -65,13 +65,13 @@ console.log('11-12. En pantalla');
   chk(/Programa: /.test(await pg.innerText('#cp-vista')) && /Quiere ir a: /.test(await pg.innerText('#cp-vista')) && /Busca: /.test(await pg.innerText('#cp-vista')), 'por defecto salen las líneas Programa, Quiere ir a y Busca');
   await pg.check('#cp-c-historia');
   const v = await pg.innerText('#cp-vista');
-  const h = (v.match(/Historia: ([^\n]*)/) || [])[1] || '';
+  const h = (v.match(/Resumen: ([^\n]*)/) || [])[1] || '';
   chk(/^Subáreas: /.test(h) && /Idiomas: Italiano, Inglés, Francés\./.test(h), 'la historia en pantalla: «' + h + '»');
   chk(!NIVEL.test(v), 'en toda la vista previa no hay «nativo» ni niveles de idioma');
   chk(!h.includes('MBA en inglés') && !h.includes('Producto y tecnología') && !/Prácticas/.test(h), 'la historia no repite el programa, el área ni lo que busca');
   chk(/Programa: MBA en inglés/.test(v) && /Quiere ir a: Producto y tecnología/.test(v) && /Busca: Prácticas/.test(v), 'esos datos siguen saliendo, una sola vez, en sus líneas');
   chk(v.split('MBA en inglés').length === 2, 'el programa aparece una sola vez en el texto');
-  chk(/sin nivel/.test(await pg.innerText('#v-compartir')) && /no se repite/.test(await pg.innerText('#v-compartir')), 'la nota de la casilla explica que es corta, sin nivel y sin repetir');
+  chk(/sin nivel/.test(await pg.innerText('#v-compartir')) && /Una línea/.test(await pg.innerText('#v-compartir')), 'la nota de la casilla explica que es corta y sin nivel');
   chk(!/Cursa|Quiere orientar|Tiene experiencia en/.test(await pg.innerText('#v-compartir')), 'la nota ya no promete programa ni área en la historia');
   // marcando lo sensible (nacionalidad, situación…): la historia sigue sin niveles
   for (const c of ['nacionalidad', 'situacion', 'experiencia', 'cv']) await pg.check('#cp-c-' + c);

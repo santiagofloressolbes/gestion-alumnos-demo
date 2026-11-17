@@ -155,7 +155,7 @@ export function tarjetaAlumnosQueEncajan(oferta, d) {
   const boton = el('button', { class: 'primary', type: 'button', id: 'cp-ir', onclick: () => { location.hash = `#/oferta/${encodeURIComponent(oferta.id)}/compartir`; } }, 'Compartir perfiles');
   const actualizar = () => {
     navegacion.compartir = { idOferta: oferta.id, ids: [...sel] };
-    cuenta.textContent = sel.size ? `${plural(sel.size, 'alumno elegido', 'alumnos elegidos')} para compartir (máximo ${MAX_PERFILES}).` : `Marca a quien quieras para compartir su perfil (máximo ${MAX_PERFILES}).`;
+    cuenta.textContent = sel.size ? `${plural(sel.size, 'alumno elegido', 'alumnos elegidos')} para compartir (máximo ${MAX_PERFILES}).` : `Marca los alumnos cuyo perfil quieras compartir (máximo ${MAX_PERFILES}).`;
     boton.disabled = sel.size === 0;
     boton.textContent = sel.size ? `Compartir perfiles (${sel.size})` : 'Compartir perfiles';
     for (const i of tarjeta?.querySelectorAll('input.cp-sel') || []) i.disabled = sel.size >= MAX_PERFILES && !i.checked;
