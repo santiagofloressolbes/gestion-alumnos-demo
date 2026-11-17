@@ -36,6 +36,21 @@ const desbordes = pg => pg.evaluate(() => {
     const mal = await desbordes(pg);
     chk(mal.length === 0, `${hash}: nada se sale a 320 px ${mal.join(' | ')}`);
   }
+  // v30: el match con todo abierto (grupos y «Por qué»): la línea «✗ No coincide: prácticas o empleo, nacionalidad, permiso · ! Revisar: …» y los textos nuevos caben.
+  for (const [hash, raiz] of [['#/oferta/O004', '#match-alumnos'], ['#/oferta/O005', '#match-alumnos'], ['#/alumno/A010', '#match-ofertas']]) {
+    await ir(pg, hash, raiz + ' .grupo-match');
+    await pg.evaluate(r => document.querySelectorAll(r + ' details').forEach(d => { d.open = true; }), raiz);
+    const mal = await pg.evaluate(r => {
+      const salida = [];
+      if (document.documentElement.scrollWidth > innerWidth) salida.push('la página se desplaza en horizontal');
+      for (const e of document.querySelectorAll(r + ' .motivo, ' + r + ' .motivo *, ' + r + ' .crit-texto, ' + r + ' .match-punt, ' + r + ' summary, ' + r + ' .aviso, ' + r + ' .sub')) {
+        const b = e.getBoundingClientRect();
+        if (b.width && (e.scrollWidth > e.clientWidth + 1 || b.right > innerWidth + 1 || b.left < -1)) salida.push('«' + (e.textContent || '').trim().slice(0, 40) + '» no cabe');
+      }
+      return salida;
+    }, raiz);
+    chk(mal.length === 0, hash + ': el match abierto cabe a 320 px ' + mal.slice(0, 3).join(' | '));
+  }
   // el filtro de área de Buscar conserva sus botones cortos
   await ir(pg, '#/buscar', '#q'); await pg.click('#v-buscar summary');
   chk((await pg.$$eval('#v-buscar .opciones button', b => b.map(x => x.textContent))).join() === 'Cualquiera,Quiere ir,Experiencia', 'filtro de área: botones cortos (Cualquiera / Quiere ir / Experiencia)');
@@ -99,7 +114,7 @@ const desbordes = pg => pg.evaluate(() => {
   await t.pg.addInitScript(() => localStorage.setItem('gad.modo', 'demo'));
   await t.pg.setViewportSize({ width: 320, height: 640 });
   await ir(t.pg, '#/', '.masters .master');
-  chk(/Son datos de ejemplo y no se guarda nada\. Conectar con el Sheet/.test(await t.pg.innerText('#demo')), 'franja de la demo: ' + await t.pg.innerText('#demo'));
+  chk(/Son datos de ejemplo y no se guarda nada\. Conectar con los datos/.test(await t.pg.innerText('#demo')), 'franja de la demo: ' + await t.pg.innerText('#demo'));
   chk(await t.pg.innerText('#legal') === 'Proyecto personal de demostración. Todos los datos son ficticios. No afiliado a LaLiga ni a LaLiga Business School.', 'aviso legal con "Todos los datos son ficticios" y "No afiliado"');
   const html = await (await fetch(BASE + 'index.html')).text();
   chk(html.includes('Proyecto personal de demostración. Todos los datos son ficticios. No afiliado a LaLiga ni a LaLiga Business School.'), 'el pie de index.html (el que se ve antes de que cargue la app) dice lo mismo');

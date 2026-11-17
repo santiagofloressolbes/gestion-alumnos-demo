@@ -110,6 +110,16 @@ console.log('6. «Ha solicitado casi todas las ofertas»');
   chk(/Aviso: ha solicitado casi todo/.test(await pg.innerText('#v-master a[href="#/alumno/A001"]')), 'la lista del máster marca a A001: «Aviso: ha solicitado casi todo»');
   await pg.click('#v-master a[href="#/alumno/A001"]'); await pg.waitForSelector('#al-avisos:not([hidden])');
   chk(/Se avisa con 5 solicitudes o más/.test(await pg.innerText('#al-avisos')), 'la ficha explica por qué');
+  // v30: a 320 px (iPhone SE) los textos más largos del aviso caben: nada se sale ni hay scroll lateral.
+  await pg.setViewportSize({ width: 320, height: 640 });
+  const desborda = sel => pg.$$eval(sel, es => es.filter(e => { const r = e.getBoundingClientRect(); return r.width > 0 && (e.scrollWidth > e.clientWidth + 1 || r.right > innerWidth + 1 || r.left < -1); }).map(e => (e.textContent || '').trim().slice(0, 40)));
+  await ir(pg, '#/master/' + encodeURIComponent('MBA en inglés'), '#v-master .alumno');
+  chk((await desborda('#v-master .etiqueta-aviso, #v-master .alumno-texto, #v-master .alumno-texto *')).length === 0 && await sinScrollLateral(pg), '320 px: la marca «Aviso: ha solicitado casi todo» cabe en la lista');
+  await ir(pg, '#/', '#in-av-aplica-a-todo');
+  chk((await desborda('#in-avisos *')).length === 0 && await sinScrollLateral(pg), '320 px: «Ha solicitado casi todas las ofertas» cabe en la tarjeta de Inicio');
+  await pg.click('#in-av-aplica-a-todo'); await pg.waitForSelector('#v-avisos .aviso-item');
+  chk((await desborda('#v-avisos *')).length === 0 && await sinScrollLateral(pg), '320 px: la pantalla del aviso (título, motivo y botones) cabe');
+  await pg.setViewportSize({ width: 390, height: 844 });
   await ctx.close();
 }
 

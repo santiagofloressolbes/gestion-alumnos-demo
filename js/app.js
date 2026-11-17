@@ -42,7 +42,7 @@ function rutaActual() {
     if ((m = h.match(/^oferta\/([^/]+)\/editar$/))) return { vista: 'oferta-form', valor: decodeURIComponent(m[1]), pestana: 'ofertas', titulo: 'Editar oferta' };
     if ((m = h.match(/^oferta\/([^/]+)$/))) return { vista: 'oferta', valor: decodeURIComponent(m[1]), pestana: 'ofertas', titulo: 'Oferta' };
   } catch { /* dirección mal escrita: se vuelve al inicio */ }
-  if ((m = h.match(/^avisos\/(sin-solicitudes|aplica-a-todo)$/))) return { vista: 'avisos', valor: m[1], pestana: 'inicio', titulo: m[1] === 'sin-solicitudes' ? 'Sin solicitudes' : 'Aplica a todo' };
+  if ((m = h.match(/^avisos\/(sin-solicitudes|aplica-a-todo)$/))) return { vista: 'avisos', valor: m[1], pestana: 'inicio', titulo: m[1] === 'sin-solicitudes' ? 'Sin solicitudes' : 'Ha solicitado casi todas las ofertas' };
   if (h === 'buscar') return { vista: 'buscar', pestana: 'buscar', titulo: 'Buscar' };
   if (h === 'ofertas') return { vista: 'ofertas', pestana: 'ofertas', titulo: 'Ofertas' };
   if (h === 'ajustes') return { vista: 'ajustes', pestana: 'ajustes', titulo: 'Ajustes' };

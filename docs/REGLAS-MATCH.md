@@ -4,18 +4,18 @@ Este documento es la tabla exacta de lo que hace el match entre una oferta y un 
 
 ## Resumen para quien no es técnico
 
-Para cada alumno se miran **ocho criterios** (área, subárea, habilidades, idiomas, formación, tipo, nacionalidad y permiso de trabajo). Cada uno lleva su semáforo (verde cumple, amarillo afín o a revisar, rojo no coincide), su motivo escrito y los puntos que da. **Lo que no consta no suma ni resta:** un dato que falta sale como «Sin datos» (a revisar), nunca como «no cumple», y la fila avisa «datos incompletos». Lo que la oferta no pide sale «No aplica».
+Para cada alumno se miran **ocho criterios** (área, subárea, habilidades, idiomas, formación, tipo, nacionalidad y permiso de trabajo). Cada uno lleva su semáforo (verde cumple, amarillo afín o a revisar, rojo no coincide), su motivo escrito y los puntos que da. **Lo que no consta no suma ni resta:** un dato que falta sale como «Sin dato» (a revisar), nunca como «no cumple», y la fila avisa «datos incompletos». Lo que la oferta no pide sale «No aplica».
 
-Los alumnos se reparten en tres grupos según los cuatro criterios básicos (área, tipo, nacionalidad y permiso): «Encaja», «Encaja con reservas» y «No encaja»; dentro de cada grupo van ordenados por puntuación. **Nadie desaparece de la lista**, y los avisos de «Añadir solicitud» usan exactamente las mismas reglas. Siempre se ve el aviso **«Orientativo, verifica la situación real»**: es una ayuda para mirar, y si alguien puede trabajar o no lo decide siempre una persona. Lo que sigue es la tabla exacta.
+Los alumnos se reparten en tres grupos según los cuatro criterios básicos (área, tipo, nacionalidad y permiso): «Encaja», «Encaja con reservas» y «Encaja poco»; dentro de cada grupo van ordenados por puntuación. **Nadie desaparece de la lista**, y los avisos de «Añadir solicitud» usan exactamente las mismas reglas. Siempre se ve el aviso **«Es una ayuda, no una decisión»**: nadie queda fuera de la lista, y si alguien puede trabajar o no lo decide siempre una persona. Lo que sigue es la tabla exacta.
 
 ## Principios
 
 1. **Orienta y ordena; nunca oculta ni descarta a nadie.** Todos los alumnos (u ofertas) salen siempre, cada uno con su motivo.
 2. **La decisión sobre si alguien puede trabajar es siempre humana.** La pantalla lo dice siempre: «Orientativo, verifica la situación real».
 3. **Sin IA ni servicios externos.** Todo es una regla escrita aquí y editable en el Sheet. Las etiquetas coinciden por **texto exacto** (sin fijarse en mayúsculas ni tildes); no hay sinónimos ni aproximaciones.
-4. **Un dato que falta o no se reconoce no es un «no cumple».** Se enseña como «Sin datos» (amarillo, «a revisar»), **no suma puntos** y no cuenta en el total.
+4. **Un dato que falta o no se reconoce no es un «no cumple».** Se enseña como «Sin dato» (amarillo, «a revisar»), **no suma puntos** y no cuenta en el total.
 5. **Compartir perfiles no cambia:** no saca situación migratoria, notas, historial ni descartes (el match no escribe nada ni envía nada).
-6. **Cómo se ve (solo presentación; no cambia el cálculo).** El % de cada fila va siempre escrito en texto y lleva el color de su grupo: verde «Encaje» y ámbar «con reservas». En «No encaja» se llama **«Afinidad»** y va en gris (ver más abajo). Debajo, **una línea con lo que falla**, con los criterios abreviados («✗ No cumple: tipo, nacionalidad, permiso»): en «No encaja», los criterios básicos en rojo; en «con reservas», lo que no cumple y lo que hay que revisar («! Revisar: idiomas»); con un solo fallo, el criterio con el comienzo de su razón («✗ Área · No cumple …»); en «Encaje», el primer criterio que cumple. El detalle de los ocho criterios está en «Por qué», y las razones de nacionalidad y permiso largas se acortan con «ver más».
+6. **Cómo se ve (solo presentación; no cambia el cálculo).** El % de cada fila va siempre escrito en texto y lleva el color de su grupo: verde «Encaje» y ámbar «con reservas». En «Encaja poco» se llama **«Afinidad»** y va en gris (ver más abajo). Debajo, **una línea con lo que falla**, con los criterios abreviados («✗ No coincide: prácticas o empleo, nacionalidad, permiso»): en «Encaja poco», los criterios básicos en rojo; en «con reservas», lo que no cumple y lo que hay que revisar («! Revisar: idiomas»); con un solo fallo, el criterio con el comienzo de su razón («✗ Área · No coincide …»); en «Encaje», el primer criterio que cumple. El detalle de los ocho criterios está en «Por qué», y las razones de nacionalidad y permiso largas se acortan con «ver más».
 
 ## Los ocho criterios
 
@@ -40,8 +40,8 @@ Los pesos suman **100** y son fijos (no se editan en el Sheet).
 |---|---|---|---|
 | **Cumple** (✓) | verde | 100 % de su peso | Coincide o cumple. |
 | **Revisar** (!) | amarillo | 50 % de su peso (o la fracción que corresponda) | Afín, parcial, o una duda que hay que mirar a mano. |
-| **No cumple** (✗) | rojo | 0 (**sí cuenta** en el máximo) | No coincide. |
-| **Sin datos** (?) | amarillo | **nada** (no entra en el total) | Falta el dato (vacío o desconocido) en la oferta o en el alumno. |
+| **No coincide** (✗) | rojo | 0 (**sí cuenta** en el máximo) | No coincide. |
+| **Sin dato** (?) | amarillo | **nada** (no entra en el total) | Falta el dato (vacío o desconocido) en la oferta o en el alumno. |
 | **No aplica** (–) | verde | **nada** (no entra en el total) | La oferta no pide nada en ese criterio. |
 
 ## Reglas de cada criterio
@@ -52,15 +52,15 @@ Se compara el área de la oferta (**O**) con «Área a la que quiere ir» (**D**
 
 | Condición | Estado |
 |---|---|
-| La oferta no indica área | Sin datos |
+| La oferta no indica área | Sin dato |
 | D = O | Cumple |
-| D vacío y E vacío | Sin datos |
+| D vacío y E vacío | Sin dato |
 | Afinidad(D, O) = **Directa** | Cumple |
 | E = O | Revisar (50 %): «tiene experiencia en esa área» |
 | Afinidad(D, O) = **Afín** | Revisar (50 %) |
 | Afinidad(E, O) = Directa o Afín | Revisar (50 %) |
-| La hoja Afinidad existe y la pareja (D, O) —o (E, O) si no hay D— **no está** en ella | **Sin datos** («la hoja Afinidad no dice cómo se relaciona…») |
-| Cualquier otro caso (Lejana, o no hay hoja Afinidad) | No cumple |
+| La hoja Afinidad existe y la pareja (D, O) —o (E, O) si no hay D— **no está** en ella | **Sin dato** («No hay dato de cómo se relaciona…») |
+| Cualquier otro caso (Lejana, o no hay hoja Afinidad) | No coincide |
 
 La hoja **Afinidad** tiene una fila por pareja de áreas (`Área A`, `Área B`, `Nivel`: Directa, Afín o Lejana); el orden de la pareja da igual.
 
@@ -69,11 +69,11 @@ La hoja **Afinidad** tiene una fila por pareja de áreas (`Área A`, `Área B`, 
 | Condición | Estado |
 |---|---|
 | La oferta no indica subárea | No aplica |
-| El alumno no tiene subáreas escritas | Sin datos |
+| El alumno no tiene subáreas escritas | Sin dato |
 | Una subárea del alumno = la de la oferta | Cumple |
 | Otra subárea **de la misma área** (según la hoja **Áreas**) | Revisar (50 %) |
-| Todas sus subáreas son de **otra** área | No cumple |
-| La hoja Áreas no dice a qué área pertenece alguna | Sin datos |
+| Todas sus subáreas son de **otra** área | No coincide |
+| La hoja Áreas no dice a qué área pertenece alguna | Sin dato |
 
 ### 3. Habilidades (peso 20)
 
@@ -82,11 +82,11 @@ Las etiquetas están en una **lista cerrada**: la hoja **Etiquetas**. Se separan
 | Condición | Estado |
 |---|---|
 | La oferta no pide etiquetas | No aplica |
-| Todas las etiquetas de la oferta están fuera de la lista | Sin datos |
-| El alumno no tiene ninguna etiqueta de la lista | Sin datos |
+| Todas las etiquetas de la oferta están fuera de la lista | Sin dato |
+| El alumno no tiene ninguna etiqueta de la lista | Sin dato |
 | Tiene **todas** las que pide la oferta | Cumple |
 | Tiene **algunas** | Revisar; suma la fracción (p. ej. 2 de 3 = 67 % del peso) |
-| No tiene **ninguna** | No cumple |
+| No tiene **ninguna** | No coincide |
 
 Una etiqueta que no está en la hoja Etiquetas se **ignora** (y el motivo lo dice); no se acepta por parecida. Sin hoja Etiquetas no hay lista que validar y coincide el texto exacto.
 
@@ -102,7 +102,7 @@ Formato: `Inglés C1; Español nativo`. El nivel es la última palabra: A1, A2, 
 | Lo tiene con nivel más bajo | 0,5 |
 | Lo tiene, pero no consta su nivel y la oferta lo pide | no cuenta (sin dato) |
 
-El criterio suma la **media** de los idiomas con dato. Estado: todos 1 → Cumple; todos 0 → No cumple; en otro caso → Revisar. Si el alumno no tiene idiomas escritos, o ninguno tiene nivel conocido, → Sin datos.
+El criterio suma la **media** de los idiomas con dato. Estado: todos 1 → Cumple; todos 0 → No coincide; en otro caso → Revisar. Si el alumno no tiene idiomas escritos, o ninguno tiene nivel conocido, → Sin dato.
 
 ### 5. Formación (peso 5)
 
@@ -111,19 +111,19 @@ La oferta pide `Nivel de formación`: **Sin requisito, Grado, Máster o Doctorad
 | Condición | Estado |
 |---|---|
 | La oferta no lo pide o dice «Sin requisito» | No aplica |
-| Nivel de la oferta que no se reconoce | Sin datos |
-| No se reconoce ningún nivel en la formación del alumno | Sin datos |
+| Nivel de la oferta que no se reconoce | Sin dato |
+| No se reconoce ningún nivel en la formación del alumno | Sin dato |
 | El alumno llega al nivel pedido o más | Cumple |
 | Un nivel por debajo | Revisar (50 %) |
-| Dos niveles por debajo | No cumple |
+| Dos niveles por debajo | No coincide |
 
 ### 6. Tipo: prácticas o empleo (peso 10)
 
 | Condición | Estado |
 |---|---|
-| La oferta no indica el tipo, o el alumno no indica qué busca | Sin datos |
+| La oferta no indica el tipo, o el alumno no indica qué busca | Sin dato |
 | El alumno busca «Ambas», o lo mismo que la oferta | Cumple |
-| Busca otra cosa | No cumple |
+| Busca otra cosa | No coincide |
 
 ### 7. Nacionalidad (peso 5)
 
@@ -135,12 +135,12 @@ Usa la hoja **Países**: cada país con su **Grupo** (`UE`, `EEE`, `Suiza` o `Re
 | Pide «Unión Europea (UE/EEE)» y el alumno tiene un país UE o EEE | Cumple |
 | …o su situación es «Ciudadano UE o español» | Cumple |
 | …y tiene Suiza | Revisar (50 %): Suiza no es UE ni EEE, pero tiene acuerdo de libre circulación |
-| …y no consta ninguna nacionalidad | Sin datos |
-| …y alguna nacionalidad **no está en la hoja Países** | **Sin datos** (país desconocido, nunca «no cumple») |
-| …y todas son países conocidos de fuera | No cumple |
+| …y no consta ninguna nacionalidad | Sin dato |
+| …y alguna nacionalidad **no está en la hoja Países** | **Sin dato** (país desconocido, nunca «no cumple») |
+| …y todas son países conocidos de fuera | No coincide |
 | Pide un país concreto y el alumno lo tiene (principal o secundaria) | Cumple |
-| …y no consta la nacionalidad, o es un país desconocido | Sin datos |
-| …y tiene otro país conocido | No cumple |
+| …y no consta la nacionalidad, o es un país desconocido | Sin dato |
+| …y tiene otro país conocido | No coincide |
 
 Sin hoja Países se usa una lista de respaldo del código con los países UE/EEE (una prueba exige que sea idéntica a la hoja) y no se puede saber qué país es «desconocido».
 
@@ -157,18 +157,18 @@ Solo se mira si la oferta pide «Permiso de trabajo en vigor»; si no, **No apli
 | `Motivo` | La frase que se enseña. `{alumno}` se cambia por el nombre. |
 | `Fecha de validación` | Cuándo se comprobó la regla (AAAA-MM-DD o DD/MM/AAAA). |
 
-**Qué fila vale:** la de la misma situación que sea **más concreta**: país > grupo > cualquiera, y a igual concreción, la que nombra el tipo de oferta. Si el país de la oferta no consta, solo valen las filas sin país. Si el país **consta pero no está en la hoja Países**, solo vale una fila que lo nombre tal cual; si no hay, queda **Sin datos**.
+**Qué fila vale:** la de la misma situación que sea **más concreta**: país > grupo > cualquiera, y a igual concreción, la que nombra el tipo de oferta. Si el país de la oferta no consta, solo valen las filas sin país. Si el país **consta pero no está en la hoja Países**, solo vale una fila que lo nombre tal cual; si no hay, queda **Sin dato**.
 
 | Condición | Estado |
 |---|---|
 | La oferta no pide permiso | No aplica |
-| Al alumno no le consta la situación | Sin datos |
-| Ninguna fila vale | Sin datos (el motivo dice que falta la regla) |
+| Al alumno no le consta la situación | Sin dato |
+| Ninguna fila vale | Sin dato (el motivo dice que falta la regla) |
 | La fila vale | Su resultado |
 | …pero es «No cumple» y el alumno tiene nacionalidad UE/EEE | Revisar (dato contradictorio) |
 | …y la regla se validó hace **más de 12 meses** | Se añade «vuelve a validarla»; un «Cumple» baja a **Revisar** (50 %) |
 
-Una fila con un `Resultado`, un `Grupo` o un `Nivel` que no existe se **ignora** y la pantalla lo avisa; nunca acaba en «No cumple». Sin hoja (o sin filas válidas) se usan estas **reglas de respaldo**:
+Una fila con un `Resultado`, un `Grupo` o un `Nivel` que no existe se **ignora** y la pantalla lo avisa; nunca acaba en «No coincide». Sin hoja (o sin filas válidas) se usan estas **reglas de respaldo**:
 
 | Situación | Resultado |
 |---|---|
@@ -196,7 +196,7 @@ Una fila con un `Resultado`, un `Grupo` o un `Nivel` que no existe se **ignora**
 | Necesita permiso de trabajo | — | (no consta) | No cumple |
 | Necesita permiso de trabajo | — | UE / EEE / Suiza / Resto | Revisar (su situación es la de España) |
 
-**«No cumple» solo sale con «Necesita permiso de trabajo» y una oferta de España (o sin país).** En las demás combinaciones, nunca. Una prueba lo recorre entero.
+**«No coincide» solo sale con «Necesita permiso de trabajo» y una oferta de España (o sin país).** En las demás combinaciones, nunca. Una prueba lo recorre entero.
 
 ## Puntuación
 
@@ -218,11 +218,11 @@ El porcentaje se calcula **igual en los tres grupos**, con la fórmula de arriba
 | Grupo | Rótulo | Color |
 |---|---|---|
 | Encaje y Encaje con reservas | **Encaje 82 %** | el del grupo (verde, ámbar) |
-| No encaja | **Afinidad 64 %** | gris |
+| Encaja poco | **Afinidad 64 %** | gris |
 
-**Por qué en «No encaja» se llama «Afinidad».** El % suma lo que cumple cada criterio **que tiene datos**: las afinidades de perfil (área 30, subárea 10, habilidades 20, idiomas 15, formación 5 y tipo 10) **y** los dos requisitos (nacionalidad 5 y permiso 5). Un alumno cuyo grupo es «No encaja» ha fallado un criterio básico (área, prácticas o empleo, nacionalidad o permiso), pero puede tener un % alto porque cumple casi todo lo demás. Ese número dice **cuánto se parece su perfil a lo que pide la oferta, no si puede ocupar el puesto**, que ya decidió el grupo. Por eso no se llama «Encaje» ni va en verde, ámbar o rojo, y se ve en gris. El orden dentro del grupo no cambia: sigue siendo por ese %. (No hay que confundirlo con la hoja **Afinidad** del Sheet, que es la tabla de áreas afines: solo comparten el nombre.)
+**Por qué en «Encaja poco» se llama «Afinidad».** El % suma lo que cumple cada criterio **que tiene datos**: las afinidades de perfil (área 30, subárea 10, habilidades 20, idiomas 15, formación 5 y tipo 10) **y** los dos requisitos (nacionalidad 5 y permiso 5). Un alumno cuyo grupo es «Encaja poco» ha fallado un criterio básico (área, prácticas o empleo, nacionalidad o permiso), pero puede tener un % alto porque cumple casi todo lo demás. Ese número dice **cuánto se parece su perfil a lo que pide la oferta, no si puede ocupar el puesto**, que ya decidió el grupo. Por eso no se llama «Encaje» ni va en verde, ámbar o rojo, y se ve en gris. El orden dentro del grupo no cambia: sigue siendo por ese %. (No hay que confundirlo con la hoja **Afinidad** del Sheet, que es la tabla de áreas afines: solo comparten el nombre.)
 
-**Los criterios que fallan, en la fila.** En «No encaja» la fila nombra **todos** los criterios básicos en rojo, abreviados: «✗ No cumple: tipo, nacionalidad, permiso». En «Encaje con reservas» nombra lo que no cumple y lo que hay que revisar (también lo que no tiene datos): «✗ No cumple: subárea · ! Revisar: idiomas, permiso». Los nombres son: área, subárea, habilidades, idiomas, formación, tipo, nacionalidad y permiso, en el orden de «Por qué». Si solo falla uno, la fila sigue enseñando ese criterio con el comienzo de su razón. El detalle de cada uno está siempre en «Por qué».
+**Los criterios que fallan, en la fila.** En «Encaja poco» la fila nombra **todos** los criterios básicos en rojo, abreviados: «✗ No coincide: prácticas o empleo, nacionalidad, permiso». En «Encaje con reservas» nombra lo que no cumple y lo que hay que revisar (también lo que no tiene datos): «✗ No coincide: subárea · ! Revisar: idiomas, permiso». Los nombres son: área, subárea, habilidades, idiomas, formación, tipo, nacionalidad y permiso, en el orden de «Por qué». Si solo falla uno, la fila sigue enseñando ese criterio con el comienzo de su razón. El detalle de cada uno está siempre en «Por qué».
 
 ## Grupos y orden
 
@@ -232,7 +232,7 @@ El **grupo** lo deciden solo los cuatro criterios básicos (área, tipo, naciona
 |---|---|
 | **Encaja** | Los ocho criterios están en verde (o «no aplica»). |
 | **Encaja con reservas** | Ningún básico en rojo, pero hay algo en amarillo, sin datos o un rojo de perfil (subárea, habilidades, idiomas o formación). |
-| **No encaja** | Algún criterio básico en rojo. Los alumnos **se enseñan igualmente**. |
+| **Encaja poco** | Algún criterio básico en rojo. Los alumnos **se enseñan igualmente**. |
 
 Dentro de cada grupo: **mayor encaje primero**; a igual encaje, el que tiene **más criterios con datos** (más pruebas); después, por nombre (o, desde el alumno, la oferta más reciente).
 
@@ -242,7 +242,7 @@ En la fila, el resumen enseña primero lo que decide el grupo, después lo legal
 
 | Falta | Qué pasa |
 |---|---|
-| Las columnas nuevas de Alumnos u Ofertas | Valen vacías: los criterios de perfil salen «No aplica» (si la oferta no los pide) o «Sin datos» (si la oferta sí los pide y el alumno no los tiene). |
+| Las columnas nuevas de Alumnos u Ofertas | Valen vacías: los criterios de perfil salen «No aplica» (si la oferta no los pide) o «Sin dato» (si la oferta sí los pide y el alumno no los tiene). |
 | Alguna hoja nueva (o el script no se actualizó) | Se usan las reglas de respaldo del código. |
 | Una fila de una hoja con un valor que no existe | Se ignora y se avisa en la tarjeta. |
 
@@ -258,15 +258,15 @@ En la fila, el resumen enseña primero lo que decide el grupo, después lo legal
 | O001 Antipiratería | A027 Julia | Con reservas | VRAVVV-V | 79 | Sus subáreas son de otra área (no baja de grupo); 1 de 2 habilidades. |
 | O001 Antipiratería | A026 Hugo | Con reservas | V?RVVV-V | 76 | Subárea sin rellenar (no suma ni resta); ninguna habilidad coincide. |
 | O002 Becario/a de patrocinio | A008 Javier | Con reservas | VR?VVV-- | 86 | Marketing es **directa** con Comercial; sin habilidades escritas. |
-| O003 Product manager junior | A001 Lucía | No encaja | VVAVVR-V | 82 | Busca prácticas y la oferta es de empleo (básico en rojo). |
+| O003 Product manager junior | A001 Lucía | Encaja poco | VVAVVR-V | 82 | Busca prácticas y la oferta es de empleo (básico en rojo). |
 | O005 Comunicación (pide UE/EEE) | A023 Ana | Con reservas | AVVAVVVV | 81 | Experiencia en Marketing pero quiere otra área; español B2 frente a C1. |
-| O005 Comunicación (pide UE/EEE) | A011 Paula | No encaja | VVVVVRRR | 80 | Perfil perfecto, pero es de Chile y necesita permiso. |
+| O005 Comunicación (pide UE/EEE) | A011 Paula | Encaja poco | VVVVVRRR | 80 | Perfil perfecto, pero es de Chile y necesita permiso. |
 | O006 Redacción (cerrada) | A011 Paula | Encaja | VVVVVV-- | 100 | Una oferta cerrada se enseña igualmente. |
-| O007 Datos (pide EE. UU.) | A014 Tomás | No encaja | VVV?AVR- | 91 | Excelente perfil; sin idiomas escritos; la oferta pide nacionalidad estadounidense y es de Canadá. |
+| O007 Datos (pide EE. UU.) | A014 Tomás | Encaja poco | VVV?AVR- | 91 | Excelente perfil; sin idiomas escritos; la oferta pide nacionalidad estadounidense y es de Canadá. |
 | O009 People & Culture | A015 Marta | Con reservas | VVAAVV-- | 81 | 1 de 2 habilidades; inglés B1 frente a B2. |
-| O009 People & Culture | A005 Camila | No encaja | VVAVVR-- | 78 | Busca empleo y la oferta es de prácticas. |
+| O009 People & Culture | A005 Camila | Encaja poco | VVAVVR-- | 78 | Busca empleo y la oferta es de prácticas. |
 
-Además, la prueba comprueba, para las 10 ofertas, cuántos alumnos salen en cada grupo, quién sale primero y que los alumnos con datos sin rellenar a propósito (A008 etiquetas, A014 idiomas, A020 formación, A026 subáreas) salen siempre «Sin datos», nunca en rojo.
+Además, la prueba comprueba, para las 10 ofertas, cuántos alumnos salen en cada grupo, quién sale primero y que los alumnos con datos sin rellenar a propósito (A008 etiquetas, A014 idiomas, A020 formación, A026 subáreas) salen siempre «Sin dato», nunca en rojo.
 
 ## Qué se queda fuera de esta versión
 

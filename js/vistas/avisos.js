@@ -145,7 +145,7 @@ export async function pintarAvisos(raiz, tipo) {
   catch (err) { reemplazar(raiz, volver, tarjetaError(err, () => { recargar().catch(() => {}); pintarAvisos(raiz, tipo); })); return; }
   const e = estadoAvisos(d);
   if (!e) {
-    reemplazar(raiz, volver, el('div', { class: 'card' }, el('h2', {}, 'Sin datos de rondas'), el('p', { class: 'sub' }, 'Aún no hay rondas ni solicitudes para calcular avisos.')));
+    reemplazar(raiz, volver, el('div', { class: 'card' }, el('h2', {}, 'Todavía no hay rondas'), el('p', { class: 'sub' }, 'Aún no hay rondas ni solicitudes para calcular avisos.')));
     return;
   }
   const estado = el('p', { class: 'ok', role: 'status', id: 'av-estado', hidden: true });

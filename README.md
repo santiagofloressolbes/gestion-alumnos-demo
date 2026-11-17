@@ -27,7 +27,7 @@ Cada punto se explica en [docs/FUNCIONAMIENTO.md](docs/FUNCIONAMIENTO.md).
 - **Notas de entrevista** en la ficha de cada alumno.
 - **Ofertas:** lista, ficha, alta y edición, con su perfil del puesto. Las ofertas no se borran: se cierran.
 - **Rondas y solicitudes:** cada vez que una oferta se reenvía a los alumnos se registra una ronda; cada alumno que responde es una solicitud, con su estado y su historial.
-- **Alumnos que encajan:** para cada oferta, ordena y explica a todos los alumnos en tres grupos (encaja, encaja con reservas, no encaja), y al revés desde la ficha del alumno. Solo orienta: las reglas exactas están en [docs/REGLAS-MATCH.md](docs/REGLAS-MATCH.md).
+- **Alumnos que encajan:** para cada oferta, ordena y explica a todos los alumnos en tres grupos (encaja, encaja con reservas, encaja poco), y al revés desde la ficha del alumno. Solo orienta: las reglas exactas están en [docs/REGLAS-MATCH.md](docs/REGLAS-MATCH.md).
 - **Compartir perfiles** (hasta 10 por envío), siempre con vista previa del texto exacto.
 - **Avisos** sobre alumnos sin solicitudes o que aplican a todo, y avisos de datos que corregir en la hoja de cálculo.
 - **Borradores de correo** de seguimiento, en español o en inglés, que se copian o se abren en la app de correo.

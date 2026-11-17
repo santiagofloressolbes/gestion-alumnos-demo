@@ -45,7 +45,7 @@ El [README](../README.md) tiene el resumen. Aquí está el detalle de cada parte
 
 ## 4. Alumnos que encajan
 
-En la ficha de la oferta, la tarjeta "Alumnos que encajan" reparte a **todos** los alumnos en tres grupos (encaja, encaja con reservas, no encaja) y cada fila explica por qué, con su semáforo, su puntuación ("Encaje 82 %"; en "No encaja" se llama "Afinidad", en gris, porque solo dice cuánto se parece el perfil, no si puede ocupar la oferta) y los datos que faltan. En la ficha del alumno, "Ofertas que encajan" hace lo mismo al revés.
+En la ficha de la oferta, la tarjeta "Alumnos que encajan" reparte a **todos** los alumnos en tres grupos (encaja, encaja con reservas, encaja poco) y cada fila explica por qué, con su semáforo, su puntuación ("Encaje 82 %"; en "Encaja poco" se llama "Afinidad", en gris, porque solo dice cuánto se parece el perfil, no si puede ocupar la oferta) y los datos que faltan. En la ficha del alumno, "Ofertas que encajan" hace lo mismo al revés.
 
 Para cada alumno se miran **ocho criterios** (área, subárea, habilidades, idiomas, formación, tipo, nacionalidad y permiso de trabajo), cada uno con su semáforo, su motivo y sus puntos. Lo que no consta no suma ni resta, y nadie desaparece de la lista. Siempre se ve el aviso **«Orientativo, verifica la situación real»**: es una ayuda para mirar, y si alguien puede trabajar o no lo decide siempre una persona. Los pesos, los estados y las reglas de cada criterio están en [REGLAS-MATCH.md](REGLAS-MATCH.md).
 
@@ -53,26 +53,26 @@ Para cada alumno se miran **ocho criterios** (área, subárea, habilidades, idio
 
 - **Cómo se hace.** En la ficha de la oferta se marcan hasta 10 alumnos (o, en la ficha de un alumno, "Compartir perfil"), se ve una vista previa con el texto exacto y se envía con el menú de compartir del móvil o se copia.
 
-Siempre pasa por una **vista previa** con el texto exacto que se enviará. Por defecto solo salen nombre, programa, área y qué busca. Nacionalidad, situación de trabajo, resumen de experiencia y enlace al CV (solo si es `https`) son **datos sensibles** y vienen desmarcados. Las notas de entrevista, el historial y los motivos de descarte **nunca** se incluyen. El máximo es de 10 alumnos por envío. Hay una casilla aparte, desmarcada, **«Incluir historia»**: un párrafo corto armado con plantillas a partir de las subáreas, las habilidades, los idiomas y la formación (sin repetir el programa, el área ni lo que busca, que ya salen en sus líneas; los idiomas van **sin nivel ni «nativo»**, para no insinuar nacionalidad; nunca el «por qué» ni datos sensibles). La app no guarda nada de lo compartido.
+Siempre pasa por una **vista previa** con el texto exacto que se enviará. Por defecto solo salen nombre, programa, área y qué busca. Nacionalidad, situación de trabajo, resumen de experiencia y enlace al CV (solo si es `https`) son **datos sensibles** y vienen desmarcados. Las notas de entrevista, el historial y los motivos de descarte **nunca** se incluyen. El máximo es de 10 alumnos por envío. Hay una casilla aparte, desmarcada, **«Incluir resumen del perfil»**: una línea armada con plantillas a partir de las subáreas, las habilidades, los idiomas y la formación (sin repetir el programa, el área ni lo que busca, que ya salen en sus líneas; los idiomas van **sin nivel ni «nativo»**, para no insinuar nacionalidad; nunca el «por qué» ni datos sensibles). La app no guarda nada de lo compartido.
 
 ## 6. Avisos de alumnos
 
-- **Qué ve quien la usa.** En Inicio, debajo de los programas, la tarjeta **Avisos** (con borde naranja) cuenta los alumnos «sin solicitudes» y los que «aplican a todo». Al tocar uno se ve quién es y **por qué ha saltado**, con los números. También sale una marca en la lista del máster y una tarjeta en la ficha. Solo informan: no bloquean nada. Se pueden **silenciar 30 días**. Aparte hay avisos de **datos** (en rojo, con un triángulo y la palabra «Datos del Sheet»), por ejemplo un programa que no está en la hoja Listas: **no se pueden silenciar**, salen aunque no haya rondas y se quitan arreglando el Sheet. Los de **seguimiento** (naranja, con un reloj) y los de datos se distinguen por la forma, la palabra y el color, no solo por el color.
+- **Qué ve quien la usa.** En Inicio, debajo de los programas, la tarjeta **Avisos** (con borde naranja) cuenta los alumnos «sin solicitudes» y los que «han solicitado casi todas las ofertas». Al tocar uno se ve quién es y **por qué se avisa**, con los números. También sale una marca en la lista del máster y una tarjeta en la ficha. Solo informan: no bloquean nada. Se pueden **silenciar 30 días**. Aparte hay avisos de **datos** (en rojo, con un triángulo y la palabra «Datos»), por ejemplo un programa que no está en la lista de programas: **no se pueden silenciar**, salen aunque no haya rondas y se quitan arreglando el Sheet. Los de **seguimiento** (naranja, con un reloj) y los de datos se distinguen por la forma, la palabra y el color, no solo por el color.
 
 Se calculan en el móvil con las rondas y las solicitudes (sin tocar el Sheet). Con los valores por defecto:
 
-| Aviso | Salta cuando… |
+| Aviso | Se avisa cuando… |
 |---|---|
-| **Sin solicitudes** | En los últimos 30 días se difundieron al menos 3 ofertas y el alumno no ha hecho **ninguna** solicitud. No salta a quien ya está Contratado, y cuenta desde la primera ronda registrada si es más reciente. |
-| **Aplica a todo** | En los últimos 30 días ha hecho al menos 5 solicitudes y a un 80 % o más de las ofertas difundidas. Se añade cuántas de esas ofertas el match marca como «no encaja», pero eso no decide nada. |
+| **Sin solicitudes** | En los últimos 30 días se enviaron al menos 3 ofertas y el alumno no ha hecho **ninguna** solicitud. No se avisa a quien ya está Contratado, y cuenta desde la primera ronda registrada si es más reciente. |
+| **Ha solicitado casi todas las ofertas** | En los últimos 30 días ha hecho al menos 5 solicitudes y a un 80 % o más de las ofertas enviadas. Se añade cuántas de esas ofertas el match marca como «encaja poco», pero eso no decide nada. |
 
-Los cuatro números (días, ofertas, solicitudes y porcentaje) se cambian en Ajustes. **Un aviso nunca bloquea nada** y siempre dice por qué ha saltado. «Silenciar 30 días» lo oculta de los contadores hasta esa fecha; se guarda solo en ese móvil.
+Los cuatro números (días, ofertas, solicitudes y porcentaje) se cambian en Ajustes. **Un aviso nunca bloquea nada** y siempre dice por qué se avisa. «Silenciar 30 días» lo oculta de los contadores hasta esa fecha; se guarda solo en ese móvil.
 
 ## 7. Borradores de correo
 
 - **Cómo se hace.** En el detalle de una solicitud, **Borrador de correo** (si está en proceso o descartada): se elige español o inglés, se ve el texto exacto y se copia o se abre en la app de correo. No incluye notas, motivos de descarte, situación de trabajo ni estatus migratorio.
 
-Hay dos: **en proceso** (Recibida, En revisión, Enviada a la empresa y Entrevista) y **descartado**, que dice con tacto que la solicitud no continúa e **invita a acercarse** si quiere ir hacia el área de la oferta. Se escriben en español, o en inglés para el MBA en inglés, y se puede cambiar el idioma en la vista previa. El texto solo usa el nombre de pila, el puesto, la empresa y el estado: **nunca** notas de entrevista, motivos de descarte, situación de trabajo ni estatus migratorio. La app no envía nada: se copia o se abre en la app de correo, sin destinatario.
+Hay dos: **en proceso** (Recibida, En revisión, Enviada a la empresa y Entrevista) y **descartado**, que dice con tacto que la solicitud no continúa e **invita a escribir** si quiere ir hacia el área de la oferta. Se escriben en español, o en inglés para el MBA en inglés, y se puede cambiar el idioma en la vista previa. El texto solo usa el nombre de pila, el puesto, la empresa y el estado: **nunca** notas de entrevista, motivos de descarte, situación de trabajo ni estatus migratorio. La app no envía nada: se copia o se abre en la app de correo, sin destinatario.
 
 ## 8. Ajustes, conexión y actualización
 
