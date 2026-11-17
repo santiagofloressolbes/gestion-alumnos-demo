@@ -221,7 +221,7 @@ console.log('11. v29: el error, en dos frases cortas y con «Cerrar»');
   chk(log.consola.every(x => /Failed to load resource|net::ERR/.test(x)), 'solo errores de red esperados en la consola');
 
   // Otros errores: el mismo formato de dos frases y con «Cerrar»
-  for (const [codigo, esperado] of [['servidor', /^No se han podido actualizar los datos\. El script de Google ha fallado por dentro\..* Se siguen viendo los datos anteriores\.$/], ['version', /^No se han podido actualizar los datos\. El script es de una versión.* Se siguen viendo los datos anteriores\.$/]]) {
+  for (const [codigo, esperado] of [['servidor', /^No se han podido actualizar los datos\. Ha fallado algo en el servidor.* Se siguen viendo los datos anteriores\.$/], ['version', /^No se han podido actualizar los datos\. La app y los datos no son compatibles.* Se siguen viendo los datos anteriores\.$/]]) {
     ctrl.alResponder = () => ({ ok: false, error: codigo });
     await pg.click('#refrescar');
     await pg.waitForFunction(() => /No se han podido/.test(document.getElementById('refrescar-texto').textContent));

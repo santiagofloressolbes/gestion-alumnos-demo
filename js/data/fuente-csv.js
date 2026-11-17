@@ -16,7 +16,7 @@ async function descargar(url) {
 // Devuelve { cabecera: [...], filas: [[...], ...] } de una hoja.
 async function hoja(nombre) {
   const filas = leerCSV(await descargar(CONFIG.local[nombre]));
-  if (!filas.length) throw new Error(`La hoja ${nombre} está vacía`);
+  if (!filas.length) throw new Error(`Faltan datos de ejemplo: ${nombre} está vacío`);
   return { cabecera: filas[0].map(h => h.trim()), filas: filas.slice(1) };
 }
 

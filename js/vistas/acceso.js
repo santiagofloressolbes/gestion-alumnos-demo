@@ -36,7 +36,7 @@ export function pintarAcceso(raiz) {
       if (e.codigo === 'clave' || e.codigo === 'bloqueado') clave.value = '';
     }
   } },
-    el('div', { class: 'campo-form' }, el('label', { for: 'ac-url' }, 'Dirección del script'), url),
+    el('div', { class: 'campo-form' }, el('label', { for: 'ac-url' }, 'Dirección de acceso'), url, el('p', { class: 'sub ayuda' }, 'Te la pasa quien administra la app.')),
     el('div', { class: 'campo-form' }, el('label', { for: 'ac-clave' }, 'Clave'), clave, ver),
     mensaje,
     boton);
@@ -44,7 +44,7 @@ export function pintarAcceso(raiz) {
   reemplazar(raiz, 
     getModo() && el('a', { class: 'volver', href: '#/' }, 'Volver'),
     el('section', { class: 'card', 'aria-labelledby': 'ac-titulo' },
-      el('h2', { id: 'ac-titulo' }, 'Conectar con el Sheet de prueba'),
+      el('h2', { id: 'ac-titulo' }, 'Conectar con los datos'),
       el('p', { class: 'sub' }, 'La dirección y la clave se quedan solo en este móvil. Los datos de los alumnos, no.'),
       formulario),
     el('section', { class: 'card', 'aria-labelledby': 'ac-demo' },

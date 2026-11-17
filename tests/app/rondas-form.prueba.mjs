@@ -307,7 +307,7 @@ const sinClaveEnUrl = log => log.peticiones.every(p => !p.url.includes(CLAVE_PRU
   mundo.hojas.Alumnos.m = mundo.hojas.Alumnos.m.filter(f => f[0] !== 'A007');
   await guardar(pg, 'v-aplicacion-form');
   await pg.waitForSelector('#v-aplicacion-form .error:not([hidden])');
-  chk(/Este alumno ya no está en el Sheet/.test(await texto(pg, '#v-aplicacion-form .error')), 'alumno borrado del Sheet mientras tanto: lo dice');
+  chk(/Este alumno ya no existe en los datos/.test(await texto(pg, '#v-aplicacion-form .error')), 'alumno borrado del Sheet mientras tanto: lo dice');
   // salir sin guardar
   pg.on('dialog', d => d.accept());   // la pantalla anterior tiene cambios sin guardar: al ir a otra se acepta descartarlos
   await formApl(pg, 'O003', 2);
@@ -534,13 +534,13 @@ const sinClaveEnUrl = log => log.peticiones.every(p => !p.url.includes(CLAVE_PRU
   t.ctrl.alResponder = (j, accion) => (accion === 'registrarRonda' ? { ok: true, ronda: null } : accion === 'cambiarEstado' ? { ok: true, aplicacion: { id: 'AP004', estado: 5 }, historial: null } : accion === 'crearAplicacion' ? { ok: true, aplicacion: { id: 'AP013' }, historial: [] } : j);
   await formRonda(t.pg, 'O004'); await guardar(t.pg, 'v-ronda-form');
   await t.pg.waitForSelector('#v-ronda-form .error:not([hidden])');
-  chk(/no responde como debería el script/.test(await texto(t.pg, '#v-ronda-form .error')), 'una respuesta sin la ronda: error claro, sin romperse');
+  chk(/no responde como se esperaba/.test(await texto(t.pg, '#v-ronda-form .error')), 'una respuesta sin la ronda: error claro, sin romperse');
   await formEstado(t.pg, 'AP004'); await t.pg.selectOption('#es-estado', 'Entrevista'); await guardar(t.pg, 'v-estado-form');
   await t.pg.waitForSelector('#v-estado-form .error:not([hidden])');
-  chk(/no responde como debería el script/.test(await texto(t.pg, '#v-estado-form .error')), 'una aplicación con campos que no son texto: error claro');
+  chk(/no responde como se esperaba/.test(await texto(t.pg, '#v-estado-form .error')), 'una aplicación con campos que no son texto: error claro');
   await formApl(t.pg, 'O002', 2); await t.pg.check('#ap-al-A003'); await guardar(t.pg, 'v-aplicacion-form');
   await t.pg.waitForSelector('#v-aplicacion-form .error:not([hidden])');
-  chk(/no responde como debería el script/.test(await texto(t.pg, '#v-aplicacion-form .error')) && t.log.consola.length === 0, 'un historial que no es un objeto: error claro y sin errores de consola');
+  chk(/no responde como se esperaba/.test(await texto(t.pg, '#v-aplicacion-form .error')) && t.log.consola.length === 0, 'un historial que no es un objeto: error claro y sin errores de consola');
   await t.ctx.close();
   const u = await entrar('script');
   await formEstado(u.pg, 'AP005'); await u.pg.selectOption('#es-estado', 'En revisión'); await u.pg.fill('#es-nota', '  Hola   mundo  ');

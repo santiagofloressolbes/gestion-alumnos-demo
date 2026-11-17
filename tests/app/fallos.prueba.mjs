@@ -99,7 +99,7 @@ const FORMS = {
     ctrl.abortar = 2;
     await enviar(pg, F.vista); await hayError(pg, F.vista);
     const t = await error(pg, F.vista);
-    chk(/No se ha podido conectar con Google/.test(t) && /dos veces/.test(t) && !/tu conexión|Comprueba/i.test(t), `${nombre}: el mensaje dice lo que pasó (dos intentos) sin culpar a la conexión: ${t.replace(/\n/g, ' ')}`);
+    chk(/No se ha podido conectar con Google/.test(t) && /Vuelve a intentarlo/.test(t) && !/tu conexión|Comprueba/i.test(t), `${nombre}: el mensaje dice lo que pasó y qué hacer, sin culpar a la conexión: ${t.replace(/\n/g, ' ')}`);
     chk(F.filas(mundo) === n0 && cuantas(log, F.accion) === 2, `${nombre}: no se escribió nada y fueron exactamente dos intentos`);
     chk(!(await pg.isDisabled(`#${F.vista} form button[type=submit]`)) && /^Guardar$/.test(await pg.innerText(`#${F.vista} form button[type=submit]`)), `${nombre}: el botón vuelve a "Guardar"`);
     await enviar(pg, F.vista); await F.final(pg);
@@ -140,7 +140,7 @@ const FORMS = {
     ctrl.ocupado = 9;
     await enviar(pg, F.vista); await hayError(pg, F.vista);
     const m = await error(pg, F.vista);
-    chk(/Google está ocupado/.test(m) && /3 veces/.test(m), `${nombre}: sigue ocupado → lo dice y cuenta los intentos: ${m}`);
+    chk(/Google está ocupado/.test(m) && /Espera unos segundos/.test(m), `${nombre}: sigue ocupado → lo dice y dice qué hacer: ${m}`);
     chk(F.filas(mundo) === n0 && cuantas(log, F.accion) === 3 && !(await pg.isDisabled(`#${F.vista} form button[type=submit]`)), `${nombre}: 3 intentos, nada escrito, botón libre`);
     await ctx.close();
   }

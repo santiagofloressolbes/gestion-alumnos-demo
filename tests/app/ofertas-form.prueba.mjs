@@ -283,7 +283,7 @@ function mundo_ubic(mundo, id) { return hojaOfertas(mundo)[fila(mundo, id) - 1][
   // g) respuesta rara del script
   t.ctrl.alResponder = (j, accion) => (accion === 'guardarOferta' ? { ok: true } : j);
   await guardarBtn(t.pg); await t.pg.waitForSelector('#v-oferta-form .error:not([hidden])');
-  chk(/no responde como debería el script/.test(await error(t.pg)), 'respuesta sin id: error claro');
+  chk(/no responde como se esperaba/.test(await error(t.pg)), 'respuesta sin id: error claro');
   await t.ctx.close();
 }
 
