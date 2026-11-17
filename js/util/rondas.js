@@ -25,7 +25,7 @@ export const aplicacionesDeAlumno = (apps, idAlumno) =>
 // Cuántas aplicaciones hay en cada estado, en el orden de la lista de estados (los que no estén en la lista, al final).
 export function resumenEstados(apps, orden = []) {
   const cuenta = new Map();
-  for (const a of apps) cuenta.set(a.estado || 'Sin estado', (cuenta.get(a.estado || 'Sin estado') || 0) + 1);
+  for (const a of apps) cuenta.set(a.estado || 'Sin dato', (cuenta.get(a.estado || 'Sin dato') || 0) + 1);
   const claves = [...orden.filter(e => cuenta.has(e)), ...[...cuenta.keys()].filter(e => !orden.includes(e)).sort()];
   return claves.map(estado => ({ estado, n: cuenta.get(estado) }));
 }

@@ -25,7 +25,7 @@ igual(R.aplicacionesDeRonda(apps, 'O002', 1).length, 3, 'el número de ronda val
 igual(R.aplicacionesDeAlumno(apps, 'A1').map(a => a.id), ['AP003', 'AP005', 'AP002'], 'las aplicaciones de un alumno, las más recientes primero');
 igual(R.resumenEstados(apps.filter(a => a.numeroRonda === '1' && a.idOferta === 'O002'), ['Recibida', 'Entrevista', 'Descartado']), [{ estado: 'Entrevista', n: 1 }, { estado: 'Descartado', n: 1 }, { estado: 'Fichado', n: 1 }], 'resumen por estado: en el orden de la lista y, al final, los que no están en ella');
 igual(R.resumenEstados([], ['Recibida']), [], 'resumen vacío');
-igual(R.resumenEstados([{ estado: '' }]), [{ estado: 'Sin estado', n: 1 }], 'una aplicación sin estado se cuenta como "Sin estado"');
+igual(R.resumenEstados([{ estado: '' }]), [{ estado: 'Sin dato', n: 1 }], 'una aplicación sin estado se cuenta como "Sin dato"');
 
 const historial = [
   { id: 'H003', idAplicacion: 'AP001', fecha: '2026-10-14' }, { id: 'H001', idAplicacion: 'AP001', fecha: '2026-10-11' },

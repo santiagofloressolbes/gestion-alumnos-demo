@@ -58,7 +58,7 @@ const sinClaveEnUrl = log => log.peticiones.every(p => !p.url.includes(CLAVE_PRU
   console.log('2. Registrar una ronda');
   const { pg, ctx, log, mundo } = await entrar('script');
   await formRonda(pg, 'O004');
-  chk(await texto(pg, '#ro-numero') === 'Vas a registrar la ronda 1 (el primer envío de esta oferta a los alumnos).' && await pg.inputValue('#ro-fecha') === HOY, 'ronda 1 y la fecha de hoy por defecto');
+  chk(await texto(pg, '#ro-numero') === 'Ronda 1: primer envío de esta oferta a los alumnos.' && await pg.inputValue('#ro-fecha') === HOY, 'ronda 1 y la fecha de hoy por defecto');
   chk(await pg.getAttribute('#ro-fecha', 'max') === HOY && await pg.getAttribute('#ro-fecha', 'min') === '2026-10-12', 'la fecha no puede ser futura ni anterior a la recepción de la oferta (12/10)');
   chk(await pg.innerText('#titulo') === 'Nueva ronda' && (await pg.$$('#ro-cerrada')).length === 0, 'título; sin aviso de oferta cerrada');
   // validaciones locales
@@ -81,7 +81,7 @@ const sinClaveEnUrl = log => log.peticiones.every(p => !p.url.includes(CLAVE_PRU
   chk(j.idOferta === 'O004' && j.numero === 1 && j.fecha === '2026-10-28' && Object.keys(j).sort().join() === 'action,fecha,idOferta,key,numero', 'la petición lleva solo lo necesario');
   chk(sinClaveEnUrl(log), 'la clave va en el cuerpo, nunca en la dirección');
   await pg.click('#ro-nueva'); await pg.waitForSelector('#ro-fecha');
-  chk(await texto(pg, '#ro-numero') === 'Vas a registrar la ronda 2 (un nuevo envío de esta oferta a los alumnos).' && await pg.getAttribute('#ro-fecha', 'min') === '2026-10-28', 'la siguiente es la ronda 2 y no puede ser antes de la ronda 1');
+  chk(await texto(pg, '#ro-numero') === 'Ronda 2: nuevo envío de esta oferta a los alumnos.' && await pg.getAttribute('#ro-fecha', 'min') === '2026-10-28', 'la siguiente es la ronda 2 y no puede ser antes de la ronda 1');
   await guardar(pg, 'v-ronda-form'); await aterriza(pg, '#/oferta/O004', '#v-oferta .ronda');
   chk((await pg.$$eval('#v-oferta .ronda h2', h => h.map(x => x.textContent))).join() === 'Ronda 2,Ronda 1', 'dos rondas, la última arriba');
   chk(log.consola.length === 0, 'sin errores de consola: ' + log.consola.join(' | '));
@@ -93,7 +93,7 @@ const sinClaveEnUrl = log => log.peticiones.every(p => !p.url.includes(CLAVE_PRU
   console.log('3. Registrar ronda: oferta cerrada, conflicto, respuesta perdida y sin conexión');
   const { pg, ctx, log, mundo, ctrl } = await entrar('script');
   await formRonda(pg, 'O006');
-  chk(/Esta oferta está cerrada/.test(await texto(pg, '#ro-cerrada')) && await texto(pg, '#ro-numero') === 'Vas a registrar la ronda 2 (un nuevo envío de esta oferta a los alumnos).', 'oferta cerrada: avisa, pero deja registrar');
+  chk(/Esta oferta está cerrada/.test(await texto(pg, '#ro-cerrada')) && await texto(pg, '#ro-numero') === 'Ronda 2: nuevo envío de esta oferta a los alumnos.', 'oferta cerrada: avisa, pero deja registrar');
   await guardar(pg, 'v-ronda-form'); await aterriza(pg, '#/oferta/O006', '#v-oferta .ronda');
   chk(fila(mundo, 'Rondas', 'R006')['ID oferta'] === 'O006', 'se guardó en una oferta cerrada');
   // conflicto: otra persona registra la ronda 1 de O004 con otra fecha mientras esta tiene el formulario abierto
@@ -102,7 +102,7 @@ const sinClaveEnUrl = log => log.peticiones.every(p => !p.url.includes(CLAVE_PRU
   mundo.llamar(base(mundo, { action: 'registrarRonda', idOferta: 'O004', numero: 1, fecha: '2026-10-20' }));
   await guardar(pg, 'v-ronda-form');
   await pg.waitForSelector('#ro-aviso');
-  chk(/Otra persona ya había registrado la ronda 1, así que esta es la ronda 2/.test(await texto(pg, '#ro-aviso')) && await texto(pg, '#ro-numero') === 'Vas a registrar la ronda 2 (un nuevo envío de esta oferta a los alumnos).' && await pg.inputValue('#ro-fecha') === '2026-10-27', 'conflicto: lo explica, propone la ronda 2 y conserva la fecha escrita');
+  chk(/Otra persona ya había registrado la ronda 1, así que esta es la ronda 2/.test(await texto(pg, '#ro-aviso')) && await texto(pg, '#ro-numero') === 'Ronda 2: nuevo envío de esta oferta a los alumnos.' && await pg.inputValue('#ro-fecha') === '2026-10-27', 'conflicto: lo explica, propone la ronda 2 y conserva la fecha escrita');
   chk(filas(mundo, 'Rondas').filter(r => r['ID oferta'] === 'O004').length === 1, '... y no se ha creado nada de más');
   await guardar(pg, 'v-ronda-form'); await aterriza(pg, '#/oferta/O004', '#v-oferta .ronda');
   chk((await pg.$$eval('#v-oferta .ronda h2', h => h.map(x => x.textContent))).join() === 'Ronda 2,Ronda 1', 'tras revisar, guarda la ronda 2');
@@ -400,7 +400,7 @@ const sinClaveEnUrl = log => log.peticiones.every(p => !p.url.includes(CLAVE_PRU
   const n0 = filas(mundo, 'Historial').length;
   await guardar(pg, 'v-estado-form');
   await pg.waitForSelector('#v-estado-form .conflicto:not([hidden])');
-  chk(/Esta solicitud ha cambiado mientras la editabas/.test(await texto(pg, '#v-estado-form .conflicto')) && /Estado en el Sheet\s+Descartado \(Otro\)/.test(await texto(pg, '#v-estado-form .conflicto')) && await pg.inputValue('#es-estado') === 'Contratado' && await pg.inputValue('#es-nota') === 'Mi cambio', 'conflicto: enseña cómo está ahora y conserva lo escrito');
+  chk(/Alguien ha cambiado esta solicitud mientras la editabas/.test(await texto(pg, '#v-estado-form .conflicto')) && /Estado actual\s+Descartado \(Otro\)/.test(await texto(pg, '#v-estado-form .conflicto')) && await pg.inputValue('#es-estado') === 'Contratado' && await pg.inputValue('#es-nota') === 'Mi cambio', 'conflicto: enseña cómo está ahora y conserva lo escrito');
   chk(filas(mundo, 'Historial').length === n0 && fila(mundo, 'Aplicaciones', 'AP001').Estado === 'Descartado', '... y no se ha pisado nada (sigue Descartado y sin líneas nuevas)');
   await pg.click('#v-estado-form .conflicto button:has-text("Guardar mi versión")');
   await aterriza(pg, '#/aplicacion/AP001', '#v-aplicacion .cabecera');
@@ -413,9 +413,9 @@ const sinClaveEnUrl = log => log.peticiones.every(p => !p.url.includes(CLAVE_PRU
   otra('AP005', 'En revisión', '', ANT('Recibida'));
   await guardar(pg, 'v-estado-form');
   await pg.waitForSelector('#v-estado-form .conflicto:not([hidden])');
-  await pg.click('#v-estado-form .conflicto button:has-text("Quedarme con la del Sheet")');
+  await pg.click('#v-estado-form .conflicto button:has-text("Quedarme con la actual")');
   await aterriza(pg, '#/aplicacion/AP005', '#v-aplicacion .cabecera');
-  chk(/Listo: ahora ves lo que hay en el Sheet/.test(await texto(pg, '#v-aplicacion .aviso-ok')) && /En revisión/.test(await texto(pg, '#v-aplicacion .cabecera')) && fila(mundo, 'Aplicaciones', 'AP005').Estado === 'En revisión', 'descartar el mío: carga lo que había y no escribe');
+  chk(/Listo: ahora ves la versión actual/.test(await texto(pg, '#v-aplicacion .aviso-ok')) && /En revisión/.test(await texto(pg, '#v-aplicacion .cabecera')) && fila(mundo, 'Aplicaciones', 'AP005').Estado === 'En revisión', 'descartar el mío: carga lo que había y no escribe');
   chk((await pg.$$eval('#v-aplicacion .historial li', l => l.length)) === 2, 'y el historial ya incluye el cambio de la otra persona');
   // conflicto: la otra persona hizo lo mismo que yo
   await formEstado(pg, 'AP007');   // Enviada a la empresa
@@ -451,7 +451,7 @@ const sinClaveEnUrl = log => log.peticiones.every(p => !p.url.includes(CLAVE_PRU
   mundo.hojas.Aplicaciones.m = mundo.hojas.Aplicaciones.m.filter(f => f[0] !== 'AP011');
   await guardar(pg, 'v-estado-form');
   await pg.waitForSelector('#v-estado-form .error:not([hidden])');
-  chk(/Esta solicitud ya no está en el Sheet/.test(await texto(pg, '#v-estado-form .error')), 'aplicación borrada del Sheet mientras tanto: lo dice');
+  chk(/Esta solicitud ya no existe en los datos/.test(await texto(pg, '#v-estado-form .error')), 'aplicación borrada del Sheet mientras tanto: lo dice');
   // salir sin guardar
   pg.on('dialog', d => d.accept());
   await formEstado(pg, 'AP012');
@@ -476,12 +476,12 @@ const sinClaveEnUrl = log => log.peticiones.every(p => !p.url.includes(CLAVE_PRU
   ctrl.alResponder = (j, accion) => { if (accion === 'data' || accion === 'ping') j.soporta = ['guardarEntrevista', 'guardarOferta']; return j; };
   for (const [h, v] of [['#/oferta/O004/ronda/nueva', '#v-ronda-form'], ['#/oferta/O002/ronda/2/aplicar', '#v-aplicacion-form'], ['#/aplicacion/AP004/estado', '#v-estado-form']]) {
     await pg.goto(BASE + h); await pg.waitForSelector(v + ' .card');
-    chk(/No se puede guardar/.test(await texto(pg, v)) && /versión anterior/.test(await texto(pg, v)) && (await pg.$$(v + ' form')).length === 0, `script antiguo: ${h} no deja guardar y lo explica`);
+    chk(/No se puede guardar/.test(await texto(pg, v)) && /Avisa a quien administra la app/.test(await texto(pg, v)) && (await pg.$$(v + ' form')).length === 0, `script antiguo: ${h} no deja guardar y lo explica`);
   }
   await ctx.close();
   ({ pg, ctx } = await entrar('script', m => { delete m.hojas.Rondas; delete m.hojas.Aplicaciones; delete m.hojas.Historial; }));
   await pg.goto(BASE + '#/oferta/O004/ronda/nueva'); await pg.waitForSelector('#v-ronda-form .card');
-  chk(/No se puede guardar/.test(await texto(pg, '#v-ronda-form')) && /faltan hojas/.test(await texto(pg, '#v-ronda-form')) && (await pg.$$('#v-ronda-form form')).length === 0, 'sin las hojas: no deja guardar y lo explica');
+  chk(/No se puede guardar/.test(await texto(pg, '#v-ronda-form')) && /Avisa a quien administra la app/.test(await texto(pg, '#v-ronda-form')) && (await pg.$$('#v-ronda-form form')).length === 0, 'sin las hojas: no deja guardar y lo explica');
   await ctx.close();
 }
 
@@ -493,7 +493,7 @@ const sinClaveEnUrl = log => log.peticiones.every(p => !p.url.includes(CLAVE_PRU
   mundo.props.set('CLAVE', 'otra clave nueva y distinta 9876543210');
   await guardar(pg, 'v-ronda-form');
   await pg.waitForSelector('#v-ronda-form .error:not([hidden])');
-  chk(/La clave ha cambiado o ya no vale/.test(await texto(pg, '#v-ronda-form .error')) && (await pg.evaluate(() => localStorage.getItem('gad.clave'))) === null && filas(mundo, 'Rondas').length === 5, 'clave rechazada: lo dice, olvida la clave guardada y no escribe');
+  chk(/La clave ya no vale/.test(await texto(pg, '#v-ronda-form .error')) && (await pg.evaluate(() => localStorage.getItem('gad.clave'))) === null && filas(mundo, 'Rondas').length === 5, 'clave rechazada: lo dice, olvida la clave guardada y no escribe');
   await ctx.close();
   {
     const t = await entrar('script');
@@ -501,7 +501,7 @@ const sinClaveEnUrl = log => log.peticiones.every(p => !p.url.includes(CLAVE_PRU
     t.mundo.props.set('CLAVE', 'otra clave nueva y distinta 9876543210');
     await t.pg.selectOption('#es-estado', 'Entrevista'); await guardar(t.pg, 'v-estado-form');
     await t.pg.waitForSelector('#v-estado-form .error:not([hidden])');
-    chk(/La clave ha cambiado o ya no vale/.test(await texto(t.pg, '#v-estado-form .error')), 'al cambiar el estado, igual');
+    chk(/La clave ya no vale/.test(await texto(t.pg, '#v-estado-form .error')), 'al cambiar el estado, igual');
     await t.ctx.close();
   }
   const t2 = await entrar('script');

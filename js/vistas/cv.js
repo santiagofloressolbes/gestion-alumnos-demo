@@ -21,5 +21,5 @@ export async function pintarCV(raiz, id) {
       bloque('Área de experiencia', a.areaExperiencia),
       bloque('Objetivo profesional', [a.areaDestino, a.porQue].filter(Boolean).join('. ')),
       bloque('Nacionalidad', [a.nacionalidadPrincipal, a.nacionalidadSecundaria].filter(Boolean).join(' · ')),
-      bloque('Disponibilidad', a.disponibilidad)));
+      bloque('Qué busca', a.disponibilidad)));
 }

@@ -108,7 +108,7 @@ function location_ok(h, re) { return re.test(h); }
   console.log('4. Sin hojas de rondas');
   const { pg, ctx, log, mundo } = await entrar('script', m => { delete m.hojas.Rondas; delete m.hojas.Aplicaciones; delete m.hojas.Historial; });
   await oferta(pg, 'O002');
-  chk(/todavía no están las hojas Rondas, Aplicaciones e Historial/.test(await pg.innerText('#v-oferta')) && (await pg.$$('#v-oferta .ronda')).length === 0, 'la ficha de la oferta explica que faltan las hojas (sin romperse)');
+  chk(/faltan datos de configuración/.test(await pg.innerText('#v-oferta')) && (await pg.$$('#v-oferta .ronda')).length === 0, 'la ficha de la oferta explica que faltan las hojas (sin romperse)');
   chk(!/todavía no se ha enviado a los alumnos/.test(await pg.innerText('#v-oferta')), 'y no dice (falsamente) que la oferta no se ha enviado');
   chk((await pg.$$('#ro-nueva')).length === 0, 'sin botón de registrar ronda');
   await alumno(pg, 'A028');
@@ -129,7 +129,7 @@ function location_ok(h, re) { return re.test(h); }
   const { pg, ctx, ctrl } = await entrar('script');
   ctrl.alResponder = (j, accion) => { if (accion === 'data') delete j.historial; return j; };
   await oferta(pg, 'O002');
-  chk((await pg.$$('#v-oferta .ronda')).length === 0 && /todavía no están las hojas/.test(await pg.innerText('#v-oferta')), 'con una hoja de menos no se enseña nada de rondas y se explica');
+  chk((await pg.$$('#v-oferta .ronda')).length === 0 && /faltan datos de configuración/.test(await pg.innerText('#v-oferta')), 'con una hoja de menos no se enseña nada de rondas y se explica');
   await ctx.close();
 }
 
@@ -158,18 +158,18 @@ function location_ok(h, re) { return re.test(h); }
     m.hojas.Aplicaciones.m.push(['AP015', 'A005', 'O004', '1', '2026-10-29', 'En revisión', 'Otro', '']);   // motivo suelto sin estar descartado
   });
   await oferta(pg, 'O002');
-  chk(/alumno A002, ya no está en el Sheet/.test(await pg.innerText('#v-oferta')), 'AP001: alumno que ya no está, sin romper la ficha');
+  chk(/alumno A002: sin dato/.test(await pg.innerText('#v-oferta')), 'AP001: alumno que ya no está, sin romper la ficha');
   await aplicacion(pg, 'AP001');
-  chk(/alumno A002, ya no está en el Sheet/.test(await pg.innerText('#v-aplicacion .cabecera')) && (await pg.$$('#v-aplicacion [aria-label=Datos] a:has-text("Ver ficha")')).length === 0, 'el detalle lo dice y no enseña enlace a una ficha que no existe');
+  chk(/alumno A002: sin dato/.test(await pg.innerText('#v-aplicacion .cabecera')) && (await pg.$$('#v-aplicacion [aria-label=Datos] a:has-text("Ver ficha")')).length === 0, 'el detalle lo dice y no enseña enlace a una ficha que no existe');
   await oferta(pg, 'O004');
   chk(/Ronda 1/.test(await pg.innerText('#v-oferta')) && /Fichado: 1/.test(await pg.innerText('#v-oferta .resumen')) && /Valentina Aguirre.*Fichado/s.test(await pg.innerText('#v-oferta .ronda')), 'estado que no está en la lista: se enseña igualmente');
   chk(!/Camila.*Otro/s.test(await pg.innerText('#v-oferta .ronda')) && !/Motivo/.test(await pg.innerText('#v-oferta .ronda a[href$=AP015]')), 'un motivo suelto (sin estar descartado) no se enseña en la lista');
   await aplicacion(pg, 'AP015');
   chk(!/Motivo del descarte/.test(await pg.innerText('#v-aplicacion')), 'ni en el detalle');
   await aplicacion(pg, 'AP014');
-  chk(/oferta O777, ya no está en el Sheet/.test(await pg.innerText('#v-aplicacion .cabecera')), 'AP014: oferta que ya no existe');
+  chk(/oferta O777: sin dato/.test(await pg.innerText('#v-aplicacion .cabecera')), 'AP014: oferta que ya no existe');
   await alumno(pg, 'A004');
-  chk(/oferta O777, ya no está en el Sheet/.test(await pg.innerText('#v-alumno [aria-label=Solicitudes]')), 'en la ficha del alumno también');
+  chk(/oferta O777: sin dato/.test(await pg.innerText('#v-alumno [aria-label=Solicitudes]')), 'en la ficha del alumno también');
   chk(await limpio(pg, '#v-alumno'), 'sin "null" ni "undefined"');
   m6: {
     const { pg: p2, ctx: c2 } = await entrar('script', m => { m.hojas.Rondas.m.push(['R006', 'O004', '1', '2026-10-28']); });

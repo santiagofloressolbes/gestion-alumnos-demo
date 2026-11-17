@@ -63,7 +63,7 @@ const error = pg => pg.innerText('#v-oferta-form .error');
   const m = hojaOfertas(mundo)[f - 1];
   chk(m[C.empresa - 1] === 'Club mock Z' && m[C.titulo - 1] === 'Analista de ventas' && m[C.fecha - 1] === hoy() && m[C.estado - 1] === 'Abierta' && m[C.nac - 1] === '', 'valores en el Sheet');
   const t = await pg.innerText('#v-oferta');
-  chk(/Oferta creada en el Sheet/.test(t) && /Analista de ventas/.test(t) && /O011/.test(t), 'ficha nueva con aviso');
+  chk(/Oferta creada/.test(t) && /Analista de ventas/.test(t) && /O011/.test(t), 'ficha nueva con aviso');
   chk(await pg.getAttribute('#v-oferta .cabecera a.primary', 'href') === 'https://empresa-real.test/o/1', 'enlace https como botón');
   const c = guardarPeticiones(log);
   chk(c.length === 1 && !('id' in c[0]) && !('anteriores' in c[0]) && c[0].oferta.empresa === 'Club mock Z' && typeof c[0].key === 'string', 'petición de alta sin id ni anteriores');
@@ -101,7 +101,7 @@ const error = pg => pg.innerText('#v-oferta-form .error');
   await probar({ titulo: '' }, /Falta «Título del puesto»/, 'titulo', 'sin título');
   await probar({ tipoOrganizacion: '' }, /Elige «Tipo de organización»/, 'tipoOrganizacion', 'sin tipo de organización');
   await probar({ area: '' }, /Elige «Área»/, 'area', 'sin área');
-  await probar({ tipo: '' }, /Elige «Tipo»/, 'tipo', 'sin tipo');
+  await probar({ tipo: '' }, /Elige «Prácticas o empleo»/, 'tipo', 'sin tipo');
   await probar({ ubicacion: '' }, /Falta «Ubicación»/, 'ubicacion', 'sin ubicación');
   await probar({ requisitoPermiso: '' }, /Elige «Permiso de trabajo»/, 'requisitoPermiso', 'sin permiso');
   await probar({ estado: '' }, /Elige «Estado»/, 'estado', 'sin estado');
@@ -157,7 +157,7 @@ const error = pg => pg.innerText('#v-oferta-form .error');
   const cambios = mundo.celdasCambiadas(antes, mundo.foto());
   chk(cambios.join() === `Ofertas!${fila(mundo, 'O002')},${C.estado}`, 'solo cambia la celda del estado: ' + cambios);
   const t = await pg.innerText('#v-oferta');
-  chk(/Guardado en el Sheet/.test(t) && /Cerrada/.test(t), 'la ficha enseña Cerrada con el aviso');
+  chk(/Guardado/.test(t) && /Cerrada/.test(t), 'la ficha enseña Cerrada con el aviso');
   const c = guardarPeticiones(log)[0];
   chk(c.id === 'O002' && Object.keys(c.anteriores).length === 16 && c.anteriores.estado === 'Abierta' && c.oferta.estado === 'Cerrada', 'petición con id, anteriores y nuevo');
   await pg.click('#v-oferta .volver'); await pg.waitForSelector('#v-ofertas ul.alumnos li');
@@ -185,7 +185,7 @@ const error = pg => pg.innerText('#v-oferta-form .error');
   await guardarBtn(t.pg);
   await t.pg.waitForSelector('.conflicto:not([hidden])');
   const panel = await t.pg.innerText('.conflicto');
-  chk(/Esta oferta ha cambiado mientras la editabas/.test(panel) && /Título del puesto/.test(panel) && /Product manager senior/.test(panel) && !/Ubicación/.test(panel), 'el panel enseña solo lo que cambió la otra persona');
+  chk(/Alguien ha cambiado esta oferta mientras la editabas/.test(panel) && /Título del puesto/.test(panel) && /Product manager senior/.test(panel) && !/Ubicación/.test(panel), 'el panel enseña solo lo que cambió la otra persona');
   chk(await t.pg.inputValue('#of-f-ubicacion') === 'Zaragoza', 'lo que escribí sigue en el formulario');
   chk(guardarPeticiones(t.log).length === 1 && mundo_ubic(t.mundo, 'O003') === 'Madrid', 'no se ha escrito nada todavía');
   await t.pg.click('text=Guardar mi versión');
@@ -199,9 +199,9 @@ const error = pg => pg.innerText('#v-oferta-form .error');
   hojaOfertas(t.mundo)[fila(t.mundo, 'O004') - 1][C.estado - 1] = 'Cerrada';
   await t.pg.fill('#of-f-ubicacion', 'Otra ciudad');
   await guardarBtn(t.pg); await t.pg.waitForSelector('.conflicto:not([hidden])');
-  await t.pg.click('text=Quedarme con la del Sheet'); await t.pg.waitForSelector('#v-oferta .cabecera');
+  await t.pg.click('text=Quedarme con la actual'); await t.pg.waitForSelector('#v-oferta .cabecera');
   const f = await t.pg.innerText('#v-oferta');
-  chk(/Cerrada/.test(f) && !/Otra ciudad/.test(f) && /Listo: ahora ves lo que hay/.test(f) && mundo_ubic(t.mundo, 'O004') === 'Madrid', 'descartar: se ve lo del Sheet y no se escribe nada');
+  chk(/Cerrada/.test(f) && !/Otra ciudad/.test(f) && /Listo: ahora ves la versión actual/.test(f) && mundo_ubic(t.mundo, 'O004') === 'Madrid', 'descartar: se ve lo del Sheet y no se escribe nada');
   await t.ctx.close();
   // c) los dos cambiamos el mismo campo: gana el mío si lo pido
   t = await entrar();
@@ -219,7 +219,7 @@ const error = pg => pg.innerText('#v-oferta-form .error');
   await editar(t.pg, 'O006');
   hojaOfertas(t.mundo).splice(fila(t.mundo, 'O006') - 1, 1);
   await t.pg.fill('#of-f-ubicacion', 'X'); await guardarBtn(t.pg); await t.pg.waitForSelector('#v-oferta-form .error:not([hidden])');
-  chk(/ya no está en el Sheet/.test(await error(t.pg)), 'oferta borrada en el Sheet: aviso');
+  chk(/ya no existe en los datos/.test(await error(t.pg)), 'oferta borrada en el Sheet: aviso');
   await t.ctx.close();
 }
 function mundo_ubic(mundo, id) { return hojaOfertas(mundo)[fila(mundo, id) - 1][C.ubicacion - 1]; }
@@ -247,7 +247,7 @@ function mundo_ubic(mundo, id) { return hojaOfertas(mundo)[fila(mundo, id) - 1][
   chk(/Puede que la oferta sí se haya creado/.test(await error(t.pg)), 'avisa de que puede estar guardada');
   await guardarBtn(t.pg); await t.pg.waitForSelector('#v-oferta .cabecera');
   chk(hojaOfertas(t.mundo).length === 12, 'tras reintentar sigue habiendo una sola (no se duplica)');
-  chk(/Oferta creada en el Sheet/.test(await t.pg.innerText('#v-oferta')) && /O011/.test(await t.pg.innerText('#v-oferta')), 'se reconoce la oferta ya guardada (O011)');
+  chk(/Oferta creada/.test(await t.pg.innerText('#v-oferta')) && /O011/.test(await t.pg.innerText('#v-oferta')), 'se reconoce la oferta ya guardada (O011)');
   chk(guardarPeticiones(t.log).length === 1, 'solo se envió un alta');
   await t.ctx.close();
   // c) al editar, se pierde la respuesta: al reintentar se reconoce como ya guardado
@@ -257,14 +257,14 @@ function mundo_ubic(mundo, id) { return hojaOfertas(mundo)[fila(mundo, id) - 1][
   await guardarBtn(t.pg); await t.pg.waitForSelector('#v-oferta-form .error:not([hidden])');
   chk(!/Puede que la oferta sí se haya creado/.test(await error(t.pg)) && /no se ha perdido/.test(await error(t.pg)), 'edición: mensaje de conexión');
   await guardarBtn(t.pg); await t.pg.waitForSelector('#v-oferta .cabecera');
-  chk(/Guardado en el Sheet/.test(await t.pg.innerText('#v-oferta')) && mundo_ubic(t.mundo, 'O007') === 'Lugo', 'edición reintentada: se reconoce como guardada');
+  chk(/Guardado/.test(await t.pg.innerText('#v-oferta')) && mundo_ubic(t.mundo, 'O007') === 'Lugo', 'edición reintentada: se reconoce como guardada');
   await t.ctx.close();
   // d) la clave ya no vale
   t = await entrar();
   await nueva(t.pg); await rellenar(t.pg, VALIDA);
   t.mundo.props.set('CLAVE', 'otra frase larga distinta de la anterior 99');
   await guardarBtn(t.pg); await t.pg.waitForSelector('#v-oferta-form .error:not([hidden])');
-  chk(/La clave ha cambiado o ya no vale/.test(await error(t.pg)) && await t.pg.inputValue('#of-f-empresa') === 'Club mock Z', 'clave cambiada: aviso y texto conservado');
+  chk(/La clave ya no vale/.test(await error(t.pg)) && await t.pg.inputValue('#of-f-empresa') === 'Club mock Z', 'clave cambiada: aviso y texto conservado');
   chk(!(await almacen(t.pg))['gad.clave'], 'la clave que ya no vale se borra del móvil');
   await t.ctx.close();
   // e) doble pulsación = una sola petición
@@ -354,11 +354,11 @@ function mundo_ubic(mundo, id) { return hojaOfertas(mundo)[fila(mundo, id) - 1][
   t = await entrar();
   t.ctrl.alResponder = (j, accion) => { if (accion === 'data') delete j.soporta; return j; };   // un script anterior no anuncia "soporta"
   await t.pg.goto(BASE + '#/ofertas'); await t.pg.waitForSelector('#v-ofertas ul.alumnos li');
-  chk(await t.pg.locator('a.nueva-oferta').count() === 0 && /versión anterior/.test(await t.pg.innerText('#v-ofertas')), 'script antiguo: sin botón y con explicación');
+  chk(await t.pg.locator('a.nueva-oferta').count() === 0 && /Avisa a quien administra la app/.test(await t.pg.innerText('#v-ofertas')), 'script antiguo: sin botón y con explicación');
   await t.pg.goto(BASE + '#/oferta/O001'); await t.pg.waitForSelector('#v-oferta .cabecera');
   chk(await t.pg.locator('#of-editar').count() === 0, 'script antiguo: sin Editar');
   await t.pg.goto(BASE + '#/oferta/nueva'); await t.pg.waitForSelector('#v-oferta-form .card');
-  chk(/versión anterior/.test(await t.pg.innerText('#v-oferta-form')) && await t.pg.locator('#of-f-empresa').count() === 0, 'script antiguo: el formulario explica por qué no');
+  chk(/Avisa a quien administra la app/.test(await t.pg.innerText('#v-oferta-form')) && await t.pg.locator('#of-f-empresa').count() === 0, 'script antiguo: el formulario explica por qué no');
   chk(!/\bnull\b|undefined|\bfalse\b/.test(await t.pg.innerText('#v-oferta-form')), 'sin "null", "undefined" ni "false" visibles');
   await t.ctx.close();
 }

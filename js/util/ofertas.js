@@ -36,7 +36,7 @@ export const CAMPOS = [
   { clave: 'titulo', etiqueta: 'Título del puesto', max: 120, obligatorio: true },
   { clave: 'tipoOrganizacion', etiqueta: 'Tipo de organización', lista: 'tiposOrganizacion', obligatorio: true },
   { clave: 'area', etiqueta: 'Área', lista: 'areas', obligatorio: true },
-  { clave: 'tipo', etiqueta: 'Tipo', lista: 'tiposOferta', obligatorio: true },
+  { clave: 'tipo', etiqueta: 'Prácticas o empleo', lista: 'tiposOferta', obligatorio: true },
   { clave: 'ubicacion', etiqueta: 'Ubicación', max: 100, obligatorio: true },
   { clave: 'requisitoNacionalidad', etiqueta: 'Nacionalidad requerida', lista: 'nacionalidades', obligatorio: false },
   { clave: 'requisitoPermiso', etiqueta: 'Permiso de trabajo', lista: 'requisitosPermiso', obligatorio: true },
@@ -46,7 +46,7 @@ export const CAMPOS = [
   // Perfil del puesto (3E-2): lo que el match compara con cada alumno. Todos opcionales.
   { clave: 'paisOferta', etiqueta: 'País de la oferta', max: 100, perfil: true, obligatorio: false },
   { clave: 'subarea', etiqueta: 'Subárea', max: 100, perfil: true, obligatorio: false },
-  { clave: 'etiquetas', etiqueta: 'Etiquetas del puesto', max: 300, perfil: true, obligatorio: false },
+  { clave: 'etiquetas', etiqueta: 'Habilidades del puesto', max: 300, perfil: true, obligatorio: false },
   { clave: 'idiomas', etiqueta: 'Idiomas', max: 200, perfil: true, obligatorio: false },
   { clave: 'nivelFormacion', etiqueta: 'Nivel de formación', max: 40, perfil: true, fijo: true, obligatorio: false },
 ];
@@ -96,13 +96,13 @@ export function apoyoPerfil(listas) {
 export function avisosPerfil(v, listas) {
   const a = apoyoPerfil(listas), fuera = [];
   const no = (lista, x) => !lista.some(y => norm(y) === norm(x));
-  if (v.paisOferta && a.paises.length && no(a.paises, v.paisOferta)) fuera.push({ campo: 'paisOferta', texto: `El país «${v.paisOferta}» no está en la hoja Países. Elige uno de la lista o añádelo antes en esa hoja.` });
+  if (v.paisOferta && a.paises.length && no(a.paises, v.paisOferta)) fuera.push({ campo: 'paisOferta', texto: `El país «${v.paisOferta}» no está en la lista de países. Elige uno de la lista o avisa a quien administra la app.` });
   if (v.subarea && a.subareas.length) {
     const filas = a.subareas.filter(s => norm(s.subarea) === norm(v.subarea));
-    if (!filas.length) fuera.push({ campo: 'subarea', texto: `La subárea «${v.subarea}» no está en la hoja Áreas. Elige una de la lista o añádela antes en esa hoja.` });
+    if (!filas.length) fuera.push({ campo: 'subarea', texto: `La subárea «${v.subarea}» no está en la lista de subáreas. Elige una de la lista o avisa a quien administra la app.` });
     else if (v.area && !filas.some(s => norm(s.area) === norm(v.area))) fuera.push({ campo: 'subarea', texto: `La subárea «${v.subarea}» es de «${filas[0].area}», no de «${v.area}». Se puede guardar, pero conviene revisarlo.` });
   }
-  if (a.etiquetas.length) for (const e of partesLista(v.etiquetas)) if (no(a.etiquetas, e)) fuera.push({ campo: 'etiquetas', texto: `La etiqueta «${e}» no está en la hoja Etiquetas. Quítala o añádela antes en esa hoja.` });
+  if (a.etiquetas.length) for (const e of partesLista(v.etiquetas)) if (no(a.etiquetas, e)) fuera.push({ campo: 'etiquetas', texto: `La habilidad «${e}» no está en la lista de habilidades. Quítala o avisa a quien administra la app.` });
   return fuera;
 }
 const ETIQUETA = Object.fromEntries(CAMPOS.map(c => [c.clave, c.etiqueta]));
@@ -123,10 +123,10 @@ export function mensajeCampo(codigo, clave) {
     case 'lista': {
       const hoja = { paisOferta: 'Países', subarea: 'Áreas', etiquetas: 'Etiquetas' }[clave];
       if (clave === 'nivelFormacion') return `${c}: elige Sin requisito, Grado, Máster o Doctorado.`;
-      if (clave === 'requisitoNacionalidad') return `${c}: elige un valor de la lista. Si no está, añádelo antes en la hoja Países (o en Listas) del Sheet.`;
-      return hoja ? `${c}: hay un valor que no está en la hoja ${hoja}. Elige de la lista o añádelo antes en esa hoja.` : `${c}: elige un valor de la lista. Si no está, añádelo antes en la hoja Listas del Sheet.`;
+      if (clave === 'requisitoNacionalidad') return `${c}: elige un valor de la lista. Si no está, avisa a quien administra la app.`;
+      return hoja ? `${c}: hay un valor que no está en la lista. Elige uno de la lista o avisa a quien administra la app.` : `${c}: elige un valor de la lista. Si no está, avisa a quien administra la app.`;
     }
-    case 'demasiadas': return clave === 'etiquetas' ? `${c}: máximo ${MAX_ETIQUETAS} etiquetas.` : `${c}: máximo ${MAX_IDIOMAS} idiomas.`;
+    case 'demasiadas': return clave === 'etiquetas' ? `${c}: máximo ${MAX_ETIQUETAS} habilidades.` : `${c}: máximo ${MAX_IDIOMAS} idiomas.`;
     case 'idiomas': return `${c}: escribe cada idioma con su nivel (A1–C2 o nativo), separados por «;». Por ejemplo: «Inglés B2; Español nativo». No repitas un idioma.`;
     case 'fecha': return `${c}: elige una fecha válida.`;
     case 'fecha-futura': return `${c} no puede ser futura.`;

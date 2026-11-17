@@ -114,8 +114,8 @@ const quitarSoporte = (j) => { if (Array.isArray(j.soporta)) j.soporta = j.sopor
   } });
   await editar(pg, 'O001');
   const avisos = await pg.$$eval('#v-oferta-form .cuenta.exceso:not([hidden])', xs => xs.map(x => x.textContent));
-  chk(avisos.some(t => /«Narnia» no está en la hoja Países/.test(t)), 'aviso: país que no está en la hoja Países');
-  chk(avisos.some(t => /«Etiqueta antigua» no está en la hoja Etiquetas/.test(t)), 'aviso: etiqueta que no está en la hoja Etiquetas');
+  chk(avisos.some(t => /«Narnia» no está en la lista de países/.test(t)), 'aviso: país que no está en la lista de países');
+  chk(avisos.some(t => /«Etiqueta antigua» no está en la lista de habilidades/.test(t)), 'aviso: habilidad que no está en la lista de habilidades');
   chk(avisos.some(t => /es de «Comercial y patrocinio», no de «Antipiratería y seguridad»/.test(t)), 'aviso: subárea de otra área');
   chk(await pg.$eval('#of-f-paisOferta', s => [...s.options].some(o => /Narnia \(no está en la lista\)/.test(o.textContent))), 'el valor antiguo se sigue viendo en el desplegable');
   chk(await pg.$eval('#v-oferta-form', f => /Etiqueta antigua \(no está en la lista\)/.test(f.innerText)), 'y la etiqueta antigua, marcada y avisada');
@@ -128,7 +128,7 @@ const quitarSoporte = (j) => { if (Array.isArray(j.soporta)) j.soporta = j.sopor
   await pg.fill('#of-f-titulo', 'Tercer título'); await pg.uncheck('#of-f-etiquetas input[value="Python"]');
   const antes3 = mundo.foto();
   await guardar(pg); await pg.waitForSelector('#v-oferta-form .error:not([hidden])');
-  chk(/Etiquetas.*no está en la hoja Etiquetas/.test(await pg.innerText('#v-oferta-form .error')) && mundo.celdasCambiadas(antes3, mundo.foto()).length === 0, 'si CAMBIAS las etiquetas, la antigua sí se rechaza (con un mensaje claro) y no se escribe nada');
+  chk(/Habilidades del puesto.*no está en la lista/.test(await pg.innerText('#v-oferta-form .error')) && mundo.celdasCambiadas(antes3, mundo.foto()).length === 0, 'si CAMBIAS las etiquetas, la antigua sí se rechaza (con un mensaje claro) y no se escribe nada');
   await pg.uncheck('#of-f-etiquetas input[value="Etiqueta antigua"]'); await pg.check('#of-f-etiquetas input[value="Excel"]');
   await guardar(pg); await pg.waitForSelector('#v-oferta .cabecera:not([hidden])');
   chk(fila(mundo, 'O001').Etiquetas === 'Excel', 'quitando la antigua, guarda: ' + fila(mundo, 'O001').Etiquetas);
@@ -149,7 +149,7 @@ const quitarSoporte = (j) => { if (Array.isArray(j.soporta)) j.soporta = j.sopor
   const todas = await pg.$$eval('#of-f-etiquetas input', xs => xs.map(x => x.value));
   for (const e of todas.slice(0, 9)) await pg.check(`#of-f-etiquetas input[value="${e}"]`);
   await guardar(pg);
-  chk(/máximo 8 etiquetas/.test(await pg.innerText('#v-oferta-form .error')) && peticiones(log).length === 0, 'más de 8 etiquetas: mensaje y no se envía');
+  chk(/máximo 8 habilidades/.test(await pg.innerText('#v-oferta-form .error')) && peticiones(log).length === 0, 'más de 8 etiquetas: mensaje y no se envía');
   await ctx.close();
 }
 
@@ -160,7 +160,7 @@ const quitarSoporte = (j) => { if (Array.isArray(j.soporta)) j.soporta = j.sopor
   await nueva(pg);
   const tipos = await pg.$$eval('#of-f-paisOferta,#of-f-subarea,#of-f-etiquetas', xs => xs.map(x => x.tagName));
   chk(tipos.join() === 'INPUT,INPUT,INPUT', 'país, subárea y etiquetas son campos de texto: ' + tipos);
-  chk(/no hay hoja Etiquetas/.test(await pg.innerText('#v-oferta-form')), 'con una pista de que falta la hoja');
+  chk(/Separadas por «;»\. Máximo 8/.test(await pg.innerText('#v-oferta-form')), 'con una pista de cómo escribirlas');
   const nac = await pg.$$eval('#of-f-requisitoNacionalidad option', os => os.map(o => o.textContent));
   chk(nac.includes('Francia') && nac.includes('Unión Europea (UE/EEE)'), 'la nacionalidad sigue saliendo de Listas');
   await rellenar(pg, { ...BASICA, paisOferta: 'España', subarea: 'Lo que sea', etiquetas: 'Una; Otra', idiomas: 'Inglés B2', nivelFormacion: 'Máster' });
@@ -191,7 +191,7 @@ const quitarSoporte = (j) => { if (Array.isArray(j.soporta)) j.soporta = j.sopor
   await pg.evaluate(() => { for (const d of document.querySelectorAll('#match-alumnos .grupo-match, #match-alumnos .porque')) d.open = true; });
   for (let i = 0; i < 20; i++) { const b = await pg.$('#match-alumnos .grupo-match > button:not([hidden])'); if (!b) break; await b.click(); }
   const crit = await pg.$$eval('#match-alumnos li.fila-match .criterios li', cs => cs.map(c => c.textContent.replace(/\s+/g, ' ')).join(' | '));
-  chk(!/La oferta no pide etiquetas/.test(crit) && !/La oferta no pide idiomas/.test(crit), 'tras guardar con el script anterior, el match (sin recargar) sigue viendo las etiquetas y los idiomas de la oferta: no se borraron en memoria');
+  chk(!/La oferta no pide habilidades/.test(crit) && !/La oferta no pide idiomas/.test(crit), 'tras guardar con el script anterior, el match (sin recargar) sigue viendo las etiquetas y los idiomas de la oferta: no se borraron en memoria');
   await ctx.close();
 }
 

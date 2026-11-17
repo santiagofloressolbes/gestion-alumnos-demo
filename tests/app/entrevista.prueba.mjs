@@ -35,7 +35,7 @@ const peticionesGuardar = log => log.peticiones.filter(p => JSON.parse(p.cuerpo)
   chk(cambios.sort().join() === [`Alumnos!${f},${COL_N}`, `Alumnos!${f},${COL_F}`].sort().join(), 'solo 2 celdas cambian: ' + cambios);
   chk(mundo.hojas.Alumnos.m[f - 1][COL_N - 1] === 'Muy buen perfil.\nQuiere prácticas en Madrid.' && mundo.hojas.Alumnos.m[f - 1][COL_F - 1] === hoy(), 'valores en el Sheet');
   const t = await pg.innerText('#v-alumno');
-  chk(/Guardado en el Sheet/.test(t) && /Muy buen perfil/.test(t), 'ficha enseña lo guardado');
+  chk(/Guardado/.test(t) && /Muy buen perfil/.test(t), 'ficha enseña lo guardado');
   chk(await pg.innerText('#en-editar') === 'Editar entrevista', 'botón pasa a Editar');
   const al = await almacen(pg);
   chk(Object.keys(al).sort().join() === 'gad.clave,gad.url' && !JSON.stringify(al).includes('Muy buen'), 'la nota no se guarda en el móvil');
@@ -141,7 +141,7 @@ const peticionesGuardar = log => log.peticiones.filter(p => JSON.parse(p.cuerpo)
   await abrir(pg, 'A006'); await pg.click('#en-editar'); await pg.fill('#en-notas', 'otra mía');
   mundo.hojas.Alumnos.m[g - 1][COL_N - 1] = 'de otra persona'; mundo.hojas.Alumnos.m[g - 1][COL_F - 1] = '2026-10-11';
   await pg.click('form button[type=submit]'); await pg.waitForSelector('.conflicto:not([hidden])');
-  await pg.click('text=Quedarme con la del Sheet'); await pg.waitForSelector('#en-editar');
+  await pg.click('text=Quedarme con la actual'); await pg.waitForSelector('#en-editar');
   chk(mundo.hojas.Alumnos.m[g - 1][COL_N - 1] === 'de otra persona', 'descartar no escribe');
   chk(/de otra persona/.test(await pg.innerText('#v-alumno')), 'la ficha enseña lo del Sheet');
   await ctx.close();
@@ -194,7 +194,7 @@ const peticionesGuardar = log => log.peticiones.filter(p => JSON.parse(p.cuerpo)
   await pg.click('form button[type=submit]'); await pg.waitForSelector('.error:not([hidden])');
   chk(mundo.hojas.Alumnos.m[g - 1][COL_N - 1] === 'guardada pero sin respuesta', 'el Sheet sí se guardó');
   await pg.click('form button[type=submit]'); await pg.waitForSelector('#en-editar');
-  chk(/Guardado en el Sheet/.test(await pg.innerText('#v-alumno')), 'reintento tras respuesta perdida = guardado, sin conflicto');
+  chk(/Guardado/.test(await pg.innerText('#v-alumno')), 'reintento tras respuesta perdida = guardado, sin conflicto');
   await ctx.close();
 }
 

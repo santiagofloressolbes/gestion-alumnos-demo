@@ -11,7 +11,7 @@ import { tarjetaAlumnosQueEncajan } from './match.js';
 
 const e = estadoVacio();   // búsqueda y filtros: se conservan al entrar en una oferta y volver
 const volverAOfertas = () => el('a', { class: 'volver', href: '#/ofertas' }, 'Ofertas');
-const insignia = estado => el('span', { class: 'insignia' + (estado === 'Abierta' ? ' abierta' : '') }, estado || 'Sin estado');
+const insignia = estado => el('span', { class: 'insignia' + (estado === 'Abierta' ? ' abierta' : '') }, estado || 'Sin dato');
 
 export async function pintarOfertas(raiz) {
   reemplazar(raiz, el('p', { class: 'estado', role: 'status' }, 'Cargando ofertas…'));
@@ -69,7 +69,7 @@ export async function pintarOfertas(raiz) {
   const filtros = desplegable({ class: 'filtros', open: !!(e.tipo || e.area) },
     resumen,
     el('div', { class: 'filtros-cuerpo' },
-      campoSelect('of-tipo', 'Tipo', tipos, 'tipo', 'Prácticas y empleo'),
+      campoSelect('of-tipo', 'Prácticas o empleo', tipos, 'tipo', 'Todas'),
       campoSelect('of-area', 'Área', areas, 'area', 'Todas las áreas')));
 
   function pintarResultados() {
@@ -89,7 +89,7 @@ export async function pintarOfertas(raiz) {
     aviso && el('p', { class: 'ok', role: 'status' }, aviso),
     puedeEscribirOfertas() && el('a', { class: 'primary nueva-oferta', href: '#/oferta/nueva' }, 'Nueva oferta'),
     estadoEscrituraOfertas() === 'script-antiguo' && el('p', { class: 'aviso', role: 'note' },
-      'No se pueden guardar ofertas: el script de Google es de una versión anterior. Actualiza Code.gs con la guía («Actualizar a la versión con ofertas»).'),
+      'No se pueden guardar ofertas ahora mismo. Avisa a quien administra la app.'),
     el('div', { class: 'card buscador', role: 'search' },
       el('div', { class: 'campo-form' }, el('label', { for: 'of-q' }, 'Buscar oferta'), q),
       el('div', { class: 'campo-form' },
@@ -97,7 +97,7 @@ export async function pintarOfertas(raiz) {
         el('div', { class: 'opciones', role: 'group', 'aria-labelledby': 'of-l-estado' }, botonesEstado)),
       filtros),
     limpiar, cuenta,
-    el('div', { class: 'card', hidden: ofertas.length > 0 }, el('h2', {}, 'Todavía no hay ofertas'), el('p', { class: 'sub' }, 'Cuando haya ofertas en el Sheet aparecerán aquí.')),
+    el('div', { class: 'card', hidden: ofertas.length > 0 }, el('h2', {}, 'Todavía no hay ofertas'), el('p', { class: 'sub' }, 'Cuando haya ofertas aparecerán aquí.')),
     vacio, lista].filter(Boolean));
   pintarResultados();
 }
@@ -107,7 +107,7 @@ function fila(o) {
   const donde = [o.empresa, o.ubicacion].filter(Boolean).join(' · ');
   return el('li', {}, el('a', { class: 'alumno oferta', href: '#/oferta/' + encodeURIComponent(o.id) },
     el('span', { class: 'alumno-texto' },
-      el('b', {}, o.titulo || '(sin título)'),
+      el('b', {}, o.titulo || 'Sin dato'),
       donde && el('span', { class: 'sub' }, donde),
       el('span', { class: 'sub' }, [o.tipo, o.area].filter(Boolean).join(' · ')),
       el('span', { class: 'oferta-pie' }, insignia(o.estado), o.fechaRecepcion && el('span', { class: 'sub' }, fechaLarga(o.fechaRecepcion)))),
@@ -116,7 +116,7 @@ function fila(o) {
 
 /* ---- Ficha de una oferta ---- */
 
-function campo(etiqueta, valor, { texto = false, vacio = 'No indicado' } = {}) {
+function campo(etiqueta, valor, { texto = false, vacio = 'Sin dato' } = {}) {
   return el('div', { class: 'campo' },
     el('dt', {}, etiqueta),
     el('dd', { class: (valor ? '' : 'vacio ') + (texto ? 'largo' : '') }, valor || vacio));
@@ -145,7 +145,7 @@ export async function pintarOferta(raiz, id) {
     aviso && el('p', { class: 'ok aviso-ok', role: 'status' }, aviso),
 
     el('section', { class: 'card cabecera cabecera-oferta', 'aria-label': 'Oferta' },
-      el('h2', { class: 'nombre' }, o.titulo || '(sin título)'),
+      el('h2', { class: 'nombre' }, o.titulo || 'Sin dato'),
       el('p', { class: 'sub' }, [o.empresa, o.ubicacion].filter(Boolean).join(' · ')),
       el('div', { class: 'chips' }, insignia(o.estado), o.tipo && el('span', { class: 'chip' }, o.tipo)),
       enlace.tipo === 'enlace'

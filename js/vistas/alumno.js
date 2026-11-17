@@ -15,7 +15,7 @@ function campo(etiqueta, valor, { opcional = false, texto = false } = {}) {
   if (!valor && opcional) return null;
   return el('div', { class: 'campo' },
     el('dt', {}, etiqueta),
-    el('dd', { class: (valor ? '' : 'vacio ') + (texto ? 'largo' : '') }, valor || 'No indicado'));
+    el('dd', { class: (valor ? '' : 'vacio ') + (texto ? 'largo' : '') }, valor || 'Sin dato'));
 }
 
 const tarjeta = (titulo, ...campos) =>

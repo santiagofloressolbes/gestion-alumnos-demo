@@ -56,8 +56,8 @@ const desbordes = pg => pg.evaluate(() => {
   t.mundo.llamar({ key: t.mundo.clave, action: 'cambiarEstado', id: 'AP001', estado: 'Descartado', motivo: 'Otro', fecha: '2026-10-30', nota: 'otra persona', anterior: { estado: 'Entrevista', motivo: '' } });
   await t.pg.click('#v-estado-form form button[type=submit]'); await t.pg.waitForSelector('#v-estado-form .conflicto:not([hidden])');
   const textos = await t.pg.$$eval('#v-estado-form .conflicto button', b => b.map(x => x.textContent));
-  chk(textos.join('|') === 'Guardar mi versión|Quedarme con la del Sheet', 'botones del conflicto: ' + textos);
-  chk(/Esta solicitud ha cambiado mientras la editabas/.test(await t.pg.innerText('#v-estado-form .conflicto')), 'título del conflicto de la solicitud');
+  chk(textos.join('|') === 'Guardar mi versión|Quedarme con la actual', 'botones del conflicto: ' + textos);
+  chk(/Alguien ha cambiado esta solicitud mientras la editabas/.test(await t.pg.innerText('#v-estado-form .conflicto')), 'título del conflicto de la solicitud');
   const alturas = await t.pg.$$eval('#v-estado-form .conflicto button', b => b.map(x => Math.round(x.getBoundingClientRect().height)));
   chk(alturas.every(h => h >= 44), 'los botones del conflicto miden 44 px o más: ' + alturas);
   const mal = await desbordes(t.pg);
@@ -84,7 +84,7 @@ const desbordes = pg => pg.evaluate(() => {
   await ir(pg, '#/oferta/O002', '#v-oferta .ronda');
   chk(/solicitudes/.test(await pg.innerText('#v-oferta .ronda')) && /Añadir solicitud/.test(await pg.innerText('#v-oferta')) && /Registrar nueva ronda/.test(await pg.innerText('#v-oferta')), 'ficha de la oferta: "solicitudes", "Añadir solicitud", "Registrar nueva ronda"');
   await ir(pg, '#/oferta/O004/ronda/nueva', '#ro-fecha');
-  chk(await pg.innerText('#ro-numero') === 'Vas a registrar la ronda 1 (el primer envío de esta oferta a los alumnos).', 'ronda 1: texto aprobado: ' + await pg.innerText('#ro-numero'));
+  chk(await pg.innerText('#ro-numero') === 'Ronda 1: primer envío de esta oferta a los alumnos.', 'ronda 1: texto aprobado: ' + await pg.innerText('#ro-numero'));
   await ir(pg, '#/oferta/O002/ronda/2/aplicar', '#ap-q');
   chk(/Fecha de la solicitud/.test(await pg.innerText('#v-aplicacion-form')), 'formulario de solicitud: "Fecha de la solicitud"');
   await ir(pg, '#/aplicacion/AP001', '#v-aplicacion .cabecera');
@@ -109,7 +109,7 @@ const desbordes = pg => pg.evaluate(() => {
   for (const [hash, sel] of [['#/oferta/O002/ronda/nueva', '#v-ronda-form .card'], ['#/oferta/nueva', '#v-oferta-form .card']]) {
     await ir(t.pg, hash, sel);
     const x = await t.pg.innerText(sel);
-    chk(x.includes('Estás en la demo y aquí no se puede guardar nada. Conecta con el Sheet de prueba desde Ajustes.'), hash + ': "desde Ajustes": ' + x.replace(/\n/g, ' '));
+    chk(x.includes('Estás en la demo y aquí no se guarda nada. Para guardar, conecta los datos reales en Ajustes.'), hash + ': "desde Ajustes": ' + x.replace(/\n/g, ' '));
   }
   await t.ctx.close();
 }

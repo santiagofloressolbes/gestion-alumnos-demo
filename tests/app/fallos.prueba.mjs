@@ -66,7 +66,7 @@ const FORMS = {
   let t = await entrar();
   await ir(t.pg, '#/alumno/A002', '#en-editar'); await t.pg.click('#en-editar'); await t.pg.fill('#en-notas', 'Nota de prueba');
   t.ctrl.abortar = 1; await t.pg.click('form button[type=submit]');
-  await t.pg.waitForFunction(() => /Guardado en el Sheet/.test(document.querySelector('#v-alumno').innerText));
+  await t.pg.waitForFunction(() => /Guardado/.test(document.querySelector('#v-alumno').innerText));
   chk(fila(t.mundo, 'Alumnos', 'A002')['Notas de entrevista'] === 'Nota de prueba' && cuantas(t.log, 'guardarEntrevista') === 2, 'entrevista: se guardó y se reintentó sola');
   await t.ctx.close();
   t = await entrar();
@@ -167,7 +167,7 @@ const FORMS = {
   await ir(t.pg, '#/alumno/A002', '#en-editar'); await t.pg.click('#en-editar'); await t.pg.fill('#en-notas', 'Nota doble');
   t.ctrl.lento = 700; await doble(t.pg, '#v-alumno form button[type=submit]'); await t.pg.waitForTimeout(150);
   chk(await t.pg.isDisabled('#v-alumno form button[type=submit]') && /Guardando…/.test(await t.pg.innerText('#v-alumno form button[type=submit]')), 'entrevista: "Guardando…" y desactivado');
-  await t.pg.waitForFunction(() => /Guardado en el Sheet/.test(document.querySelector('#v-alumno').innerText));
+  await t.pg.waitForFunction(() => /Guardado/.test(document.querySelector('#v-alumno').innerText));
   chk(cuantas(t.log, 'guardarEntrevista') === 1, 'entrevista: una sola petición');
   await t.ctx.close();
   // oferta
@@ -183,7 +183,7 @@ const FORMS = {
 /* 6. Botones del aviso de conflicto: también se desactivan y dicen qué hacen */
 {
   console.log('6. Conflictos: botones ocupados');
-  const GUARDAR = 'button:has-text("Guardar mi versión")', DESCARTAR = 'button:has-text("Quedarme con la del Sheet")';
+  const GUARDAR = 'button:has-text("Guardar mi versión")', DESCARTAR = 'button:has-text("Quedarme con la actual")';
   const conflictoEstado = async id => {
     const t = await entrar();
     await ir(t.pg, `#/aplicacion/${id}/estado`, '#es-estado');
@@ -192,14 +192,14 @@ const FORMS = {
     await enviar(t.pg, 'v-estado-form'); await t.pg.waitForSelector('#v-estado-form .conflicto:not([hidden])');
     return t;
   };
-  // estado: "Quedarme con la del Sheet" con 5 pulsaciones seguidas
+  // estado: "Quedarme con la actual" con 5 pulsaciones seguidas
   let t = await conflictoEstado('AP001');
   const d0 = cuantas(t.log, 'data');
   t.ctrl.lento = 0;
-  await t.pg.evaluate(() => { const b = [...document.querySelectorAll('#v-estado-form .conflicto button')].find(x => /Quedarme con la del Sheet/.test(x.textContent)); for (let i = 0; i < 5; i++) b.click(); });
+  await t.pg.evaluate(() => { const b = [...document.querySelectorAll('#v-estado-form .conflicto button')].find(x => /Quedarme con la actual/.test(x.textContent)); for (let i = 0; i < 5; i++) b.click(); });
   await aterriza(t.pg, '#/aplicacion/AP001', '#v-aplicacion .cabecera');
-  chk(cuantas(t.log, 'data') === d0 + 1, 'estado: 5 pulsaciones en "Quedarme con la del Sheet" = una sola carga de datos');
-  chk(/Listo: ahora ves lo que hay en el Sheet/.test(await t.pg.innerText('#v-aplicacion .aviso-ok')), 'estado: Quedarme con la del Sheet termina bien');
+  chk(cuantas(t.log, 'data') === d0 + 1, 'estado: 5 pulsaciones en "Quedarme con la actual" = una sola carga de datos');
+  chk(/Listo: ahora ves la versión actual/.test(await t.pg.innerText('#v-aplicacion .aviso-ok')), 'estado: Quedarme con la actual termina bien');
   await t.ctx.close();
   // mientras trabaja: texto visible y el otro botón desactivado (se frena la carga de datos para poder verlo)
   t = await conflictoEstado('AP001');
@@ -233,7 +233,7 @@ const FORMS = {
   await t.pg.waitForTimeout(150);
   const be = await t.pg.$$eval('#v-alumno .conflicto button', b => b.map(x => ({ t: x.textContent, d: x.disabled })));
   chk(be.every(x => x.d) && be.some(x => /Guardando…/.test(x.t)) && await t.pg.isVisible('#v-alumno .conflicto'), 'entrevista: botones del aviso desactivados y "Guardando…"');
-  await t.pg.waitForFunction(() => /Guardado en el Sheet/.test(document.querySelector('#v-alumno').innerText));
+  await t.pg.waitForFunction(() => /Guardado/.test(document.querySelector('#v-alumno').innerText));
   chk(cuantas(t.log, 'guardarEntrevista') === 2, 'entrevista: doble pulsación = una sola petición (la primera dio el conflicto)');
   await t.ctx.close();
   // oferta: conflicto y "Guardar mi versión" doble
@@ -288,7 +288,7 @@ const FORMS = {
   await pg.click('#v-alumno form button[type=submit]');
   await pg.waitForSelector('#en-editar');
   await pg.waitForTimeout(900);   // el desplazamiento es suave
-  chk(/Guardado en el Sheet/.test(await pg.innerText('#v-alumno .card:has(#en-titulo)')) && await enPantalla(pg, '#en-titulo'), 'tras guardar la entrevista, se ve la tarjeta con su confirmación');
+  chk(/Guardado/.test(await pg.innerText('#v-alumno .card:has(#en-titulo)')) && await enPantalla(pg, '#en-titulo'), 'tras guardar la entrevista, se ve la tarjeta con su confirmación');
   await ctx.close();
 }
 

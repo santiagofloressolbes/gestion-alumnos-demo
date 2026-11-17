@@ -7,7 +7,7 @@ import { rondasDeOferta, aplicacionesDeRonda, aplicacionesDeAlumno, resumenEstad
 import { fechaLarga } from './entrevista.js';
 import { tarjetaError } from './error-datos.js';
 
-export const insigniaEstado = estado => el('span', { class: 'insignia' + claseEstado(estado) }, estado || 'Sin estado');
+export const insigniaEstado = estado => el('span', { class: 'insignia' + claseEstado(estado) }, estado || 'Sin dato');
 
 // Lo que hace falta para pintar rondas: todo sale de la misma carga de datos.
 export async function datosRondas() {
@@ -21,8 +21,8 @@ export function notaSinEscritura() {
   const e = getEstadoFuente();
   if (e.modo !== 'script' || !e.puedeEscribir || puedeEscribirRondas()) return null;
   return el('p', { class: 'aviso', role: 'note' }, e.conRondas
-    ? 'No se pueden guardar rondas ni solicitudes: el script de Google es de una versión anterior. Actualiza Code.gs con la guía («Actualizar a la versión con rondas y solicitudes»).'
-    : 'No se pueden guardar rondas ni solicitudes: en el Sheet todavía no están las hojas Rondas, Aplicaciones e Historial. Créalas con la guía («Actualizar a la versión con rondas y solicitudes»).');
+    ? 'No se pueden guardar rondas ni solicitudes ahora mismo. Avisa a quien administra la app.'
+    : 'No se pueden guardar rondas ni solicitudes: faltan datos de configuración. Avisa a quien administra la app.');
 }
 
 const mover = origen => () => { navegacion.origenAplicacion = origen; };
@@ -32,8 +32,8 @@ function filaAplicacion(a, d, desde) {
   const alumno = d.alumnos.find(x => x.id === a.idAlumno);
   const oferta = d.ofertas.find(x => x.id === a.idOferta);
   const titulo = desde === 'oferta'
-    ? (alumno ? nombreAlumno(alumno) : `(alumno ${a.idAlumno}, ya no está en el Sheet)`)
-    : (oferta ? (oferta.titulo || '(sin título)') : `(oferta ${a.idOferta}, ya no está en el Sheet)`);
+    ? (alumno ? nombreAlumno(alumno) : `(alumno ${a.idAlumno}: sin dato)`)
+    : (oferta ? (oferta.titulo || 'Sin dato') : `(oferta ${a.idOferta}: sin dato)`);
   const sub = desde === 'oferta' ? '' : [oferta?.empresa, 'Ronda ' + a.numeroRonda].filter(Boolean).join(' · ');
   return el('li', {}, el('a', { class: 'alumno oferta', href: '#/aplicacion/' + encodeURIComponent(a.id), onclick: mover(desde) },
     el('span', { class: 'alumno-texto' },
@@ -95,7 +95,7 @@ export function tarjetaAplicaciones(alumno, d) {
 
 /* ---- Detalle de una aplicación ---- */
 
-function campo(etiqueta, valor, { texto = false, vacio = 'No indicado' } = {}) {
+function campo(etiqueta, valor, { texto = false, vacio = 'Sin dato' } = {}) {
   return el('div', { class: 'campo' }, el('dt', {}, etiqueta), el('dd', { class: (valor ? '' : 'vacio ') + (texto ? 'largo' : '') }, valor || vacio));
 }
 
@@ -121,8 +121,8 @@ export async function pintarAplicacion(raiz, id) {
   const volver = navegacion.origenAplicacion === 'alumno' && alumno
     ? el('a', { class: 'volver', href: '#/alumno/' + encodeURIComponent(alumno.id) }, nombreAlumno(alumno))
     : el('a', { class: 'volver', href: oferta ? '#/oferta/' + encodeURIComponent(oferta.id) : '#/ofertas' }, oferta ? 'Oferta' : 'Ofertas');
-  const nombreAl = alumno ? nombreAlumno(alumno) : `(alumno ${a.idAlumno}, ya no está en el Sheet)`;
-  const nombreOf = oferta ? [oferta.titulo || '(sin título)', oferta.empresa].filter(Boolean).join(' · ') : `(oferta ${a.idOferta}, ya no está en el Sheet)`;
+  const nombreAl = alumno ? nombreAlumno(alumno) : `(alumno ${a.idAlumno}: sin dato)`;
+  const nombreOf = oferta ? [oferta.titulo || 'Sin dato', oferta.empresa].filter(Boolean).join(' · ') : `(oferta ${a.idOferta}: sin dato)`;
 
   reemplazar(raiz, ...[
     volver,

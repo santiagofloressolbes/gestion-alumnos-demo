@@ -104,12 +104,12 @@ export function tarjetaEntrevista(a) {
       const liberar = ocupar(controles(), pulsado);
       try {
         await guardarEntrevista(a.id, notas, fecha, base || undefined);
-        ver('Guardado en el Sheet.');
+        ver('Guardado.');
       } catch (e) {
         liberar();
         if (e.codigo === 'conflicto') return pintarConflicto(e.extra, notas, fecha);
         decir(e.codigo === 'clave'
-          ? 'La clave ha cambiado o ya no vale. Copia tu nota antes de salir y entra de nuevo con la clave nueva.'
+          ? 'La clave ya no vale. Copia tu nota y vuelve a entrar con la clave nueva.'
           : e.message);
         if (e.codigo === 'red' || e.codigo === 'tiempo') error.append(' Tu nota sigue aquí: no se ha perdido.');
       }
@@ -120,14 +120,14 @@ export function tarjetaEntrevista(a) {
       const nA = normalizar(actual.notas || ''), fA = actual.fecha || '';
       if (nA === mias && fA === miFecha) {            // ya estaba guardado (p. ej. se cortó la respuesta): no hay nada que decidir
         aplicarEntrevista(a.id, actual.notas, fA);
-        return ver('Guardado en el Sheet.');
+        return ver('Guardado.');
       }
       reemplazar(conflicto, 
-        el('h3', {}, 'Esta entrevista ha cambiado mientras la editabas'),
-        el('p', { class: 'sub' }, 'Esto es lo que hay ahora en el Sheet. Lo que has escrito sigue en el cuadro de arriba.'),
-        el('dl', { class: 'campos' }, campo('Fecha', fechaLarga(fA) || 'Sin fecha', !fA), campo('Notas', nA || 'Sin notas', !nA, true)),
+        el('h3', {}, 'Alguien ha cambiado esta entrevista mientras la editabas'),
+        el('p', { class: 'sub' }, 'Esto es lo que hay ahora. Lo que has escrito sigue en el cuadro de arriba.'),
+        el('dl', { class: 'campos' }, campo('Fecha', fechaLarga(fA) || 'Sin dato', !fA), campo('Notas', nA || 'Sin notas', !nA, true)),
         el('button', { class: 'primary', type: 'button', onclick: ev => { base = { notas: actual.notas || '', fecha: fA }; enviar(ev.currentTarget); } }, 'Guardar mi versión'),
-        el('button', { class: 'secondary', type: 'button', onclick: () => { aplicarEntrevista(a.id, actual.notas || '', fA); ver('Listo: ahora ves lo que hay en el Sheet. Tus cambios no se han guardado.'); } }, 'Quedarme con la del Sheet'));
+        el('button', { class: 'secondary', type: 'button', onclick: () => { aplicarEntrevista(a.id, actual.notas || '', fA); ver('Listo: ahora ves la versión actual. Tus cambios no se han guardado.'); } }, 'Quedarme con la actual'));
       conflicto.hidden = false;
       conflicto.scrollIntoView?.({ block: 'nearest' });
     };
