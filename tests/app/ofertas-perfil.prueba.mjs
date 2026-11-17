@@ -62,7 +62,7 @@ const quitarSoporte = (j) => { if (Array.isArray(j.soporta)) j.soporta = j.sopor
     for (let i = 0; i < 20; i++) { const b = await pg.$('#match-alumnos .grupo-match > button:not([hidden])'); if (!b) break; await b.click(); }
     const a1 = await pg.$$eval('#match-alumnos li.fila-match', ls => ls.filter(l => l.innerText.includes('Lucía Quintero')).map(l => [...l.querySelectorAll('.criterios li')].map(c => c.textContent.replace(/\s+/g, ' ').trim()))[0]);
     const txt = (a1 || []).join(' | ');
-    chk(a1 && /etiquetas/i.test(txt) && /Tiene las 2 etiquetas/.test(txt), `match (${recargar ? 'tras recargar' : 'sin recargar'}): las etiquetas de la oferta nueva se comparan con las de la alumna`);
+    chk(a1 && /habilidades/i.test(txt) && /Tiene las 2 habilidades/.test(txt), `match (${recargar ? 'tras recargar' : 'sin recargar'}): las etiquetas de la oferta nueva se comparan con las de la alumna`);
     chk(/Inglés B2: tiene C1/.test(txt) && /llega a ese nivel/.test(txt), '... y los idiomas y el nivel de formación');
     chk(/Subárea|subárea/.test(txt) && !/no consta/i.test(txt.split('|').filter(x => /subárea|Subárea/.test(x)).join('')), '... y la subárea');
   }

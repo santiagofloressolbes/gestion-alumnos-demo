@@ -22,7 +22,7 @@ igual(est(M.evaluar(al({ nacionalidadPrincipal: 'Chile', situacionTrabajo: 'Ciud
 igual(est(M.evaluar(al({ nacionalidadPrincipal: 'Chile', situacionTrabajo: 'Necesita permiso de trabajo' }), of({ requisitoNacionalidad: UE })), 'nacionalidad'), 'no', 'pide UE/EEE y es chileno sin situación UE: no cumple');
 const suiza = M.criterioNacionalidad(al({ nacionalidadPrincipal: 'Suiza', situacionTrabajo: 'Residente con permiso de trabajo' }), of({ requisitoNacionalidad: UE }));
 igual(suiza.estado, 'revisar', 'pide UE/EEE y es suizo: a revisar (nunca "no cumple")');
-chk(/Suiza no es de la UE ni del EEE/.test(suiza.texto), 'el aviso de Suiza lo explica');
+chk(/es de Suiza: no es de la UE\/EEE/.test(suiza.texto), 'el aviso de Suiza lo explica');
 igual(M.criterioNacionalidad(al({ nacionalidadPrincipal: '', situacionTrabajo: '' }), of({ requisitoNacionalidad: UE })).estado, 'revisar', 'pide UE/EEE y no consta nacionalidad: a revisar');
 igual(est(M.evaluar(al({ nacionalidadPrincipal: 'Chile' }), of({ requisitoNacionalidad: 'Chile' })), 'nacionalidad'), 'ok', 'país concreto que sí tiene');
 igual(est(M.evaluar(al({ nacionalidadPrincipal: 'Chile', nacionalidadSecundaria: 'Perú' }), of({ requisitoNacionalidad: 'Perú' })), 'nacionalidad'), 'ok', 'país concreto: vale la secundaria');

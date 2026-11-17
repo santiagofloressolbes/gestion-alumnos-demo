@@ -75,7 +75,7 @@ console.log('6. El % de encaje lleva el color de su grupo');
     return [...document.querySelectorAll('#match-alumnos .grupo-match')].map(g => ({ g: g.dataset.grupo, n: g.querySelectorAll('.match-punt').length,
       ok: [...g.querySelectorAll('.match-punt')].every(p => getComputedStyle(p).color === esperado[g.dataset.grupo] && getComputedStyle(p).color !== rojo), color: esperado[g.dataset.grupo] }));
   });
-  chk(col.every(c => c.n > 0 && c.ok), 'cada % lleva el color de su grupo (verde, ámbar y, en «No encaja», gris) y ninguno el rojo de acento: ' + JSON.stringify(col));
+  chk(col.every(c => c.n > 0 && c.ok), 'cada % lleva el color de su grupo (verde, ámbar y, en «Encaja poco», gris) y ninguno el rojo de acento: ' + JSON.stringify(col));
   chk(new Set(col.map(c => c.color)).size === 3, 'los tres grupos tienen tres colores distintos');
   const ratios = [];
   for (const g of ['encaja', 'reservas', 'no']) ratios.push(await contraste(pg, `#match-alumnos .grupo-match[data-grupo=${g}] .match-punt`));
@@ -97,11 +97,11 @@ console.log('7. Cada fila dice en una línea el motivo que decide el grupo');
     }));
     const NUCLEO = ['area', 'tipo', 'nacionalidad', 'permiso'];
     chk(filas.length > 0 && filas.every(f => f.n === 1), `${hash}: cada una de las ${filas.length} filas tiene exactamente una línea de motivo`);
-    chk(filas.filter(f => f.g === 'no').every(f => NUCLEO.includes(f.id) && /\bno\b/.test(f.clase)), `${hash}: en «No encaja», el motivo es un «no» de área, tipo, nacionalidad o permiso (${filas.filter(f => f.g === 'no').length} filas)`);
+    chk(filas.filter(f => f.g === 'no').every(f => NUCLEO.includes(f.id) && /\bno\b/.test(f.clase)), `${hash}: en «Encaja poco», el motivo es un «no» de área, tipo, nacionalidad o permiso (${filas.filter(f => f.g === 'no').length} filas)`);
     chk(filas.filter(f => f.g === 'reservas').every(f => /revisar|\bno\b/.test(f.clase)), `${hash}: en «con reservas», el motivo es algo que revisar (${filas.filter(f => f.g === 'reservas').length} filas)`);
     chk(filas.filter(f => f.g === 'encaja').every(f => /\bok\b/.test(f.clase)), `${hash}: en «Encaja», el motivo es un criterio que cumple`);
     chk(filas.every(f => f.texto.length <= 125), `${hash}: la línea es corta (≤ 125 caracteres; la más larga, ${Math.max(...filas.map(f => f.texto.length))})`);
-    chk(filas.every(f => { const palabra = (/(Cumple|Revisar|No cumple|Sin datos|No aplica)/.exec(f.palabraPorQue) || [])[1]; return palabra && f.texto.includes(palabra); }), `${hash}: la palabra del motivo coincide con la de «Por qué»`);
+    chk(filas.every(f => { const palabra = (/(Cumple|Revisar|No coincide|Sin dato|No aplica)/.exec(f.palabraPorQue) || [])[1]; return palabra && f.texto.includes(palabra); }), `${hash}: la palabra del motivo coincide con la de «Por qué»`);
   }
   await ctx.close();
 }
@@ -117,7 +117,7 @@ console.log('8. «Por qué» menos repetitivo; la razón migratoria larga, con �
     n: document.querySelectorAll('#match-alumnos li.fila-match').length,
     textos: [...document.querySelectorAll('#match-alumnos .crit-texto')].map(e => e.textContent.length),
   }));
-  chk(x.arriba.length > 80 && x.aviso.length === x.n && x.aviso.every(a => a.length < 60 && /verifica/.test(a)), 'el aviso largo sale una vez arriba y en cada «Por qué» solo una frase corta');
+  chk(x.arriba.length > 80 && x.aviso.length === x.n && x.aviso.every(a => a.length < 60 && /comprueba/.test(a)), 'el aviso largo sale una vez arriba y en cada «Por qué» solo una frase corta');
   chk(x.puntos.every(t => !/%/.test(t) && !/Encaje/.test(t)), '«Por qué» no repite el «Encaje %» de la fila');
   const largo = await pg.$('#match-alumnos .crit[data-criterio=permiso] .ver-mas');
   chk(largo !== null, 'una razón de permiso larga lleva «ver más»');
@@ -192,10 +192,10 @@ console.log('10. Ningún «0» suelto');
   await ctx.close();
 }
 
-console.log('11. v28: «Afinidad» (gris) en «No encaja» y todos los criterios que fallan en la fila');
+console.log('11. v28: «Afinidad» (gris) en «Encaja poco» y todos los criterios que fallan en la fila');
 {
   const { pg, ctx } = await entrar();
-  const NOMBRE = { area: 'área', subarea: 'subárea', etiquetas: 'habilidades', idiomas: 'idiomas', nivel: 'formación', tipo: 'tipo', nacionalidad: 'nacionalidad', permiso: 'permiso' };
+  const NOMBRE = { area: 'área', subarea: 'subárea', etiquetas: 'habilidades', idiomas: 'idiomas', nivel: 'formación', tipo: 'prácticas o empleo', nacionalidad: 'nacionalidad', permiso: 'permiso' };
   const NUCLEO = ['area', 'tipo', 'nacionalidad', 'permiso'];
   let multiples = 0, conRevisarYNo = 0, filasTotal = 0;
   for (const [hash, raiz] of [['#/oferta/O004', '#match-alumnos'], ['#/oferta/O005', '#match-alumnos'], ['#/oferta/O006', '#match-alumnos'], ['#/alumno/A001', '#match-ofertas'], ['#/alumno/A010', '#match-ofertas']]) {
@@ -209,7 +209,7 @@ console.log('11. v28: «Afinidad» (gris) en «No encaja» y todos los criterios
     })));
     const gris = await pg.evaluate(() => { const v = getComputedStyle(document.documentElement).getPropertyValue('--cmuted').trim(); const m = v.match(/^#(..)(..)(..)$/); return `rgb(${parseInt(m[1], 16)}, ${parseInt(m[2], 16)}, ${parseInt(m[3], 16)})`; });
     filasTotal += filas.length;
-    chk(filas.filter(f => f.g === 'no').every(f => /^(Afinidad \d+ %|Sin puntuación)/.test(f.punt)), `${hash}: en «No encaja» el % se llama «Afinidad» (${filas.filter(f => f.g === 'no').length} filas)`);
+    chk(filas.filter(f => f.g === 'no').every(f => /^(Afinidad \d+ %|Sin puntuación)/.test(f.punt)), `${hash}: en «Encaja poco» el % se llama «Afinidad» (${filas.filter(f => f.g === 'no').length} filas)`);
     chk(filas.filter(f => f.g !== 'no').every(f => /^(Encaje \d+ %|Sin puntuación)/.test(f.punt)), `${hash}: en «Encaja» y «con reservas» sigue «Encaje»`);
     chk(filas.filter(f => f.g === 'no').every(f => f.color === gris), `${hash}: la «Afinidad» va en gris`);
     chk(filas.every(f => !/Afinidad de perfil/.test(f.punt)), `${hash}: el rótulo es «Afinidad» a secas`);
@@ -220,17 +220,17 @@ console.log('11. v28: «Afinidad» (gris) en «No encaja» y todos los criterios
       const no = f.g === 'no' ? f.no.filter(i => NUCLEO.includes(i)) : f.no, rev = f.g === 'no' ? [] : f.revisar;
       if (no.length + rev.length < 2) continue;   // con uno solo se queda la línea de siempre, con el comienzo de la razón
       multiples++; if (no.length && rev.length) conRevisarYNo++;
-      const esperado = [no.length && `✗ No cumple: ${no.map(i => NOMBRE[i]).join(', ')}`, rev.length && `! Revisar: ${rev.map(i => NOMBRE[i]).join(', ')}`].filter(Boolean).join(' · ');
+      const esperado = [no.length && `✗ No coincide: ${no.map(i => NOMBRE[i]).join(', ')}`, rev.length && `! Revisar: ${rev.map(i => NOMBRE[i]).join(', ')}`].filter(Boolean).join(' · ');
       if (f.linea !== esperado) malas.push(`«${f.linea}» ≠ «${esperado}»`);
       if (f.ids !== [...no, ...rev].join(' ')) malas.push('data-criterios ' + f.ids);
     }
     chk(malas.length === 0, `${hash}: la línea de cada fila con varios fallos los nombra todos y en el orden de «Por qué» ${malas.slice(0, 2).join(' | ')}`);
     const unico = filas.filter(f => f.g !== 'encaja' && (f.g === 'no' ? f.no.filter(i => NUCLEO.includes(i)).length : f.no.length + f.revisar.length) === 1);
-    chk(unico.every(f => /^[✗!?] \S.* · (No cumple|Revisar|Sin datos)/.test(f.linea)), `${hash}: con un solo fallo se conserva «✗ Área · No cumple» y el comienzo de la razón (${unico.length} filas)`);
-    chk(filas.filter(f => f.g === 'no').every(f => !/Revisar/.test(f.linea.split(' · ')[0]) || /No cumple/.test(f.linea)), `${hash}: «No encaja» nombra los «no», no los «a revisar»`);
+    chk(unico.every(f => /^[✗!?] \S.* · (No coincide|Revisar|Sin dato)/.test(f.linea)), `${hash}: con un solo fallo se conserva «✗ Área · No coincide» y el comienzo de la razón (${unico.length} filas)`);
+    chk(filas.filter(f => f.g === 'no').every(f => !/Revisar/.test(f.linea.split(' · ')[0]) || /No coincide/.test(f.linea)), `${hash}: «Encaja poco» nombra los «no», no los «a revisar»`);
   }
   chk(multiples >= 5, `hay filas con varios criterios que fallan para comprobar (${multiples} de ${filasTotal})`);
-  chk(conRevisarYNo >= 1, `y al menos una con «No cumple» y «Revisar» a la vez (${conRevisarYNo})`);
+  chk(conRevisarYNo >= 1, `y al menos una con «No coincide» y «Revisar» a la vez (${conRevisarYNo})`);
   // Ni encaja ni nombres de criterios que la oferta no pide
   chk(await pg.$$eval('#match-ofertas li.fila-match', ls => ls.every(l => !/NaN|undefined|null/.test(l.querySelector('.motivo').textContent))), 'ninguna línea con basura');
   await ctx.close();
@@ -263,7 +263,7 @@ console.log('13. v28: «Idiomas · Revisar: Idiomas: …» ya no repite la palab
     const idiomas = x.filter(c => c.id === 'idiomas' && c.resto && !/^La oferta/.test(c.resto));
     chk(idiomas.every(c => !/^Idiomas/.test(c.resto)), `${hash}: los ${idiomas.length} textos de idiomas empiezan por el idioma, no por «Idiomas:»`);
     const filas = await pg.$$eval(raiz + ' .motivo', ms => ms.map(m => m.textContent.replace(/\s+/g, ' ')));
-    chk(filas.every(f => !/Idiomas · (Revisar|No cumple|Cumple) Idiomas/.test(f)), `${hash}: ni en la línea de la fila`);
+    chk(filas.every(f => !/Idiomas · (Revisar|No coincide|Cumple) Idiomas/.test(f)), `${hash}: ni en la línea de la fila`);
   }
   await ctx.close();
 }
@@ -282,7 +282,7 @@ console.log('14. v29: cada criterio tiene un solo nombre, en la fila y en el det
     const malas = [];
     for (const f of filas) {
       if (f.ids.length > 1) {
-        const nombres = f.linea.replace(/^[✗!] No cumple: /, '').replace(/ · ! Revisar: /, ', ').replace(/^! Revisar: /, '').split(', ');
+        const nombres = f.linea.replace(/^[✗!] No coincide: /, '').replace(/ · ! Revisar: /, ', ').replace(/^! Revisar: /, '').split(', ');
         if (nombres.length !== f.ids.length || !f.ids.every((id, i) => nombres[i] === abreviado(f.titulos[id]))) malas.push(`«${f.linea}» no sale de ${f.ids.map(i => f.titulos[i]).join(', ')}`);
         if (f.ids.includes('tipo')) tipoFilas++;
         comprobadas++;
@@ -292,8 +292,8 @@ console.log('14. v29: cada criterio tiene un solo nombre, en la fila y en el det
       }
     }
     chk(malas.length === 0, `${hash}: el nombre de cada criterio en la fila sale del mismo del detalle (${filas.length} filas) ${malas.slice(0, 2).join(' | ')}`);
-    chk(filas.every(f => f.titulos.tipo === 'Tipo'), `${hash}: el criterio de tipo se llama «Tipo» en el detalle`);
-    chk(!/Prácticas o empleo/.test(await pg.innerText(raiz)), `${hash}: ni rastro del nombre antiguo «Prácticas o empleo»`);
+    chk(filas.every(f => f.titulos.tipo === 'Prácticas o empleo'), `${hash}: el criterio de tipo se llama «Prácticas o empleo» en el detalle`);
+    chk(!/Tipo · (Cumple|Revisar|No coincide|Sin dato|No aplica)/.test(await pg.innerText(raiz)), `${hash}: ni rastro del nombre antiguo «Tipo»`);
   }
   chk(comprobadas >= 5, `se han comparado ${comprobadas} filas con varios fallos (${tipoFilas} con «tipo»)`);
   await ctx.close();

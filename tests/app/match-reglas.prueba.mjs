@@ -85,7 +85,7 @@ console.log('3. Etiquetas con lista cerrada (hoja Etiquetas), coincidencia exact
   igual(M.criterioEtiquetas(al({ etiquetas: 'Exce' }), of({ etiquetas: 'Excel' }), ctx).sinDatos, true, '…y como no está en la lista, es dato desconocido (sin datos), no «no cumple»');
   const fuera = M.criterioEtiquetas(al({ etiquetas: 'SQL; Cocina' }), of({ etiquetas: 'SQL' }), ctx);
   igual(fuera.estado, 'ok', 'una etiqueta que no es de la lista se ignora y no estropea lo demás');
-  chk(/«Cocina»/.test(fuera.texto) && /no están en la hoja Etiquetas/.test(fuera.texto), 'y se avisa cuál se ha ignorado');
+  chk(/«Cocina»/.test(fuera.texto) && /no están en la lista de habilidades/.test(fuera.texto), 'y se avisa cuál se ha ignorado');
   const ofFuera = M.criterioEtiquetas(al({ etiquetas: 'SQL' }), of({ etiquetas: 'Cocina' }), ctx);
   igual([ofFuera.estado, ofFuera.sinDatos], ['revisar', true], 'si la oferta pide una etiqueta que no está en la lista: sin datos');
   igual(M.criterioEtiquetas(al({ etiquetas: 'Cocina' }), of({ etiquetas: 'Cocina' }), M.CONTEXTO_VACIO).estado, 'ok', 'sin hoja Etiquetas no hay lista que validar: coincide el texto exacto');
@@ -161,7 +161,7 @@ console.log('6. Reglas migratorias (hoja del Sheet) y respaldo');
   igual([sinReglaPais.estado, sinReglaPais.sinDatos], ['revisar', true], 'país de la oferta desconocido (no está en la hoja Países): sin datos, no «cumple» ni «no cumple»');
   const rara = caso('Situación inventada');
   igual([rara.estado, rara.sinDatos], ['revisar', true], 'situación sin regla en la tabla: sin datos');
-  chk(/Reglas migratorias/.test(rara.texto), 'y dice dónde falta la regla');
+  chk(/No hay una regla para la situación «Situación inventada»/.test(rara.texto) && /Avisa a quien administra la app/.test(rara.texto), 'y dice dónde falta la regla y qué hacer');
   igual(M.criterioPermiso(al({ situacionTrabajo: 'Necesita permiso de trabajo' }), of({ requisitoPermiso: 'No requerido' }), ctx).noAplica, true, 'la oferta no pide permiso: no aplica');
   chk(['Ciudadano UE o español', 'Residente con permiso de trabajo', 'Permiso de estudiante', 'Necesita permiso de trabajo', '', 'Raro'].every(s => ['España', 'Portugal', 'Noruega', 'Suiza', 'Estados Unidos', 'Atlantis', ''].every(p => ['Prácticas', 'Empleo', ''].every(t => {
     const c = M.criterioPermiso(al({ situacionTrabajo: s, nacionalidadPrincipal: 'Chile' }), { ...pide, paisOferta: p, tipo: t }, ctx);
@@ -212,7 +212,7 @@ console.log('7. Nacionalidad y países (hoja Países)');
   igual(nac('Chile').estado, 'no', 'país conocido de fuera de la UE: no cumple');
   const raro = nac('Atlantis');
   igual([raro.estado, raro.sinDatos], ['revisar', true], 'país DESCONOCIDO (no está en la hoja Países): revisar, nunca «no cumple»');
-  chk(/Atlantis/.test(raro.texto) && /hoja Países/.test(raro.texto), 'y lo explica');
+  chk(/Atlantis/.test(raro.texto) && /lista de países/.test(raro.texto), 'y lo explica');
   igual(nac('Atlantis', 'Necesita permiso de trabajo', M.CONTEXTO_VACIO).estado, 'no', '(sin hoja Países no se puede saber qué país es desconocido: como siempre)');
   igual(nac('Chile').sinDatos, undefined, 'el rojo de un país conocido no es «sin datos»');
   igual(M.criterioNacionalidad(al({ nacionalidadPrincipal: 'Chile', nacionalidadSecundaria: 'Atlantis', situacionTrabajo: 'Necesita permiso de trabajo' }), pide, ctx).sinDatos, true, 'si una de las dos es desconocida no se puede dar un «no cumple»');

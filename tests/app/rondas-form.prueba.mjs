@@ -245,7 +245,7 @@ const sinClaveEnUrl = log => log.peticiones.every(p => !p.url.includes(CLAVE_PRU
   await formApl(pg, 'O007', 1);
   await elegir('castañeda', 'A009');
   avisos = await pg.$$eval('#ap-avisos .aviso', a => a.map(x => x.textContent));
-  chk(avisos.length === 1 && /nacionalidad «Estados Unidos» y Isabella Castañeda tiene «Argentina · Países Bajos»/.test(avisos[0]), 'nacionalidad requerida distinta → aviso: ' + avisos.join(' | '));
+  chk(avisos.length === 1 && /nacionalidad «Estados Unidos» y consta «Argentina · Países Bajos»/.test(avisos[0]), 'nacionalidad requerida distinta → aviso: ' + avisos.join(' | '));
   await elegir('haddad', 'A012');
   chk((await pg.$$('#ap-avisos .aviso')).length === 0, 'Rafael (EE. UU.): sin avisos');
   // oferta cerrada

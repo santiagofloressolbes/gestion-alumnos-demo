@@ -60,20 +60,20 @@ for (const modo of ['demo', 'script']) {
     });
     await ir(pg, '#/oferta/O005', '#match-alumnos .grupo-match');
     const cs = await cuentas(pg);
-    chk(cs.length === 3 && /^Encaja \(/.test(cs[0]) && /^Encaja con reservas \(/.test(cs[1]) && /^No encaja \(/.test(cs[2]), 'tres grupos: ' + cs.join(' | '));
+    chk(cs.length === 3 && /^Encaja \(/.test(cs[0]) && /^Encaja con reservas \(/.test(cs[1]) && /^Encaja poco \(/.test(cs[2]), 'tres grupos: ' + cs.join(' | '));
     chk(numeros(cs).reduce((a, b) => a + b, 0) === 30, 'los tres grupos suman los 30 alumnos: nadie queda fuera (' + cs.join(' | ') + ')');
-    chk(/ayuda para mirar, no una decisión/.test(await pg.innerText('#match-alumnos')), 'dice que es una ayuda y no una decisión');
+    chk(/Es una ayuda, no una decisión/.test(await pg.innerText('#match-alumnos')), 'dice que es una ayuda y no una decisión');
     await abrirTodo(pg, '#match-alumnos');
     chk((await pg.$$('#match-alumnos li.fila-match')).length === 30, 'abriendo todo se ven los 30 alumnos');
     const enc = await grupoDe(pg, '#match-alumnos', 'encaja'), res = await grupoDe(pg, '#match-alumnos', 'reservas'), no = await grupoDe(pg, '#match-alumnos', 'no');
     if (modo === 'script') chk(enc.length === 1 && /Ana/.test(enc[0]) && /Quiere ir al área «Marketing y comunicación»/.test(enc[0]), 'Ana quiere ir a Marketing, es de la UE y busca empleo: encaja: ' + enc[0]);
-    chk(no.some(x => /Javier/.test(x) && /pide nacionalidad de la UE\/EEE y Javier .* tiene «Chile»/.test(x)), 'Javier (Chile, necesita permiso): no encaja y dice por qué');
+    chk(no.some(x => /Javier/.test(x) && /pide nacionalidad de la UE\/EEE y consta «Chile»/.test(x)), 'Javier (Chile, necesita permiso): encaja poco y dice por qué');
     chk(no.length + res.length + enc.length === 30, 'cada alumno está en un solo grupo');
     // "Por qué": cuatro criterios, con símbolo y palabra
     const crit = await pg.$$eval('#match-alumnos li.fila-match >> nth=0 >> .criterios li', l => l.map(x => x.textContent.replace(/\s+/g, ' ').trim()));
-    chk(crit.length === 8 && crit.every(x => /^[✓!✗?–] ?(Área|Subárea|Habilidades|Idiomas|Formación|Tipo|Nacionalidad|Permiso de trabajo) · (Cumple|Revisar|No cumple|Sin datos|No aplica):/.test(x)), 'cada fila explica 8 criterios con símbolo, nombre y palabra: ' + crit.join(' | '));
+    chk(crit.length === 8 && crit.every(x => /^[✓!✗?–] ?(Área|Subárea|Habilidades|Idiomas|Formación|Prácticas o empleo|Nacionalidad|Permiso de trabajo) · (Cumple|Revisar|No coincide|Sin dato|No aplica):/.test(x)), 'cada fila explica 8 criterios con símbolo, nombre y palabra: ' + crit.join(' | '));
     chk(crit.every(x => /\((\d+(,\d)? de \d+ puntos|no suma|no cuenta)\)$/.test(x)), 'y cada criterio dice cuántos puntos da (o que no suma / no cuenta)');
-    chk(/Orientativo, verifica la situación real/.test(await pg.innerText('#match-alumnos')), 'el aviso fijo «orientativo, verifica la situación real» está en la tarjeta');
+    chk(/La decisión sobre si puede trabajar en una oferta la toma siempre una persona/.test(await pg.innerText('#match-alumnos')), 'el aviso fijo (la decisión la toma una persona) está en la tarjeta');
     chk(await pg.$$eval('#match-alumnos li.fila-match', l => l.every(x => /^(Encaje|Afinidad) \d+ %|^Sin puntuación/.test(x.querySelector('.match-punt')?.textContent || ''))), 'cada fila enseña su puntuación («Encaje 82 %»)');
     chk(!/\bnull\b|undefined|\[object/.test(await pg.innerText('#match-alumnos')), 'sin "null" ni "undefined"');
     // el resto de la ficha sigue ahí
@@ -99,12 +99,12 @@ for (const modo of ['demo', 'script']) {
   chk(numeros(cs).reduce((a, b) => a + b, 0) === 70, 'con 70 alumnos, los grupos suman 70: ' + cs.join(' | '));
   chk((await pg.$$('#match-alumnos .grupo-match[data-grupo=encaja] li.fila-match')).length === 15, 'el primer grupo pinta 15 filas de golpe, no las 40');
   const mas = await pg.innerText('#match-alumnos .grupo-match[data-grupo=encaja] > button');
-  chk(/Ver 15 más \(quedan 25\)/.test(mas), '"Ver más" dice cuántas quedan: ' + mas);
+  chk(/^Ver 15 más$/.test(mas), '"Ver más" dice cuántos más se ven: ' + mas);
   await abrirTodo(pg, '#match-alumnos');
   chk((await pg.$$('#match-alumnos li.fila-match')).length === 70, 'con "Ver más" se llega a los 70');
   const res = await grupoDe(pg, '#match-alumnos', 'reservas');
-  chk(res.some(x => /Ana/.test(x) && /Suiza no es de la UE ni del EEE/.test(x)), 'Suiza: a revisar, con el aviso de que no es UE/EEE');
-  chk(res.some(x => /Paula/.test(x) && /no consta la nacionalidad/.test(x)), 'sin nacionalidad: a revisar, no descartada');
+  chk(res.some(x => /Ana/.test(x) && /es de Suiza: no es de la UE\/EEE/.test(x)), 'Suiza: a revisar, con el aviso de que no es UE/EEE');
+  chk(res.some(x => /Paula/.test(x) && /no hay dato de la nacionalidad/.test(x)), 'sin nacionalidad: a revisar, no descartada');
   await ir(pg, '#/oferta/O003', '#match-alumnos .grupo-match');
   await abrirTodo(pg, '#match-alumnos');
   const r3 = await grupoDe(pg, '#match-alumnos', 'reservas');
@@ -140,7 +140,7 @@ for (const modo of ['demo', 'script']) {
   pg.on('dialog', d => d.accept());   // al salir de un formulario con cambios se acepta descartar
   await ir(pg, '#/oferta/O005/ronda/1/aplicar', '#ap-lista li');
   const subs = await pg.$$eval('#ap-lista li .alumno-texto .sub', s => s.map(x => x.textContent));
-  const rango = t => /No encaja/.test(t) ? 2 : /Encaja con reservas/.test(t) ? 1 : /Encaja/.test(t) ? 0 : -1;
+  const rango = t => /Encaja poco/.test(t) ? 2 : /Encaja con reservas/.test(t) ? 1 : /Encaja/.test(t) ? 0 : -1;
   const rangos = subs.map(rango);
   chk(rangos.every(r => r >= 0) && rangos.every((r, i) => i === 0 || r >= rangos[i - 1]), 'la lista va por orden (encajan, con reservas, no encajan) y cada fila lo dice');
   chk(rangos[0] === 0, 'el primero es quien mejor encaja: ' + subs[0]);

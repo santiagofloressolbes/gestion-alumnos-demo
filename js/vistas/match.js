@@ -8,17 +8,17 @@ import { navegacion } from '../util/navegacion.js';
 import { MAX_PERFILES } from '../util/compartir.js';
 
 const POR_PAGINA = 15;   // filas que se pintan de golpe en cada grupo (con "Ver más")
-const NOTA = 'Es una ayuda para mirar, no una decisión: nadie queda fuera de la lista y cada fila dice por qué.';
+const NOTA = 'Cada fila dice por qué.';
 // Aviso fijo: el match orienta y ordena; si alguien puede trabajar o no lo decide siempre una persona.
-export const AVISO_ORIENTATIVO = 'Orientativo, verifica la situación real: la decisión sobre si se puede trabajar en una oferta la toma siempre una persona.';
-const TITULO = { area: 'Área', subarea: 'Subárea', etiquetas: 'Habilidades', idiomas: 'Idiomas', nivel: 'Formación', tipo: 'Tipo', nacionalidad: 'Nacionalidad', permiso: 'Permiso de trabajo' };
+export const AVISO_ORIENTATIVO = 'Es una ayuda, no una decisión. Nadie queda fuera de la lista. La decisión sobre si puede trabajar en una oferta la toma siempre una persona.';
+const TITULO = { area: 'Área', subarea: 'Subárea', etiquetas: 'Habilidades', idiomas: 'Idiomas', nivel: 'Formación', tipo: 'Prácticas o empleo', nacionalidad: 'Nacionalidad', permiso: 'Permiso de trabajo' };
 
 // Cómo se dice cada criterio: el símbolo y la palabra van siempre en texto (el color nunca es lo único que lo dice).
-// «Sin datos» = faltan datos: se ve como «a revisar», pero no suma puntos ni cuenta como «no cumple». «No aplica» = la oferta no pide eso.
+// «Sin dato» = falta el dato: se ve como «a revisar», pero no suma puntos ni cuenta como «no cumple». «No aplica» = la oferta no pide eso.
 function rotulo(c) {
   if (c.noAplica) return { signo: '–', palabra: 'No aplica', clase: 'na' };
-  if (c.sinDatos) return { signo: '?', palabra: 'Sin datos', clase: 'revisar sin-datos' };
-  return { signo: { ok: '✓', revisar: '!', no: '✗' }[c.estado], palabra: { ok: 'Cumple', revisar: 'Revisar', no: 'No cumple' }[c.estado], clase: c.estado };
+  if (c.sinDatos) return { signo: '?', palabra: 'Sin dato', clase: 'revisar sin-datos' };
+  return { signo: { ok: '✓', revisar: '!', no: '✗' }[c.estado], palabra: { ok: 'Cumple', revisar: 'Revisar', no: 'No coincide' }[c.estado], clase: c.estado };
 }
 const num = n => String(Math.round(n * 10) / 10).replace('.', ',');
 const puntosDe = c => (c.noAplica ? 'no cuenta' : c.sinDatos ? 'no suma' : `${num(c.peso * c.factor)} de ${c.peso} puntos`);
@@ -31,7 +31,7 @@ export function textoPuntuacion(p, categoria) {
 }
 
 // Aviso corto dentro de cada «Por qué» (el aviso completo está arriba, en la tarjeta): la decisión sobre si se puede trabajar la toma siempre una persona.
-export const AVISO_CORTO = 'Orientativo: verifica la situación real.';
+export const AVISO_CORTO = 'Orientativo: comprueba la situación real.';
 
 // Un texto largo se acorta con «ver más» (y «ver menos»). Solo se usa donde el texto puede ser muy largo (la razón de nacionalidad y de permiso).
 const MAX_TEXTO = 110;
@@ -52,9 +52,9 @@ function porQue(r) {
   const p = r.puntuacion;
   // Sin repetir el «Encaje 81 %» de la fila: aquí solo los puntos y cuántos criterios tenían datos.
   const puntos = p.porcentaje == null
-    ? 'Sin puntuación: ningún criterio tiene datos.'
-    : `${num(p.puntos)} de ${p.maximo} puntos, con ${p.evaluados === 1 ? '1 criterio con datos' : `${p.evaluados} criterios con datos`}.`
-      + (p.incompleto ? ` Sin datos en ${p.sinDatos === 1 ? '1 criterio (ni suma ni resta)' : `${p.sinDatos} criterios (ni suman ni restan)`}.` : '');
+    ? 'Sin puntuación: no hay dato en ningún criterio.'
+    : `${num(p.puntos)} de ${p.maximo} puntos con ${p.evaluados === 1 ? '1 criterio' : `${p.evaluados} criterios`}.`
+      + (p.incompleto ? ` ${p.sinDatos === 1 ? '1 criterio sin dato: ni suma ni resta' : `${p.sinDatos} criterios sin dato: ni suman ni restan`}.` : '');
   return desplegable({ class: 'porque' },
     el('summary', {}, 'Por qué'),
     el('p', { class: 'sub porque-punt' }, puntos),
@@ -91,15 +91,15 @@ export function criteriosQueFallan(r) {
 }
 const nombres = lista => lista.map(x => NOMBRE_CORTO[x.id]).join(', ');
 
-// La línea corta de la fila. Con varios fallos: «✗ No cumple: tipo, nacionalidad, permiso · ! Revisar: idiomas».
-// Con uno solo (o en «Encaja»): «✗ Área · No cumple» y el comienzo de la razón. El detalle completo está en «Por qué».
+// La línea corta de la fila. Con varios fallos: «✗ No coincide: prácticas o empleo, nacionalidad, permiso · ! Revisar: idiomas».
+// Con uno solo (o en «Encaja»): «✗ Área · No coincide» y el comienzo de la razón. El detalle completo está en «Por qué».
 const MAX_MOTIVO = 70;
 function motivo(r) {
   const f = criteriosQueFallan(r);
   if (f.no.length + f.revisar.length > 1) {
     const todos = [...f.no, ...f.revisar];
     return el('span', { class: 'sub motivo ' + (f.no.length ? 'no' : 'revisar'), 'data-criterio': criterioDecisivo(r).id, 'data-criterios': todos.map(x => x.id).join(' ') },
-      f.no.length > 0 && el('b', { class: 'm-no' }, `✗ No cumple: ${nombres(f.no)}`),
+      f.no.length > 0 && el('b', { class: 'm-no' }, `✗ No coincide: ${nombres(f.no)}`),
       f.no.length > 0 && f.revisar.length > 0 && ' · ',
       f.revisar.length > 0 && el('b', { class: 'm-revisar' }, `! Revisar: ${nombres(f.revisar)}`));
   }
@@ -122,7 +122,7 @@ function grupos(resultados, fila, nombreItem, extra = () => {}) {
       pintadas = Math.min(items.length, pintadas + POR_PAGINA);
       const quedan = items.length - pintadas;
       mas.hidden = quedan === 0;
-      mas.textContent = `Ver ${quedan > POR_PAGINA ? POR_PAGINA : quedan} más (quedan ${quedan})`;
+      mas.textContent = `Ver ${quedan > POR_PAGINA ? POR_PAGINA : quedan} más`;
       extra();
     };
     pintar();
@@ -139,7 +139,7 @@ function avisosDeTarjeta(ctx) {
   return [
     el('p', { class: 'aviso aviso-orientativo', role: 'note' }, AVISO_ORIENTATIVO),
     ctx.problemas.length > 0 && el('p', { class: 'aviso', role: 'note', id: 'match-problemas' },
-      `En las hojas de reglas hay ${ctx.problemas.length === 1 ? '1 fila que no se entiende y no se ha usado' : `${ctx.problemas.length} filas que no se entienden y no se han usado`}: ${ctx.problemas.slice(0, 3).join(' ')}${ctx.problemas.length > 3 ? ' …' : ''}`),
+      `Hay ${ctx.problemas.length === 1 ? '1 regla que no se entiende y no se ha usado' : `${ctx.problemas.length} reglas que no se entienden y no se han usado`}: ${ctx.problemas.slice(0, 3).join(' ')}${ctx.problemas.length > 3 ? ' …' : ''} Avisa a quien administra la app.`),
   ];
 }
 
@@ -203,7 +203,7 @@ export function tarjetaOfertasQueEncajan(alumno, d) {
     return el('li', { class: 'fila-match' }, el('div', { class: 'fila-match-cuerpo' },
       el('a', { class: 'alumno oferta', href: '#/oferta/' + encodeURIComponent(o.id) },
         el('span', { class: 'alumno-texto' },
-          el('b', {}, o.titulo || '(sin título)'),
+          el('b', {}, o.titulo || 'Sin dato'),
           el('span', { class: 'sub' }, [o.empresa, o.estado === 'Cerrada' && 'cerrada'].filter(Boolean).join(' · ')),
           el('span', { class: 'sub match-punt g-' + r.categoria }, textoPuntuacion(r.puntuacion, r.categoria)),
           motivo(r)),

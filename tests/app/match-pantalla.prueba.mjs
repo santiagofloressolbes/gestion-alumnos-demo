@@ -32,12 +32,12 @@ for (const modo of ['demo', 'script']) {
   const tomas = await fila(pg, '#match-alumnos', 'Tomás Lacerda');
   chk(tomas && /(Encaje|Afinidad) \d+ % · datos incompletos/.test(tomas.texto), 'Tomás (sin idiomas escritos): se ve «Encaje N % · datos incompletos» (en «No encaja», «Afinidad»): ' + tomas?.texto);
   const idi = tomas.crit.find(c => /Idiomas/.test(c));
-  chk(/^\?/.test(idi) && /Sin datos/.test(idi) && /\(no suma\)$/.test(idi), 'y el criterio de idiomas sale «Sin datos» y «no suma»: ' + idi);
+  chk(/^\?/.test(idi) && /Sin dato/.test(idi) && /\(no suma\)$/.test(idi), 'y el criterio de idiomas sale «Sin dato» y «no suma»: ' + idi);
   chk(tomas.grupo !== 'no' || /nacionalidad/.test(tomas.texto), 'si está en «No encaja» es por un requisito de verdad (nacionalidad), no por el dato que falta');
   const sinPerfil = await fila(pg, '#match-alumnos', 'Javier Mendes');
-  chk(sinPerfil.crit.some(c => /Habilidades · Sin datos/.test(c)), 'Javier (sin etiquetas): «Habilidades · Sin datos»');
+  chk(sinPerfil.crit.some(c => /Habilidades · Sin dato/.test(c)), 'Javier (sin habilidades): «Habilidades · Sin dato»');
   chk(await pg.$$eval('#match-alumnos li.fila-match', l => l.length) === 30, 'siguen los 30 alumnos: nadie queda fuera');
-  chk(/Orientativo, verifica la situación real/.test(await pg.innerText('#match-alumnos .aviso-orientativo')), 'el aviso fijo «Orientativo, verifica la situación real» está arriba');
+  chk(/La decisión sobre si puede trabajar en una oferta la toma siempre una persona/.test(await pg.innerText('#match-alumnos .aviso-orientativo')), 'el aviso fijo (la decisión la toma una persona) está arriba');
   chk(await pg.$$eval('#match-alumnos .porque .porque-aviso', l => l.length) === 30, 'y se repite dentro de cada «Por qué»');
   chk(!(await pg.$('#match-problemas')), 'con las hojas bien, no sale ningún aviso de filas raras');
   const orden = await pg.$$eval('#match-alumnos li.fila-match', l => l.map(x => ({ g: x.closest('.grupo-match').dataset.grupo, p: +((/(?:Encaje|Afinidad) (\d+) %/.exec(x.innerText) || [])[1] ?? -1) })));
@@ -46,7 +46,7 @@ for (const modo of ['demo', 'script']) {
   await ir(pg, '#/alumno/A014', '#match-ofertas .grupo-match');
   await abrirTodo(pg, '#match-ofertas');
   chk(await pg.$$eval('#match-ofertas li.fila-match', l => l.length === 10 && l.every(x => /(Encaje|Afinidad) \d+ %|Sin puntuación/.test(x.querySelector('.match-punt')?.textContent || ''))), 'la ficha del alumno: las 10 ofertas, cada una con su puntuación');
-  chk(/Orientativo, verifica la situación real/.test(await pg.innerText('#match-ofertas .aviso-orientativo')), 'y también lleva el aviso fijo');
+  chk(/La decisión sobre si puede trabajar en una oferta la toma siempre una persona/.test(await pg.innerText('#match-ofertas .aviso-orientativo')), 'y también lleva el aviso fijo');
   chk(escrituras(log).length === 0 && log.consola.length === 0, 'sin peticiones de guardar y sin errores: ' + log.consola.join(' | '));
   await ctx.close();
 }
@@ -76,7 +76,7 @@ for (const modo of ['demo', 'script']) {
   await abrirTodo(sin.pg, '#match-alumnos');
   chk(await sin.pg.$$eval('#match-alumnos li.fila-match', l => l.length) === 30, 'sin hojas: los 30 alumnos');
   const jav = await fila(sin.pg, '#match-alumnos', 'Javier Mendes');
-  chk(/pide nacionalidad de la UE\/EEE y Javier/.test(jav.texto) && jav.grupo === 'no', 'sin hojas, Javier (Chile) sigue sin encajar y dice por qué');
+  chk(/pide nacionalidad de la UE\/EEE y consta «Chile»/.test(jav.texto) && jav.grupo === 'no', 'sin hojas, Javier (Chile) sigue sin encajar y dice por qué');
   chk(sin.log.consola.length === 0, 'sin errores de consola');
   await sin.ctx.close();
 
@@ -99,7 +99,7 @@ for (const modo of ['demo', 'script']) {
   });
   await ir(pg, '#/oferta/O003', '#match-problemas');
   const t = await pg.innerText('#match-problemas');
-  chk(/3 filas que no se entienden y no se han usado/.test(t) && /Marte/.test(t) && /Muchísima/.test(t) && /Quizás/.test(t), 'aviso con las 3 filas raras: ' + t);
+  chk(/3 reglas que no se entienden y no se han usado/.test(t) && /Avisa a quien administra la app/.test(t) && /Marte/.test(t) && /Muchísima/.test(t) && /Quizás/.test(t), 'aviso con las 3 filas raras: ' + t);
   await abrirTodo(pg, '#match-alumnos');
   chk(await pg.$$eval('#match-alumnos li.fila-match', l => l.length) === 30, 'y los 30 alumnos siguen ahí');
   chk(log.consola.length === 0, 'sin errores');

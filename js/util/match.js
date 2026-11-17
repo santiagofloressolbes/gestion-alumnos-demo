@@ -124,7 +124,6 @@ export function criterioNacionalidad(alumno, oferta, ctx = CONTEXTO_VACIO) {
   const pide = oferta.requisitoNacionalidad;
   if (!pide) return noAplica('nacionalidad', 'La oferta no pide una nacionalidad concreta.');
   const nacs = nacionalidadesDe(alumno);
-  const quien = nombre(alumno);
   const tiene = nacs.join(' · ');
   const desconocidas = nacs.filter(n => !paisConocido(n, ctx));
   const nuevo = (...a) => crit('nacionalidad', ...a);
@@ -133,17 +132,17 @@ export function criterioNacionalidad(alumno, oferta, ctx = CONTEXTO_VACIO) {
     if (nacs.some(n => esPaisUE(n, ctx))) return nuevo('ok', `Pide nacionalidad de la UE/EEE y tiene «${nacs.filter(n => esPaisUE(n, ctx))[0]}».`);
     if (alumno.situacionTrabajo === SITUACION_UE) return nuevo('ok', `Pide nacionalidad de la UE/EEE y su situación es «${SITUACION_UE}».`);
     if (nacs.some(n => esSuiza(n, ctx))) {
-      return nuevo('revisar', `La oferta pide nacionalidad de la UE/EEE y ${quien} es de Suiza: Suiza no es de la UE ni del EEE, aunque tiene un acuerdo de libre circulación. Conviene revisarlo.`);
+      return nuevo('revisar', `La oferta pide nacionalidad de la UE/EEE y es de Suiza: no es de la UE/EEE, pero tiene libre circulación. Revísalo.`);
     }
-    if (!nacs.length) return sinDatos('nacionalidad', `La oferta pide nacionalidad de la UE/EEE y no consta la nacionalidad de ${quien}.`);
-    if (desconocidas.length) return sinDatos('nacionalidad', `La oferta pide nacionalidad de la UE/EEE y no reconozco el país ${unir(desconocidas)} (no está en la hoja Países): conviene revisarlo.`);
-    return nuevo('no', `La oferta pide nacionalidad de la UE/EEE y ${quien} tiene «${tiene}».`);
+    if (!nacs.length) return sinDatos('nacionalidad', `La oferta pide nacionalidad de la UE/EEE y no hay dato de la nacionalidad.`);
+    if (desconocidas.length) return sinDatos('nacionalidad', `La oferta pide nacionalidad de la UE/EEE y ${desconocidas.length === 1 ? 'el país' : 'los países'} ${unir(desconocidas)} no ${desconocidas.length === 1 ? 'está' : 'están'} en la lista de países: revísalo.`);
+    return nuevo('no', `La oferta pide nacionalidad de la UE/EEE y consta «${tiene}».`);
   }
 
   if (nacs.some(n => mismo(n, pide))) return nuevo('ok', `Pide nacionalidad «${pide}» y la tiene.`);
-  if (!nacs.length) return sinDatos('nacionalidad', `La oferta pide nacionalidad «${pide}» y no consta la nacionalidad de ${quien}.`);
-  if (desconocidas.length) return sinDatos('nacionalidad', `La oferta pide nacionalidad «${pide}» y no reconozco el país ${unir(desconocidas)} (no está en la hoja Países): conviene revisarlo.`);
-  return nuevo('no', `La oferta pide nacionalidad «${pide}» y ${quien} tiene «${tiene}».`);
+  if (!nacs.length) return sinDatos('nacionalidad', `La oferta pide nacionalidad «${pide}» y no hay dato de la nacionalidad.`);
+  if (desconocidas.length) return sinDatos('nacionalidad', `La oferta pide nacionalidad «${pide}» y ${desconocidas.length === 1 ? 'el país' : 'los países'} ${unir(desconocidas)} no ${desconocidas.length === 1 ? 'está' : 'están'} en la lista de países: revísalo.`);
+  return nuevo('no', `La oferta pide nacionalidad «${pide}» y consta «${tiene}».`);
 }
 
 // Fecha del Sheet (AAAA-MM-DD o DD/MM/AAAA) → Date, o null si no se entiende.
@@ -195,22 +194,22 @@ export function criterioPermiso(alumno, oferta, ctx = CONTEXTO_VACIO) {
   if (oferta.requisitoPermiso !== PIDE_PERMISO) return noAplica('permiso', 'La oferta no pide permiso de trabajo en vigor.');
   const s = alumno.situacionTrabajo;
   const quien = nombre(alumno);
-  if (!s) return sinDatos('permiso', `La oferta pide permiso de trabajo en vigor y no consta la situación de trabajo de ${quien}.`);
+  if (!s) return sinDatos('permiso', `La oferta pide permiso de trabajo en vigor y no hay dato de la situación de trabajo.`);
   const regla = buscarRegla(ctx.reglas, s, oferta.tipo, oferta.paisOferta, ctx);
   if (!regla) {
-    const donde = ctx.reglas.some(r => norm(r.situacion) === norm(s)) ? `${oferta.tipo ? ` de ${oferta.tipo.toLowerCase()}` : ''}${oferta.paisOferta ? ` en ${oferta.paisOferta}` : ' (y no consta el país de la oferta)'}` : '';
-    return sinDatos('permiso', `La oferta pide permiso de trabajo en vigor y no hay una regla para la situación «${s}»${donde} en la hoja Reglas migratorias: conviene revisarla.`);
+    const donde = ctx.reglas.some(r => norm(r.situacion) === norm(s)) ? ` (${[oferta.tipo && oferta.tipo.toLowerCase(), oferta.paisOferta || 'sin país en la oferta'].filter(Boolean).join(', ')})` : '';
+    return sinDatos('permiso', `No hay una regla para la situación «${s}»${donde}. Avisa a quien administra la app.`);
   }
   let estado = regla.estado;
   let texto = (regla.motivo || `La oferta pide permiso de trabajo en vigor y ${quien} aparece como «${s}».`).replaceAll('{alumno}', quien).replaceAll('{situacion}', s);
   let factor;
   if (estado === 'no' && nacionalidadesDe(alumno).some(n => esPaisUE(n, ctx))) {
     estado = 'revisar';
-    texto = `La oferta pide permiso de trabajo en vigor y ${quien} aparece como «${s}», pero tiene nacionalidad de la UE/EEE. Conviene revisarlo.`;
+    texto = `La oferta pide permiso de trabajo en vigor y ${quien} aparece como «${s}», pero consta nacionalidad de la UE/EEE. Revísalo.`;
   }
   const vieja = reglaCaducada(regla, ctx);
   if (vieja) {
-    texto += ` Esta regla se validó el ${fechaCorta(vieja)} (hace más de ${MESES_VIGENCIA} meses): hay que volver a validarla.`;
+    texto += ` Esta regla se validó el ${fechaCorta(vieja)}, hace más de ${MESES_VIGENCIA} meses: avisa a quien administra la app para que la confirme.`;
     if (estado === 'ok') { estado = 'revisar'; factor = 0.5; }
   }
   return crit('permiso', estado, texto, { factor });
@@ -225,15 +224,15 @@ export function criterioArea(alumno, oferta, ctx = CONTEXTO_VACIO) {
   if (!area) return sinDatos('area', 'La oferta no indica el área.');
   const destino = alumno.areaDestino, exp = alumno.areaExperiencia;
   if (mismo(destino, area)) return crit('area', 'ok', `Quiere ir al área «${area}».`);
-  if (!destino && !exp) return sinDatos('area', `No consta el área a la que quiere ir ni su experiencia.`);
+  if (!destino && !exp) return sinDatos('area', `No hay dato del área a la que quiere ir ni de su experiencia.`);
   const dDestino = nivelAfinidad(destino, area, ctx), dExp = nivelAfinidad(exp, area, ctx);
-  if (dDestino === 'directa') return crit('area', 'ok', `Quiere ir a «${destino}», un área directamente relacionada con «${area}» (hoja Afinidad).`);
+  if (dDestino === 'directa') return crit('area', 'ok', `Quiere ir a «${destino}», un área directamente relacionada con «${area}» (según las afinidades definidas).`);
   if (mismo(exp, area)) return crit('area', 'revisar', `Tiene experiencia en «${area}», aunque quiere ir a otra área${destino ? ` («${destino}»)` : ''}.`);
-  if (dDestino === 'afin') return crit('area', 'revisar', `Quiere ir a «${destino}», un área afín a «${area}» (hoja Afinidad).`);
-  if (dExp === 'directa' || dExp === 'afin') return crit('area', 'revisar', `Tiene experiencia en «${exp}», un área ${dExp === 'directa' ? 'directamente relacionada con' : 'afín a'} «${area}» (hoja Afinidad).`);
+  if (dDestino === 'afin') return crit('area', 'revisar', `Quiere ir a «${destino}», un área afín a «${area}» (según las afinidades definidas).`);
+  if (dExp === 'directa' || dExp === 'afin') return crit('area', 'revisar', `Tiene experiencia en «${exp}», un área ${dExp === 'directa' ? 'directamente relacionada con' : 'afín a'} «${area}» (según las afinidades definidas).`);
   // Con la hoja Afinidad cargada, una pareja que no está en ella es un dato que falta (no un «no coincide»).
   if (ctx.hayAfinidad && ((destino && dDestino === undefined) || (!destino && dExp === undefined))) {
-    return sinDatos('area', `La hoja Afinidad no dice cómo se relaciona «${destino || exp}» con «${area}»: conviene revisarlo.`);
+    return sinDatos('area', `No hay dato de cómo se relaciona «${destino || exp}» con «${area}»: revísalo.`);
   }
   return crit('area', 'no', `El área «${area}» no coincide con lo que quiere ni con su experiencia.`);
 }
@@ -242,7 +241,7 @@ export function criterioSubarea(alumno, oferta, ctx = CONTEXTO_VACIO) {
   const sub = oferta.subarea;
   if (!sub) return noAplica('subarea', 'La oferta no indica una subárea.');
   const subs = lista(alumno.subareasExperiencia);
-  if (!subs.length) return sinDatos('subarea', `La oferta es de la subárea «${sub}» y no constan las subáreas de experiencia de ${nombre(alumno)}.`);
+  if (!subs.length) return sinDatos('subarea', `La oferta es de la subárea «${sub}» y no hay dato de las subáreas de experiencia.`);
   const propia = subs.find(s => mismo(s, sub));
   if (propia) return crit('subarea', 'ok', `Tiene experiencia en la subárea «${sub}».`);
   const areaOferta = ctx.areaDeSubarea.get(norm(sub));
@@ -251,23 +250,23 @@ export function criterioSubarea(alumno, oferta, ctx = CONTEXTO_VACIO) {
     return crit('subarea', 'revisar', `La oferta es de la subárea «${sub}»; tiene experiencia en otra subárea de la misma área (${unir(conocidas.filter(s => ctx.areaDeSubarea.get(norm(s)) === areaOferta))}).`);
   }
   if (areaOferta && conocidas.length) return crit('subarea', 'no', `La oferta es de la subárea «${sub}» y su experiencia está en otras áreas (${unir(subs)}).`);
-  return sinDatos('subarea', `La hoja Áreas no dice a qué área pertenece la subárea «${sub}» o las del alumno: conviene revisarlo.`);
+  return sinDatos('subarea', `No se sabe a qué área pertenece la subárea «${sub}» o las del alumno: revísalo.`);
 }
 
 export function criterioEtiquetas(alumno, oferta, ctx = CONTEXTO_VACIO) {
   const piden = lista(oferta.etiquetas);
-  if (!piden.length) return noAplica('etiquetas', 'La oferta no pide etiquetas ni habilidades concretas.');
+  if (!piden.length) return noAplica('etiquetas', 'La oferta no pide habilidades concretas.');
   const oficial = e => !ctx.hayEtiquetas || ctx.etiquetas.has(norm(e));
   const req = piden.filter(oficial), reqFuera = piden.filter(e => !oficial(e));
-  if (!req.length) return sinDatos('etiquetas', `Las etiquetas de la oferta (${unir(reqFuera)}) no están en la hoja Etiquetas: conviene revisarlas.`);
+  if (!req.length) return sinDatos('etiquetas', `Las habilidades de la oferta (${unir(reqFuera)}) no están en la lista de habilidades: revísalas.`);
   const tiene = lista(alumno.etiquetas), tieneOf = tiene.filter(oficial), tieneFuera = tiene.filter(e => !oficial(e));
-  if (!tieneOf.length) return sinDatos('etiquetas', `La oferta pide ${unir(req)} y no constan etiquetas del alumno${tieneFuera.length ? ` reconocidas (${unir(tieneFuera)} no están en la hoja Etiquetas)` : ''}.`);
+  if (!tieneOf.length) return sinDatos('etiquetas', `La oferta pide ${unir(req)} y no hay habilidades del alumno${tieneFuera.length ? ` reconocidas (${unir(tieneFuera)} no están en la lista de habilidades)` : ''}.`);
   const coinciden = req.filter(e => tieneOf.some(t => mismo(t, e))), faltan = req.filter(e => !coinciden.some(c => mismo(c, e)));
   const frac = coinciden.length / req.length;
-  const nota = (reqFuera.length || tieneFuera.length) ? ` No se han contado las que no están en la hoja Etiquetas: ${unir([...reqFuera, ...tieneFuera])}.` : '';
-  const texto = frac === 1 ? `Tiene las ${req.length === 1 ? '1 etiqueta' : `${req.length} etiquetas`} que pide la oferta (${unir(coinciden)}).${nota}`
+  const nota = (reqFuera.length || tieneFuera.length) ? ` No se han contado las que no están en la lista de habilidades: ${unir([...reqFuera, ...tieneFuera])}.` : '';
+  const texto = frac === 1 ? `Tiene ${req.length === 1 ? 'la habilidad' : `las ${req.length} habilidades`} que pide la oferta (${unir(coinciden)}).${nota}`
     : frac === 0 ? `La oferta pide ${unir(req)} y no tiene ninguna.${nota}`
-      : `Tiene ${coinciden.length} de las ${req.length} etiquetas que pide la oferta (${unir(coinciden)}); le faltan ${unir(faltan)}.${nota}`;
+      : `Tiene ${coinciden.length} de las ${req.length} habilidades que pide la oferta (${unir(coinciden)}); le faltan ${unir(faltan)}.${nota}`;
   return crit('etiquetas', frac === 1 ? 'ok' : frac === 0 ? 'no' : 'revisar', texto, { factor: frac });
 }
 
@@ -287,19 +286,19 @@ export function criterioIdiomas(alumno, oferta) {
   const piden = idiomasDe(oferta.idiomas);
   if (!piden.length) return noAplica('idiomas', 'La oferta no pide idiomas concretos.');
   const tiene = idiomasDe(alumno.idiomas);
-  if (!tiene.length) return sinDatos('idiomas', `La oferta pide ${unir(lista(oferta.idiomas))} y no constan los idiomas de ${nombre(alumno)}.`);
+  if (!tiene.length) return sinDatos('idiomas', `La oferta pide ${unir(lista(oferta.idiomas))} y no hay dato de los idiomas.`);
   const partes = []; let suma = 0, medidos = 0, sinNivel = 0;
   for (const p of piden) {
     const q = tiene.find(t => t.idioma === p.idioma);
     const pide = p.nivel ? ` ${rotuloNivel(p.nivel)}` : '';
     if (!q) { partes.push(`${p.texto}${pide}: no lo tiene`); medidos++; continue; }
     if (!p.nivel) { partes.push(`${p.texto}: lo tiene`); suma += 1; medidos++; continue; }
-    if (!q.nivel) { partes.push(`${p.texto}${pide}: lo tiene pero no consta el nivel`); sinNivel++; continue; }
+    if (!q.nivel) { partes.push(`${p.texto}${pide}: consta el idioma pero no el nivel`); sinNivel++; continue; }
     const cumple = NIVELES_IDIOMA.indexOf(q.nivel) >= NIVELES_IDIOMA.indexOf(p.nivel);
     partes.push(`${p.texto}${pide}: tiene ${rotuloNivel(q.nivel)}${cumple ? '' : ' (nivel más bajo)'}`);
     suma += cumple ? 1 : 0.5; medidos++;
   }
-  if (!medidos) return sinDatos('idiomas', `No constan los niveles de idioma de ${nombre(alumno)}: ${partes.join('; ')}.`);
+  if (!medidos) return sinDatos('idiomas', `No hay dato de los niveles de idioma: ${partes.join('; ')}.`);
   const frac = suma / medidos;
   const estado = frac === 0 ? 'no' : frac === 1 && !sinNivel ? 'ok' : 'revisar';
   return crit('idiomas', estado, `${partes.join('; ')}.`, { factor: frac });   // v28: sin el «Idiomas:» del principio (el rótulo «Idiomas · Revisar:» ya lo dice)
@@ -321,24 +320,24 @@ export function criterioNivel(alumno, oferta) {
   if (pide === null) return sinDatos('nivel', `El nivel de formación «${oferta.nivelFormacion}» de la oferta no se reconoce (usa Grado, Máster, Doctorado o Sin requisito).`);
   if (pide === 'ninguno') return noAplica('nivel', 'La oferta no pide un nivel de formación.');
   const tiene = nivelAlumno(alumno.formacionPrevia);
-  if (!tiene) return sinDatos('nivel', `La oferta pide ${oferta.nivelFormacion} y no consta la formación previa de ${nombre(alumno)} (o no se reconoce el nivel).`);
+  if (!tiene) return sinDatos('nivel', `La oferta pide ${oferta.nivelFormacion} y no hay dato de la formación previa (o no se reconoce el nivel).`);
   const d = NIVELES_FORMACION.indexOf(tiene) - NIVELES_FORMACION.indexOf(pide);
   if (d >= 0) return crit('nivel', 'ok', `Pide ${oferta.nivelFormacion} y su formación previa llega a ese nivel.`);
   if (d === -1) return crit('nivel', 'revisar', `Pide ${oferta.nivelFormacion} y su formación previa es de un nivel por debajo (${tiene === 'grado' ? 'Grado' : 'Máster'}).`);
-  return crit('nivel', 'no', `Pide ${oferta.nivelFormacion} y su formación previa es de un nivel bastante más bajo (Grado).`);
+  return crit('nivel', 'no', `Pide ${oferta.nivelFormacion} y su formación previa es de Grado.`);
 }
 
 export function criterioTipo(alumno, oferta) {
   const tipo = oferta.tipo, busca = alumno.disponibilidad;
-  if (!tipo) return sinDatos('tipo', 'La oferta no indica si es de prácticas o de empleo.');
-  if (!busca) return sinDatos('tipo', `La oferta es de ${tipo.toLowerCase()} y no consta qué busca el alumno.`);
+  if (!tipo) return sinDatos('tipo', 'La oferta no indica si es de prácticas o empleo.');
+  if (!busca) return sinDatos('tipo', `La oferta es de ${tipo.toLowerCase()} y no hay dato de qué busca.`);
   if (mismo(busca, 'Ambas') || mismo(busca, tipo)) return crit('tipo', 'ok', mismo(busca, 'Ambas') ? `Busca prácticas y empleo, y la oferta es de ${tipo.toLowerCase()}.` : `Busca ${busca.toLowerCase()} y la oferta es de ${tipo.toLowerCase()}.`);
-  return crit('tipo', 'no', `La oferta es de ${tipo.toLowerCase()} y ${nombre(alumno)} busca ${busca.toLowerCase()}.`);
+  return crit('tipo', 'no', `La oferta es de ${tipo.toLowerCase()} y busca ${busca.toLowerCase()}.`);
 }
 
 /* ---- Resultado ---- */
 
-export const CATEGORIAS = { encaja: 'Encaja', reservas: 'Encaja con reservas', no: 'No encaja' };
+export const CATEGORIAS = { encaja: 'Encaja', reservas: 'Encaja con reservas', no: 'Encaja poco' };
 const ORDEN = { encaja: 0, reservas: 1, no: 2 };
 
 // La puntuación: solo cuentan los criterios con datos y que la oferta pide. "incompleto" = hay criterios sin datos.
