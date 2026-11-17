@@ -26,13 +26,13 @@ export async function pintarCorreo(raiz, id) {
   const oferta = d.ofertas.find(x => x.id === a.idOferta);
   if (!alumno || !oferta) {
     reemplazar(raiz, volver, el('div', { class: 'card' }, el('h2', {}, 'Faltan datos'),
-      el('p', { class: 'sub' }, 'No se encuentra el alumno o la oferta de esta solicitud en el Sheet, y sin ellos no se puede armar el borrador.')));
+      el('p', { class: 'sub' }, 'No se encuentra el alumno o la oferta de esta solicitud, y sin ellos no se puede preparar el borrador.')));
     return;
   }
   const tipo = tipoDeEstado(a.estado);
   if (!tipo) {
     reemplazar(raiz, volver, el('div', { class: 'card', id: 'co-sin-borrador' }, el('h2', {}, 'Esta solicitud no tiene borrador'),
-      el('p', { class: 'sub' }, `Solo hay borradores para solicitudes en proceso (Recibida, En revisión, Enviada a la empresa o Entrevista) o descartadas. El estado de esta es «${a.estado || 'sin estado'}».`)));
+      el('p', { class: 'sub' }, `Solo hay borrador para solicitudes en curso o descartadas. El estado de esta es «${a.estado || 'sin dato'}».`)));
     return;
   }
 
@@ -43,7 +43,7 @@ export async function pintarCorreo(raiz, id) {
   const vista = el('pre', { class: 'vista-previa', id: 'co-vista', tabindex: '0', 'aria-label': 'Texto del borrador' });
   const estado = el('p', { class: 'ok', role: 'status', id: 'co-estado', hidden: true });
   const error = el('p', { class: 'error', role: 'alert', id: 'co-error', hidden: true });
-  const largo = el('p', { class: 'sub', id: 'co-largo', hidden: true }, 'El texto es demasiado largo para abrirlo directamente en el correo. Usa «Copiar».');
+  const largo = el('p', { class: 'sub', id: 'co-largo', hidden: true }, 'El texto es demasiado largo para abrirlo en el correo. Pulsa «Copiar».');
   const abrir = el('a', { class: 'primary', id: 'co-correo' }, 'Abrir en la app de correo');
   const copiar = el('button', { class: 'secondary', type: 'button', id: 'co-copiar', onclick: () => copiarBorrador() }, 'Copiar');
   const decir = (t, bien) => { estado.textContent = bien ? t : ''; estado.hidden = !(bien && t); error.textContent = bien ? '' : t; error.hidden = !t || bien; };
@@ -68,7 +68,7 @@ export async function pintarCorreo(raiz, id) {
 
   async function copiarBorrador() {
     if (!actual) return;
-    if (await copiarTexto(actual)) { decir('Copiado. Pégalo en tu correo: desde ahora el texto ya no se controla desde la app.', true); avisoFlotante('Copiado.'); }
+    if (await copiarTexto(actual)) { decir('Copiado. Pégalo en tu correo y revísalo antes de enviarlo.', true); avisoFlotante('Copiado.'); }
     else decir('No se ha podido copiar. Mantén pulsado el texto de la vista previa y elige «Copiar».', false);
   }
 
@@ -76,9 +76,9 @@ export async function pintarCorreo(raiz, id) {
     volver,
     el('section', { class: 'card', 'aria-labelledby': 'co-titulo' },
       el('h2', { id: 'co-titulo' }, 'Borrador de seguimiento'),
-      el('p', { class: 'sub' }, `${nombreAlumno(alumno)} · ${[oferta.titulo || '(sin título)', oferta.empresa].filter(Boolean).join(' · ')}`),
-      el('div', { class: 'estado-actual' }, insigniaEstado(a.estado), el('span', { class: 'sub' }, tipo === TIPOS_CORREO.enProceso ? 'Correo de «en proceso»' : 'Correo de «no continúa» con invitación a acercarse')),
-      el('p', { class: 'aviso', role: 'note', id: 'co-privacidad' }, 'El borrador no incluye notas de entrevista, motivo de descarte, situación de trabajo ni estatus migratorio. Solo el nombre de pila, el puesto, la empresa y el estado. Léelo antes de enviarlo: cuando sale de la app ya no se controla.')),
+      el('p', { class: 'sub' }, `${nombreAlumno(alumno)} · ${[oferta.titulo || 'Sin dato', oferta.empresa].filter(Boolean).join(' · ')}`),
+      el('div', { class: 'estado-actual' }, insigniaEstado(a.estado), el('span', { class: 'sub' }, tipo === TIPOS_CORREO.enProceso ? 'Correo de seguimiento' : 'Correo de cierre con oferta de ayuda')),
+      el('p', { class: 'aviso', role: 'note', id: 'co-privacidad' }, 'El borrador no incluye notas, motivo de descarte ni datos de trabajo. Solo el nombre, el puesto, la empresa y el estado. Léelo antes de enviarlo.')),
     el('section', { class: 'card', 'aria-labelledby': 'co-idioma-titulo' },
       el('h2', { id: 'co-idioma-titulo' }, 'Idioma'),
       listaIdiomas),

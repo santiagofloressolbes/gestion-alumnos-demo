@@ -48,26 +48,26 @@ console.log('2. El texto en español');
   const b = C.borradorCorreo({ alumno, oferta, aplicacion: app('Entrevista'), idioma: 'es', firma: 'Ana Pérez' });
   igual(b.tipo, 'en-proceso', 'tipo');
   igual(b.asunto, 'Seguimiento de tu solicitud: Becario/a de patrocinio en Club Mock B', 'asunto');
-  igual(b.cuerpo, 'Hola Lucía,\n\nTe escribo para decirte que tu solicitud para Becario/a de patrocinio en Club Mock B está en fase de entrevista.\n\nSeguimos el proceso de cerca y te avisaremos en cuanto haya novedades. Si tienes cualquier duda, escríbeme.\n\nUn saludo,\nAna Pérez', 'cuerpo de «Entrevista»');
+  igual(b.cuerpo, 'Hola Lucía,\n\nTu solicitud para Becario/a de patrocinio en Club Mock B ha pasado a la fase de entrevista.\n\nSeguimos el proceso de cerca y te avisaremos en cuanto haya novedades. Si tienes cualquier duda, escríbeme.\n\nUn saludo,\nAna Pérez', 'cuerpo de «Entrevista»');
   chk(b.faltaFirma === false, 'con firma, no falta');
-  for (const [e, frag] of [['Recibida', 'hemos recibido tu solicitud'], ['En revisión', 'está en revisión'], ['Enviada a la empresa', 'hemos enviado tu perfil a la empresa'], ['Entrevista', 'fase de entrevista']])
+  for (const [e, frag] of [['Recibida', 'Hemos recibido tu solicitud'], ['En revisión', 'está en revisión'], ['Enviada a la empresa', 'Hemos enviado tu perfil a la empresa'], ['Entrevista', 'fase de entrevista']])
     chk(C.borradorCorreo({ alumno, oferta, aplicacion: app(e), firma: 'Ana' }).cuerpo.includes(frag), `${e}: «${frag}»`);
   const d = C.borradorCorreo({ alumno, oferta, aplicacion: app('Descartado'), idioma: 'es', firma: 'Ana Pérez' });
   igual(d.tipo, 'descartado', 'descartado: tipo');
   igual(d.asunto, 'Sobre tu solicitud: Becario/a de patrocinio en Club Mock B', 'descartado: asunto');
-  igual(d.cuerpo, 'Hola Lucía,\n\nTe escribo para comentarte que, en esta ocasión, tu solicitud para Becario/a de patrocinio en Club Mock B no continúa en el proceso. Gracias por tu interés y por el esfuerzo.\n\nSi te gustaría orientar tu carrera hacia Comercial y patrocinio, acércate y lo hablamos: puedo ayudarte a preparar las próximas oportunidades en esa área.\n\nUn saludo,\nAna Pérez', 'cuerpo de «Descartado» con invitación al área de la oferta');
+  igual(d.cuerpo, 'Hola Lucía,\n\nTe escribo para comentarte que, esta vez, tu solicitud para Becario/a de patrocinio en Club Mock B no continúa en el proceso. Gracias por tu interés.\n\nSi quieres orientar tu carrera hacia Comercial y patrocinio, escríbeme y lo hablamos: puedo ayudarte a preparar las próximas oportunidades en esa área.\n\nUn saludo,\nAna Pérez', 'cuerpo de «Descartado» con invitación al área de la oferta');
   chk(!/descartad|rechaz|motivo|perfil no encaja/i.test(d.cuerpo + d.asunto), 'el descartado no dice «descartado», «rechazado» ni ningún motivo');
   const sinArea = C.borradorCorreo({ alumno, oferta: { ...oferta, area: '' }, aplicacion: app('Descartado'), firma: 'Ana' });
-  chk(/acércate y lo hablamos/.test(sinArea.cuerpo) && !/hacia/.test(sinArea.cuerpo), 'sin área en la oferta: invitación general, sin inventar un área');
+  chk(/escríbeme y lo hablamos/.test(sinArea.cuerpo) && !/hacia/.test(sinArea.cuerpo), 'sin área en la oferta: invitación general, sin inventar un área');
 }
 
 console.log('3. El texto en inglés');
 {
   const b = C.borradorCorreo({ alumno, oferta, aplicacion: app('Enviada a la empresa'), idioma: 'en', firma: 'Ana Pérez' });
   igual(b.asunto, 'Update on your application: Becario/a de patrocinio at Club Mock B', 'asunto en inglés');
-  igual(b.cuerpo, "Hi Lucía,\n\nI'm writing to let you know that we have sent your profile to the company for Becario/a de patrocinio at Club Mock B.\n\nWe are following the process closely and will let you know as soon as there is any news. If you have any questions, just write to me.\n\nBest regards,\nAna Pérez", 'cuerpo en inglés');
+  igual(b.cuerpo, "Hi Lucía,\n\nWe have sent your profile to the company for Becario/a de patrocinio at Club Mock B.\n\nWe are following the process closely and will let you know as soon as there is news. If you have any questions, just get in touch.\n\nBest regards,\nAna Pérez", 'cuerpo en inglés');
   const d = C.borradorCorreo({ alumno, oferta, aplicacion: app('Descartado'), idioma: 'en', firma: 'Ana' });
-  chk(/will not be moving forward/.test(d.cuerpo) && /steer your career towards Comercial y patrocinio/.test(d.cuerpo) && !/descartad|rejected|reason/i.test(d.cuerpo), 'descartado en inglés: invitación y sin motivo');
+  chk(/will not be moving forward/.test(d.cuerpo) && /focus your career on Comercial y patrocinio/.test(d.cuerpo) && !/descartad|rejected|reason/i.test(d.cuerpo), 'descartado en inglés: invitación y sin motivo');
   chk(!/Un saludo|Hola|Te escribo/.test(b.cuerpo + d.cuerpo), 'ni una palabra en español');
   chk(!/Best regards|Hi |I'm writing/.test(C.borradorCorreo({ alumno, oferta, aplicacion: app('Recibida'), idioma: 'es', firma: 'Ana' }).cuerpo), 'ni una palabra en inglés en el español');
   igual(C.borradorCorreo({ alumno, oferta, aplicacion: app('Recibida'), idioma: 'fr', firma: 'Ana' }).idioma, 'es', 'un idioma desconocido vuelve al español');
@@ -156,7 +156,7 @@ const sinScrollLateral = pg => pg.evaluate(() => document.documentElement.scroll
   let vista = await pg.innerText('#co-vista');
   chk(/^Subject — Update on your application: Becario\/a de patrocinio at Club mock B/.test(vista) && /Hi Mateo,/.test(vista) && /interview stage/.test(vista) && /Best regards,\s*Ana Pérez$/.test(vista.trim()), 'vista previa en inglés, con asunto, nombre y firma: ' + vista.slice(0, 120).replace(/\n/g, ' / '));
   chk(!/CANARIO/.test(await pg.innerText('#v-correo')) && !/Ferrer/.test(vista), 'ningún canario en la pantalla y sin apellidos en el borrador');
-  chk(/no incluye notas de entrevista, motivo de descarte, situación de trabajo ni estatus migratorio/i.test(await pg.innerText('#co-privacidad')), 'avisa de qué nunca incluye');
+  chk(/no incluye notas, motivo de descarte ni datos de trabajo/i.test(await pg.innerText('#co-privacidad')), 'avisa de qué nunca incluye');
   chk(!(await visible(pg, '#co-firma-falta')), 'con firma guardada no avisa de que falte');
 
   console.log('9. Cambiar de idioma');
