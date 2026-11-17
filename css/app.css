@@ -355,3 +355,14 @@ input.casilla:checked{background-color:var(--act-bg);border-color:var(--act-bg);
 input.casilla[type=radio]:checked{background-image:radial-gradient(circle,#FFFFFF 0 .25rem,transparent .3rem)}
 .crit.ok{margin:0;font-weight:400}
 input.casilla:disabled{opacity:.45;cursor:not-allowed}
+
+/* ---------- v28: móvil en horizontal (poca altura). El título grande se oculta (sigue ahí para los lectores de pantalla) y la cabecera
+   deja de ocupar una fila: el botón de actualizar flota arriba a la derecha y el contenido deja libre ese hueco. La barra inferior no se toca. ---------- */
+@media (orientation:landscape) and (max-height:500px){
+  header{position:absolute;top:var(--sat);right:calc(var(--sar) + 12px);z-index:7;min-height:0;padding:0}
+  header h1{position:absolute;display:block;width:1px;height:1px;margin:-1px;overflow:hidden;clip:rect(0 0 0 0);clip-path:inset(50%);white-space:nowrap}
+  header .refrescar{margin:0}
+  #app.con-refrescar main{padding-right:calc(24px + 2.75rem)}
+  main{padding-top:calc(var(--sat) + .5rem)}
+  .refrescar-aviso{margin-right:calc(24px + 2.75rem)}
+}

@@ -29,7 +29,11 @@ export function iniciarRefrescar({ vistaActual, alActualizar }) {
     aviso.setAttribute('role', clase === 'mal' ? 'alert' : 'status');
     if (clase === 'ok') reloj = setTimeout(() => { aviso.hidden = true; }, AVISO_OK_MS);
   };
-  const mostrar = () => { boton.hidden = !botonVisible(vistaActual()); if (boton.hidden) decir(''); };
+  const mostrar = () => {
+    boton.hidden = !botonVisible(vistaActual());
+    document.getElementById('app').classList.toggle('con-refrescar', !boton.hidden);   // en horizontal, el contenido deja libre el hueco del botón
+    if (boton.hidden) decir('');
+  };
 
   boton.addEventListener('click', async () => {
     if (ocupado || boton.hidden || hayFormularioAbierto()) return;   // un solo toque a la vez; nunca con un formulario abierto
