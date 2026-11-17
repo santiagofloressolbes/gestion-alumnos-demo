@@ -248,4 +248,24 @@ console.log('12. v28: las líneas con varios fallos caben en 320 px');
   await ctx.close();
 }
 
+console.log('13. v28: «Idiomas · Revisar: Idiomas: …» ya no repite la palabra');
+{
+  const { pg, ctx } = await entrar();
+  for (const [hash, raiz] of [['#/oferta/O004', '#match-alumnos'], ['#/oferta/O005', '#match-alumnos'], ['#/alumno/A001', '#match-ofertas'], ['#/alumno/A010', '#match-ofertas']]) {
+    await ir(pg, hash, raiz + ' .grupo-match'); await abrirTodo(pg);
+    const x = await pg.$$eval(raiz + ' .crit', cs => cs.map(c => {
+      const b = c.querySelector('b').textContent, resto = c.querySelector('.crit-texto').textContent.slice(b.length);
+      return { b, resto: resto.trim(), id: c.dataset.criterio };
+    }));
+    const quitar = t => t.normalize('NFD').replace(/[̀-ͯ]/g, '').toLowerCase();
+    const malos = x.filter(c => { const rotulo = quitar(c.b.split(' · ')[0]); return quitar(c.resto).startsWith(rotulo + ':') || quitar(c.resto).startsWith(rotulo + ' ·'); });
+    chk(malos.length === 0, `${hash}: en «Por qué» ningún texto empieza repitiendo su rótulo (${x.length} criterios) ${malos.slice(0, 2).map(m => m.b + m.resto.slice(0, 30)).join(' | ')}`);
+    const idiomas = x.filter(c => c.id === 'idiomas' && c.resto && !/^La oferta/.test(c.resto));
+    chk(idiomas.every(c => !/^Idiomas/.test(c.resto)), `${hash}: los ${idiomas.length} textos de idiomas empiezan por el idioma, no por «Idiomas:»`);
+    const filas = await pg.$$eval(raiz + ' .motivo', ms => ms.map(m => m.textContent.replace(/\s+/g, ' ')));
+    chk(filas.every(f => !/Idiomas · (Revisar|No cumple|Cumple) Idiomas/.test(f)), `${hash}: ni en la línea de la fila`);
+  }
+  await ctx.close();
+}
+
 await terminar();

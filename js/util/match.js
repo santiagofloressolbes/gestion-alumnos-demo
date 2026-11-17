@@ -302,7 +302,7 @@ export function criterioIdiomas(alumno, oferta) {
   if (!medidos) return sinDatos('idiomas', `No constan los niveles de idioma de ${nombre(alumno)}: ${partes.join('; ')}.`);
   const frac = suma / medidos;
   const estado = frac === 0 ? 'no' : frac === 1 && !sinNivel ? 'ok' : 'revisar';
-  return crit('idiomas', estado, `Idiomas: ${partes.join('; ')}.`, { factor: frac });
+  return crit('idiomas', estado, `${partes.join('; ')}.`, { factor: frac });   // v28: sin el «Idiomas:» del principio (el rótulo «Idiomas · Revisar:» ya lo dice)
 }
 
 // Nivel de formación: lo que pide la oferta (Grado, Máster, Doctorado) frente a la «Formación previa» del alumno (texto libre: se buscan esas palabras).
