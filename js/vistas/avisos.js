@@ -5,7 +5,7 @@ import { avatar } from '../util/avatar.js';
 import { navegacion } from '../util/navegacion.js';
 import { avisoFlotante } from '../util/trabajo.js';
 import { nombreAlumno } from '../util/rondas.js';
-import { TIPOS, TITULO_TIPO, calcularAvisos, hoyISO, repartir, silenciadoHasta, fechaCorta, avisosDe, contar, estaSilenciado } from '../util/avisos.js';
+import { TIPOS, TITULO_TIPO, ETIQUETA_CORTA, calcularAvisos, hoyISO, repartir, silenciadoHasta, fechaCorta, avisosDe, contar, estaSilenciado } from '../util/avisos.js';
 import { leerUmbrales, leerSilencios, silenciar, quitarSilencio } from '../util/preferencias.js';
 import { datosRondas } from './rondas.js';
 import { tarjetaError } from './error-datos.js';
@@ -27,7 +27,7 @@ export function estadoAvisos(d, hoy = hoyISO()) {
 export function textoPeriodo(e) {
   if (!e.periodo) return '';
   const { desde, hasta, ofertas, recortado } = e.periodo;
-  return `Se mira del ${fechaCorta(desde)} al ${fechaCorta(hasta)}${recortado ? ' (desde la primera ronda registrada)' : ` (${e.umbrales.dias} días)`}. En ese tiempo se ${ofertas === 1 ? 'difundió 1 oferta' : `difundieron ${ofertas} ofertas`}.`;
+  return `${recortado ? 'Se revisa desde la primera ronda registrada' : `Se revisan los últimos ${e.umbrales.dias} días`} (del ${fechaCorta(desde)} al ${fechaCorta(hasta)}). En ese tiempo se ${ofertas === 1 ? 'envió 1 oferta' : `enviaron ${ofertas} ofertas`}.`;
 }
 
 const alumnosTexto = n => (n === 0 ? 'Ningún alumno' : plural(n, 'alumno', 'alumnos'));
@@ -41,9 +41,9 @@ export const etiquetaTipo = (tipo, texto) => el('span', { class: 'etiqueta-tipo 
 export const programasFuera = masters => masters.filter(m => !m.enLista || !m.categoria);
 
 // Una nota de DATOS suelta (programa fuera de Listas en la lista, la ficha y Otros programas): rojo relleno, icono y la palabra «Datos».
-export const notaDatos = (texto, id) => el('p', { class: 'aviso aviso-alerta', role: 'note', id }, svgAviso('datos'), el('span', {}, el('b', {}, 'Datos del Sheet: '), texto));
+export const notaDatos = (texto, id) => el('p', { class: 'aviso aviso-alerta', role: 'note', id }, svgAviso('datos'), el('span', {}, el('b', {}, 'Datos: '), texto));
 
-// Aviso de DATOS. No se puede silenciar: no depende del tiempo, se arregla en el Sheet. El alumno sigue en «Otros programas».
+// Aviso de DATOS. No se puede silenciar: no depende del tiempo, se arregla en los datos. El alumno sigue en «Otros programas».
 function avisoDatos(fuera) {
   const abrirOtros = ev => {
     ev.preventDefault();
@@ -54,11 +54,11 @@ function avisoDatos(fuera) {
     d.querySelector('summary')?.focus({ preventScroll: true });
   };
   return el('div', { class: 'aviso-datos', id: 'in-av-datos', role: 'note' },
-    etiquetaTipo('datos', 'Datos del Sheet'),
+    etiquetaTipo('datos', 'Datos'),
     el('ul', { class: 'aviso-datos-lista' }, fuera.map(m => el('li', {},
-      `Programa no reconocido: «${m.nombre}» (${plural(m.alumnos, 'alumno', 'alumnos')}). No está en la hoja Listas.`))),
+      `Programa «${m.nombre}» (${plural(m.alumnos, 'alumno', 'alumnos')}) fuera de la lista de programas.`))),
     el('a', { class: 'enlace', id: 'in-av-datos-ver', href: '#/', onclick: abrirOtros }, 'Ver en «Otros programas»'),
-    el('p', { class: 'sub aviso-datos-nota' }, 'Este aviso no se puede silenciar: desaparece al añadir el programa a Listas o corregirlo en Alumnos.'));
+    el('p', { class: 'sub aviso-datos-nota' }, 'Este aviso no se puede silenciar. Avisa a quien administra la app: desaparece cuando el programa esté en la lista.'));
 }
 
 function contenidoInicio(e, fuera) {
@@ -75,7 +75,7 @@ function contenidoInicio(e, fuera) {
     fuera.length > 0 && avisoDatos(fuera),
     e && el('div', { class: 'aviso-seguimiento', id: 'in-av-seguimiento' },
       etiquetaTipo('seguimiento', 'Seguimiento'),
-      el('p', { class: 'sub' }, 'Solo informan: no bloquean nada. Toca uno para ver a quién afecta y por qué.'),
+      el('p', { class: 'sub' }, 'Son solo avisos. Toca uno para ver a quién afecta y por qué.'),
       el('ul', { class: 'avisos-resumen', 'aria-label': 'Tipos de aviso' }, TIPOS_VALIDOS.map(fila))),
   ];
 }
@@ -105,18 +105,18 @@ export async function avisosActivosPorAlumno() {
     return id => avisosDe(e.activos, id);
   } catch { return () => []; }
 }
-export const etiquetaAviso = avisos => (avisos.length ? 'Aviso: ' + avisos.map(a => TITULO_TIPO[a.tipo].toLowerCase()).join(' · ') : '');
+export const etiquetaAviso = avisos => (avisos.length ? 'Aviso: ' + avisos.map(a => ETIQUETA_CORTA[a.tipo]).join(' · ') : '');
 
 /* ---- Una fila con motivo y botón de silenciar ---- */
 
 function bloqueAviso(a, alumno, e, alCambiar, { conEnlace }) {
   const silenciado = estaSilenciado(e.silencios, a.id, e.hoy);
-  const nombre = alumno ? nombreAlumno(alumno) : `(alumno ${a.idAlumno}, ya no está en el Sheet)`;
+  const nombre = alumno ? nombreAlumno(alumno) : `(alumno ${a.idAlumno}: sin dato)`;
   const boton = silenciado
     ? el('button', { class: 'secondary', type: 'button', 'data-aviso': a.id, 'aria-label': `Quitar el silencio del aviso de ${nombre}`, onclick: () => { quitarSilencio(a.id); alCambiar(`Silencio quitado: ${nombre}.`); } }, 'Quitar silencio')
     : el('button', { class: 'secondary', type: 'button', 'data-aviso': a.id, 'aria-label': `Silenciar 30 días el aviso de ${nombre}`, onclick: () => {
         const hasta = silenciadoHasta(e.hoy);
-        if (!silenciar(a.id, hasta)) { avisoFlotante('No se ha podido guardar el silencio en este móvil (¿navegación privada?).'); return; }
+        if (!silenciar(a.id, hasta)) { avisoFlotante('No se ha podido guardar el silencio en este móvil. ¿Estás en una ventana privada?'); return; }
         alCambiar(`Silenciado hasta el ${fechaCorta(hasta)}: ${nombre}.`);
       } }, 'Silenciar 30 días');
   return [
@@ -145,7 +145,7 @@ export async function pintarAvisos(raiz, tipo) {
   catch (err) { reemplazar(raiz, volver, tarjetaError(err, () => { recargar().catch(() => {}); pintarAvisos(raiz, tipo); })); return; }
   const e = estadoAvisos(d);
   if (!e) {
-    reemplazar(raiz, volver, el('div', { class: 'card' }, el('h2', {}, 'Sin datos de rondas'), el('p', { class: 'sub' }, 'Los avisos se calculan con las rondas y las solicitudes, y todavía no hay.')));
+    reemplazar(raiz, volver, el('div', { class: 'card' }, el('h2', {}, 'Sin datos de rondas'), el('p', { class: 'sub' }, 'Aún no hay rondas ni solicitudes para calcular avisos.')));
     return;
   }
   const estado = el('p', { class: 'ok', role: 'status', id: 'av-estado', hidden: true });
@@ -162,12 +162,12 @@ export async function pintarAvisos(raiz, tipo) {
     etiquetaTipo('seguimiento', 'Seguimiento'),
     el('h2', { class: 'seccion' }, `${TITULO_TIPO[tipo]} · ${alumnosTexto(activos.length).toLowerCase()}`),
     el('p', { class: 'sub', id: 'av-periodo' }, textoPeriodo(e)),
-    el('p', { class: 'sub' }, 'Solo es un aviso: no bloquea nada. Cada alumno dice por qué ha saltado.'),
+    el('p', { class: 'sub' }, 'Es solo un aviso. Cada alumno indica el motivo.'),
     estado,
     activos.length ? lista(activos, 'Alumnos con este aviso') : el('div', { class: 'card', id: 'av-nadie' }, el('p', { class: 'sub' }, 'Ningún alumno tiene este aviso ahora mismo.')),
     silenciados.length && el('h3', { class: 'sub-titulo', id: 'av-sil-titulo' }, `Silenciados (${silenciados.length})`),
     silenciados.length && lista(silenciados, 'Avisos silenciados'),
-    el('p', { class: 'sub' }, 'Los umbrales se cambian en Ajustes. Los silencios se guardan solo en este móvil.'),
+    el('p', { class: 'sub' }, 'Puedes cambiar los límites en Ajustes. Los silencios se guardan solo en este móvil.'),
   ].filter(Boolean));
 }
 
@@ -183,7 +183,7 @@ export function tarjetaAvisosAlumno(alumno, d) {
     reemplazar(seccion, 
       etiquetaTipo('seguimiento', 'Seguimiento'),
       el('h2', { id: 'al-av-titulo' }, suyos.length === 1 ? 'Aviso' : 'Avisos'),
-      el('p', { class: 'sub' }, 'Solo informa: no bloquea nada.'),
+      el('p', { class: 'sub' }, 'Es solo un aviso.'),
       mensaje && el('p', { class: 'ok', role: 'status', id: 'al-av-estado' }, mensaje),
       ...suyos.map(a => el('div', { class: 'aviso-ficha' }, bloqueAviso(a, alumno, e, pintar, { conEnlace: false }))));
   };

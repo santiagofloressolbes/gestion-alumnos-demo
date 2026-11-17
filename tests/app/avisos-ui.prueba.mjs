@@ -20,7 +20,7 @@ const ir = async (pg, hash, sel) => { await pg.goto(BASE + hash); await pg.waitF
 const visible = (pg, sel) => pg.evaluate(s => { const e = document.querySelector(s); if (!e || e.hidden) return false; const r = e.getBoundingClientRect(); return r.width > 0 && r.height > 0; }, sel);
 const sinScrollLateral = pg => pg.evaluate(() => document.documentElement.scrollWidth <= innerWidth && document.querySelector('#main').scrollWidth <= document.querySelector('#main').clientWidth);
 const silencios = pg => pg.evaluate(() => localStorage.getItem('gad.silencios'));
-// Cuatro solicitudes más de A001 (con la que ya tiene suman 5), todas dentro del periodo, a las 3 ofertas difundidas.
+// Cuatro solicitudes más de A001 (con la que ya tiene suman 5), todas dentro del periodo, a las 3 ofertas enviadas.
 const EXTRA = 'AP901,A001,O003,1,2026-10-14,Recibida,,\nAP902,A001,O003,2,2026-10-27,Recibida,,\nAP903,A001,O006,1,2026-10-17,Recibida,,\nAP904,A001,O002,1,2026-10-13,Recibida,,\n';
 
 console.log('1. Tarjeta de Inicio');
@@ -28,24 +28,24 @@ console.log('1. Tarjeta de Inicio');
   const { pg, ctx, log } = await entrar();
   await ir(pg, '#/', '.masters .master');
   await pg.waitForSelector('#in-avisos:not([hidden])');
-  chk(/Avisos/.test(await pg.innerText('#in-av-titulo')) && /no bloquean nada/.test(await pg.innerText('#in-avisos')), 'hay una tarjeta «Avisos» que dice que no bloquea nada');
+  chk(/Avisos/.test(await pg.innerText('#in-av-titulo')) && /Son solo avisos/.test(await pg.innerText('#in-avisos')), 'hay una tarjeta «Avisos» que dice que son solo avisos');
   chk(/Sin solicitudes\s*21 alumnos/.test((await pg.innerText('#in-av-sin-solicitudes')).replace(/\n/g, ' ')), 'Sin solicitudes: 21 alumnos: ' + (await pg.innerText('#in-av-sin-solicitudes')).replace(/\n/g, ' '));
-  chk(/Aplica a todo\s*Ningún alumno/.test((await pg.innerText('#in-av-aplica-a-todo')).replace(/\n/g, ' ')), 'Aplica a todo: ningún alumno');
+  chk(/Ha solicitado casi todas las ofertas\s*Ningún alumno/.test((await pg.innerText('#in-av-aplica-a-todo')).replace(/\n/g, ' ')), 'Ha solicitado casi todas las ofertas: ningún alumno');
   chk(await pg.$$eval('.masters .master', m => m.length) === 14, 'los 14 botones de programa siguen ahí');
   chk(await pg.$$eval('#in-avisos a', a => a.every(x => x.getBoundingClientRect().height >= 44)), 'las filas miden al menos 44 px');
 
   console.log('2. Lista de «Sin solicitudes» con su motivo');
   await pg.click('#in-av-sin-solicitudes'); await pg.waitForSelector('#v-avisos .aviso-item');
   chk(await pg.evaluate(() => location.hash) === '#/avisos/sin-solicitudes' && await pg.innerText('#titulo') === 'Sin solicitudes' && await pg.getAttribute('#tabs a[data-tab=inicio]', 'aria-current') === 'page', 'dirección, título y pestaña Inicio');
-  chk(await pg.innerText('#av-periodo') === 'Se mira del 13 de octubre al 12 de noviembre (30 días). En ese tiempo se difundieron 3 ofertas.', 'dice qué periodo mira: ' + await pg.innerText('#av-periodo'));
+  chk(await pg.innerText('#av-periodo') === 'Se revisan los últimos 30 días (del 13 de octubre al 12 de noviembre). En ese tiempo se enviaron 3 ofertas.', 'dice qué periodo mira: ' + await pg.innerText('#av-periodo'));
   chk(await pg.$$eval('#v-avisos .aviso-item', l => l.length) === 21, '21 alumnos en la lista');
   const motivos = await pg.$$eval('#v-avisos .aviso-motivo', e => e.map(x => x.textContent));
-  chk(motivos.every(m => m === 'Ninguna solicitud en los últimos 30 días, y en ese tiempo se difundieron 3 ofertas. Salta si se difunden 3 o más.'), 'cada alumno dice por qué: ' + motivos[0]);
+  chk(motivos.every(m => m === 'Ninguna solicitud en 30 días. En ese tiempo se enviaron 3 ofertas. Se avisa si se envían 3 o más.'), 'cada alumno dice por qué: ' + motivos[0]);
   chk(await pg.$('#v-avisos a[href="#/alumno/A002"]') !== null && await pg.$('#v-avisos a[href="#/alumno/A004"]') === null && await pg.$('#v-avisos a[href="#/alumno/A001"]') === null, 'sale A002 (solo tiene una solicitud antigua), no A004 (contratado) ni A001 (ha aplicado hace poco)');
   const nombres = await pg.$$eval('#v-avisos .aviso-item .alumno-texto b', e => e.map(x => x.textContent));
   chk(JSON.stringify(nombres) === JSON.stringify([...nombres].sort((a, b) => a.localeCompare(b, 'es'))), 'ordenados por nombre');
   const texto = await pg.innerText('#v-avisos');
-  chk(!/Ciudadano|Residente|permiso|nota/i.test(texto.replace(/Solo es un aviso: no bloquea nada\./, '')), 'la lista no enseña situación de trabajo ni notas');
+  chk(!/Ciudadano|Residente|permiso|nota/i.test(texto.replace(/Es solo un aviso\./, '')), 'la lista no enseña situación de trabajo ni notas');
   chk(await pg.$$eval('#v-avisos .aviso-item button', b => b.every(x => /^Silenciar 30 días$/.test(x.textContent) && /Silenciar 30 días el aviso de /.test(x.getAttribute('aria-label')) && x.getBoundingClientRect().height >= 44)), 'cada fila tiene «Silenciar 30 días» (con nombre accesible y 44 px)');
 
   console.log('3. Silenciar 30 días');
@@ -69,7 +69,7 @@ console.log('1. Tarjeta de Inicio');
   chk(!(await visible(pg, '#al-avisos')), 'A001 (ha aplicado hace poco): la ficha no tiene tarjeta de aviso');
   await ir(pg, '#/avisos/sin-solicitudes', '#v-avisos .aviso-item');
   await pg.click('#v-avisos a[href="#/alumno/A003"]'); await pg.waitForSelector('#al-avisos:not([hidden])');
-  chk(/^Aviso/.test(await pg.innerText('#al-av-titulo')) && /Ninguna solicitud en los últimos 30 días/.test(await pg.innerText('#al-avisos')), 'la ficha tiene la tarjeta «Aviso» con el motivo');
+  chk(/^Aviso/.test(await pg.innerText('#al-av-titulo')) && /Ninguna solicitud en 30 días/.test(await pg.innerText('#al-avisos')), 'la ficha tiene la tarjeta «Aviso» con el motivo');
   chk(await pg.innerText('#v-alumno .volver') === 'Avisos', 'desde un aviso, «atrás» vuelve a Avisos');
   chk(await visible(pg, '#al-compartir') && (await pg.$$eval('#v-alumno .secondary, #v-alumno .primary', e => e.length)) >= 2, 'con un aviso, la ficha sigue igual: Compartir perfil y el resto funcionan (nada bloqueado)');
   await pg.click('#al-avisos button');
@@ -96,20 +96,20 @@ console.log('5. Quitar el silencio desde la lista');
   await ctx.close();
 }
 
-console.log('6. «Aplica a todo»');
+console.log('6. «Ha solicitado casi todas las ofertas»');
 {
   const { pg, ctx } = await entrar({ extraApps: EXTRA });
   await ir(pg, '#/', '#in-av-aplica-a-todo');
-  chk(/Aplica a todo\s*1 alumno/.test((await pg.innerText('#in-av-aplica-a-todo')).replace(/\n/g, ' ')), 'Inicio: Aplica a todo, 1 alumno');
+  chk(/Ha solicitado casi todas las ofertas\s*1 alumno/.test((await pg.innerText('#in-av-aplica-a-todo')).replace(/\n/g, ' ')), 'Inicio: Ha solicitado casi todas las ofertas, 1 alumno');
   chk(/Sin solicitudes\s*21 alumnos/.test((await pg.innerText('#in-av-sin-solicitudes')).replace(/\n/g, ' ')), 'y los 21 sin solicitudes no cambian');
   await pg.click('#in-av-aplica-a-todo'); await pg.waitForSelector('#v-avisos .aviso-item');
   chk(await pg.$$eval('#v-avisos .aviso-item', l => l.length) === 1 && await pg.$('#v-avisos a[href="#/alumno/A001"]') !== null, 'la lista tiene a A001');
   const m = await pg.innerText('#v-avisos .aviso-motivo');
-  chk(m === '5 solicitudes en los últimos 30 días, a 3 de las 3 ofertas difundidas (100 %). De ellas, 2 no encajan según el match. Salta con 5 o más solicitudes y un 80 % o más de las ofertas.', 'el motivo lleva los números, el dato del match y la regla: ' + m);
+  chk(m === '5 solicitudes en 30 días, a 3 de las 3 ofertas enviadas (100 %). De esas, 2 encajan poco. Se avisa con 5 solicitudes o más y un 80 % o más de las ofertas enviadas.', 'el motivo lleva los números, el dato del match y la regla: ' + m);
   await ir(pg, '#/master/' + encodeURIComponent('MBA en inglés'), '#v-master .alumno');
-  chk(/Aviso: aplica a todo/.test(await pg.innerText('#v-master a[href="#/alumno/A001"]')), 'la lista del máster marca a A001: «Aviso: aplica a todo»');
+  chk(/Aviso: ha solicitado casi todo/.test(await pg.innerText('#v-master a[href="#/alumno/A001"]')), 'la lista del máster marca a A001: «Aviso: ha solicitado casi todo»');
   await pg.click('#v-master a[href="#/alumno/A001"]'); await pg.waitForSelector('#al-avisos:not([hidden])');
-  chk(/Salta con 5 o más solicitudes/.test(await pg.innerText('#al-avisos')), 'la ficha explica por qué');
+  chk(/Se avisa con 5 solicitudes o más/.test(await pg.innerText('#al-avisos')), 'la ficha explica por qué');
   await ctx.close();
 }
 
@@ -133,7 +133,7 @@ console.log('8. Con el paso del tiempo (sin rondas en el periodo) no hay avisos'
 {
   const { pg, ctx } = await entrar({ hoy: '2026-12-20T12:00:00' });
   await ir(pg, '#/', '#in-av-sin-solicitudes');
-  chk(/Ningún alumno/.test(await pg.innerText('#in-av-sin-solicitudes')) && /Ningún alumno/.test(await pg.innerText('#in-av-aplica-a-todo')), 'el 20/12 no se ha difundido nada en 30 días: no salta nadie');
+  chk(/Ningún alumno/.test(await pg.innerText('#in-av-sin-solicitudes')) && /Ningún alumno/.test(await pg.innerText('#in-av-aplica-a-todo')), 'el 20/12 no se ha enviado nada en 30 días: no se avisa a nadie');
   await ctx.close();
 }
 

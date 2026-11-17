@@ -65,7 +65,7 @@ console.log('2. Programa no reconocido: aviso de datos, no se silencia, el alumn
   const { pg, ctx, log } = await entrar({ alumnos: RARO });
   await ir(pg, '#/', '.masters .master'); await pg.waitForSelector('#in-av-datos');
   const txt = await pg.textContent('#in-av-datos');   // textContent: la etiqueta se ve en mayúsculas por el CSS
-  chk(/Datos del Sheet/.test(txt) && /Programa no reconocido: «Programa que ya no existe» \(8 alumnos\)/.test(txt), 'el aviso dice qué programa y cuántos alumnos: ' + txt.replace(/\n/g, ' ').slice(0, 120));
+  chk(/Datos/.test(txt) && /Programa «Programa que ya no existe» \(8 alumnos\) fuera de la lista de programas/.test(txt), 'el aviso dice qué programa y cuántos alumnos: ' + txt.replace(/\n/g, ' ').slice(0, 120));
   chk(await pg.$$eval('#in-av-datos button, #in-av-datos [data-aviso]', e => e.length) === 0 && !/Silenciar/.test(txt), 'no hay botón de silenciar');
   chk(/no se puede silenciar/i.test(txt), 'y lo dice');
   await pg.evaluate(() => localStorage.setItem('gad.silencios', JSON.stringify(Object.fromEntries(['A001', 'A002', 'A003', 'A004', 'A005', 'A006', 'A007', 'A008', 'A009', 'A010'].flatMap(id => [[id + '|sin-solicitudes', '2099-01-01'], [id + '|aplica-a-todo', '2099-01-01']])))));
@@ -79,7 +79,7 @@ console.log('2. Programa no reconocido: aviso de datos, no se silencia, el alumn
   chk(await pg.evaluate(() => { const r = document.querySelector('details[data-categoria="Otros programas"]').getBoundingClientRect(), m = document.querySelector('#main').getBoundingClientRect(); return r.top >= m.top - 1 && r.top < m.bottom; }), 'y lo deja a la vista');
   chk(['', '#/'].includes(await pg.evaluate(() => location.hash)), 'sin cambiar de pantalla');
   await pg.click('details[data-categoria="Otros programas"] .master'); await pg.waitForSelector('#ma-fuera-de-lista');
-  chk(/Datos del Sheet/.test(await pg.textContent('#ma-fuera-de-lista')) && await pg.$('#ma-fuera-de-lista svg.icono-aviso.datos') !== null, 'la lista del programa lleva la misma señal de «datos» (palabra e icono)');
+  chk(/Datos:/.test(await pg.textContent('#ma-fuera-de-lista')) && await pg.$('#ma-fuera-de-lista svg.icono-aviso.datos') !== null, 'la lista del programa lleva la misma señal de «datos» (palabra e icono)');
   sinErrores(log, 'sin errores en la consola');
   await ctx.close();
 }
@@ -111,7 +111,7 @@ console.log('4. Datos y seguimiento se distinguen: forma, palabra y color; contr
       claseD: id.getAttribute('class'), claseS: is.getAttribute('class'), pathD: id.querySelector('path').getAttribute('d'), pathS: is.querySelector('path').getAttribute('d'),
       fondoD: getComputedStyle(d).backgroundColor, fondoS: getComputedStyle(s).backgroundColor, bordeCard: getComputedStyle(c).borderTopColor, seg: root.getPropertyValue('--seg').trim(), bordeS: getComputedStyle(s).borderLeftColor };
   });
-  chk(x.palabraD === 'Datos del Sheet' && x.palabraS === 'Seguimiento', 'cada tipo lleva su palabra: ' + x.palabraD + ' / ' + x.palabraS);
+  chk(x.palabraD === 'Datos' && x.palabraS === 'Seguimiento', 'cada tipo lleva su palabra: ' + x.palabraD + ' / ' + x.palabraS);
   chk(x.claseD !== x.claseS && x.pathD !== x.pathS, 'y su icono, de otra forma (triángulo / reloj)');
   chk(x.fondoD !== x.fondoS, 'datos va relleno de color y seguimiento no: ' + x.fondoD + ' / ' + x.fondoS);
   chk(x.bordeS === 'rgb(255, 159, 67)' && x.bordeCard === 'rgb(255, 159, 67)' && x.seg.toUpperCase() === '#FF9F43', 'seguimiento usa la variable --seg (naranja)');

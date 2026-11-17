@@ -54,9 +54,9 @@ const ofertas = ['O0', 'O1', 'O2', 'O3', 'O4'].map(id => of(id));
 {
   const r = calc({ alumnos: [al('A1'), al('A2')], ofertas, rondas: rondas4, aplicaciones: [sol('S1', 'A2', 'O1', '2026-10-21')] });
   igual(ids(r), ['A1|sin-solicitudes'], 'sin solicitudes: salta A1 (ninguna) y no A2 (una en el periodo)');
-  igual(r.periodo, { desde: '2026-10-13', hasta: HOY, ofertas: 4, recortado: false }, 'el periodo: 30 días y 4 ofertas difundidas');
+  igual(r.periodo, { desde: '2026-10-13', hasta: HOY, ofertas: 4, recortado: false }, 'el periodo: 30 días y 4 ofertas enviadas');
   const m = r.avisos[0].motivo;
-  chk(/Ninguna solicitud en los últimos 30 días/.test(m) && /difundieron 4 ofertas/.test(m) && /Salta si se difunden 3 o más/.test(m), 'el motivo explica por qué salta: ' + m);
+  chk(/Ninguna solicitud en 30 días/.test(m) && /enviaron 4 ofertas/.test(m) && /Se avisa si se envían 3 o más/.test(m), 'el motivo explica por qué se avisa: ' + m);
   igual(r.avisos[0].id, 'A1|sin-solicitudes', 'el aviso tiene un identificador estable (alumno|tipo)');
 }
 // bordes de fecha
@@ -69,11 +69,11 @@ const ofertas = ['O0', 'O1', 'O2', 'O3', 'O4'].map(id => of(id));
   igual(sinSol(''), [], 'una solicitud SIN fecha: no se puede situar, así que no se avisa (por si acaso)');
   igual(sinSol('31/10/2026'), [], 'una solicitud con fecha rara: tampoco se avisa');
 }
-// umbral M (ofertas difundidas)
+// umbral M (ofertas enviadas)
 {
   const con = n => ids(calc({ alumnos: [al('A1')], ofertas, rondas: [ronda('R0', 'O0', '2026-09-01'), ...['O1', 'O2', 'O3', 'O4'].slice(0, n).map((o, i) => ronda('RR' + i, o, '2026-11-01'))] }));
-  igual(con(2), [], 'con 2 ofertas difundidas y umbral 3: no salta');
-  igual(con(3), ['A1|sin-solicitudes'], 'con 3 ofertas difundidas y umbral 3: salta');
+  igual(con(2), [], 'con 2 ofertas enviadas y umbral 3: no salta');
+  igual(con(3), ['A1|sin-solicitudes'], 'con 3 ofertas enviadas y umbral 3: salta');
   const r4 = ids(calc({ alumnos: [al('A1')], ofertas, rondas: rondas4 }, { ofertas: 5 }));
   igual(r4, [], 'subiendo el umbral a 5: con 4 ofertas ya no salta (el umbral se respeta)');
   const dos = calc({ alumnos: [al('A1')], ofertas, rondas: [ronda('R0', 'O1', '2026-10-20'), ronda('R1', 'O1', '2026-10-28'), ronda('R2', 'O2', '2026-11-01')] }, { ofertas: 3 });
@@ -106,9 +106,9 @@ igual(ids(calc({ alumnos: [al('A1')], ofertas, rondas: [{ id: 'RX', idOferta: 'O
   const sols = n => Array.from({ length: n }, (_, i) => sol('S' + i, 'A1', 'O' + (i % 4 + 1), '2026-10-2' + i));
   igual(ids(calc({ alumnos: [al('A1')], ofertas, rondas: rondas4, aplicaciones: sols(4) })), [], '4 solicitudes (umbral 5): no salta');
   const r = calc({ alumnos: [al('A1')], ofertas, rondas: rondas4, aplicaciones: sols(5) });
-  igual(ids(r), ['A1|aplica-a-todo'], '5 solicitudes a las 4 ofertas difundidas (100 %): salta');
+  igual(ids(r), ['A1|aplica-a-todo'], '5 solicitudes a las 4 ofertas enviadas (100 %): salta');
   const m = r.avisos[0].motivo;
-  chk(/5 solicitudes en los últimos 30 días, a 4 de las 4 ofertas difundidas \(100 %\)/.test(m) && /Salta con 5 o más solicitudes y un 80 % o más/.test(m), 'el motivo lleva los números y la regla: ' + m);
+  chk(/5 solicitudes en 30 días, a 4 de las 4 ofertas enviadas \(100 %\)/.test(m) && /Se avisa con 5 solicitudes o más y un 80 % o más de las ofertas enviadas/.test(m), 'el motivo lleva los números y la regla: ' + m);
   chk(!/según el match/.test(m), 'si todas encajan, no menciona el match');
   // porcentaje: 3 de 5 ofertas = 60 %
   const cinco = [...rondas4, ronda('R5', 'O5', '2026-11-08')];
@@ -126,9 +126,9 @@ igual(ids(calc({ alumnos: [al('A1')], ofertas, rondas: [{ id: 'RX', idOferta: 'O
   // dato extra del match: ofertas de otra área
   const otras = ofertas.map(o => (o.id === 'O1' || o.id === 'O2') ? { ...o, area: 'Otra área' } : o);
   const m2 = calc({ alumnos: [al('A1')], ofertas: otras, rondas: rondas4, aplicaciones: sols(5) }).avisos[0].motivo;
-  chk(/De ellas, 2 no encajan según el match\./.test(m2), 'dato extra: cuántas no encajan según el match: ' + m2);
+  chk(/De esas, 2 encajan poco\./.test(m2), 'dato extra: cuántas encajan poco: ' + m2);
   const aviso1 = calc({ alumnos: [al('A1')], ofertas: otras.map(o => ({ ...o, area: o.id === 'O1' ? 'Otra área' : 'Área X' })), rondas: rondas4, aplicaciones: sols(5) }).avisos[0].motivo;
-  chk(/De ellas, 1 no encaja según el match\./.test(aviso1), 'en singular: «1 no encaja»');
+  chk(/De esas, 1 encaja poco\./.test(aviso1), 'en singular: «1 encaja poco»');
   igual(ids(calc({ alumnos: [al('A1')], ofertas: otras, rondas: rondas4, aplicaciones: sols(5) })), ['A1|aplica-a-todo'], 'el match NO decide si salta: con ofertas que no encajan sigue saltando solo por las reglas de arriba');
   // los dos avisos a la vez no son posibles; y un alumno con 5 solicitudes no tiene "sin solicitudes"
   igual(ids(calc({ alumnos: [al('A1')], ofertas, rondas: rondas4, aplicaciones: sols(5) })).includes('A1|sin-solicitudes'), false, 'quien aplica a todo no tiene también "sin solicitudes"');

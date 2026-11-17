@@ -35,7 +35,7 @@ export async function pintarMaster(raiz, nombre) {
     lista.length
       ? el('ul', { class: 'alumnos', 'aria-label': 'Alumnos de ' + nombre }, lista.map(a => fila(a, 'master', false, avisosDe(a.id))))
       : el('div', { class: 'card' }, el('p', { class: 'sub' }, 'Este programa todavía no tiene alumnos.')),
-    !programa.enLista && notaDatos(`El programa «${nombre}» no está en la hoja Listas del Sheet. Añádelo allí o corrígelo en la hoja Alumnos.`, 'ma-fuera-de-lista'));
+    !programa.enLista && notaDatos(`El programa «${nombre}» no está en la lista de programas. Avisa a quien administra la app.`, 'ma-fuera-de-lista'));
 }
 
 // Dato breve: a qué área quiere ir y si busca prácticas o empleo. En la búsqueda se añade el programa.

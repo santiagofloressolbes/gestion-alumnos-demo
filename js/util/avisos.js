@@ -1,12 +1,12 @@
 // Avisos sobre alumnos (funciones puras: solo leen y calculan, no tocan la pantalla ni los datos).
 // Un aviso NUNCA bloquea ni oculta nada: es una ayuda para mirar, y siempre dice por qué ha saltado.
 //
-//   sin-solicitudes  → en los últimos N días se difundieron al menos M ofertas y el alumno no ha hecho ninguna solicitud.
-//   aplica-a-todo    → en los últimos N días ha hecho al menos S solicitudes y a un P % o más de las ofertas difundidas.
+//   sin-solicitudes  → en los últimos N días se enviaron al menos M ofertas y el alumno no ha hecho ninguna solicitud.
+//   aplica-a-todo    → en los últimos N días ha hecho al menos S solicitudes y a un P % o más de las ofertas enviadas.
 //
 // Reglas que valen para los dos:
 //  · El periodo cuenta desde la primera ronda registrada, si es más reciente que "hoy − N días" (así nadie salta el primer día).
-//  · "Ofertas difundidas" = ofertas distintas con alguna ronda en el periodo.
+//  · "Ofertas enviadas" = ofertas distintas con alguna ronda en el periodo.
 //  · Quien ya está Contratado no recibe "sin solicitudes".
 //  · Una solicitud sin fecha válida no se puede situar en el tiempo: evita "sin solicitudes" (por si acaso) y no cuenta para "aplica a todo".
 //  · Sin rondas registradas no hay avisos.
@@ -17,7 +17,9 @@ import { fechaValida } from './ofertas.js';
 export const UMBRALES_POR_DEFECTO = Object.freeze({ dias: 30, ofertas: 3, solicitudes: 5, porcentaje: 80 });
 export const LIMITES = Object.freeze({ dias: [1, 365], ofertas: [1, 50], solicitudes: [1, 50], porcentaje: [1, 100] });
 export const TIPOS = Object.freeze({ sinSolicitudes: 'sin-solicitudes', aplicaTodo: 'aplica-a-todo' });
-export const TITULO_TIPO = Object.freeze({ 'sin-solicitudes': 'Sin solicitudes', 'aplica-a-todo': 'Aplica a todo' });
+export const TITULO_TIPO = Object.freeze({ 'sin-solicitudes': 'Sin solicitudes', 'aplica-a-todo': 'Ha solicitado casi todas las ofertas' });
+// Nombre corto para la marca de la lista de alumnos (cabe en 320 px).
+export const ETIQUETA_CORTA = Object.freeze({ 'sin-solicitudes': 'sin solicitudes', 'aplica-a-todo': 'ha solicitado casi todo' });
 export const DIAS_SILENCIO = 30;
 const ESTADO_CONTRATADO = 'Contratado';
 
@@ -77,7 +79,7 @@ export function calcularAvisos({ alumnos = [], ofertas = [], rondas = [], aplica
   const dentro = f => valida(f) && f >= desde && f <= hoy;
   const difundidas = new Set(rondas.filter(r => dentro(r.fecha)).map(r => r.idOferta));
   const periodo = { desde, hasta: hoy, ofertas: difundidas.size, recortado };
-  const cuando = recortado ? `desde la primera ronda (${fechaCorta(primera)})` : `en los últimos ${umbrales.dias} días`;
+  const cuando = recortado ? `desde la primera ronda (${fechaCorta(primera)})` : `en ${umbrales.dias} días`;
   const ofertaPorId = new Map(ofertas.map(o => [o.id, o]));
   const avisos = [];
 
@@ -90,7 +92,7 @@ export function calcularAvisos({ alumnos = [], ofertas = [], rondas = [], aplica
     if (difundidas.size >= umbrales.ofertas && !enPeriodo.length && !sinFecha.length && !suyas.some(a => a.estado === ESTADO_CONTRATADO)) {
       avisos.push({
         id: `${alumno.id}|${TIPOS.sinSolicitudes}`, tipo: TIPOS.sinSolicitudes, idAlumno: alumno.id,
-        motivo: `Ninguna solicitud ${cuando}, y en ese tiempo se ${difundidas.size === 1 ? 'difundió 1 oferta' : `difundieron ${difundidas.size} ofertas`}. Salta si se difunden ${umbrales.ofertas} o más.`,
+        motivo: `Ninguna solicitud ${cuando}. En ese tiempo se ${difundidas.size === 1 ? 'envió 1 oferta' : `enviaron ${difundidas.size} ofertas`}. Se avisa si se envían ${umbrales.ofertas} o más.`,
       });
     }
 
@@ -102,9 +104,9 @@ export function calcularAvisos({ alumnos = [], ofertas = [], rondas = [], aplica
       const noEncajan = [...aplicadas].filter(id => ofertaPorId.has(id) && evaluar(alumno, ofertaPorId.get(id), contextoMatch).categoria === 'no').length;
       avisos.push({
         id: `${alumno.id}|${TIPOS.aplicaTodo}`, tipo: TIPOS.aplicaTodo, idAlumno: alumno.id,
-        motivo: `${enPeriodo.length === 1 ? '1 solicitud' : `${enPeriodo.length} solicitudes`} ${cuando}, a ${aplicadas.size} de las ${difundidas.size} ofertas difundidas (${pct} %).`
-          + (noEncajan ? ` De ellas, ${noEncajan} ${noEncajan === 1 ? 'no encaja' : 'no encajan'} según el match.` : '')
-          + ` Salta con ${umbrales.solicitudes} o más solicitudes y un ${umbrales.porcentaje} % o más de las ofertas.`,
+        motivo: `${enPeriodo.length === 1 ? '1 solicitud' : `${enPeriodo.length} solicitudes`} ${cuando}, a ${aplicadas.size} de las ${difundidas.size} ofertas enviadas (${pct} %).`
+          + (noEncajan ? ` De esas, ${noEncajan} ${noEncajan === 1 ? 'encaja poco' : 'encajan poco'}.` : '')
+          + ` Se avisa con ${umbrales.solicitudes} solicitudes o más y un ${umbrales.porcentaje} % o más de las ofertas enviadas.`,
       });
     }
   }

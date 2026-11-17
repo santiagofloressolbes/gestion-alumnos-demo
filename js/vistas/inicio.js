@@ -37,7 +37,7 @@ function seccion(g, i, guardadas, raiz) {
         el('span', { class: 'sub' }, `${plural(g.programas.length, 'programa', 'programas')} · ${plural(g.alumnos, 'alumno', 'alumnos')}`))),
     el('div', { class: 'grupo-cuerpo' },
       el('nav', { class: 'masters', 'aria-label': g.categoria }, g.programas.map(botonPrograma)),
-      g.otros && notaDatos('Estos programas no están en la hoja Listas del Sheet (o no tienen categoría). Añádelos o corrígelos allí.')));
+      g.otros && notaDatos('Estos programas no están en la lista de programas (o no tienen categoría). Avisa a quien administra la app.')));
   d.addEventListener('toggle', () => {
     if (d.open === abierta) return;   // el aviso inicial del navegador no es una elección de la persona
     abierta = d.open;
@@ -67,7 +67,7 @@ export async function pintarInicio(raiz) {
     el('div', { class: 'grupos', id: 'grupos' },
       grupos.length
         ? grupos.map((g, i) => seccion(g, i, guardadas, raiz))
-        : el('div', { class: 'card' }, el('p', { class: 'sub' }, 'La hoja Listas todavía no tiene programas.'))),
+        : el('div', { class: 'card' }, el('p', { class: 'sub' }, 'Todavía no hay programas.'))),
     cajaAvisos,
     el('p', { class: 'estado' }, `${plural(masters.length, 'programa', 'programas')} · ${plural(total, 'alumno', 'alumnos')} · datos ficticios`));
   await pintarAvisosInicio(cajaAvisos);   // si no hay rondas o algo falla, la tarjeta no se enseña y Inicio sigue igual
