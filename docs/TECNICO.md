@@ -52,7 +52,7 @@
 |---|---|
 | `index.html`, `css/`, `js/` | La app. |
 | `js/vistas/` | Una pantalla por archivo (inicio, máster, alumno, CV, buscar, ofertas, formulario de oferta, acceso, entrevista, rondas y solicitudes, los formularios de rondas, **las tarjetas del match (`match.js`) y la pantalla de compartir perfiles (`compartir.js`)**). |
-| `js/util/` | Funciones sin pantalla: búsqueda y filtros (`filtros.js`, `ofertas.js`), orden, resúmenes y validación de rondas (`rondas.js`), **match oferta-alumno y avisos de requisitos (`match.js`)**, **texto de los perfiles que se comparten (`compartir.js`)**, CSV, textos, avatar, navegación. |
+| `js/util/` | Funciones sin pantalla: búsqueda y filtros (`filtros.js`, `ofertas.js`), orden, resúmenes y validación de rondas y «quién ha solicitado» una oferta (`rondas.js`, `solicitantesDeOferta`: una fila por alumno con su solicitud más reciente), **match oferta-alumno y avisos de requisitos (`match.js`)**, **texto de los perfiles que se comparten (`compartir.js`)**, CSV, textos, avatar, navegación. |
 | **`js/data/`** | **Único sitio que sabe de dónde vienen los datos.** Ver sección 3. |
 | `datos-mock/` | Seis CSV con los datos ficticios del modo demo (Alumnos, Ofertas, Listas, Rondas, Aplicaciones, Historial). También sirven para crear esas hojas en el Sheet de prueba (ver la guía). |
 | `docs/apps-script/` | `Code.gs` (el script, **sin claves**) y `GUIA.md` (puesta en marcha). |

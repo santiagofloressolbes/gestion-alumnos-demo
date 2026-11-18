@@ -38,14 +38,15 @@ El [README](../README.md) tiene el resumen. Aquí está el detalle de cada parte
 - La app **avisa, sin impedir nada,** si la oferta está cerrada o si lo que pide (permiso de trabajo, nacionalidad) choca claramente con la situación del alumno.
 - Si dos personas cambian lo mismo a la vez, la app lo detecta y enseña lo que hay antes de pisar nada.
 
-- **Ver las rondas de una oferta.** En la ficha de la oferta salen sus rondas (cada vez que se reenvía a los alumnos) y, en cada una, los alumnos que han aplicado y cómo va cada uno.
+- **Ver quién ha solicitado una oferta.** En la ficha de la oferta, la tarjeta **«Quién ha solicitado»** (arriba de las rondas) dice cuántas solicitudes hay y de cuántos alumnos, cuántos están en cada estado ahora y lista **una fila por alumno** con su programa, su estado actual y su ronda (y «también en la ronda N» si respondió a más de una). Va de más a menos avanzado (Contratado, Entrevista, Enviada a la empresa, En revisión, Recibida) y los descartados, al final. Quien solicitó pero encaja poco sigue en la lista, con la marca «Encaja poco». Tocar una fila abre su solicitud. Salen 15 filas y «Ver N más» enseña el resto. No enseña notas ni motivos de descarte, y no aparece si la oferta no tiene solicitudes.
+- **Ver las rondas de una oferta.** Debajo, sus rondas (cada vez que se reenvía a los alumnos) y, en cada una, los alumnos que han solicitado y cómo va cada uno.
 - **Registrar una ronda y añadir solicitudes.** "Registrar nueva ronda" y, dentro de cada ronda, "Añadir solicitud": se busca al alumno, se elige y se guarda.
 - **Cambiar el estado de una solicitud.** En su detalle, "Cambiar estado". Todo queda apuntado en un historial con fecha y nota, que no se borra.
 - **Ver las solicitudes de un alumno.** En su ficha, en el apartado "Solicitudes".
 
 ## 4. Alumnos que encajan
 
-En la ficha de la oferta, la tarjeta "Alumnos que encajan" reparte a **todos** los alumnos en tres grupos (encaja, encaja con reservas, encaja poco) y cada fila explica por qué, con su semáforo, su puntuación ("Encaje 82 %"; en "Encaja poco" se llama "Afinidad", en gris, porque solo dice cuánto se parece el perfil, no si puede ocupar la oferta) y los datos que faltan. En la ficha del alumno, "Ofertas que encajan" hace lo mismo al revés.
+En la ficha de la oferta, la tarjeta "Alumnos que encajan" reparte a **todos** los alumnos en tres grupos (encaja, encaja con reservas, encaja poco; quien ya ha solicitado lleva la marca **«Solicitó · estado»**, también en «Encaja poco») y cada fila explica por qué, con su semáforo, su puntuación ("Encaje 82 %"; en "Encaja poco" se llama "Afinidad", en gris, porque solo dice cuánto se parece el perfil, no si puede ocupar la oferta) y los datos que faltan. En la ficha del alumno, "Ofertas que encajan" hace lo mismo al revés.
 
 Para cada alumno se miran **ocho criterios** (área, subárea, habilidades, idiomas, formación, tipo, nacionalidad y permiso de trabajo), cada uno con su semáforo, su motivo y sus puntos. Lo que no consta no suma ni resta, y nadie desaparece de la lista. Siempre se ve el aviso **«Orientativo, verifica la situación real»**: es una ayuda para mirar, y si alguien puede trabajar o no lo decide siempre una persona. Los pesos, los estados y las reglas de cada criterio están en [REGLAS-MATCH.md](REGLAS-MATCH.md).
 
