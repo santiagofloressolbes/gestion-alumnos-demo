@@ -60,7 +60,7 @@ export function tarjetaAvisos() {
     limpiarErrores();
     restablecerUmbrales();
     for (const c of CAMPOS) inputs[c.clave].value = String(UMBRALES_POR_DEFECTO[c.clave]);
-    decir('Valores recuperados.', true);
+    decir('Valores por defecto restablecidos.', true);
   };
 
   const enter = e => { if (e.key === 'Enter' && e.target.tagName === 'INPUT') { e.preventDefault(); guardar(); } };   // Enter en un campo = Guardar (sin <form>, para no mezclarse con los formularios de la app)

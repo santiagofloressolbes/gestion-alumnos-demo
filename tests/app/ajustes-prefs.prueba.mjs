@@ -61,7 +61,7 @@ console.log('1. Valores por defecto y etiquetas');
   console.log('4. Valores por defecto');
   await pg.click('#aj-av-defecto');
   chk(JSON.stringify(await vals(pg)) === JSON.stringify(['30', '3', '5', '80']) && await guardado(pg, 'gad.avisos') === null, '«Valores por defecto» los restablece y borra lo guardado');
-  chk(/recuperados/.test(await pg.innerText('#aj-av-ok')) && !(await visible(pg, '#aj-av-dias-error')), 'lo dice y quita los errores');
+  chk(/Valores por defecto restablecidos/.test(await pg.innerText('#aj-av-ok')) && !(await visible(pg, '#aj-av-dias-error')), 'lo dice y quita los errores');
 
   console.log('5. La firma');
   await pg.fill('#aj-firma', '  Ana   <b>Pérez</b>  ');
