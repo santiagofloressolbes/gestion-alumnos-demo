@@ -1,4 +1,4 @@
-// v29, parte 2: los CSV ampliados de docs/importar-sheet («Alumnos - demo ampliada» y «Ofertas - demo ampliada»).
+// v29, parte 2: los CSV ampliados de docs/importar-hoja (alumnos-demo-ampliada.csv y ofertas-demo-ampliada.csv).
 // Son los 30 alumnos y 10 ofertas de siempre (sin tocar) más 20 alumnos (2 por cada programa que no tenía) y 8 ofertas nuevas, todos ficticios.
 // Integridad: mismas columnas que lee la app, valores que existen en las hojas Listas, Países, Áreas y Etiquetas, y el match corre sobre todo.
 // Funciones puras: sin navegador.
@@ -18,7 +18,7 @@ const crudo = f => fs.readFileSync(path.join(RAIZ, f), 'utf8');
 const tabla = f => { const filas = leerCSV(crudo(f)); return { cabecera: filas[0].map(h => h.trim()), filas: filas.slice(1) }; };
 const DEMO = { paises: 'Paises', areas: 'Areas', afinidad: 'Afinidad', reglas: 'ReglasMigratorias', etiquetas: 'Etiquetas' };
 
-const F_AL = 'docs/importar-sheet/Alumnos - demo ampliada.csv', F_OF = 'docs/importar-sheet/Ofertas - demo ampliada.csv';
+const F_AL = 'docs/importar-hoja/alumnos-demo-ampliada.csv', F_OF = 'docs/importar-hoja/ofertas-demo-ampliada.csv';
 const demoAl = tabla('datos-mock/Alumnos.csv'), demoOf = tabla('datos-mock/Ofertas.csv');
 const tAl = tabla(F_AL), tOf = tabla(F_OF);
 const listas = aListas(tabla('datos-mock/Listas.csv'), E.LISTAS, E.ALIAS_LISTAS);
@@ -122,8 +122,8 @@ console.log('5. Todo ficticio, sin datos reales');
 
 console.log('6. PASOS.md dice cuándo usarlos');
 {
-  const t = crudo('docs/importar-sheet/PASOS.md');
-  chk(t.includes('Alumnos - demo ampliada.csv') && t.includes('Ofertas - demo ampliada.csv'), 'PASOS.md nombra los dos archivos nuevos');
+  const t = crudo('docs/importar-hoja/PASOS.md');
+  chk(t.includes('alumnos-demo-ampliada.csv') && t.includes('ofertas-demo-ampliada.csv'), 'PASOS.md nombra los dos archivos nuevos');
   chk(/50 alumnos/.test(t) && /18 ofertas/.test(t), 'y dice cuántos alumnos y ofertas traen');
   chk(/No hace falta\*\* hacer nada en `datos-mock\/` ni en la app/.test(t) && /Solo en un Sheet de prueba/i.test(t), 'y que es solo para un Sheet de prueba y que la demo de la app no cambia');
 }

@@ -4,7 +4,7 @@
 
 ## Resumen
 
-**Contexto.** Una aplicación web para móvil con la que quien gestiona la bolsa de empleo de un máster consulta fichas de alumnos, registra ofertas, rondas y solicitudes, y comparte perfiles. Hoy es una **demostración con datos ficticios**, conectada solo en pruebas a un Google Sheet privado mediante un script con clave compartida: **ese puente no vale con datos reales**. El destino previsto es Microsoft con inicio de sesión individual (cómo está hecha y qué se propone: [TECNICO.md](TECNICO.md); decisiones y riesgos: [../DECISIONES.md](../DECISIONES.md)).
+**Contexto.** Una aplicación web para móvil con la que quien gestiona la bolsa de empleo de un máster consulta fichas de alumnos, registra ofertas, rondas y solicitudes, y comparte perfiles. Hoy es una **demostración con datos ficticios**, conectada solo en pruebas a un Google Sheet privado mediante un script con clave compartida: **ese puente no vale con datos reales**. El destino previsto es Microsoft con inicio de sesión individual (cómo está hecha y qué se propone: [TECNICO.md](TECNICO.md); decisiones y riesgos: [DECISIONES.md](DECISIONES.md)).
 
 **Datos que manejaría (todos sensibles con personas reales):** nombre, máster, nacionalidad, situación de trabajo en España, experiencia, enlace al CV, notas de entrevista, solicitudes, estado de cada proceso y motivo de descarte.
 

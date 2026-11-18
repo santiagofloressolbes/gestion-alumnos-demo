@@ -4,26 +4,26 @@ Todo son datos ficticios, para probar y juzgar el match en el iPhone. Siguen sie
 
 **No hace falta tocar la hoja Listas** (ni una fila). Todo va en hojas nuevas o en columnas añadidas al final de Alumnos y Ofertas.
 
-Los archivos están en esta carpeta (`docs/importar-sheet/`). Los nombres son los de las hojas: Google le pone a la hoja nueva el nombre del archivo.
+Los archivos están en esta carpeta (`docs/importar-hoja/`). Los nombres de archivo van sin tildes ni espacios (`paises.csv`, `reglas-migratorias.csv`…), pero las hojas del Sheet deben llamarse exactamente como se indica abajo, con sus tildes y mayúsculas: Google le pone a la hoja nueva el nombre del archivo y hay que cambiárselo.
 
 ## A. Cinco hojas nuevas
 
 Para cada uno de estos cinco archivos, repite los mismos pasos 1 a 4:
 
-- `Países.csv`
-- `Áreas.csv` (trae una tercera columna, **Área (inglés)**, con el nombre del área para el correo en inglés; es opcional. Debe quedar en la celda C1 con ese texto, y el nombre en inglés va en cada fila de su área)
-- `Afinidad.csv`
-- `Reglas migratorias.csv`
-- `Etiquetas.csv`
+- `paises.csv` → hoja **Países**
+- `areas.csv` → hoja **Áreas** (trae una tercera columna, **Área (inglés)**, con el nombre del área para el correo en inglés; es opcional. Debe quedar en la celda C1 con ese texto, y el nombre en inglés va en cada fila de su área)
+- `afinidad.csv` → hoja **Afinidad**
+- `reglas-migratorias.csv` → hoja **Reglas migratorias**
+- `etiquetas.csv` → hoja **Etiquetas**
 
 1. En el Sheet, abre **Archivo > Importar**.
 2. En la pestaña **Subir**, arrastra el archivo (o elígelo con «Seleccionar un archivo de tu dispositivo»).
 3. En «Ubicación de importación» elige **Insertar hoja(s) nueva(s)**. Deja lo demás como viene y pulsa **Importar datos**.
-4. Mira el nombre de la pestaña nueva: tiene que ser **exactamente** el del archivo, sin «.csv» y con su tilde (Países, Áreas, Afinidad, Reglas migratorias, Etiquetas). Si es otro, haz clic derecho en la pestaña, **Cambiar nombre**, y escríbelo igual.
+4. Mira el nombre de la pestaña nueva: Google le habrá puesto el del archivo (por ejemplo «paises»). Tiene que llamarse **exactamente** como la hoja de la lista de arriba, con su tilde y su mayúscula (Países, Áreas, Afinidad, Reglas migratorias, Etiquetas). Haz clic derecho en la pestaña, **Cambiar nombre**, y escríbelo igual.
 
 ## B. Las columnas nuevas de Alumnos
 
-5. Importa `Alumnos - columnas nuevas.csv` igual que antes (pasos 1 a 3). Quedará una hoja temporal llamada «Alumnos - columnas nuevas».
+5. Importa `alumnos-columnas-nuevas.csv` igual que antes (pasos 1 a 3). Quedará una hoja temporal (se llamará «alumnos-columnas-nuevas»).
 6. Comprueba que los alumnos están en el mismo orden: en esa hoja temporal, en la celda G1, escribe `=SUMPRODUCT(--(A2:A31<>Alumnos!A2:A31))`. Tiene que salir **0**. Si sale otro número, no sigas: avísame.
 7. En la hoja temporal, selecciona de **B1** a **E31** y cópialo (Ctrl+C o Cmd+C).
 8. Ve a la hoja **Alumnos**, haz clic en la primera celda vacía a la derecha de «Disponibilidad» (la **R1**) y pega.
@@ -31,7 +31,7 @@ Para cada uno de estos cinco archivos, repite los mismos pasos 1 a 4:
 
 ## C. Las columnas nuevas de Ofertas
 
-10. Importa `Ofertas - columnas nuevas.csv` igual (pasos 1 a 3).
+10. Importa `ofertas-columnas-nuevas.csv` igual (pasos 1 a 3).
 11. En la hoja temporal, en la celda H1, escribe `=SUMPRODUCT(--(A2:A11<>Ofertas!A2:A11))`. Tiene que salir **0**.
 12. Selecciona de **B1** a **F11**, cópialo, ve a **Ofertas**, haz clic en la primera celda vacía a la derecha de «Enlace o descripción» (la **M1**) y pega. Borra la hoja temporal.
 
@@ -59,10 +59,10 @@ Sin este paso la app sigue funcionando, pero con las reglas de siempre (no ve la
 
 ## G. Una demo más grande (50 alumnos y 18 ofertas), solo para un Sheet de PRUEBA
 
-Si quieres probar el match y las listas con más datos, hay dos archivos más: `Alumnos - demo ampliada.csv` (**50 alumnos**, con las 21 columnas) y `Ofertas - demo ampliada.csv` (**18 ofertas**, con las 17 columnas, perfil del puesto incluido). Son los 30 alumnos y las 10 ofertas de siempre, sin tocar, más 20 alumnos (2 por cada programa que antes no tenía ninguno, así que los 14 programas tienen alumnos) y 8 ofertas nuevas. Todo es ficticio.
+Si quieres probar el match y las listas con más datos, hay dos archivos más: `alumnos-demo-ampliada.csv` (**50 alumnos**, con las 21 columnas) y `ofertas-demo-ampliada.csv` (**18 ofertas**, con las 17 columnas, perfil del puesto incluido). Son los 30 alumnos y las 10 ofertas de siempre, sin tocar, más 20 alumnos (2 por cada programa que antes no tenía ninguno, así que los 14 programas tienen alumnos) y 8 ofertas nuevas. Todo es ficticio.
 
-20. **Solo en un Sheet de prueba** (nunca en uno con datos reales): abre la hoja **Alumnos**, **Archivo > Importar > Subir**, elige `Alumnos - demo ampliada.csv` y, en «Ubicación de la importación», **Reemplazar hoja actual**. No marques «Convertir texto en números, fechas y fórmulas».
-21. Haz lo mismo en **Ofertas** con `Ofertas - demo ampliada.csv`.
+20. **Solo en un Sheet de prueba** (nunca en uno con datos reales): abre la hoja **Alumnos**, **Archivo > Importar > Subir**, elige `alumnos-demo-ampliada.csv` y, en «Ubicación de la importación», **Reemplazar hoja actual**. No marques «Convertir texto en números, fechas y fórmulas».
+21. Haz lo mismo en **Ofertas** con `ofertas-demo-ampliada.csv`.
 22. Las hojas Rondas, Aplicaciones e Historial no cambian: sus ID (A001 a A030, O001 a O010) siguen existiendo.
 
 **No hace falta** hacer nada en `datos-mock/` ni en la app: la demo que viene con la app sigue siendo la de 30 alumnos y 10 ofertas. Estos archivos no se importan solos.

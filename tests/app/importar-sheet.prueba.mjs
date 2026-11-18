@@ -1,4 +1,4 @@
-// Pruebas de los CSV para importar al Sheet (docs/importar-sheet): son los mismos datos que usa la demo y encajan con las hojas y columnas que lee la app.
+// Pruebas de los CSV para importar al Sheet (docs/importar-hoja): son los mismos datos que usa la demo y encajan con las hojas y columnas que lee la app.
 import fs from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
@@ -13,20 +13,22 @@ const igual = (a, b, t) => chk(JSON.stringify(a) === JSON.stringify(b), t + (JSO
 const RAIZ = fileURLToPath(new URL('../../', import.meta.url));
 const leer = f => fs.readFileSync(path.join(RAIZ, f));
 const tabla = f => { const filas = leerCSV(leer(f).toString('utf8')); return { cabecera: filas[0].map(h => h.trim()), filas: filas.slice(1) }; };
+// Los archivos van sin tildes ni espacios (paises.csv); la hoja del Sheet se llama con tilde y se renombra al importar (lo dice PASOS.md).
+const archivo = hoja => hoja.normalize('NFD').replace(/[̀-ͯ]/g, '').toLowerCase().replace(/\s+/g, '-');
 const DEMO = { paises: 'Paises', areas: 'Areas', afinidad: 'Afinidad', reglas: 'ReglasMigratorias', etiquetas: 'Etiquetas' };
 
-console.log('1. Cada hoja nueva: el archivo se llama como la hoja y es igual que el de la demo');
+console.log('1. Cada hoja nueva: tiene su archivo (sin tildes ni espacios) y es igual que el de la demo');
 for (const [clave, { hoja }] of Object.entries(E.HOJAS_MATCH)) {
-  const f = `docs/importar-sheet/${hoja}.csv`;
-  chk(fs.existsSync(path.join(RAIZ, f)), `existe ${f} (Google pone a la hoja el nombre del archivo)`);
+  const f = `docs/importar-hoja/${archivo(hoja)}.csv`;
+  chk(fs.existsSync(path.join(RAIZ, f)), `existe ${f} (la hoja se llama «${hoja}»)`);
   chk(Buffer.compare(leer(f), leer(`datos-mock/${DEMO[clave]}.csv`)) === 0, `${hoja}: idéntico a datos-mock/${DEMO[clave]}.csv`);
   const t = tabla(f);
   igual(t.cabecera, Object.values(E.HOJAS_MATCH[clave].columnas), `${hoja}: las columnas se llaman justo como las lee la app`);
 }
 
 console.log('2. Columnas nuevas de Alumnos y Ofertas');
-for (const [hoja, opc, esquema, nuevas] of [['Alumnos', E.ALUMNO_OPC, E.ALUMNO, 'Alumnos - columnas nuevas'], ['Ofertas', E.OFERTA_OPC, E.OFERTA, 'Ofertas - columnas nuevas']]) {
-  const demo = tabla(`datos-mock/${hoja}.csv`), imp = tabla(`docs/importar-sheet/${nuevas}.csv`);
+for (const [hoja, opc, esquema, nuevas] of [['Alumnos', E.ALUMNO_OPC, E.ALUMNO, 'alumnos-columnas-nuevas'], ['Ofertas', E.OFERTA_OPC, E.OFERTA, 'ofertas-columnas-nuevas']]) {
+  const demo = tabla(`datos-mock/${hoja}.csv`), imp = tabla(`docs/importar-hoja/${nuevas}.csv`);
   igual(imp.cabecera, [Object.keys(esquema)[0], ...Object.keys(opc)], `${nuevas}: el ID y las columnas nuevas, con el nombre exacto que lee la app`);
   igual(imp.filas.length, demo.filas.length, `${nuevas}: una fila por ${hoja.toLowerCase().slice(0, -1)}`);
   const idx = demo.cabecera.indexOf(Object.keys(opc)[0]);
@@ -51,9 +53,9 @@ console.log('3. Todo lo que usan los alumnos y las ofertas mock está en las hoj
 
 console.log('4. Los pasos para el Sheet');
 {
-  const t = leer('docs/importar-sheet/PASOS.md').toString('utf8');
-  for (const hoja of Object.values(E.HOJAS_MATCH).map(h => h.hoja)) chk(t.includes(`${hoja}.csv`), `PASOS.md nombra ${hoja}.csv`);
-  chk(t.includes('Alumnos - columnas nuevas.csv') && t.includes('Ofertas - columnas nuevas.csv'), 'PASOS.md nombra los dos archivos de columnas nuevas');
+  const t = leer('docs/importar-hoja/PASOS.md').toString('utf8');
+  for (const hoja of Object.values(E.HOJAS_MATCH).map(h => h.hoja)) chk(t.includes(`${archivo(hoja)}.csv`) && t.includes(`hoja **${hoja}**`), `PASOS.md nombra ${archivo(hoja)}.csv y dice que la hoja se llama «${hoja}»`);
+  chk(t.includes('alumnos-columnas-nuevas.csv') && t.includes('ofertas-columnas-nuevas.csv'), 'PASOS.md nombra los dos archivos de columnas nuevas');
   chk(t.includes('No hace falta tocar la hoja Listas'), 'PASOS.md deja claro que Listas no se toca');
 }
 

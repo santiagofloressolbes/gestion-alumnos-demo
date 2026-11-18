@@ -43,7 +43,7 @@ Esto está pensado para crecer por partes. Aún no hay:
 - **Borrar rondas, solicitudes o su historial:** nada se borra desde la app. Si una solicitud ya no vale, se marca como "Descartado".
 - **Decidir por ti:** "Alumnos que encajan" solo ordena y explica; no descarta a nadie ni envía nada a las empresas.
 - **Enviar correos:** los borradores se copian o se abren en tu app de correo; la app no envía nada ni guarda qué se mandó.
-- **Anotar lo que se comparte:** la app no apunta quién compartió qué perfil ni con quién. Es un requisito antes de usar datos reales (ver [DECISIONES.md](DECISIONES.md)).
+- **Anotar lo que se comparte:** la app no apunta quién compartió qué perfil ni con quién. Es un requisito antes de usar datos reales (ver [DECISIONES.md](docs/DECISIONES.md)).
 - **Inicio de sesión personal:** hoy todas las personas autorizadas usan la misma clave.
 - **Crear, borrar o mover alumnos** desde la app. Eso se hace en la hoja de cálculo.
 - **Fotos reales:** solo hay círculos con las iniciales.
@@ -86,10 +86,10 @@ Al abrir la app por primera vez, se elige una de las dos:
 | [docs/REGLAS-MATCH.md](docs/REGLAS-MATCH.md) | Quien quiere entender o revisar el match | Los ocho criterios, sus pesos y sus reglas exactas. |
 | [docs/TECNICO.md](docs/TECNICO.md) | Informática (TI) y quien mantiene la app | Cómo está hecha, cómo se conecta, qué seguridad tiene, sus límites y qué hace falta para integrarla en LaLiga. |
 | [docs/apps-script/GUIA.md](docs/apps-script/GUIA.md) | Quien administra la hoja de prueba | Paso a paso para poner en marcha la conexión con clave. |
-| [docs/importar-sheet/PASOS.md](docs/importar-sheet/PASOS.md) | Quien administra la hoja de prueba | Cómo cargar en ella los datos de ejemplo del match. |
+| [docs/importar-hoja/PASOS.md](docs/importar-hoja/PASOS.md) | Quien administra la hoja de prueba | Cómo cargar en ella los datos de ejemplo del match. |
 | [docs/PREPARAR-LALIGA.md](docs/PREPARAR-LALIGA.md) | Quien impulsa el proyecto | Qué se puede preparar hoy sin datos reales y qué depende de LaLiga y TI (Microsoft Forms y Entra ID). |
 | [docs/PREGUNTAS-TI.md](docs/PREGUNTAS-TI.md) | Equipo de TI | Las preguntas que hay que contestar antes de usar datos reales: primero las 11 que bloquean el inicio. |
 | [docs/VISIBILIDAD-REPO.md](docs/VISIBILIDAD-REPO.md) | Quien mantiene la app | Dos opciones para el repositorio (seguir público con datos ficticios o pasar a privado) y qué cambia con cada una. Preparado, sin ejecutar. |
-| [DECISIONES.md](DECISIONES.md) | Quien mantiene la app | Qué se decidió, por qué, y los riesgos conocidos. |
+| [docs/DECISIONES.md](docs/DECISIONES.md) | Quien mantiene la app | Qué se decidió, por qué, y los riesgos conocidos. |
 | [AVISO-DERECHOS.md](AVISO-DERECHOS.md) | Cualquier persona | Qué se puede y qué no se puede hacer con el código: todos los derechos reservados. |
 | [SECURITY.md](SECURITY.md) | Quien encuentra un fallo de seguridad | Cómo informar de él de forma privada. |

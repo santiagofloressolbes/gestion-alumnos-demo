@@ -4,7 +4,7 @@
 
 El script es un "portero" que vive dentro de tu Google Sheet de prueba. La app le pide los datos y le manda las notas de entrevista. Solo atiende si la petición trae la clave correcta.
 
-**Solo para datos de prueba.** Con alumnos reales no se usa (ver `DECISIONES.md`).
+**Solo para datos de prueba.** Con alumnos reales no se usa (ver `docs/DECISIONES.md`).
 
 ## Qué puede y qué no puede hacer
 
@@ -171,7 +171,7 @@ Sirve para que una oferta pueda pedir «nacionalidad de la UE o del EEE» sin el
 
 **El script cambia solo para LEER cinco hojas nuevas** (Países, Áreas, Afinidad, Reglas migratorias y Etiquetas). No escribe nada nuevo, no cambia el guardado de ofertas ni de entrevistas y no toca Listas. La dirección y la clave no cambian.
 
-Los datos para el Sheet y los pasos están en `docs/importar-sheet/` (`PASOS.md`). El script se actualiza así:
+Los datos para el Sheet y los pasos están en `docs/importar-hoja/` (`PASOS.md`). El script se actualiza así:
 
 1. Abre el proyecto en Apps Script y el archivo `Code.gs`.
 2. Borra todo su contenido y pega el de `docs/apps-script/Code.gs`. **Guardar.** (Si usas una copia con tu clave en otro archivo, no la pegues ahí: la clave vive en las propiedades del script, no en el código.)

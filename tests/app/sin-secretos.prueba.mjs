@@ -25,7 +25,7 @@ const BINARIOS = /\.(png|jpe?g|gif|ico|woff2?|ttf|pdf|zip)$/i;
 const esPrueba = f => f.startsWith('tests/');
 const esCodigo = f => /^(js|css)\//.test(f) || ['index.html', 'sw.js', 'manifest.webmanifest', 'docs/apps-script/Code.gs'].includes(f);
 const esDocumento = f => /\.md$/i.test(f);
-const esDatos = f => /^(datos-mock|docs\/importar-sheet)\/.*\.csv$/i.test(f);
+const esDatos = f => /^(datos-mock|docs\/importar-hoja)\/.*\.csv$/i.test(f);
 
 const DOMINIOS_CODIGO = ['script.google.com', 'script.googleusercontent.com', 'www.w3.org', 'example.com'];
 const DOMINIOS_DOCUMENTOS = ['docs.github.com', 'example.com', 'script.google.com'];
@@ -100,7 +100,7 @@ console.log('1. Los detectores saltan con muestras inventadas (si no saltaran, l
   chk(problemas('README.md', 'escribe a ana@dominio.es').length >= 1 && problemas('tests/x.mjs', 'ana@dominio.es').length === 0, 'un correo salta fuera de las pruebas y se admite dentro');
   chk(problemas('README.md', 'https://alguien.github.io/repo/').length >= 1, 'una dirección de GitHub Pages salta');
   chk(problemas('docs/x.md', 'sube a <usuario>.github.io/<repositorio>').length === 0, '... pero el marcador «<usuario>.github.io» es válido');
-  chk(problemas('DECISIONES.md', 'Decisión de Santiago').length >= 1 && problemas('DECISIONES.md', 'Decisión del responsable del proyecto').length === 0, 'el nombre del responsable salta');
+  chk(problemas('docs/DECISIONES.md', 'Decisión de Santiago').length >= 1 && problemas('docs/DECISIONES.md', 'Decisión del responsable del proyecto').length === 0, 'el nombre del responsable salta');
   chk(problemas('docs/x.md', 'https://mi-sitio-interno.empresa.local/wiki').length >= 1, 'un dominio que no está permitido en un documento salta');
   chk(problemas('js/x.js', "fetch('https://api.otro-servicio.com/datos')").length >= 1, 'un dominio nuevo en el código salta');
   chk(problemas('datos-mock/Alumnos.csv', 'https://linkedin.com/in/alguien').length >= 1 && problemas('datos-mock/Alumnos.csv', 'https://example.com/cv/A001').length === 0, 'un CSV de datos solo admite example.com');
@@ -140,13 +140,13 @@ console.log('4. Los datos de ejemplo y los documentos');
   chk(datos.length >= 15 && docs.length >= 8, `se han mirado ${datos.length} CSV de datos y ${docs.length} documentos`);
   const enlacesDatos = datos.flatMap(f => (fs.readFileSync(path.join(RAIZ, f), 'utf8').match(/https?:\/\/[^\s,"]+/g) || []));
   chk(enlacesDatos.length >= 100 && enlacesDatos.every(u => /^https:\/\/example\.com\//.test(u)), `los ${enlacesDatos.length} enlaces de los CSV de datos son todos de example.com`);
-  const publicos = ['README.md', 'DECISIONES.md', 'docs/TECNICO.md', 'docs/apps-script/GUIA.md', 'docs/importar-sheet/PASOS.md', 'docs/PREGUNTAS-TI.md', 'docs/PREPARAR-LALIGA.md', 'docs/VISIBILIDAD-REPO.md', 'docs/REGLAS-MATCH.md', 'docs/FUNCIONAMIENTO.md'];
+  const publicos = ['README.md', 'docs/DECISIONES.md', 'docs/TECNICO.md', 'docs/apps-script/GUIA.md', 'docs/importar-hoja/PASOS.md', 'docs/PREGUNTAS-TI.md', 'docs/PREPARAR-LALIGA.md', 'docs/VISIBILIDAD-REPO.md', 'docs/REGLAS-MATCH.md', 'docs/FUNCIONAMIENTO.md'];
   igual(publicos.filter(f => !fs.existsSync(path.join(RAIZ, f))), [], 'existen los diez documentos públicos');
-  const sinAviso = publicos.filter(f => !/No afiliado a LaLiga/i.test(fs.readFileSync(path.join(RAIZ, f), 'utf8')) && f !== 'docs/importar-sheet/PASOS.md' && f !== 'docs/REGLAS-MATCH.md' && f !== 'docs/apps-script/GUIA.md');
+  const sinAviso = publicos.filter(f => !/No afiliado a LaLiga/i.test(fs.readFileSync(path.join(RAIZ, f), 'utf8')) && f !== 'docs/importar-hoja/PASOS.md' && f !== 'docs/REGLAS-MATCH.md' && f !== 'docs/apps-script/GUIA.md');
   igual(sinAviso, [], 'los documentos principales llevan el aviso «No afiliado a LaLiga»');
   const readme = fs.readFileSync(path.join(RAIZ, 'README.md'), 'utf8');
   chk(!/https?:\/\//.test(readme), 'el README no lleva ninguna dirección web (ni la de GitHub Pages)');
-  chk(/responsable del proyecto/.test(fs.readFileSync(path.join(RAIZ, 'DECISIONES.md'), 'utf8')), 'DECISIONES.md habla de «el responsable del proyecto»');
+  chk(/responsable del proyecto/.test(fs.readFileSync(path.join(RAIZ, 'docs/DECISIONES.md'), 'utf8')), 'docs/DECISIONES.md habla de «el responsable del proyecto»');
 }
 
 console.log(`\n${ok} bien, ${mal} mal`);

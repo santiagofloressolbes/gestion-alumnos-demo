@@ -71,7 +71,7 @@ console.log('2. PREGUNTAS-TI: orden, numeración y la pregunta nueva');
   const bloques = [...t.matchAll(/^### ([A-I])\. (.+)$/gm)].map(m => m[1]);
   igual(bloques, ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I'], 'los nueve bloques complementarios, de la A a la I');
   chk(!/tu |vosotros|nosotros/i.test(t.replace(/ tu /g, ' ')) || true, 'tono neutro');
-  const dec = leer('DECISIONES.md');
+  const dec = leer('docs/DECISIONES.md');
   const m = dec.match(/(\d+) preguntas para TI/);
   igual(m && +m[1], N, 'DECISIONES.md dice cuántas preguntas hay (' + (m && m[1]) + ')');
   const todo = docs.map(leer).join('\n');

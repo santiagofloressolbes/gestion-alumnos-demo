@@ -68,7 +68,7 @@ console.log('3. Las reglas migratorias mock siguen vigentes (las pruebas de pant
   const t = tabla('datos-mock/ReglasMigratorias.csv'), i = t.cabecera.indexOf('Fecha de validación');
   const masVieja = t.filas.map(f => f[i]).filter(Boolean).sort()[0];
   const meses = (Date.now() - Date.parse(masVieja)) / (30.44 * 24 * 3600 * 1000);
-  chk(meses <= 12, `las reglas de datos-mock/ReglasMigratorias.csv se validaron el ${masVieja}, hace más de 12 meses: pon una fecha nueva ahí y en docs/importar-sheet/Reglas migratorias.csv (no es un fallo de la app: las pruebas de pantalla esperan reglas vigentes)`);
+  chk(meses <= 12, `las reglas de datos-mock/ReglasMigratorias.csv se validaron el ${masVieja}, hace más de 12 meses: pon una fecha nueva ahí y en docs/importar-hoja/reglas-migratorias.csv (no es un fallo de la app: las pruebas de pantalla esperan reglas vigentes)`);
 }
 
 console.log(`\n${ok} bien, ${mal} mal`);
