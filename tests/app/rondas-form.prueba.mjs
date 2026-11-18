@@ -74,7 +74,7 @@ const sinClaveEnUrl = log => log.peticiones.every(p => !p.url.includes(CLAVE_PRU
   await pg.fill('#ro-fecha', '2026-10-28'); await guardar(pg, 'v-ronda-form');
   await aterriza(pg, '#/oferta/O004', '#v-oferta .ronda');
   chk(/Ronda 1 registrada\./.test(await texto(pg, '#v-oferta .aviso-ok')), 'aviso "Ronda 1 registrada."');
-  chk((await pg.$$eval('#v-oferta .ronda h2', h => h.map(x => x.textContent))).join() === 'Ronda 1' && /Enviada el 28 de octubre de 2026 · 0 solicitudes/.test(await texto(pg, '#v-oferta .ronda')) && /Aún no hay solicitudes/.test(await texto(pg, '#v-oferta .ronda')), 'la ficha enseña la ronda nueva, sin aplicaciones');
+  chk((await pg.$$eval('#v-oferta .ronda h2', h => h.map(x => x.textContent))).join() === 'Ronda 1' && /Enviada el 28 de octubre de 2026(?! ·)/.test(await texto(pg, '#v-oferta .ronda')) && !/0 solicitudes/.test(await texto(pg, '#v-oferta .ronda')) && /Aún no hay solicitudes/.test(await texto(pg, '#v-oferta .ronda')), 'la ficha enseña la ronda nueva, sin aplicaciones');
   const r6 = fila(mundo, 'Rondas', 'R006');
   chk(r6 && r6['ID oferta'] === 'O004' && r6['Número de ronda'] === '1' && r6['Fecha de envío a los alumnos'] === '2026-10-28', 'en el Sheet: R006, oferta O004, ronda 1, 2026-10-28');
   const j = cuerpoDe(log, 'registrarRonda')[0];

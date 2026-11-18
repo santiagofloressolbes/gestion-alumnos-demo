@@ -174,7 +174,7 @@ function location_ok(h, re) { return re.test(h); }
   m6: {
     const { pg: p2, ctx: c2 } = await entrar('script', m => { m.hojas.Rondas.m.push(['R006', 'O004', '1', '2026-10-28']); });
     await oferta(p2, 'O004');
-    chk(/Aún no hay solicitudes/.test(await p2.innerText('#v-oferta .ronda')) && /0 solicitudes/.test(await p2.innerText('#v-oferta .ronda')) && (await p2.$$('#v-oferta .ronda .resumen')).length === 0, 'una ronda sin aplicaciones: "Aún no hay solicitudes", sin resumen vacío');
+    chk(/Aún no hay solicitudes/.test(await p2.innerText('#v-oferta .ronda')) && !/0 solicitudes/.test(await p2.innerText('#v-oferta .ronda')) && (await p2.$$('#v-oferta .ronda .resumen')).length === 0, 'una ronda sin aplicaciones: "Aún no hay solicitudes", sin resumen vacío');
     await c2.close();
   }
   chk(log.consola.length === 0, 'sin errores de consola: ' + log.consola.join(' | '));

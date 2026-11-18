@@ -62,7 +62,7 @@ export function seccionesRondas(oferta, d) {
     const resumen = resumenEstados(apps, d.listas.estadosAplicacion || []);
     return el('section', { class: 'card ronda', 'aria-label': 'Ronda ' + r.numero },
       el('h2', {}, 'Ronda ' + r.numero),
-      el('p', { class: 'sub' }, [r.fecha && 'Enviada el ' + fechaLarga(r.fecha), plural(apps.length, 'solicitud', 'solicitudes')].filter(Boolean).join(' · ')),
+      el('p', { class: 'sub' }, [r.fecha && 'Enviada el ' + fechaLarga(r.fecha), apps.length > 0 && plural(apps.length, 'solicitud', 'solicitudes')].filter(Boolean).join(' · ')),
       resumen.length > 0 && el('div', { class: 'chips resumen' }, resumen.map(x => el('span', { class: 'chip' }, `${x.estado}: ${x.n}`))),
       apps.length
         ? el('ul', { class: 'alumnos', 'aria-label': 'Solicitudes de la ronda ' + r.numero }, apps.map(a => filaAplicacion(a, d, 'oferta')))
