@@ -125,6 +125,8 @@ console.log('3. El código solo habla con quien la política de seguridad permit
   const csp = (html.match(/Content-Security-Policy" content="([^"]+)"/) || [])[1] || '';
   const connect = (csp.match(/connect-src ([^;]+)/) || [])[1] || '';
   igual(connect.split(/\s+/).sort(), ["'self'", 'https://script.google.com', 'https://script.googleusercontent.com'], 'connect-src: solo la propia web y los dos dominios del script de Google');
+  const imagenes = (csp.match(/img-src ([^;]+)/) || [])[1] || '';
+  igual(imagenes.split(/\s+/).sort(), ["'self'", 'data:'], 'img-src: solo la propia web y data: (sin fotos de otros sitios)');
   chk(/default-src 'none'/.test(csp) && /script-src 'self'/.test(csp), "la política parte de default-src 'none' y solo permite scripts propios");
   const dominiosJs = new Set(archivos.filter(f => /^js\//.test(f)).flatMap(f => dominiosDe(fs.readFileSync(path.join(RAIZ, f), 'utf8'))));
   igual([...dominiosJs].filter(d => !DOMINIOS_CODIGO.includes(d)).sort(), [], 'ningún archivo de js/ nombra otro dominio');

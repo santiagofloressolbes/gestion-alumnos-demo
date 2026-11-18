@@ -194,7 +194,7 @@ Cada valor escrito se guarda como **texto plano** (formato de celda texto). Si u
 | **Clave de al menos 16 caracteres**, guardada en las Propiedades del script; el script se niega a funcionar con una más corta. | `Code.gs` |
 | **Bloqueo:** 5 claves malas seguidas bloquean 15 minutos (también a la clave buena). | `Code.gs` |
 | **Ningún secreto en el repositorio:** ni la clave ni la dirección del script. `Code.gs` público es una plantilla; cualquier otro `Code.gs` está en `.gitignore`. | Repo |
-| **Política de seguridad del contenido (CSP)** en `index.html`: solo código de la propia web; las únicas conexiones externas permitidas son `script.google.com` y `script.googleusercontent.com`; imágenes solo por https; sin formularios hacia fuera. | `index.html` |
+| **Política de seguridad del contenido (CSP)** en `index.html`: solo código de la propia web; las únicas conexiones externas permitidas son `script.google.com` y `script.googleusercontent.com`; imágenes solo de la propia web o incrustadas (`img-src 'self' data:`: una foto por https de otro sitio no se carga y se ven las iniciales); sin formularios hacia fuera. | `index.html` |
 | **Ningún `innerHTML` ni estilos en línea:** todo texto de los datos se escribe como texto. Un valor con código HTML no se ejecuta. | Todo `js/` |
 | **Enlaces:** solo `https://` se abre, en otra pestaña y sin enviar de dónde vienes, y sin usuario ni contraseña dentro de la dirección. `http:`, `javascript:` y similares se muestran como texto. Un único validador (`js/util/enlaces.js`) lo decide para el CV, las ofertas y compartir perfiles. | `js/util/enlaces.js`, `ofertas.js`, `cv.js`, `compartir.js` |
 | **Sin datos en el teléfono:** los datos solo están en memoria; lo escrito en un formulario no se guarda hasta pulsar Guardar. Una clave que el script rechaza se borra del teléfono. | `js/data/` |
@@ -244,6 +244,7 @@ Todos son aceptables **solo porque los datos son ficticios**.
 | La app: el match en pantalla (puntuación, «datos incompletos», aviso fijo, hojas que faltan o con filas raras, regla vieja) | 37 | (incluido en `npm test`) |
 | La app: CSV para importar al Sheet (iguales a los de la demo, columnas con su nombre exacto, todo lo usado está en las listas, todo en `sw.js`) | 36 | (incluido en `npm test`) |
 | La app: compartir perfiles (texto, "canarios" que nunca deben salir, vista previa = lo que se envía, Compartir, Copiar, sin menú, 320 px) | 81 | (incluido en `npm test`) |
+| La app: política de imágenes (`img-src 'self' data:`; todo lo que se ve sigue viéndose, una foto https externa la bloquea la política y salen las iniciales; 2 roturas a propósito detectadas) | 23 | (incluido en `npm test`) |
 | La app: enlaces (solo https y sin usuario@, el CV, las ofertas y compartir usan el mismo validador; 3 roturas a propósito detectadas) | 60 | (incluido en `npm test`) |
 | La app: lectura de rondas y solicitudes | 108 | (incluido en `npm test`) |
 | La app: registrar rondas, añadir solicitudes y cambiar su estado | 156 | (incluido en `npm test`) |
