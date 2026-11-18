@@ -9,8 +9,14 @@ const entrar = async ({ extraApps = '', hoy = HOY, ancho = 390, alto = 800 } = {
   await t.pg.addInitScript(() => { if (!sessionStorage.getItem('ini')) { localStorage.setItem('gad.ajustes', '["conexion","avisos","firma","version"]'); localStorage.setItem('gad.modo', 'demo'); sessionStorage.setItem('ini', '1'); } });
   if (extraApps) {
     await t.pg.route('**/datos-mock/Aplicaciones.csv*', async r => {
-      const res = await r.fetch();
-      await r.fulfill({ response: res, body: (await res.text()).replace(/\s*$/, '\n') + extraApps });
+      // Si el navegador se cierra con esta petición en vuelo, fetch() falla («socket hang up»). Sin este try/catch el error
+      // quedaba sin capturar y la prueba salía con código 1 aunque todas las comprobaciones hubieran pasado.
+      try {
+        const res = await r.fetch();
+        await r.fulfill({ response: res, body: (await res.text()).replace(/\s*$/, '\n') + extraApps });
+      } catch {
+        await r.abort().catch(() => {});
+      }
     });
   }
   await t.pg.setViewportSize({ width: ancho, height: alto });
