@@ -1,3 +1,4 @@
+import { norm } from '../util/texto.js';
 // Convierte tablas { cabecera, filas } (de un CSV o del script) en los objetos que usa la app.
 // Es común a todas las fuentes: una fuente nueva solo tiene que entregar tablas con este formato.
 
@@ -41,6 +42,8 @@ export function aListas({ cabecera, filas }, esquema, alias = {}) {
 
 // Hojas de reglas del match (todas opcionales): cada una es una tabla { cabecera, filas } o null si no existe.
 // Devuelve listas de objetos con las claves internas. Una hoja que falta, o una columna que falta, da una lista vacía (nunca un error).
+// «areaEn» (nombre del área en inglés) se encuentra aunque falte la tilde o cambien las mayúsculas: un descuido al escribir la cabecera no lo desactiva.
+const COLUMNAS_FLEXIBLES = new Set(['areaEn']);
 export function aReglasMatch(tablas, hojas) {
   const out = {};
   for (const [clave, { columnas }] of Object.entries(hojas)) {
@@ -48,7 +51,7 @@ export function aReglasMatch(tablas, hojas) {
     out[clave] = [];
     if (!t || !Array.isArray(t.cabecera) || !Array.isArray(t.filas)) continue;
     const cab = t.cabecera.map(h => String(h).trim());
-    const idx = Object.fromEntries(Object.entries(columnas).map(([k, nombre]) => [k, cab.indexOf(nombre)]));
+    const idx = Object.fromEntries(Object.entries(columnas).map(([k, nombre]) => [k, cab.indexOf(nombre) >= 0 || !COLUMNAS_FLEXIBLES.has(k) ? cab.indexOf(nombre) : cab.findIndex(h => norm(h) === norm(nombre))]));
     const [primera] = Object.keys(columnas);
     if (idx[primera] < 0) continue;
     for (const f of t.filas) {

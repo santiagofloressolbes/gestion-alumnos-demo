@@ -2,6 +2,7 @@
 //
 // PRIVACIDAD: este archivo solo lee, a propósito, estos campos (lista cerrada):
 //   alumno.nombre · oferta.empresa · oferta.titulo · oferta.area · aplicacion.estado
+// (y, solo para traducir el nombre del área en el correo en inglés, la columna «Área (inglés)» de la hoja Áreas)
 // Las notas de entrevista, los motivos de descarte, las notas y el historial de la solicitud, la situación de trabajo,
 // el estatus migratorio, la nacionalidad, el CV y el resto de campos NO se leen aquí: no hay forma de que acaben en el texto.
 // (Pruebas con textos "canario" lo comprueban.) Un borrador de "descartado" nunca dice el motivo.
@@ -89,14 +90,24 @@ const FRASES = {
   },
 };
 
+// Nombre del área en el idioma del correo. En español, el de siempre. En inglés, el de la columna «Área (inglés)» de la hoja Áreas
+// (la primera fila de esa área que lo tenga); si no hay, se queda el nombre en español (nunca falla ni deja el hueco vacío).
+export function areaEnIdioma(area, filasAreas, idioma) {
+  const nombre = limpio(area);
+  if (!nombre || idioma !== 'en') return nombre;
+  const clave = estadoNorm(nombre);
+  const fila = (Array.isArray(filasAreas) ? filasAreas : []).find(f => f && estadoNorm(f.area) === clave && limpio(f.areaEn));
+  return fila ? limpio(fila.areaEn) : nombre;
+}
+
 // Devuelve { tipo, idioma, asunto, cuerpo, faltaFirma } o null si ese estado no tiene borrador.
 // Solo se leen alumno.nombre, oferta.empresa, oferta.titulo, oferta.area y aplicacion.estado (ver arriba).
-export function borradorCorreo({ alumno, oferta, aplicacion, idioma = 'es', firma = '' }) {
+export function borradorCorreo({ alumno, oferta, aplicacion, idioma = 'es', firma = '', areas = [] }) {
   const tipo = tipoDeEstado(aplicacion?.estado);
   if (!tipo) return null;
   const lang = idioma === 'en' ? 'en' : 'es';
   const T = FRASES[lang];
-  const nombre = limpio(alumno?.nombre), empresa = limpio(oferta?.empresa), puesto = limpio(oferta?.titulo), area = limpio(oferta?.area);
+  const nombre = limpio(alumno?.nombre), empresa = limpio(oferta?.empresa), puesto = limpio(oferta?.titulo), area = areaEnIdioma(oferta?.area, areas, lang);
   const d = descripcion(puesto, empresa, lang);
   const firmaLimpia = limpio(firma);
 

@@ -53,7 +53,7 @@ export const LISTAS = {
 // Hojas OPCIONALES con las reglas del match (3E). Cada una: nombre de la hoja en el Sheet y sus columnas. Si falta, la app usa las reglas de respaldo del código.
 export const HOJAS_MATCH = {
   paises: { hoja: 'Países', columnas: { pais: 'País', grupo: 'Grupo' } },
-  areas: { hoja: 'Áreas', columnas: { area: 'Área', subarea: 'Subárea' } },
+  areas: { hoja: 'Áreas', columnas: { area: 'Área', subarea: 'Subárea', areaEn: 'Área (inglés)' } },   // «Área (inglés)» es opcional: nombre del área para el correo en inglés
   afinidad: { hoja: 'Afinidad', columnas: { a: 'Área A', b: 'Área B', nivel: 'Nivel' } },
   reglas: { hoja: 'Reglas migratorias', columnas: { situacion: 'Situación de trabajo', tipo: 'Tipo de oferta', lugar: 'País o grupo de la oferta', resultado: 'Resultado', motivo: 'Motivo', fecha: 'Fecha de validación' } },
   etiquetas: { hoja: 'Etiquetas', columnas: { etiqueta: 'Etiqueta' } },

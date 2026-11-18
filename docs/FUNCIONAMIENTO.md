@@ -72,7 +72,7 @@ Los cuatro números (días, ofertas, solicitudes y porcentaje) se cambian en Aju
 
 - **Cómo se hace.** En el detalle de una solicitud, **Borrador de correo** (si está en proceso o descartada): se elige español o inglés, se ve el texto exacto y se copia o se abre en la app de correo. No incluye notas, motivos de descarte, situación de trabajo ni estatus migratorio.
 
-Hay dos: **en proceso** (Recibida, En revisión, Enviada a la empresa y Entrevista) y **descartado**, que dice con tacto que la solicitud no continúa e **invita a escribir** si quiere ir hacia el área de la oferta. Se escriben en español, o en inglés para el MBA en inglés, y se puede cambiar el idioma en la vista previa. El texto solo usa el nombre de pila, el puesto, la empresa y el estado: **nunca** notas de entrevista, motivos de descarte, situación de trabajo ni estatus migratorio. La app no envía nada: se copia o se abre en la app de correo, sin destinatario.
+Hay dos: **en proceso** (Recibida, En revisión, Enviada a la empresa y Entrevista) y **descartado**, que dice con tacto que la solicitud no continúa e **invita a escribir** si quiere ir hacia el área de la oferta. Se escriben en español, o en inglés para el MBA en inglés, y se puede cambiar el idioma en la vista previa. En inglés, el área de la oferta sale con su nombre en inglés si la hoja Áreas tiene la columna opcional **Área (inglés)**; si no la tiene (o esa celda está vacía), sale el nombre en español. El texto solo usa el nombre de pila, el puesto, la empresa y el estado: **nunca** notas de entrevista, motivos de descarte, situación de trabajo ni estatus migratorio. La app no envía nada: se copia o se abre en la app de correo, sin destinatario.
 
 ## 8. Ajustes, conexión y actualización
 

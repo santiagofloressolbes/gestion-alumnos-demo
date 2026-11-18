@@ -55,7 +55,7 @@ export async function pintarCorreo(raiz, id) {
   const avisoFirma = !firma && el('p', { class: 'aviso', role: 'note', id: 'co-firma-falta' }, 'Falta tu firma: el borrador lleva el hueco «[Tu nombre]». Puedes escribirla en ', el('a', { class: 'enlace', href: '#/ajustes' }, 'Ajustes'), '.');
 
   function refrescar() {
-    const b = borradorCorreo({ alumno, oferta, aplicacion: a, idioma, firma });
+    const b = borradorCorreo({ alumno, oferta, aplicacion: a, idioma, firma, areas: d.listas.match?.areas });
     actual = textoCompleto(b);
     vista.textContent = actual;
     const href = enlaceCorreo(b);

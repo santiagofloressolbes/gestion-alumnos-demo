@@ -11,7 +11,7 @@ Los archivos están en esta carpeta (`docs/importar-sheet/`). Los nombres son lo
 Para cada uno de estos cinco archivos, repite los mismos pasos 1 a 4:
 
 - `Países.csv`
-- `Áreas.csv`
+- `Áreas.csv` (trae una tercera columna, **Área (inglés)**, con el nombre del área para el correo en inglés; es opcional. Debe quedar en la celda C1 con ese texto, y el nombre en inglés va en cada fila de su área)
 - `Afinidad.csv`
 - `Reglas migratorias.csv`
 - `Etiquetas.csv`

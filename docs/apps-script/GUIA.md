@@ -167,6 +167,8 @@ Sirve para que una oferta pueda pedir «nacionalidad de la UE o del EEE» sin el
 
 ## Hojas de reglas del match (versión 25)
 
+**La hoja Áreas puede llevar una columna opcional «Área (inglés)»** (para el correo en inglés). El script no cambia: ya devuelve la hoja entera y la app lee esa columna si existe.
+
 **El script cambia solo para LEER cinco hojas nuevas** (Países, Áreas, Afinidad, Reglas migratorias y Etiquetas). No escribe nada nuevo, no cambia el guardado de ofertas ni de entrevistas y no toca Listas. La dirección y la clave no cambian.
 
 Los datos para el Sheet y los pasos están en `docs/importar-sheet/` (`PASOS.md`). El script se actualiza así:

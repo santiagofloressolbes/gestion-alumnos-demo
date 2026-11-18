@@ -39,6 +39,14 @@ console.log('2. Hojas de reglas (opcionales)');
   chk(m.paises.length >= 80 && m.paises.every(p => p.pais && p.grupo), 'Países: todos con su grupo (' + m.paises.length + ')');
   igual([...new Set(m.paises.map(p => p.grupo))].sort(), ['EEE', 'Grupo de países', 'Resto', 'Suiza', 'UE'], 'grupos de Países');
   igual(m.areas.length, 30, 'Áreas: 30 subáreas');
+  chk(m.areas.every(f => f.areaEn) && new Set(m.areas.map(f => f.area)).size === new Set(m.areas.map(f => f.areaEn)).size, 'Áreas: cada área trae su nombre en inglés, uno distinto por área');
+  {
+    const cab = ['Área', 'Subárea'], f = [['Finanzas', 'Contabilidad']];
+    igual(aReglasMatch({ areas: { cabecera: cab, filas: f } }, E.HOJAS_MATCH).areas, [{ area: 'Finanzas', subarea: 'Contabilidad', areaEn: '' }], 'sin la columna «Área (inglés)»: se lee igual, con el nombre en inglés vacío');
+    for (const nombre of ['Área (inglés)', 'Area (ingles)', 'ÁREA (INGLÉS)', ' area (INGLÉS) ']) igual(aReglasMatch({ areas: { cabecera: [...cab, nombre], filas: [['Finanzas', 'Contabilidad', 'Finance']] } }, E.HOJAS_MATCH).areas[0].areaEn, 'Finance', 'la columna se reconoce como «' + nombre + '» (tilde y mayúsculas no importan)');
+    igual(aReglasMatch({ areas: { cabecera: [...cab, 'Area ingles 2'], filas: [['Finanzas', 'Contabilidad', 'x']] } }, E.HOJAS_MATCH).areas[0].areaEn, '', 'una columna con otro nombre no se toma por la del inglés');
+    igual(aReglasMatch({ areas: { cabecera: ['area', 'subarea'], filas: [['Finanzas', 'x']] } }, E.HOJAS_MATCH).areas, [], 'las columnas de siempre siguen siendo exactas (solo la del inglés es flexible)');
+  }
   igual(m.afinidad.length, 45, 'Afinidad: las 45 parejas de 10 áreas');
   igual(m.reglas.length, 20, 'Reglas migratorias: 20 filas');
   chk(m.reglas.every(r => r.situacion && r.resultado && r.fecha), 'cada regla trae su resultado y su fecha de validación');

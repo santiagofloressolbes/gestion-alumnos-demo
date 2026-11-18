@@ -2,6 +2,11 @@
 // Lo que no debe salir NUNCA (notas de entrevista, motivo de descarte, situación de trabajo, estatus migratorio, nacionalidad…)
 // se comprueba con "canarios": textos inventados metidos en esos campos, que no pueden aparecer en ningún borrador.
 import * as C from '../../js/util/correo.js';
+import fs from 'node:fs';
+import { leerCSV } from '../../js/util/csv.js';
+import { aReglasMatch } from '../../js/data/tablas.js';
+import { HOJAS_MATCH } from '../../js/data/esquema.js';
+const AREAS_MOCK = () => { const f = leerCSV(fs.readFileSync(new URL('../../datos-mock/Areas.csv', import.meta.url), 'utf8')); return aReglasMatch({ areas: { cabecera: f[0].map(h => h.trim()), filas: f.slice(1) } }, HOJAS_MATCH).areas; };
 import { nuevo, chk, terminar, BASE } from './ayudas.mjs';
 
 const igual = (a, b, t) => chk(JSON.stringify(a) === JSON.stringify(b), t + (JSON.stringify(a) === JSON.stringify(b) ? '' : ` → obtenido ${JSON.stringify(a)}, esperado ${JSON.stringify(b)}`));
@@ -72,6 +77,21 @@ console.log('3. El texto en inglés');
   chk(!/Best regards|Hi |I'm writing/.test(C.borradorCorreo({ alumno, oferta, aplicacion: app('Recibida'), idioma: 'es', firma: 'Ana' }).cuerpo), 'ni una palabra en inglés en el español');
   igual(C.borradorCorreo({ alumno, oferta, aplicacion: app('Recibida'), idioma: 'fr', firma: 'Ana' }).idioma, 'es', 'un idioma desconocido vuelve al español');
   igual(C.lineaAsunto('en') + '|' + C.lineaAsunto('es'), 'Subject|Asunto', 'la línea de asunto según el idioma');
+}
+
+console.log('3b. El área en inglés (columna opcional «Área (inglés)» de la hoja Áreas)');
+{
+  const AREAS = [{ area: 'Comercial y patrocinio', subarea: 'Hospitality', areaEn: '' }, { area: 'Comercial y patrocinio', subarea: 'Activación de marca', areaEn: 'Commercial and sponsorship' }, { area: 'Finanzas', subarea: 'Contabilidad', areaEn: 'Finance' }];
+  const en = (o, areas) => C.borradorCorreo({ alumno, oferta: o, aplicacion: app('Descartado'), idioma: 'en', firma: 'Ana', areas }).cuerpo;
+  chk(/focus your career on Commercial and sponsorship, get in touch/.test(en(oferta, AREAS)) && !/Comercial y patrocinio/.test(en(oferta, AREAS)), 'en inglés sale el nombre en inglés (el de la primera fila de esa área que lo tiene)');
+  chk(/focus your career on Comercial y patrocinio,/.test(en(oferta, [])) && /focus your career on Comercial y patrocinio,/.test(en(oferta, undefined)) && /focus your career on Comercial y patrocinio,/.test(en(oferta, [{ area: 'Comercial y patrocinio', areaEn: '' }])), 'sin hoja, sin columna o con la celda vacía: respaldo al nombre en español (sin hueco ni error)');
+  chk(/focus your career on Commercial and sponsorship,/.test(en({ ...oferta, area: ' comercial Y patrocinio ' }, AREAS)), 'el área se reconoce sin fijarse en mayúsculas, tildes ni espacios');
+  const es = C.borradorCorreo({ alumno, oferta, aplicacion: app('Descartado'), idioma: 'es', firma: 'Ana', areas: AREAS }).cuerpo;
+  chk(/hacia Comercial y patrocinio,/.test(es) && !/Commercial/.test(es), 'en español no cambia: sigue el nombre en español');
+  chk(/focus your career on Comercial y patrocinio,/.test(en({ ...oferta, area: 'Área inventada' }, AREAS).replace('Área inventada', 'Comercial y patrocinio')) && /on Área inventada,/.test(en({ ...oferta, area: 'Área inventada' }, AREAS)), 'un área que no está en la hoja se queda como está');
+  chk(C.areaEnIdioma('', AREAS, 'en') === '' && C.areaEnIdioma('Finanzas', AREAS, 'es') === 'Finanzas' && C.areaEnIdioma('Finanzas', AREAS, 'en') === 'Finance', 'la función por separado: vacío, español e inglés');
+  const mock = AREAS_MOCK();
+  chk(mock.length >= 10 && mock.every(f => f.areaEn), 'los datos de ejemplo traen el nombre en inglés de cada área');
 }
 
 console.log('4. Firma');
@@ -185,6 +205,18 @@ const sinScrollLateral = pg => pg.evaluate(() => document.documentElement.scroll
 }
 
 console.log('11. Descartado: sin motivo');
+{
+  const { pg, ctx } = await entrar();
+  await ir(pg, '#/aplicacion/AP002/correo', '#co-vista');
+  await pg.check('#co-idioma-en');
+  await pg.waitForTimeout(300);
+  const vista = await pg.innerText('#co-vista');
+  chk(/focus your career on Commercial and sponsorship/.test(vista) && !/Comercial y patrocinio/.test(vista), 'en pantalla, el borrador en inglés enseña el área traducida');
+  await pg.check('#co-idioma-es');
+  await pg.waitForTimeout(300);
+  chk(/hacia Comercial y patrocinio/.test(await pg.innerText('#co-vista')), '... y al volver al español, el área en español');
+  await ctx.close();
+}
 {
   const { pg, ctx } = await entrar();
   await ir(pg, '#/aplicacion/AP002/correo', '#co-vista');   // A028, Descartado con motivo (con canario)
