@@ -35,4 +35,18 @@ jobs:
           path: ~/.cache/ms-playwright
           key: playwright-${{ runner.os }}-${{ hashFiles('package-lock.json') }}
       - run: npx playwright install --with-deps chromium
-      - run: npm test
+      - name: Pruebas
+        run: npm test 2>&1 | tee salida-pruebas.txt
+      - name: Resumen de las pruebas que fallan
+        if: failure()
+        run: |
+          {
+            echo '## Pruebas'
+            echo '```'
+            grep -E '^(✔|✖)|FALLA|Resumen|Pruebas:' salida-pruebas.txt || true
+            echo '```'
+            echo '## Salida de lo que falla (final)'
+            echo '```'
+            tail -c 50000 salida-pruebas.txt
+            echo '```'
+          } >> "$GITHUB_STEP_SUMMARY"
