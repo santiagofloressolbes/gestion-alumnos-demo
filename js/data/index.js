@@ -10,7 +10,7 @@ import { getModo, accesoGuardado, urlGuardada, urlValida, guardarAcceso, guardar
 export { getModo, urlGuardada, urlValida };
 
 let carga = null;
-let enMemoria = null;   // los datos ya cargados (solo en memoria; nunca se guardan en el móvil)
+let enMemoria = null; // los datos ya cargados (solo en memoria; nunca se guardan en el móvil)
 let estado = { modo: '', puedeEscribir: false, soporta: [], conRondas: false };
 
 async function cargarTodo() {
@@ -23,13 +23,17 @@ async function cargarTodo() {
     enMemoria = datos;
     return datos;
   } catch (e) {
-    if (e.codigo === 'clave') borrarClave();   // una clave que ya no vale no se queda guardada
+    if (e.codigo === 'clave') borrarClave(); // una clave que ya no vale no se queda guardada
     throw e;
   }
 }
 
 function datos() {
-  if (!carga) carga = cargarTodo().catch(e => { carga = null; throw e; });   // si falla, se puede reintentar
+  if (!carga)
+    carga = cargarTodo().catch(e => {
+      carga = null;
+      throw e;
+    }); // si falla, se puede reintentar
   return carga;
 }
 
@@ -49,18 +53,24 @@ export async function getMasters() {
   const { alumnos, listas } = await datos();
   const lista = listas.programas || listas.masters.map(nombre => ({ nombre, categoria: '', idioma: '' }));
   const fuera = [...new Set(alumnos.map(a => a.master).filter(n => n && !lista.some(p => p.nombre === n)))];
-  return [...lista.map(p => ({ ...p, enLista: true })), ...fuera.map(nombre => ({ nombre, categoria: '', idioma: '', enLista: false }))]
-    .map(p => ({ ...p, alumnos: alumnos.filter(a => a.master === p.nombre).length }));
+  return [
+    ...lista.map(p => ({ ...p, enLista: true })),
+    ...fuera.map(nombre => ({ nombre, categoria: '', idioma: '', enLista: false }))
+  ].map(p => ({ ...p, alumnos: alumnos.filter(a => a.master === p.nombre).length }));
 }
 
 // Vuelve a pedir los datos (botón "Reintentar").
-export function recargar() { carga = null; enMemoria = null; return datos(); }
+export function recargar() {
+  carga = null;
+  enMemoria = null;
+  return datos();
+}
 
 // Botón "Actualizar datos": vuelve a leer el Sheet SIN borrar antes lo que ya hay en memoria.
 // Si la carga falla, los datos anteriores se quedan (a diferencia de recargar(), que los borra). Nada se guarda en el móvil.
 export async function refrescar() {
   if (!getModo()) throw errorDatos('sin-acceso');
-  const nuevos = await cargarTodo();   // solo si sale bien se sustituyen los datos (cargarTodo no toca enMemoria si falla)
+  const nuevos = await cargarTodo(); // solo si sale bien se sustituyen los datos (cargarTodo no toca enMemoria si falla)
   carga = Promise.resolve(nuevos);
   return nuevos;
 }
@@ -75,8 +85,15 @@ export async function conectar(url, clave) {
   await probarConexion({ url, clave });
   if (!guardarAcceso(url, clave)) throw errorDatos('almacenamiento');
 }
-export function usarDemo() { if (!guardarDemo()) throw errorDatos('almacenamiento'); }
-export function olvidarAcceso() { olvidarTodo(); carga = null; enMemoria = null; estado = { modo: '', puedeEscribir: false, soporta: [], conRondas: false }; }
+export function usarDemo() {
+  if (!guardarDemo()) throw errorDatos('almacenamiento');
+}
+export function olvidarAcceso() {
+  olvidarTodo();
+  carga = null;
+  enMemoria = null;
+  estado = { modo: '', puedeEscribir: false, soporta: [], conRondas: false };
+}
 
 /* ---- Escritura: solo la entrevista (notas y fecha) ---- */
 
@@ -90,8 +107,13 @@ export async function guardarEntrevista(id, notas, fecha, base) {
   const ant = base || { notas: a.notasEntrevista, fecha: a.fechaUltimaEntrevista };
   let r;
   try {
-    r = await llamarScript(accesoGuardado(), 'guardarEntrevista',
-      { id, notas, fecha, notasAnteriores: ant.notas, fechaAnterior: ant.fecha });
+    r = await llamarScript(accesoGuardado(), 'guardarEntrevista', {
+      id,
+      notas,
+      fecha,
+      notasAnteriores: ant.notas,
+      fechaAnterior: ant.fecha
+    });
   } catch (e) {
     if (e.codigo === 'clave') borrarClave();
     throw e;
@@ -103,19 +125,23 @@ export async function guardarEntrevista(id, notas, fecha, base) {
 // Pone en memoria lo que hay ahora en el Sheet (tras guardar, o al descartar un cambio propio por un conflicto).
 export function aplicarEntrevista(id, notas, fecha) {
   const a = enMemoria?.alumnos.find(x => x.id === id);
-  if (a) { a.notasEntrevista = notas; a.fechaUltimaEntrevista = fecha; }
+  if (a) {
+    a.notasEntrevista = notas;
+    a.fechaUltimaEntrevista = fecha;
+  }
 }
 export const puedeEscribir = () => estado.modo === 'script' && estado.puedeEscribir;
 
 /* ---- Escritura: ofertas (alta y edición; nunca se borran: se cierran cambiando el estado) ---- */
 
-const CAMPOS_OFERTA = [...Object.values(esquemas.OFERTA).filter(k => k !== 'id'), ...Object.values(esquemas.OFERTA_OPC)];   // los 11 de siempre + los 5 del perfil del puesto
+const CAMPOS_OFERTA = [...Object.values(esquemas.OFERTA).filter(k => k !== 'id'), ...Object.values(esquemas.OFERTA_OPC)]; // los 11 de siempre + los 5 del perfil del puesto
 // ¿Esta conexión sabe guardar ofertas? Un script antiguo no lo anuncia: entonces no se enseñan los botones.
 export const puedeEscribirOfertas = () => puedeEscribir() && estado.soporta.includes('guardarOferta');
 // 'conectado' | 'script-antiguo' | 'solo-lectura' (demo): para explicar por qué no hay botones.
 // ¿El script sabe guardar el perfil del puesto (país, subárea, etiquetas, idiomas, nivel)? Un script anterior lo ignoraría en silencio, así que no se le envía.
 export const soportaPerfilOferta = () => puedeEscribirOfertas() && estado.soporta.includes('perfilOferta');
-export const estadoEscrituraOfertas = () => (puedeEscribirOfertas() ? 'conectado' : estado.modo === 'script' && estado.puedeEscribir ? 'script-antiguo' : 'solo-lectura');
+export const estadoEscrituraOfertas = () =>
+  puedeEscribirOfertas() ? 'conectado' : estado.modo === 'script' && estado.puedeEscribir ? 'script-antiguo' : 'solo-lectura';
 
 // Crea (id vacío) o edita una oferta. "anteriores" = lo que se cree que hay ahora en el Sheet (al editar);
 // el script lo compara y, si alguien lo cambió, devuelve 'conflicto' con lo que hay.
@@ -130,7 +156,7 @@ export async function guardarOferta(id, oferta, anteriores) {
   }
   let r;
   try {
-    r = await llamarScript(accesoGuardado(), 'guardarOferta', peticion, { reintentarRed: !!id });   // un alta no se repite sola: podría duplicarse
+    r = await llamarScript(accesoGuardado(), 'guardarOferta', peticion, { reintentarRed: !!id }); // un alta no se repite sola: podría duplicarse
   } catch (e) {
     if (e.codigo === 'clave') borrarClave();
     throw e;
@@ -146,7 +172,8 @@ const FUNCIONES_RONDAS = ['registrarRonda', 'crearAplicacion', 'cambiarEstado'];
 // Hacen falta las 3 hojas en el Sheet Y un script que anuncie las 3 funciones; si no, no se enseñan los botones.
 export const puedeEscribirRondas = () => puedeEscribir() && estado.conRondas && FUNCIONES_RONDAS.every(f => estado.soporta.includes(f));
 // 'conectado' | 'script-antiguo' (script o Sheet sin las rondas) | 'solo-lectura' (demo): para explicar por qué no hay botones.
-export const estadoEscrituraRondas = () => (puedeEscribirRondas() ? 'conectado' : estado.modo === 'script' && estado.puedeEscribir ? 'script-antiguo' : 'solo-lectura');
+export const estadoEscrituraRondas = () =>
+  puedeEscribirRondas() ? 'conectado' : estado.modo === 'script' && estado.puedeEscribir ? 'script-antiguo' : 'solo-lectura';
 
 // Pone en memoria lo que hay ahora en el Sheet (tras guardar, o al descartar un cambio propio por un conflicto).
 export function aplicarOferta(id, oferta) {
@@ -180,11 +207,18 @@ function objetoDe(x, campos) {
 // Pone o cambia una fila en memoria (por su ID).
 function poner(lista, fila) {
   const i = lista.findIndex(x => x.id === fila.id);
-  if (i >= 0) Object.assign(lista[i], fila); else lista.push(fila);
+  if (i >= 0) Object.assign(lista[i], fila);
+  else lista.push(fila);
 }
-export function aplicarRonda(r) { if (enMemoria) poner(enMemoria.rondas, objetoDe(r, CAMPOS_RONDA)); }
-export function aplicarAplicacion(a) { if (enMemoria) poner(enMemoria.aplicaciones, objetoDe(a, CAMPOS_APLICACION)); }
-function aplicarHistorial(h) { if (enMemoria && h) poner(enMemoria.historial, objetoDe(h, CAMPOS_HISTORIAL)); }
+export function aplicarRonda(r) {
+  if (enMemoria) poner(enMemoria.rondas, objetoDe(r, CAMPOS_RONDA));
+}
+export function aplicarAplicacion(a) {
+  if (enMemoria) poner(enMemoria.aplicaciones, objetoDe(a, CAMPOS_APLICACION));
+}
+function aplicarHistorial(h) {
+  if (enMemoria && h) poner(enMemoria.historial, objetoDe(h, CAMPOS_HISTORIAL));
+}
 
 async function pedirRondas(accion, peticion) {
   await datos();
@@ -209,8 +243,10 @@ export async function registrarRonda(idOferta, numero, fecha) {
 // Un alumno aplica a una ronda de una oferta. Nace "Recibida" con su primera línea de historial.
 export async function crearAplicacion({ idAlumno, idOferta, numeroRonda, fecha, notas }) {
   const r = await pedirRondas('crearAplicacion', { idAlumno, idOferta, numeroRonda, fecha, notas });
-  const aplicacion = objetoDe(r.aplicacion, CAMPOS_APLICACION), historial = objetoDe(r.historial, CAMPOS_HISTORIAL);
-  aplicarAplicacion(aplicacion); aplicarHistorial(historial);
+  const aplicacion = objetoDe(r.aplicacion, CAMPOS_APLICACION),
+    historial = objetoDe(r.historial, CAMPOS_HISTORIAL);
+  aplicarAplicacion(aplicacion);
+  aplicarHistorial(historial);
   return { aplicacion, historial };
 }
 
@@ -220,6 +256,7 @@ export async function cambiarEstado(id, { estado, motivo, fecha, nota }, anterio
   const r = await pedirRondas('cambiarEstado', { id, estado, motivo, fecha, nota, anterior });
   const aplicacion = objetoDe(r.aplicacion, CAMPOS_APLICACION);
   const historial = r.historial ? objetoDe(r.historial, CAMPOS_HISTORIAL) : null;
-  aplicarAplicacion(aplicacion); aplicarHistorial(historial);
+  aplicarAplicacion(aplicacion);
+  aplicarHistorial(historial);
   return { aplicacion, historial, sinCambios: r.sinCambios === true };
 }

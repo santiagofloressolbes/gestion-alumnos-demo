@@ -14,39 +14,77 @@ export async function pintarMaster(raiz, nombre) {
   try {
     [masters, alumnos] = await Promise.all([getMasters(), getAlumnos()]);
   } catch (e) {
-    reemplazar(raiz, volver(), tarjetaError(e, () => { recargar().catch(() => {}); pintarMaster(raiz, nombre); }));
+    reemplazar(
+      raiz,
+      volver(),
+      tarjetaError(e, () => {
+        recargar().catch(() => {});
+        pintarMaster(raiz, nombre);
+      })
+    );
     return;
   }
   if (!masters.some(m => m.nombre === nombre)) {
-    reemplazar(raiz, volver(), el('div', { class: 'card' },
-      el('h2', {}, 'Programa no encontrado'),
-      el('p', { class: 'sub' }, 'Vuelve al inicio y elige uno de la lista.')));
+    reemplazar(
+      raiz,
+      volver(),
+      el(
+        'div',
+        { class: 'card' },
+        el('h2', {}, 'Programa no encontrado'),
+        el('p', { class: 'sub' }, 'Vuelve al inicio y elige uno de la lista.')
+      )
+    );
     return;
   }
 
-  const lista = alumnos.filter(a => a.master === nombre)
+  const lista = alumnos
+    .filter(a => a.master === nombre)
     .sort((a, b) => `${a.apellidos} ${a.nombre}`.localeCompare(`${b.apellidos} ${b.nombre}`, 'es'));
 
   const avisosDe = await avisosActivosPorAlumno();
   const programa = masters.find(m => m.nombre === nombre);
-  reemplazar(raiz, 
+  reemplazar(
+    raiz,
     volver(),
     el('h2', { class: 'seccion' }, plural(lista.length, 'alumno', 'alumnos')),
     lista.length
-      ? el('ul', { class: 'alumnos', 'aria-label': 'Alumnos de ' + nombre }, lista.map(a => fila(a, 'master', false, avisosDe(a.id))))
+      ? el(
+          'ul',
+          { class: 'alumnos', 'aria-label': 'Alumnos de ' + nombre },
+          lista.map(a => fila(a, 'master', false, avisosDe(a.id)))
+        )
       : el('div', { class: 'card' }, el('p', { class: 'sub' }, 'Este programa todavía no tiene alumnos.')),
-    !programa.enLista && notaDatos(`El programa «${nombre}» no está en la lista de programas. Avisa a quien administra la app.`, 'ma-fuera-de-lista'));
+    !programa.enLista &&
+      notaDatos(`El programa «${nombre}» no está en la lista de programas. Avisa a quien administra la app.`, 'ma-fuera-de-lista')
+  );
 }
 
 // Dato breve: a qué área quiere ir y si busca prácticas o empleo. En la búsqueda se añade el programa.
 export function fila(a, origen, conMaster = false, avisos = []) {
   const breve = [a.areaDestino, a.disponibilidad].filter(Boolean).join(' · ');
-  return el('li', {}, el('a', { class: 'alumno', href: '#/alumno/' + encodeURIComponent(a.id), onclick: () => { navegacion.origen = origen; } },
-    avatar(a),
-    el('span', { class: 'alumno-texto' },
-      el('b', {}, `${a.nombre} ${a.apellidos}`.trim()),
-      breve && el('span', { class: 'sub' }, breve),
-      conMaster && el('span', { class: 'sub' }, a.master),
-      avisos.length > 0 && el('span', { class: 'etiqueta-aviso' }, etiquetaAviso(avisos))),
-    svgFlecha()));
+  return el(
+    'li',
+    {},
+    el(
+      'a',
+      {
+        class: 'alumno',
+        href: '#/alumno/' + encodeURIComponent(a.id),
+        onclick: () => {
+          navegacion.origen = origen;
+        }
+      },
+      avatar(a),
+      el(
+        'span',
+        { class: 'alumno-texto' },
+        el('b', {}, `${a.nombre} ${a.apellidos}`.trim()),
+        breve && el('span', { class: 'sub' }, breve),
+        conMaster && el('span', { class: 'sub' }, a.master),
+        avisos.length > 0 && el('span', { class: 'etiqueta-aviso' }, etiquetaAviso(avisos))
+      ),
+      svgFlecha()
+    )
+  );
 }

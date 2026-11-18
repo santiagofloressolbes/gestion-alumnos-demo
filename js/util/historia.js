@@ -7,20 +7,41 @@ export const CAMPOS_HISTORIA = ['subareasExperiencia', 'etiquetas', 'idiomas', '
 
 // La historia es corta y solo dice lo que NO sale ya en las líneas de debajo del perfil. El programa, el área a la que quiere ir, el área de experiencia
 // y qué busca ya tienen su propia línea («Programa», «Quiere ir a», «Experiencia en», «Busca»), así que aquí no se repiten ni se leen.
-const MAX_SUBAREAS = 3, MAX_ETIQUETAS = 6, MAX_IDIOMAS = 5, MAX_FORMACION = 120;
+const MAX_SUBAREAS = 3,
+  MAX_ETIQUETAS = 6,
+  MAX_IDIOMAS = 5,
+  MAX_FORMACION = 120;
 
 // Una sola línea: sin saltos ni espacios de más (lo que viene del Sheet no puede inventarse líneas nuevas del mensaje).
-export const linea = t => String(t ?? '').replace(/[\u0000-\u001F\u007F]+/g, ' ').replace(/\s+/g, ' ').trim();
+export const linea = t =>
+  String(t ?? '')
+    .replace(/[\u0000-\u001F\u007F]+/g, ' ')
+    .replace(/\s+/g, ' ')
+    .trim();
 
 // Los valores de una celda («A; B»), sin repetir (sin fijarse en mayúsculas).
-const valores = t => [...new Map(linea(t).split(/[;,]/).map(x => x.trim()).filter(Boolean).map(x => [x.toLowerCase(), x])).values()];
+const valores = t => [
+  ...new Map(
+    linea(t)
+      .split(/[;,]/)
+      .map(x => x.trim())
+      .filter(Boolean)
+      .map(x => [x.toLowerCase(), x])
+  ).values()
+];
 const sinPunto = t => t.replace(/[\s.;,:]+$/, '');
 const recortar = (t, n) => (t.length <= n ? t : t.slice(0, n - 1).replace(/\s+\S*$/, '') + '…');
 
 // Idiomas: SOLO el nombre, nunca el nivel. «Italiano nativo» o «Español nativo» pueden insinuar la nacionalidad de alguien, y un «C2» suelto junto a
 // idiomas sin nivel también lo haría: por eso se quita el nivel (A1–C2, nativo, lengua materna, bilingüe…) de todos. El nivel sigue en la ficha.
-const NIVEL = /\s*[(\[]?\s*(?:[ABC][12]|nativ[oa]s?|native|lengua materna|materno|materna|mother tongue|biling(?:ü|u)e|bilingual)\s*[)\]]?\s*$/i;
-const idiomas = t => { const vistos = new Set(); return valores(t).map(x => x.replace(NIVEL, '').trim()).filter(x => x && !vistos.has(x.toLowerCase()) && vistos.add(x.toLowerCase())); };
+const NIVEL =
+  /\s*[(\[]?\s*(?:[ABC][12]|nativ[oa]s?|native|lengua materna|materno|materna|mother tongue|biling(?:ü|u)e|bilingual)\s*[)\]]?\s*$/i;
+const idiomas = t => {
+  const vistos = new Set();
+  return valores(t)
+    .map(x => x.replace(NIVEL, '').trim())
+    .filter(x => x && !vistos.has(x.toLowerCase()) && vistos.add(x.toLowerCase()));
+};
 
 export function historia(alumno) {
   // Lo único que se lee del alumno: los campos de la lista.

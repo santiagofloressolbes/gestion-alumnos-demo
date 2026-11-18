@@ -11,23 +11,32 @@ export const CAMPOS_BASE = [
   { clave: 'nombre', etiqueta: 'Nombre' },
   { clave: 'master', etiqueta: 'Programa' },
   { clave: 'area', etiqueta: 'Área (a la que quiere ir y de experiencia)' },
-  { clave: 'disponibilidad', etiqueta: 'Qué busca (prácticas o empleo)' },
+  { clave: 'disponibilidad', etiqueta: 'Qué busca (prácticas o empleo)' }
 ];
 export const CAMPOS_SENSIBLES = [
   { clave: 'nacionalidad', etiqueta: 'Nacionalidad' },
   { clave: 'situacion', etiqueta: 'Situación de trabajo en España' },
   { clave: 'experiencia', etiqueta: 'Resumen de experiencia' },
-  { clave: 'cv', etiqueta: 'Enlace al CV' },
+  { clave: 'cv', etiqueta: 'Enlace al CV' }
 ];
 export const BASE_POR_DEFECTO = CAMPOS_BASE.map(c => c.clave);
 // Texto armado por la app (no es un dato del Sheet): sale solo si se marca la casilla. Va aparte, siempre desmarcado.
 export const CAMPOS_EXTRA = [
-  { clave: 'historia', etiqueta: 'Incluir resumen del perfil', nota: 'Una línea con subáreas, habilidades, idiomas (sin nivel) y formación. No usa el texto «Por qué» ni datos sensibles.' },
+  {
+    clave: 'historia',
+    etiqueta: 'Incluir resumen del perfil',
+    nota: 'Una línea con subáreas, habilidades, idiomas (sin nivel) y formación. No usa el texto «Por qué» ni datos sensibles.'
+  }
 ];
 
 // El enlace al CV solo se incluye si es una dirección https válida; si no, se deja fuera (nunca http, javascript:, data:…).
 export function enlaceHttps(t) {
-  try { const u = new URL(String(t ?? '').trim()); return u.protocol === 'https:' ? u.href : ''; } catch { return ''; }
+  try {
+    const u = new URL(String(t ?? '').trim());
+    return u.protocol === 'https:' ? u.href : '';
+  } catch {
+    return '';
+  }
 }
 
 export const nombreCompleto = a => linea(`${a.nombre ?? ''} ${a.apellidos ?? ''}`);
@@ -36,10 +45,14 @@ export const nombreCompleto = a => linea(`${a.nombre ?? ''} ${a.apellidos ?? ''}
 function lineasDe(a, campos) {
   const L = [];
   const si = c => campos.has(c);
-  if (si('historia')) { const h = historia(a); if (h) L.push(['Perfil', h]); }   // primero: abre el perfil
+  if (si('historia')) {
+    const h = historia(a);
+    if (h) L.push(['Perfil', h]);
+  } // primero: abre el perfil
   if (si('master') && linea(a.master)) L.push(['Programa', linea(a.master)]);
   if (si('area')) {
-    const destino = linea(a.areaDestino), exp = linea(a.areaExperiencia);
+    const destino = linea(a.areaDestino),
+      exp = linea(a.areaExperiencia);
     if (destino) L.push(['Quiere ir a', destino]);
     if (exp) L.push(['Experiencia en', exp]);
   }
@@ -74,4 +87,5 @@ export function textoPerfiles({ alumnos, campos, oferta = null }) {
 // ¿Hay datos sensibles marcados? (para avisar)
 export const sensiblesMarcados = campos => CAMPOS_SENSIBLES.filter(c => new Set(campos).has(c.clave));
 // ¿Algún alumno tiene un CV que no es https (y por eso se deja fuera)?
-export const cvSinHttps = (alumnos, campos) => new Set(campos).has('cv') && alumnos.filter(a => !enlaceHttps(a.enlaceCV)).map(nombreCompleto);
+export const cvSinHttps = (alumnos, campos) =>
+  new Set(campos).has('cv') && alumnos.filter(a => !enlaceHttps(a.enlaceCV)).map(nombreCompleto);

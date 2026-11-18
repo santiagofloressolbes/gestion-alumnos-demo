@@ -21,28 +21,54 @@ const $ = s => document.querySelector(s);
 let inicioPintado = false;
 let vistaPrevia = null;
 let vistaActual = '';
-const scrollLista = { buscar: 0, ofertas: 0 };   // para volver a la búsqueda o a las ofertas en el mismo punto
+const scrollLista = { buscar: 0, ofertas: 0 }; // para volver a la búsqueda o a las ofertas en el mismo punto
 function rutaActual() {
   const h = location.hash.replace(/^#\/?/, '');
   let m;
   try {
-    if ((m = h.match(/^master\/(.+)$/))) return { vista: 'master', valor: decodeURIComponent(m[1]), pestana: 'inicio', titulo: decodeURIComponent(m[1]) };
+    if ((m = h.match(/^master\/(.+)$/)))
+      return { vista: 'master', valor: decodeURIComponent(m[1]), pestana: 'inicio', titulo: decodeURIComponent(m[1]) };
     if ((m = h.match(/^cv\/(.+)$/))) return { vista: 'cv', valor: decodeURIComponent(m[1]), pestana: 'inicio', titulo: 'CV de ejemplo' };
-    if ((m = h.match(/^alumno\/([^/]+)\/compartir$/))) return { vista: 'compartir', valor: '', valor2: decodeURIComponent(m[1]), pestana: 'inicio', titulo: 'Compartir perfil' };
+    if ((m = h.match(/^alumno\/([^/]+)\/compartir$/)))
+      return { vista: 'compartir', valor: '', valor2: decodeURIComponent(m[1]), pestana: 'inicio', titulo: 'Compartir perfil' };
     if ((m = h.match(/^alumno\/(.+)$/))) return { vista: 'alumno', valor: decodeURIComponent(m[1]), pestana: 'inicio', titulo: 'Ficha' };
-  } catch { /* dirección mal escrita: se vuelve al inicio */ }
+  } catch {
+    /* dirección mal escrita: se vuelve al inicio */
+  }
   try {
-    if ((m = h.match(/^oferta\/([^/]+)\/ronda\/nueva$/))) return { vista: 'ronda-form', valor: decodeURIComponent(m[1]), pestana: 'ofertas', titulo: 'Nueva ronda' };
-    if ((m = h.match(/^oferta\/([^/]+)\/ronda\/([^/]+)\/aplicar$/))) return { vista: 'aplicacion-form', valor: decodeURIComponent(m[1]), valor2: decodeURIComponent(m[2]), pestana: 'ofertas', titulo: 'Añadir solicitud' };
-    if ((m = h.match(/^aplicacion\/([^/]+)\/correo$/))) return { vista: 'correo', valor: decodeURIComponent(m[1]), pestana: 'ofertas', titulo: 'Borrador de correo' };
-    if ((m = h.match(/^aplicacion\/([^/]+)\/estado$/))) return { vista: 'estado-form', valor: decodeURIComponent(m[1]), pestana: 'ofertas', titulo: 'Cambiar estado' };
-    if ((m = h.match(/^aplicacion\/([^/]+)$/))) return { vista: 'aplicacion', valor: decodeURIComponent(m[1]), pestana: 'ofertas', titulo: 'Solicitud' };
-    if ((m = h.match(/^oferta\/([^/]+)\/compartir$/))) return { vista: 'compartir', valor: decodeURIComponent(m[1]), valor2: '', pestana: 'ofertas', titulo: 'Compartir perfiles' };
+    if ((m = h.match(/^oferta\/([^/]+)\/ronda\/nueva$/)))
+      return { vista: 'ronda-form', valor: decodeURIComponent(m[1]), pestana: 'ofertas', titulo: 'Nueva ronda' };
+    if ((m = h.match(/^oferta\/([^/]+)\/ronda\/([^/]+)\/aplicar$/)))
+      return {
+        vista: 'aplicacion-form',
+        valor: decodeURIComponent(m[1]),
+        valor2: decodeURIComponent(m[2]),
+        pestana: 'ofertas',
+        titulo: 'Añadir solicitud'
+      };
+    if ((m = h.match(/^aplicacion\/([^/]+)\/correo$/)))
+      return { vista: 'correo', valor: decodeURIComponent(m[1]), pestana: 'ofertas', titulo: 'Borrador de correo' };
+    if ((m = h.match(/^aplicacion\/([^/]+)\/estado$/)))
+      return { vista: 'estado-form', valor: decodeURIComponent(m[1]), pestana: 'ofertas', titulo: 'Cambiar estado' };
+    if ((m = h.match(/^aplicacion\/([^/]+)$/)))
+      return { vista: 'aplicacion', valor: decodeURIComponent(m[1]), pestana: 'ofertas', titulo: 'Solicitud' };
+    if ((m = h.match(/^oferta\/([^/]+)\/compartir$/)))
+      return { vista: 'compartir', valor: decodeURIComponent(m[1]), valor2: '', pestana: 'ofertas', titulo: 'Compartir perfiles' };
     if (h === 'oferta/nueva') return { vista: 'oferta-form', valor: null, pestana: 'ofertas', titulo: 'Nueva oferta' };
-    if ((m = h.match(/^oferta\/([^/]+)\/editar$/))) return { vista: 'oferta-form', valor: decodeURIComponent(m[1]), pestana: 'ofertas', titulo: 'Editar oferta' };
-    if ((m = h.match(/^oferta\/([^/]+)$/))) return { vista: 'oferta', valor: decodeURIComponent(m[1]), pestana: 'ofertas', titulo: 'Oferta' };
-  } catch { /* dirección mal escrita: se vuelve al inicio */ }
-  if ((m = h.match(/^avisos\/(sin-solicitudes|aplica-a-todo)$/))) return { vista: 'avisos', valor: m[1], pestana: 'inicio', titulo: m[1] === 'sin-solicitudes' ? 'Sin solicitudes' : 'Ha solicitado casi todas las ofertas' };
+    if ((m = h.match(/^oferta\/([^/]+)\/editar$/)))
+      return { vista: 'oferta-form', valor: decodeURIComponent(m[1]), pestana: 'ofertas', titulo: 'Editar oferta' };
+    if ((m = h.match(/^oferta\/([^/]+)$/)))
+      return { vista: 'oferta', valor: decodeURIComponent(m[1]), pestana: 'ofertas', titulo: 'Oferta' };
+  } catch {
+    /* dirección mal escrita: se vuelve al inicio */
+  }
+  if ((m = h.match(/^avisos\/(sin-solicitudes|aplica-a-todo)$/)))
+    return {
+      vista: 'avisos',
+      valor: m[1],
+      pestana: 'inicio',
+      titulo: m[1] === 'sin-solicitudes' ? 'Sin solicitudes' : 'Ha solicitado casi todas las ofertas'
+    };
   if (h === 'buscar') return { vista: 'buscar', pestana: 'buscar', titulo: 'Buscar' };
   if (h === 'ofertas') return { vista: 'ofertas', pestana: 'ofertas', titulo: 'Ofertas' };
   if (h === 'ajustes') return { vista: 'ajustes', pestana: 'ajustes', titulo: 'Ajustes' };
@@ -72,14 +98,19 @@ async function pintar() {
 
   if (r.vista === 'acceso') pintarAcceso($('#v-acceso'));
   if (r.vista === 'ajustes') pintarAjustes($('#v-ajustes'));
-  if (r.vista === 'inicio' && !inicioPintado) { inicioPintado = true; await pintarInicio($('#v-inicio')); }
-  else if (r.vista === 'inicio') await pintarAvisosInicio($('#in-avisos'));   // los avisos pueden haber cambiado (silenciar, nuevos umbrales)
+  if (r.vista === 'inicio' && !inicioPintado) {
+    inicioPintado = true;
+    await pintarInicio($('#v-inicio'));
+  } else if (r.vista === 'inicio') await pintarAvisosInicio($('#in-avisos')); // los avisos pueden haber cambiado (silenciar, nuevos umbrales)
   if (r.vista === 'avisos') await pintarAvisos($('#v-avisos'), r.valor);
   if (r.vista === 'correo') await pintarCorreo($('#v-correo'), r.valor);
   if (r.vista === 'master') await pintarMaster($('#v-master'), r.valor);
   if (r.vista === 'alumno') await pintarAlumno($('#v-alumno'), r.valor);
   if (r.vista === 'cv') await pintarCV($('#v-cv'), r.valor);
-  if (r.vista === 'buscar') { await pintarBuscar($('#v-buscar')); if (vistaPrevia === 'alumno') $('#main').scrollTop = scrollLista.buscar; }
+  if (r.vista === 'buscar') {
+    await pintarBuscar($('#v-buscar'));
+    if (vistaPrevia === 'alumno') $('#main').scrollTop = scrollLista.buscar;
+  }
   if (r.vista === 'oferta') await pintarOferta($('#v-oferta'), r.valor);
   if (r.vista === 'aplicacion') await pintarAplicacion($('#v-aplicacion'), r.valor);
   if (r.vista === 'ronda-form') await pintarFormRonda($('#v-ronda-form'), r.valor);
@@ -87,33 +118,48 @@ async function pintar() {
   if (r.vista === 'compartir') await pintarCompartir($('#v-compartir'), { idOferta: r.valor, idAlumno: r.valor2 });
   if (r.vista === 'estado-form') await pintarFormEstado($('#v-estado-form'), r.valor);
   if (r.vista === 'oferta-form') await pintarFormOferta($('#v-oferta-form'), r.valor);
-  if (r.vista === 'ofertas') { await pintarOfertas($('#v-ofertas')); if (vistaPrevia === 'oferta') $('#main').scrollTop = scrollLista.ofertas; }
+  if (r.vista === 'ofertas') {
+    await pintarOfertas($('#v-ofertas'));
+    if (vistaPrevia === 'oferta') $('#main').scrollTop = scrollLista.ofertas;
+  }
   vistaPrevia = r.vista;
   vistaActual = r.vista;
   boton.mostrar();
 }
 
 // Un formulario con cambios sin guardar pregunta antes de salir (tocar otra pestaña, "atrás"...). Si se cancela, se vuelve a la dirección anterior.
-let hashPrevio = location.hash, restaurando = false;
+let hashPrevio = location.hash,
+  restaurando = false;
 window.addEventListener('hashchange', () => {
-  if (restaurando) { restaurando = false; return; }
+  if (restaurando) {
+    restaurando = false;
+    return;
+  }
   if (navegacion.sinGuardar && !confirm('Hay cambios sin guardar. ¿Salir sin guardarlos?')) {
-    restaurando = true; location.hash = hashPrevio; return;
+    restaurando = true;
+    location.hash = hashPrevio;
+    return;
   }
   navegacion.sinGuardar = false;
   hashPrevio = location.hash;
   pintar();
 });
-window.addEventListener('beforeunload', e => { if (navegacion.sinGuardar) { e.preventDefault(); e.returnValue = ''; } });
+window.addEventListener('beforeunload', e => {
+  if (navegacion.sinGuardar) {
+    e.preventDefault();
+    e.returnValue = '';
+  }
+});
 // Botón "Actualizar datos": tras leer el Sheet se repinta la pantalla actual en el mismo punto (scroll y búsqueda se conservan).
 const boton = iniciarRefrescar({
   vistaActual: () => vistaActual,
   alActualizar: async () => {
     const y = $('#main').scrollTop;
-    inicioPintado = false; reiniciarBuscar();
+    inicioPintado = false;
+    reiniciarBuscar();
     await pintar();
     $('#main').scrollTop = y;
-  },
+  }
 });
 pintar();
 

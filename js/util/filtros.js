@@ -11,21 +11,37 @@ export const hayAlgo = e => !!e.texto.trim() || filtrosActivos(e) > 0;
 const pajar = new WeakMap();
 function textoDe(a) {
   if (!pajar.has(a)) {
-    pajar.set(a, norm([a.nombre, a.apellidos, a.id, a.master, a.promocion, a.areaExperiencia, a.areaDestino,
-      a.resumenExperiencia, a.porQue, a.nacionalidadPrincipal, a.nacionalidadSecundaria, a.situacionTrabajo,
-      a.disponibilidad].join(' ')));
+    pajar.set(
+      a,
+      norm(
+        [
+          a.nombre,
+          a.apellidos,
+          a.id,
+          a.master,
+          a.promocion,
+          a.areaExperiencia,
+          a.areaDestino,
+          a.resumenExperiencia,
+          a.porQue,
+          a.nacionalidadPrincipal,
+          a.nacionalidadSecundaria,
+          a.situacionTrabajo,
+          a.disponibilidad
+        ].join(' ')
+      )
+    );
   }
   return pajar.get(a);
 }
 
-const porArea = (a, area, en) =>
-  (en !== 'destino' && a.areaExperiencia === area) || (en !== 'experiencia' && a.areaDestino === area);
+const porArea = (a, area, en) => (en !== 'destino' && a.areaExperiencia === area) || (en !== 'experiencia' && a.areaDestino === area);
 
 // "Prácticas" y "Empleo" incluyen también a quien tiene "Ambas". "Ambas" muestra solo a los de Ambas.
 const disponible = (valor, buscado) => valor === buscado || (valor === 'Ambas' && buscado !== 'Ambas');
 
 export function filtrar(alumnos, e) {
-  const palabras = norm(e.texto).split(/\s+/).filter(Boolean);   // todas deben aparecer
+  const palabras = norm(e.texto).split(/\s+/).filter(Boolean); // todas deben aparecer
   return alumnos
     .filter(a => palabras.every(p => textoDe(a).includes(p)))
     .filter(a => !e.area || porArea(a, e.area, e.areaEn))

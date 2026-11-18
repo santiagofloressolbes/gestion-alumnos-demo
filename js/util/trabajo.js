@@ -15,7 +15,8 @@ export function ocupar(controles, pulsado, texto = 'Guardando…') {
 }
 
 // Un aviso que flota arriba de la pantalla, se vea donde se vea el scroll. Se quita solo (o al tocarlo).
-let flotante = null, relojFlotante = 0;
+let flotante = null,
+  relojFlotante = 0;
 export function avisoFlotante(texto, ms = 6000) {
   quitarFlotante();
   flotante = document.createElement('p');
@@ -50,13 +51,29 @@ export async function copiarTexto(texto) {
       await navigator.clipboard.write([new ClipboardItem({ 'text/plain': new Blob([t], { type: 'text/plain' }) })]);
       return true;
     }
-  } catch { /* se prueba el siguiente */ }
-  try { await navigator.clipboard.writeText(t); return true; } catch { /* se prueba el respaldo */ }
+  } catch {
+    /* se prueba el siguiente */
+  }
+  try {
+    await navigator.clipboard.writeText(t);
+    return true;
+  } catch {
+    /* se prueba el respaldo */
+  }
   const area = document.createElement('textarea');
-  area.setAttribute('aria-hidden', 'true'); area.setAttribute('tabindex', '-1'); area.readOnly = true; area.className = 'cp-oculto';
-  area.value = t; document.body.append(area); area.select();
+  area.setAttribute('aria-hidden', 'true');
+  area.setAttribute('tabindex', '-1');
+  area.readOnly = true;
+  area.className = 'cp-oculto';
+  area.value = t;
+  document.body.append(area);
+  area.select();
   let bien;
-  try { bien = document.execCommand('copy'); } catch { bien = false; }
+  try {
+    bien = document.execCommand('copy');
+  } catch {
+    bien = false;
+  }
   area.remove();
   return bien;
 }

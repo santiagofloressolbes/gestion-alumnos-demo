@@ -7,18 +7,32 @@ import { nombreAlumno, claseEstado, solicitantesDeOferta } from '../util/rondas.
 import { navegacion } from '../util/navegacion.js';
 import { MAX_PERFILES } from '../util/compartir.js';
 
-const POR_PAGINA = 15;   // filas que se pintan de golpe en cada grupo (con "Ver más")
+const POR_PAGINA = 15; // filas que se pintan de golpe en cada grupo (con "Ver más")
 const NOTA = 'Cada fila dice por qué.';
 // Aviso fijo: el match orienta y ordena; si alguien puede trabajar o no lo decide siempre una persona.
-const AVISO_ORIENTATIVO = 'Es una ayuda, no una decisión. Nadie queda fuera de la lista. La decisión sobre si puede trabajar en una oferta la toma siempre una persona.';
-const TITULO = { area: 'Área', subarea: 'Subárea', etiquetas: 'Habilidades', idiomas: 'Idiomas', nivel: 'Formación', tipo: 'Prácticas o empleo', nacionalidad: 'Nacionalidad', permiso: 'Permiso de trabajo' };
+const AVISO_ORIENTATIVO =
+  'Es una ayuda, no una decisión. Nadie queda fuera de la lista. La decisión sobre si puede trabajar en una oferta la toma siempre una persona.';
+const TITULO = {
+  area: 'Área',
+  subarea: 'Subárea',
+  etiquetas: 'Habilidades',
+  idiomas: 'Idiomas',
+  nivel: 'Formación',
+  tipo: 'Prácticas o empleo',
+  nacionalidad: 'Nacionalidad',
+  permiso: 'Permiso de trabajo'
+};
 
 // Cómo se dice cada criterio: el símbolo y la palabra van siempre en texto (el color nunca es lo único que lo dice).
 // «Sin dato» = falta el dato: se ve como «a revisar», pero no suma puntos ni cuenta como «no cumple». «No aplica» = la oferta no pide eso.
 function rotulo(c) {
   if (c.noAplica) return { signo: '–', palabra: 'No aplica', clase: 'na' };
   if (c.sinDatos) return { signo: '?', palabra: 'Sin dato', clase: 'revisar sin-datos' };
-  return { signo: { ok: '✓', revisar: '!', no: '✗' }[c.estado], palabra: { ok: 'Cumple', revisar: 'Revisar', no: 'No coincide' }[c.estado], clase: c.estado };
+  return {
+    signo: { ok: '✓', revisar: '!', no: '✗' }[c.estado],
+    palabra: { ok: 'Cumple', revisar: 'Revisar', no: 'No coincide' }[c.estado],
+    clase: c.estado
+  };
 }
 const num = n => String(Math.round(n * 10) / 10).replace('.', ',');
 const puntosDe = c => (c.noAplica ? 'no cuenta' : c.sinDatos ? 'no suma' : `${num(c.peso * c.factor)} de ${c.peso} puntos`);
@@ -39,42 +53,75 @@ function conVerMas(texto, max = MAX_TEXTO) {
   if (texto.length <= max) return el('span', {}, texto);
   const corto = texto.slice(0, max).replace(/\s+\S*$/, '') + '…';
   const cuerpo = el('span', { class: 'texto-largo' }, corto);
-  const boton = el('button', { class: 'ver-mas', type: 'button', 'aria-expanded': 'false', onclick: () => {
-    const abierto = boton.getAttribute('aria-expanded') === 'true';
-    cuerpo.textContent = abierto ? corto : texto;
-    boton.textContent = abierto ? 'ver más' : 'ver menos';
-    boton.setAttribute('aria-expanded', abierto ? 'false' : 'true');
-  } }, 'ver más');
+  const boton = el(
+    'button',
+    {
+      class: 'ver-mas',
+      type: 'button',
+      'aria-expanded': 'false',
+      onclick: () => {
+        const abierto = boton.getAttribute('aria-expanded') === 'true';
+        cuerpo.textContent = abierto ? corto : texto;
+        boton.textContent = abierto ? 'ver más' : 'ver menos';
+        boton.setAttribute('aria-expanded', abierto ? 'false' : 'true');
+      }
+    },
+    'ver más'
+  );
   return el('span', {}, cuerpo, ' ', boton);
 }
 
 function porQue(r) {
   const p = r.puntuacion;
   // Sin repetir el «Encaje 81 %» de la fila: aquí solo los puntos y cuántos criterios tenían datos.
-  const puntos = p.porcentaje == null
-    ? 'Sin puntuación: no hay dato en ningún criterio.'
-    : `${num(p.puntos)} de ${p.maximo} puntos con ${p.evaluados === 1 ? '1 criterio' : `${p.evaluados} criterios`}.`
-      + (p.incompleto ? ` ${p.sinDatos === 1 ? '1 criterio sin dato: ni suma ni resta' : `${p.sinDatos} criterios sin dato: ni suman ni restan`}.` : '');
-  return desplegable({ class: 'porque' },
+  const puntos =
+    p.porcentaje == null
+      ? 'Sin puntuación: no hay dato en ningún criterio.'
+      : `${num(p.puntos)} de ${p.maximo} puntos con ${p.evaluados === 1 ? '1 criterio' : `${p.evaluados} criterios`}.` +
+        (p.incompleto
+          ? ` ${p.sinDatos === 1 ? '1 criterio sin dato: ni suma ni resta' : `${p.sinDatos} criterios sin dato: ni suman ni restan`}.`
+          : '');
+  return desplegable(
+    { class: 'porque' },
     el('summary', {}, 'Por qué'),
     el('p', { class: 'sub porque-punt' }, puntos),
-    el('ul', { class: 'criterios' }, r.criterios.map(c => {
-      const t = rotulo(c);
-      const migratorio = c.id === 'nacionalidad' || c.id === 'permiso';
-      return el('li', { class: 'crit ' + t.clase, 'data-criterio': c.id },
-        el('span', { class: 'crit-signo', 'aria-hidden': 'true' }, t.signo),
-        el('span', { class: 'crit-texto' }, el('b', {}, `${TITULO[c.id]} · ${t.palabra}: `), migratorio ? conVerMas(c.texto) : c.texto, el('span', { class: 'crit-puntos' }, ` (${puntosDe(c)})`)));
-    })),
-    el('p', { class: 'sub porque-aviso' }, AVISO_CORTO));
+    el(
+      'ul',
+      { class: 'criterios' },
+      r.criterios.map(c => {
+        const t = rotulo(c);
+        const migratorio = c.id === 'nacionalidad' || c.id === 'permiso';
+        return el(
+          'li',
+          { class: 'crit ' + t.clase, 'data-criterio': c.id },
+          el('span', { class: 'crit-signo', 'aria-hidden': 'true' }, t.signo),
+          el(
+            'span',
+            { class: 'crit-texto' },
+            el('b', {}, `${TITULO[c.id]} · ${t.palabra}: `),
+            migratorio ? conVerMas(c.texto) : c.texto,
+            el('span', { class: 'crit-puntos' }, ` (${puntosDe(c)})`)
+          )
+        );
+      })
+    ),
+    el('p', { class: 'sub porque-aviso' }, AVISO_CORTO)
+  );
 }
 
 // El criterio que decide el grupo (o, en «Encaja», el primero que cuenta).
 // Primero lo que decide el grupo (un «no» en área, tipo, nacionalidad o permiso); después lo que hay que verificar de nacionalidad y permiso
 // (lo legal se ve siempre arriba); después cualquier otro «no», lo que hay que revisar, lo que no tiene datos, y si no, el primer criterio que cuenta.
 function criterioDecisivo(r) {
-  const c = r.criterios, legal = x => x.grupo === 'requisito' && x.estado !== 'ok';
-  const malo = c.find(x => x.estado === 'no' && NUCLEO.includes(x.id)) || c.find(x => legal(x) && !x.sinDatos) || c.find(legal) || c.find(x => x.estado === 'no')
-    || c.find(x => x.estado === 'revisar' && !x.sinDatos) || c.find(x => x.estado === 'revisar');
+  const c = r.criterios,
+    legal = x => x.grupo === 'requisito' && x.estado !== 'ok';
+  const malo =
+    c.find(x => x.estado === 'no' && NUCLEO.includes(x.id)) ||
+    c.find(x => legal(x) && !x.sinDatos) ||
+    c.find(legal) ||
+    c.find(x => x.estado === 'no') ||
+    c.find(x => x.estado === 'revisar' && !x.sinDatos) ||
+    c.find(x => x.estado === 'revisar');
   return malo || c.find(x => !x.noAplica) || c[0];
 }
 
@@ -98,15 +145,27 @@ function motivo(r) {
   const f = criteriosQueFallan(r);
   if (f.no.length + f.revisar.length > 1) {
     const todos = [...f.no, ...f.revisar];
-    return el('span', { class: 'sub motivo ' + (f.no.length ? 'no' : 'revisar'), 'data-criterio': criterioDecisivo(r).id, 'data-criterios': todos.map(x => x.id).join(' ') },
+    return el(
+      'span',
+      {
+        class: 'sub motivo ' + (f.no.length ? 'no' : 'revisar'),
+        'data-criterio': criterioDecisivo(r).id,
+        'data-criterios': todos.map(x => x.id).join(' ')
+      },
       f.no.length > 0 && el('b', { class: 'm-no' }, `✗ No coincide: ${nombres(f.no)}`),
       f.no.length > 0 && f.revisar.length > 0 && ' · ',
-      f.revisar.length > 0 && el('b', { class: 'm-revisar' }, `! Revisar: ${nombres(f.revisar)}`));
+      f.revisar.length > 0 && el('b', { class: 'm-revisar' }, `! Revisar: ${nombres(f.revisar)}`)
+    );
   }
-  const c = criterioDecisivo(r), t = rotulo(c);
+  const c = criterioDecisivo(r),
+    t = rotulo(c);
   const corto = c.texto.length <= MAX_MOTIVO ? c.texto : c.texto.slice(0, MAX_MOTIVO).replace(/\s+\S*$/, '') + '…';
-  return el('span', { class: 'sub motivo ' + t.clase, 'data-criterio': c.id },
-    el('b', {}, `${t.signo} ${TITULO[c.id]} · ${t.palabra}`), ` ${corto}`);
+  return el(
+    'span',
+    { class: 'sub motivo ' + t.clase, 'data-criterio': c.id },
+    el('b', {}, `${t.signo} ${TITULO[c.id]} · ${t.palabra}`),
+    ` ${corto}`
+  );
 }
 
 // Los tres grupos. "fila(r)" pinta cada elemento; "vacio" es lo que se dice cuando no hay nadie en el grupo.
@@ -126,9 +185,11 @@ function grupos(resultados, fila, nombreItem, extra = () => {}) {
       extra();
     };
     pintar();
-    return desplegable({ class: 'grupo-match ' + c, open: c !== 'no' && items.length > 0, 'data-grupo': c },
+    return desplegable(
+      { class: 'grupo-match ' + c, open: c !== 'no' && items.length > 0, 'data-grupo': c },
       el('summary', {}, `${CATEGORIAS[c]} (${items.length})`),
-      items.length ? [lista, mas] : el('p', { class: 'sub' }, `Ningún ${nombreItem} en este grupo.`));
+      items.length ? [lista, mas] : el('p', { class: 'sub' }, `Ningún ${nombreItem} en este grupo.`)
+    );
   });
 }
 
@@ -138,31 +199,59 @@ function grupos(resultados, fila, nombreItem, extra = () => {}) {
 function avisosDeTarjeta(ctx) {
   return [
     el('p', { class: 'aviso aviso-orientativo', role: 'note' }, AVISO_ORIENTATIVO),
-    ctx.problemas.length > 0 && el('p', { class: 'aviso', role: 'note', id: 'match-problemas' },
-      `Hay ${ctx.problemas.length === 1 ? '1 regla que no se entiende y no se ha usado' : `${ctx.problemas.length} reglas que no se entienden y no se han usado`}: ${ctx.problemas.slice(0, 3).join(' ')}${ctx.problemas.length > 3 ? ' …' : ''} Avisa a quien administra la app.`),
+    ctx.problemas.length > 0 &&
+      el(
+        'p',
+        { class: 'aviso', role: 'note', id: 'match-problemas' },
+        `Hay ${ctx.problemas.length === 1 ? '1 regla que no se entiende y no se ha usado' : `${ctx.problemas.length} reglas que no se entienden y no se han usado`}: ${ctx.problemas.slice(0, 3).join(' ')}${ctx.problemas.length > 3 ? ' …' : ''} Avisa a quien administra la app.`
+      )
   ];
 }
 
 export function tarjetaAlumnosQueEncajan(oferta, d) {
   const ctx = contextoDe(d.listas);
   const res = emparejar(d.alumnos, oferta, ctx);
-  const solicito = new Map(solicitantesDeOferta(d.aplicaciones, d.alumnos, oferta.id).filas.map(f => [f.idAlumno, f.app]));   // su solicitud más reciente en esta oferta
+  const solicito = new Map(solicitantesDeOferta(d.aplicaciones, d.alumnos, oferta.id).filas.map(f => [f.idAlumno, f.app])); // su solicitud más reciente en esta oferta
 
   // Alumnos marcados para compartir su perfil (solo en memoria; al cambiar de oferta se empieza de cero).
-  const sel = new Set(navegacion.compartir?.idOferta === oferta.id ? navegacion.compartir.ids.filter(id => d.alumnos.some(a => a.id === id)) : []);
+  const sel = new Set(
+    navegacion.compartir?.idOferta === oferta.id ? navegacion.compartir.ids.filter(id => d.alumnos.some(a => a.id === id)) : []
+  );
   let tarjeta = null;
   const cuenta = el('p', { class: 'sub', id: 'cp-cuenta', role: 'status', 'aria-live': 'polite' });
-  const boton = el('button', { class: 'primary', type: 'button', id: 'cp-ir', onclick: () => { location.hash = `#/oferta/${encodeURIComponent(oferta.id)}/compartir`; } }, 'Compartir perfiles');
+  const boton = el(
+    'button',
+    {
+      class: 'primary',
+      type: 'button',
+      id: 'cp-ir',
+      onclick: () => {
+        location.hash = `#/oferta/${encodeURIComponent(oferta.id)}/compartir`;
+      }
+    },
+    'Compartir perfiles'
+  );
   const actualizar = () => {
     navegacion.compartir = { idOferta: oferta.id, ids: [...sel] };
-    cuenta.textContent = sel.size ? `${plural(sel.size, 'alumno elegido', 'alumnos elegidos')} para compartir (máximo ${MAX_PERFILES}).` : `Marca los alumnos cuyo perfil quieras compartir (máximo ${MAX_PERFILES}).`;
+    cuenta.textContent = sel.size
+      ? `${plural(sel.size, 'alumno elegido', 'alumnos elegidos')} para compartir (máximo ${MAX_PERFILES}).`
+      : `Marca los alumnos cuyo perfil quieras compartir (máximo ${MAX_PERFILES}).`;
     boton.disabled = sel.size === 0;
     boton.textContent = sel.size ? `Compartir perfiles (${sel.size})` : 'Compartir perfiles';
     for (const i of tarjeta?.querySelectorAll('input.cp-sel') || []) i.disabled = sel.size >= MAX_PERFILES && !i.checked;
   };
   const casilla = a => {
-    const i = el('input', { type: 'checkbox', class: 'casilla cp-sel', id: 'cp-sel-' + a.id, 'aria-label': 'Elegir a ' + nombreAlumno(a) + ' para compartir su perfil',
-      onchange: () => { if (i.checked) sel.add(a.id); else sel.delete(a.id); actualizar(); } });
+    const i = el('input', {
+      type: 'checkbox',
+      class: 'casilla cp-sel',
+      id: 'cp-sel-' + a.id,
+      'aria-label': 'Elegir a ' + nombreAlumno(a) + ' para compartir su perfil',
+      onchange: () => {
+        if (i.checked) sel.add(a.id);
+        else sel.delete(a.id);
+        actualizar();
+      }
+    });
     i.checked = sel.has(a.id);
     i.disabled = sel.size >= MAX_PERFILES && !i.checked;
     return el('label', { class: 'sel-compartir' }, i);
@@ -170,25 +259,49 @@ export function tarjetaAlumnosQueEncajan(oferta, d) {
 
   const fila = r => {
     const a = r.alumno;
-    return el('li', { class: 'fila-match' },
+    return el(
+      'li',
+      { class: 'fila-match' },
       casilla(a),
-      el('div', { class: 'fila-match-cuerpo' },
-        el('a', { class: 'alumno oferta', href: '#/alumno/' + encodeURIComponent(a.id) },
-          el('span', { class: 'alumno-texto' },
+      el(
+        'div',
+        { class: 'fila-match-cuerpo' },
+        el(
+          'a',
+          { class: 'alumno oferta', href: '#/alumno/' + encodeURIComponent(a.id) },
+          el(
+            'span',
+            { class: 'alumno-texto' },
             el('b', {}, nombreAlumno(a)),
             el('span', { class: 'sub' }, a.master || ''),
-            solicito.has(a.id) && el('span', { class: 'oferta-pie marca-solicito' }, el('span', { class: 'insignia' + claseEstado(solicito.get(a.id).estado) }, 'Solicitó · ' + (solicito.get(a.id).estado || 'Sin dato'))),
+            solicito.has(a.id) &&
+              el(
+                'span',
+                { class: 'oferta-pie marca-solicito' },
+                el(
+                  'span',
+                  { class: 'insignia' + claseEstado(solicito.get(a.id).estado) },
+                  'Solicitó · ' + (solicito.get(a.id).estado || 'Sin dato')
+                )
+              ),
             el('span', { class: 'sub match-punt g-' + r.categoria }, textoPuntuacion(r.puntuacion, r.categoria)),
-            motivo(r)),
-          svgFlecha()),
-        porQue(r)));
+            motivo(r)
+          ),
+          svgFlecha()
+        ),
+        porQue(r)
+      )
+    );
   };
-  tarjeta = el('section', { class: 'card', id: 'match-alumnos', 'aria-labelledby': 'match-titulo' },
+  tarjeta = el(
+    'section',
+    { class: 'card', id: 'match-alumnos', 'aria-labelledby': 'match-titulo' },
     el('h2', { id: 'match-titulo' }, 'Alumnos que encajan'),
     el('p', { class: 'sub' }, `${plural(d.alumnos.length, 'alumno', 'alumnos')}, ordenados por cómo encajan con esta oferta. ${NOTA}`),
     avisosDeTarjeta(ctx),
     el('div', { class: 'compartir-barra' }, cuenta, boton),
-    grupos(res, fila, 'alumno', actualizar));
+    grupos(res, fila, 'alumno', actualizar)
+  );
   actualizar();
   return tarjeta;
 }
@@ -201,19 +314,35 @@ export function tarjetaOfertasQueEncajan(alumno, d) {
   const res = ofertasParaAlumno(d.ofertas, alumno, ctx);
   const fila = r => {
     const o = r.oferta;
-    return el('li', { class: 'fila-match' }, el('div', { class: 'fila-match-cuerpo' },
-      el('a', { class: 'alumno oferta', href: '#/oferta/' + encodeURIComponent(o.id) },
-        el('span', { class: 'alumno-texto' },
-          el('b', {}, o.titulo || 'Sin título'),
-          el('span', { class: 'sub' }, [o.empresa, o.estado === 'Cerrada' && 'cerrada'].filter(Boolean).join(' · ')),
-          el('span', { class: 'sub match-punt g-' + r.categoria }, textoPuntuacion(r.puntuacion, r.categoria)),
-          motivo(r)),
-        svgFlecha()),
-      porQue(r)));
+    return el(
+      'li',
+      { class: 'fila-match' },
+      el(
+        'div',
+        { class: 'fila-match-cuerpo' },
+        el(
+          'a',
+          { class: 'alumno oferta', href: '#/oferta/' + encodeURIComponent(o.id) },
+          el(
+            'span',
+            { class: 'alumno-texto' },
+            el('b', {}, o.titulo || 'Sin título'),
+            el('span', { class: 'sub' }, [o.empresa, o.estado === 'Cerrada' && 'cerrada'].filter(Boolean).join(' · ')),
+            el('span', { class: 'sub match-punt g-' + r.categoria }, textoPuntuacion(r.puntuacion, r.categoria)),
+            motivo(r)
+          ),
+          svgFlecha()
+        ),
+        porQue(r)
+      )
+    );
   };
-  return el('section', { class: 'card', id: 'match-ofertas', 'aria-labelledby': 'match-of-titulo' },
+  return el(
+    'section',
+    { class: 'card', id: 'match-ofertas', 'aria-labelledby': 'match-of-titulo' },
     el('h2', { id: 'match-of-titulo' }, 'Ofertas que encajan'),
     el('p', { class: 'sub' }, `${plural(d.ofertas.length, 'oferta', 'ofertas')}, ordenadas por cómo encajan con este alumno. ${NOTA}`),
     avisosDeTarjeta(ctx),
-    grupos(res, fila, 'oferta'));
+    grupos(res, fila, 'oferta')
+  );
 }

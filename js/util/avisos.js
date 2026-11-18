@@ -26,12 +26,16 @@ const ESTADO_CONTRATADO = 'Contratado';
 /* ---- Fechas (texto AAAA-MM-DD; sin horas, para que no importen las zonas horarias) ---- */
 
 const MESES = ['enero', 'febrero', 'marzo', 'abril', 'mayo', 'junio', 'julio', 'agosto', 'septiembre', 'octubre', 'noviembre', 'diciembre'];
-export const hoyISO = (d = new Date()) => `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+export const hoyISO = (d = new Date()) =>
+  `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
 export function sumarDias(iso, n) {
   const [y, m, d] = iso.split('-').map(Number);
   return new Date(Date.UTC(y, m - 1, d + n)).toISOString().slice(0, 10);
 }
-export const fechaCorta = iso => { const [, m, d] = iso.split('-').map(Number); return `${d} de ${MESES[m - 1]}`; };
+export const fechaCorta = iso => {
+  const [, m, d] = iso.split('-').map(Number);
+  return `${d} de ${MESES[m - 1]}`;
+};
 const valida = f => typeof f === 'string' && fechaValida(f);
 
 /* ---- Umbrales ---- */
@@ -39,13 +43,24 @@ const valida = f => typeof f === 'string' && fechaValida(f);
 // "valores" = lo que escribe la persona (texto o número). Devuelve { umbrales, errores }: errores[campo] = 'vacio' | 'entero' | 'rango'.
 // Si hay algún error, no hay umbrales nuevos que guardar.
 export function validarUmbrales(valores) {
-  const umbrales = {}, errores = {};
+  const umbrales = {},
+    errores = {};
   for (const k of Object.keys(UMBRALES_POR_DEFECTO)) {
     const t = String(valores?.[k] ?? '').trim();
-    if (!t) { errores[k] = 'vacio'; continue; }
-    if (!/^\d+$/.test(t)) { errores[k] = 'entero'; continue; }
-    const n = Number(t), [min, max] = LIMITES[k];
-    if (n < min || n > max) { errores[k] = 'rango'; continue; }
+    if (!t) {
+      errores[k] = 'vacio';
+      continue;
+    }
+    if (!/^\d+$/.test(t)) {
+      errores[k] = 'entero';
+      continue;
+    }
+    const n = Number(t),
+      [min, max] = LIMITES[k];
+    if (n < min || n > max) {
+      errores[k] = 'rango';
+      continue;
+    }
     umbrales[k] = n;
   }
   return { umbrales: Object.keys(errores).length ? null : umbrales, errores };
@@ -66,10 +81,21 @@ export function umbralesSaneados(crudo) {
 
 // Devuelve { periodo, avisos }. Cada aviso: { id: 'A001|sin-solicitudes', tipo, idAlumno, motivo }.
 // "hoy" y "umbrales" se pasan siempre (así el resultado no depende del reloj del móvil dentro de las funciones).
-export function calcularAvisos({ alumnos = [], ofertas = [], rondas = [], aplicaciones = [], hoy, umbrales = UMBRALES_POR_DEFECTO, contextoMatch }) {
+export function calcularAvisos({
+  alumnos = [],
+  ofertas = [],
+  rondas = [],
+  aplicaciones = [],
+  hoy,
+  umbrales = UMBRALES_POR_DEFECTO,
+  contextoMatch
+}) {
   const vacio = { periodo: null, avisos: [] };
   if (!valida(hoy)) return vacio;
-  const fechasRondas = rondas.map(r => r.fecha).filter(valida).sort();
+  const fechasRondas = rondas
+    .map(r => r.fecha)
+    .filter(valida)
+    .sort();
   if (!fechasRondas.length) return vacio;
 
   const desdeNormal = sumarDias(hoy, -umbrales.dias);
@@ -91,22 +117,29 @@ export function calcularAvisos({ alumnos = [], ofertas = [], rondas = [], aplica
     // 1. Sin solicitudes
     if (difundidas.size >= umbrales.ofertas && !enPeriodo.length && !sinFecha.length && !suyas.some(a => a.estado === ESTADO_CONTRATADO)) {
       avisos.push({
-        id: `${alumno.id}|${TIPOS.sinSolicitudes}`, tipo: TIPOS.sinSolicitudes, idAlumno: alumno.id,
-        motivo: `Ninguna solicitud ${cuando}. En ese tiempo se ${difundidas.size === 1 ? 'envió 1 oferta' : `enviaron ${difundidas.size} ofertas`}. Se avisa si se envían ${umbrales.ofertas} o más.`,
+        id: `${alumno.id}|${TIPOS.sinSolicitudes}`,
+        tipo: TIPOS.sinSolicitudes,
+        idAlumno: alumno.id,
+        motivo: `Ninguna solicitud ${cuando}. En ese tiempo se ${difundidas.size === 1 ? 'envió 1 oferta' : `enviaron ${difundidas.size} ofertas`}. Se avisa si se envían ${umbrales.ofertas} o más.`
       });
     }
 
     // 2. Aplica a todo
     const aplicadas = new Set(enPeriodo.map(a => a.idOferta).filter(id => difundidas.has(id)));
     if (enPeriodo.length >= umbrales.solicitudes && difundidas.size && aplicadas.size * 100 >= umbrales.porcentaje * difundidas.size) {
-      const pct = Math.round(aplicadas.size * 100 / difundidas.size);
+      const pct = Math.round((aplicadas.size * 100) / difundidas.size);
       // Dato extra (no decide nada): de esas ofertas, a cuántas el match dice "no encaja".
-      const noEncajan = [...aplicadas].filter(id => ofertaPorId.has(id) && evaluar(alumno, ofertaPorId.get(id), contextoMatch).categoria === 'no').length;
+      const noEncajan = [...aplicadas].filter(
+        id => ofertaPorId.has(id) && evaluar(alumno, ofertaPorId.get(id), contextoMatch).categoria === 'no'
+      ).length;
       avisos.push({
-        id: `${alumno.id}|${TIPOS.aplicaTodo}`, tipo: TIPOS.aplicaTodo, idAlumno: alumno.id,
-        motivo: `${enPeriodo.length === 1 ? '1 solicitud' : `${enPeriodo.length} solicitudes`} ${cuando}, a ${aplicadas.size} de las ${difundidas.size} ofertas enviadas (${pct} %).`
-          + (noEncajan ? ` De esas, ${noEncajan} ${noEncajan === 1 ? 'encaja poco' : 'encajan poco'}.` : '')
-          + ` Se avisa con ${umbrales.solicitudes} solicitudes o más y un ${umbrales.porcentaje} % o más de las ofertas enviadas.`,
+        id: `${alumno.id}|${TIPOS.aplicaTodo}`,
+        tipo: TIPOS.aplicaTodo,
+        idAlumno: alumno.id,
+        motivo:
+          `${enPeriodo.length === 1 ? '1 solicitud' : `${enPeriodo.length} solicitudes`} ${cuando}, a ${aplicadas.size} de las ${difundidas.size} ofertas enviadas (${pct} %).` +
+          (noEncajan ? ` De esas, ${noEncajan} ${noEncajan === 1 ? 'encaja poco' : 'encajan poco'}.` : '') +
+          ` Se avisa con ${umbrales.solicitudes} solicitudes o más y un ${umbrales.porcentaje} % o más de las ofertas enviadas.`
       });
     }
   }
@@ -124,6 +157,6 @@ export const estaSilenciado = (silencios, id, hoy) => valida(silencios?.[id]) &&
 export function repartir(avisos, silencios, hoy) {
   return {
     activos: avisos.filter(a => !estaSilenciado(silencios, a.id, hoy)),
-    silenciados: avisos.filter(a => estaSilenciado(silencios, a.id, hoy)),
+    silenciados: avisos.filter(a => estaSilenciado(silencios, a.id, hoy))
   };
 }

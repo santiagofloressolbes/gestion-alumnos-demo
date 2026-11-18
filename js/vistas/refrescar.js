@@ -21,51 +21,71 @@ function botonVisible(vista, doc = document) {
 // El texto del error: siempre dos frases cortas, sin repetir «no se ha podido»; los datos de antes se siguen viendo.
 export function textoError(e) {
   if (e?.codigo === 'red') return 'Sin conexión: se siguen viendo los datos anteriores. Vuelve a intentarlo cuando tengas internet.';
-  if (e?.codigo === 'tiempo') return 'Google tarda demasiado en responder: se siguen viendo los datos anteriores. Vuelve a intentarlo en un momento.';
+  if (e?.codigo === 'tiempo')
+    return 'Google tarda demasiado en responder: se siguen viendo los datos anteriores. Vuelve a intentarlo en un momento.';
   const motivo = String(e?.message || 'Error desconocido.').trim();
   return `No se han podido actualizar los datos. ${/[.!?]$/.test(motivo) ? motivo : motivo + '.'} Se siguen viendo los datos anteriores.`;
 }
 
 // Conecta el botón. "alActualizar" repinta la pantalla actual con los datos nuevos; "vistaActual" dice cuál es.
 export function iniciarRefrescar({ vistaActual, alActualizar }) {
-  const boton = document.getElementById('refrescar'), aviso = document.getElementById('refrescar-aviso');
-  const textoAviso = document.getElementById('refrescar-texto'), cerrar = document.getElementById('refrescar-cerrar');
-  let ocupado = false, reloj = null;
+  const boton = document.getElementById('refrescar'),
+    aviso = document.getElementById('refrescar-aviso');
+  const textoAviso = document.getElementById('refrescar-texto'),
+    cerrar = document.getElementById('refrescar-cerrar');
+  let ocupado = false,
+    reloj = null;
   const decir = (texto, clase) => {
     clearTimeout(reloj);
-    textoAviso.textContent = texto; aviso.hidden = !texto;
-    cerrar.hidden = clase !== 'mal';   // solo el error se puede cerrar (lo demás se quita solo)
+    textoAviso.textContent = texto;
+    aviso.hidden = !texto;
+    cerrar.hidden = clase !== 'mal'; // solo el error se puede cerrar (lo demás se quita solo)
     aviso.className = 'refrescar-aviso ' + (clase || '');
     aviso.setAttribute('role', clase === 'mal' ? 'alert' : 'status');
-    if (clase === 'ok') reloj = setTimeout(() => { aviso.hidden = true; }, AVISO_OK_MS);
+    if (clase === 'ok')
+      reloj = setTimeout(() => {
+        aviso.hidden = true;
+      }, AVISO_OK_MS);
   };
   const mostrar = () => {
     boton.hidden = !botonVisible(vistaActual());
-    document.getElementById('app').classList.toggle('con-refrescar', !boton.hidden);   // en horizontal, el contenido deja libre el hueco del botón
+    document.getElementById('app').classList.toggle('con-refrescar', !boton.hidden); // en horizontal, el contenido deja libre el hueco del botón
     if (boton.hidden) decir('');
   };
 
   boton.addEventListener('click', async () => {
-    if (ocupado || boton.hidden || hayFormularioAbierto()) return;   // un solo toque a la vez; nunca con un formulario abierto
+    if (ocupado || boton.hidden || hayFormularioAbierto()) return; // un solo toque a la vez; nunca con un formulario abierto
     ocupado = true;
-    boton.classList.add('girando'); boton.setAttribute('aria-busy', 'true'); boton.setAttribute('aria-disabled', 'true');
-    decir('Actualizando…', 'carga');   // también cierra un error anterior
+    boton.classList.add('girando');
+    boton.setAttribute('aria-busy', 'true');
+    boton.setAttribute('aria-disabled', 'true');
+    decir('Actualizando…', 'carga'); // también cierra un error anterior
     try {
       await refrescar();
       await alActualizar();
       decir('Datos actualizados.', 'ok');
     } catch (e) {
       decir(textoError(e), 'mal');
-      if (e?.codigo === 'clave') location.hash = '#/acceso';   // la clave ya no vale: se vuelve a pedir, como en el resto de la app
+      if (e?.codigo === 'clave') location.hash = '#/acceso'; // la clave ya no vale: se vuelve a pedir, como en el resto de la app
     } finally {
       ocupado = false;
-      boton.classList.remove('girando'); boton.removeAttribute('aria-busy'); boton.removeAttribute('aria-disabled');
+      boton.classList.remove('girando');
+      boton.removeAttribute('aria-busy');
+      boton.removeAttribute('aria-disabled');
     }
   });
 
-  cerrar.addEventListener('click', () => { decir(''); boton.focus(); });
+  cerrar.addEventListener('click', () => {
+    decir('');
+    boton.focus();
+  });
 
   // El botón sigue a la pantalla (también cuando se abre la entrevista, que no cambia la dirección).
-  new MutationObserver(mostrar).observe(document.getElementById('main'), { childList: true, subtree: true, attributes: true, attributeFilter: ['class'] });
+  new MutationObserver(mostrar).observe(document.getElementById('main'), {
+    childList: true,
+    subtree: true,
+    attributes: true,
+    attributeFilter: ['class']
+  });
   return { mostrar };
 }

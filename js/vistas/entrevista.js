@@ -19,7 +19,7 @@ export function hoyLocal(d = new Date()) {
 }
 
 const normalizar = t => String(t).replace(/\r\n?/g, '\n').trim();
-const miles = n => String(n).replace(/\B(?=(\d{3})+(?!\d))/g, '.');   // 2000 -> 2.000 (toLocaleString no pone el punto en 4 cifras)
+const miles = n => String(n).replace(/\B(?=(\d{3})+(?!\d))/g, '.'); // 2000 -> 2.000 (toLocaleString no pone el punto en 4 cifras)
 
 // Las mismas reglas que aplica el script; así los errores se ven antes de enviar nada. Devuelve un código o ''.
 export function validar(notas, fecha, hoy) {
@@ -35,10 +35,12 @@ export function validar(notas, fecha, hoy) {
 }
 
 const MENSAJES = {
-  'sin-notas': 'Escribe una nota.', largo: `La nota es demasiado larga: el máximo es de ${miles(MAX_NOTAS)} caracteres.`,
+  'sin-notas': 'Escribe una nota.',
+  largo: `La nota es demasiado larga: el máximo es de ${miles(MAX_NOTAS)} caracteres.`,
   caracteres: 'La nota tiene caracteres raros que no se admiten (suelen venir de copiar y pegar).',
   html: 'La nota lleva un «<» seguido de una letra o una barra, y la app lo toma por código. Quítalo o cámbialo y vuelve a guardar.',
-  fecha: 'Elige una fecha válida.', 'fecha-futura': 'La fecha no puede ser futura.',
+  fecha: 'Elige una fecha válida.',
+  'fecha-futura': 'La fecha no puede ser futura.'
 };
 
 export function tarjetaEntrevista(a) {
@@ -47,24 +49,40 @@ export function tarjetaEntrevista(a) {
   const ver = (aviso = '') => {
     const hay = !!(a.notasEntrevista.trim() || a.fechaUltimaEntrevista);
     // replaceChildren convierte un null en el texto "null": lo opcional se filtra antes.
-    reemplazar(caja, ...[
-      el('h2', { id: 'en-titulo' }, 'Entrevista'),
-      el('dl', { class: 'campos' },
-        campo('Última entrevista', fechaLarga(a.fechaUltimaEntrevista) || 'Sin entrevista registrada', !a.fechaUltimaEntrevista),
-        campo('Notas', a.notasEntrevista.trim() || 'Sin notas', !a.notasEntrevista.trim(), true)),
-      aviso && el('p', { class: 'ok', role: 'status' }, aviso),
-      puedeEscribir()
-        ? el('button', { class: 'secondary', type: 'button', id: 'en-editar', onclick: editar }, hay ? 'Editar entrevista' : 'Añadir entrevista')
-        : null,
-    ].filter(Boolean));
-    if (aviso) llevarA(caja, 'nearest');   // al guardar, la tarjeta encoge: se asegura de que se vea la confirmación
+    reemplazar(
+      caja,
+      ...[
+        el('h2', { id: 'en-titulo' }, 'Entrevista'),
+        el(
+          'dl',
+          { class: 'campos' },
+          campo('Última entrevista', fechaLarga(a.fechaUltimaEntrevista) || 'Sin entrevista registrada', !a.fechaUltimaEntrevista),
+          campo('Notas', a.notasEntrevista.trim() || 'Sin notas', !a.notasEntrevista.trim(), true)
+        ),
+        aviso && el('p', { class: 'ok', role: 'status' }, aviso),
+        puedeEscribir()
+          ? el(
+              'button',
+              { class: 'secondary', type: 'button', id: 'en-editar', onclick: editar },
+              hay ? 'Editar entrevista' : 'Añadir entrevista'
+            )
+          : null
+      ].filter(Boolean)
+    );
+    if (aviso) llevarA(caja, 'nearest'); // al guardar, la tarjeta encoge: se asegura de que se vea la confirmación
   };
 
   const editar = () => {
     const hoy = hoyLocal();
-    let base = null;   // si hay conflicto y se elige "guardar el mío igualmente": lo que hay ahora en el Sheet
+    let base = null; // si hay conflicto y se elige "guardar el mío igualmente": lo que hay ahora en el Sheet
     const inicial = a.notasEntrevista.trim();
-    const textarea = el('textarea', { id: 'en-notas', rows: '9', autocomplete: 'off', spellcheck: 'true', 'aria-describedby': 'en-cuenta' });
+    const textarea = el('textarea', {
+      id: 'en-notas',
+      rows: '9',
+      autocomplete: 'off',
+      spellcheck: 'true',
+      'aria-describedby': 'en-cuenta'
+    });
     textarea.value = inicial;
     const cuenta = el('p', { class: 'cuenta', id: 'en-cuenta' });
     const fechaIn = el('input', { id: 'en-fecha', type: 'date', max: hoy, required: true });
@@ -72,10 +90,18 @@ export function tarjetaEntrevista(a) {
     const error = el('p', { class: 'error', role: 'alert', hidden: true });
     const conflicto = el('div', { class: 'conflicto', hidden: true });
     const guardar = el('button', { class: 'primary', type: 'submit' }, 'Guardar');
-    const cancelar = el('button', { class: 'secondary', type: 'button', onclick: () => {
-      if (textarea.value !== inicial && !confirm('¿Salir sin guardar lo que has escrito?')) return;
-      ver();
-    } }, 'Cancelar');
+    const cancelar = el(
+      'button',
+      {
+        class: 'secondary',
+        type: 'button',
+        onclick: () => {
+          if (textarea.value !== inicial && !confirm('¿Salir sin guardar lo que has escrito?')) return;
+          ver();
+        }
+      },
+      'Cancelar'
+    );
 
     const pintarCuenta = () => {
       const n = normalizar(textarea.value).length;
@@ -85,7 +111,10 @@ export function tarjetaEntrevista(a) {
     textarea.addEventListener('input', pintarCuenta);
     pintarCuenta();
 
-    const decir = t => { error.textContent = t; error.hidden = !t; };
+    const decir = t => {
+      error.textContent = t;
+      error.hidden = !t;
+    };
     const controles = () => [guardar, cancelar, textarea, fechaIn, ...conflicto.querySelectorAll('button')];
 
     // ¿Se puede guardar? Si no hay nota y ya había entrevista, se entiende que se quiere borrarla.
@@ -97,10 +126,14 @@ export function tarjetaEntrevista(a) {
         fecha = '';
       } else {
         const c = validar(notas, fecha, hoy);
-        if (c) { decir(MENSAJES[c]); (c === 'fecha' || c === 'fecha-futura' ? fechaIn : textarea).focus(); return; }
+        if (c) {
+          decir(MENSAJES[c]);
+          (c === 'fecha' || c === 'fecha-futura' ? fechaIn : textarea).focus();
+          return;
+        }
       }
       decir('');
-      if (pulsado === guardar) conflicto.hidden = true;   // si se pulsó un botón del aviso, ese aviso sigue a la vista mientras trabaja
+      if (pulsado === guardar) conflicto.hidden = true; // si se pulsó un botón del aviso, ese aviso sigue a la vista mientras trabaja
       const liberar = ocupar(controles(), pulsado);
       try {
         await guardarEntrevista(a.id, notas, fecha, base || undefined);
@@ -108,36 +141,74 @@ export function tarjetaEntrevista(a) {
       } catch (e) {
         liberar();
         if (e.codigo === 'conflicto') return pintarConflicto(e.extra, notas, fecha);
-        decir(e.codigo === 'clave'
-          ? 'La clave ya no vale. Copia tu nota y vuelve a entrar con la clave nueva.'
-          : e.message);
+        decir(e.codigo === 'clave' ? 'La clave ya no vale. Copia tu nota y vuelve a entrar con la clave nueva.' : e.message);
         if (e.codigo === 'red' || e.codigo === 'tiempo') error.append(' Tu nota sigue aquí: no se ha perdido.');
       }
     };
 
     // Otra persona cambió la entrevista: se enseña lo que hay ahora y se deja elegir. Nunca se pisa en silencio.
     const pintarConflicto = (actual, mias, miFecha) => {
-      const nA = normalizar(actual.notas || ''), fA = actual.fecha || '';
-      if (nA === mias && fA === miFecha) {            // ya estaba guardado (p. ej. se cortó la respuesta): no hay nada que decidir
+      const nA = normalizar(actual.notas || ''),
+        fA = actual.fecha || '';
+      if (nA === mias && fA === miFecha) {
+        // ya estaba guardado (p. ej. se cortó la respuesta): no hay nada que decidir
         aplicarEntrevista(a.id, actual.notas, fA);
         return ver('Guardado.');
       }
-      reemplazar(conflicto, 
+      reemplazar(
+        conflicto,
         el('h3', {}, 'Alguien ha cambiado esta entrevista mientras la editabas'),
         el('p', { class: 'sub' }, 'Esto es lo que hay ahora. Lo que has escrito sigue en el cuadro de arriba.'),
         el('dl', { class: 'campos' }, campo('Fecha', fechaLarga(fA) || 'Sin dato', !fA), campo('Notas', nA || 'Sin notas', !nA, true)),
-        el('button', { class: 'primary', type: 'button', onclick: ev => { base = { notas: actual.notas || '', fecha: fA }; enviar(ev.currentTarget); } }, 'Guardar mi versión'),
-        el('button', { class: 'secondary', type: 'button', onclick: () => { aplicarEntrevista(a.id, actual.notas || '', fA); ver('Listo: ahora ves la versión actual. Tus cambios no se han guardado.'); } }, 'Quedarme con la actual'));
+        el(
+          'button',
+          {
+            class: 'primary',
+            type: 'button',
+            onclick: ev => {
+              base = { notas: actual.notas || '', fecha: fA };
+              enviar(ev.currentTarget);
+            }
+          },
+          'Guardar mi versión'
+        ),
+        el(
+          'button',
+          {
+            class: 'secondary',
+            type: 'button',
+            onclick: () => {
+              aplicarEntrevista(a.id, actual.notas || '', fA);
+              ver('Listo: ahora ves la versión actual. Tus cambios no se han guardado.');
+            }
+          },
+          'Quedarme con la actual'
+        )
+      );
       conflicto.hidden = false;
       conflicto.scrollIntoView?.({ block: 'nearest' });
     };
 
-    reemplazar(caja, 
+    reemplazar(
+      caja,
       el('h2', { id: 'en-titulo' }, 'Editar entrevista'),
-      el('form', { novalidate: true, onsubmit: ev => { ev.preventDefault(); if (!guardar.disabled) enviar(); } },
+      el(
+        'form',
+        {
+          novalidate: true,
+          onsubmit: ev => {
+            ev.preventDefault();
+            if (!guardar.disabled) enviar();
+          }
+        },
         el('div', { class: 'campo-form' }, el('label', { for: 'en-notas' }, 'Notas'), textarea, cuenta),
         el('div', { class: 'campo-form' }, el('label', { for: 'en-fecha' }, 'Fecha de la entrevista'), fechaIn),
-        error, conflicto, guardar, cancelar));
+        error,
+        conflicto,
+        guardar,
+        cancelar
+      )
+    );
     textarea.focus();
   };
 
@@ -146,5 +217,10 @@ export function tarjetaEntrevista(a) {
 }
 
 function campo(etiqueta, valor, vacio, largo) {
-  return el('div', { class: 'campo' }, el('dt', {}, etiqueta), el('dd', { class: (vacio ? 'vacio ' : '') + (largo ? 'largo' : '') }, valor));
+  return el(
+    'div',
+    { class: 'campo' },
+    el('dt', {}, etiqueta),
+    el('dd', { class: (vacio ? 'vacio ' : '') + (largo ? 'largo' : '') }, valor)
+  );
 }

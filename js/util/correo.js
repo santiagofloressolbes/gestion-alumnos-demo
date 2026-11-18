@@ -9,18 +9,27 @@
 
 import { norm } from './texto.js';
 
-export const IDIOMAS = Object.freeze([{ clave: 'es', etiqueta: 'Español' }, { clave: 'en', etiqueta: 'English' }]);
+export const IDIOMAS = Object.freeze([
+  { clave: 'es', etiqueta: 'Español' },
+  { clave: 'en', etiqueta: 'English' }
+]);
 // Estados en los que hay borrador. "Contratado" y cualquier otro no tienen.
 export const ESTADOS_EN_PROCESO = Object.freeze(['Recibida', 'En revisión', 'Enviada a la empresa', 'Entrevista']);
 const ESTADO_DESCARTADO = 'Descartado';
 export const TIPOS_CORREO = Object.freeze({ enProceso: 'en-proceso', descartado: 'descartado' });
-export const MAX_MAILTO = 1800;   // los enlaces mailto muy largos se cortan en algunas apps de correo
+export const MAX_MAILTO = 1800; // los enlaces mailto muy largos se cortan en algunas apps de correo
 
 const SIN_FIRMA = { es: '[Tu nombre]', en: '[Your name]' };
 const MAX_CAMPO = 120;
 
 // Una línea, sin caracteres de control ni espacios de más (lo que viene del Sheet no puede inventar líneas del mensaje ni cabeceras).
-const limpio = t => String(t ?? '').replace(/[\p{Cc}\p{Zl}\p{Zp}]+/gu, ' ').replace(/\s+/g, ' ').trim().slice(0, MAX_CAMPO).trim();
+const limpio = t =>
+  String(t ?? '')
+    .replace(/[\p{Cc}\p{Zl}\p{Zp}]+/gu, ' ')
+    .replace(/\s+/g, ' ')
+    .trim()
+    .slice(0, MAX_CAMPO)
+    .trim();
 
 const estadoNorm = estado => norm(limpio(estado));
 const EN_PROCESO = new Map(ESTADOS_EN_PROCESO.map(e => [norm(e), e]));
@@ -47,7 +56,8 @@ export function idiomaPorDefecto(alumno, programas = []) {
 
 // "el puesto en la empresa", con lo que haya.
 function descripcion(puesto, empresa, idioma) {
-  if (idioma === 'en') return puesto && empresa ? `${puesto} at ${empresa}` : puesto || (empresa ? `an opening at ${empresa}` : 'the position');
+  if (idioma === 'en')
+    return puesto && empresa ? `${puesto} at ${empresa}` : puesto || (empresa ? `an opening at ${empresa}` : 'the position');
   return puesto && empresa ? `${puesto} en ${empresa}` : puesto || (empresa ? `una oferta de ${empresa}` : 'la oferta');
 }
 
@@ -55,39 +65,43 @@ const FRASES = {
   es: {
     saludo: n => (n ? `Hola ${n},` : 'Hola,'),
     'en-proceso': {
-      'Recibida': d => `Hemos recibido tu solicitud para ${d}.`,
+      Recibida: d => `Hemos recibido tu solicitud para ${d}.`,
       'En revisión': d => `Tu solicitud para ${d} está en revisión.`,
       'Enviada a la empresa': d => `Hemos enviado tu perfil a la empresa para optar a ${d}.`,
-      'Entrevista': d => `Tu solicitud para ${d} ha pasado a la fase de entrevista.`,
+      Entrevista: d => `Tu solicitud para ${d} ha pasado a la fase de entrevista.`,
       cierre: 'Seguimos el proceso de cerca y te avisaremos en cuanto haya novedades. Si tienes cualquier duda, escríbeme.',
-      asunto: d => `Seguimiento de tu solicitud: ${d}`,
+      asunto: d => `Seguimiento de tu solicitud: ${d}`
     },
     descartado: {
       cuerpo: d => `Te escribo para comentarte que, esta vez, tu solicitud para ${d} no continúa en el proceso. Gracias por tu interés.`,
-      conArea: a => `Si quieres orientar tu carrera hacia ${a}, escríbeme y lo hablamos: puedo ayudarte a preparar las próximas oportunidades en esa área.`,
+      conArea: a =>
+        `Si quieres orientar tu carrera hacia ${a}, escríbeme y lo hablamos: puedo ayudarte a preparar las próximas oportunidades en esa área.`,
       sinArea: 'Si quieres comentar tu búsqueda y los próximos pasos, escríbeme y lo hablamos.',
-      asunto: d => `Sobre tu solicitud: ${d}`,
+      asunto: d => `Sobre tu solicitud: ${d}`
     },
-    despedida: 'Un saludo,',
+    despedida: 'Un saludo,'
   },
   en: {
     saludo: n => (n ? `Hi ${n},` : 'Hi,'),
     'en-proceso': {
-      'Recibida': d => `We have received your application for ${d}.`,
+      Recibida: d => `We have received your application for ${d}.`,
       'En revisión': d => `Your application for ${d} is under review.`,
       'Enviada a la empresa': d => `We have sent your profile to the company for ${d}.`,
-      'Entrevista': d => `Your application for ${d} has moved on to the interview stage.`,
-      cierre: "We are following the process closely and will let you know as soon as there is news. If you have any questions, just get in touch.",
-      asunto: d => `Update on your application: ${d}`,
+      Entrevista: d => `Your application for ${d} has moved on to the interview stage.`,
+      cierre:
+        'We are following the process closely and will let you know as soon as there is news. If you have any questions, just get in touch.',
+      asunto: d => `Update on your application: ${d}`
     },
     descartado: {
-      cuerpo: d => `I'm writing to let you know that, this time, your application for ${d} will not be moving forward. Thank you for your interest.`,
-      conArea: a => `If you would like to focus your career on ${a}, get in touch and we can talk it through: I can help you prepare for the next opportunities in that area.`,
+      cuerpo: d =>
+        `I'm writing to let you know that, this time, your application for ${d} will not be moving forward. Thank you for your interest.`,
+      conArea: a =>
+        `If you would like to focus your career on ${a}, get in touch and we can talk it through: I can help you prepare for the next opportunities in that area.`,
       sinArea: 'If you would like to talk about your search and the next steps, get in touch.',
-      asunto: d => `About your application: ${d}`,
+      asunto: d => `About your application: ${d}`
     },
-    despedida: 'Best regards,',
-  },
+    despedida: 'Best regards,'
+  }
 };
 
 // Nombre del área en el idioma del correo. En español, el de siempre. En inglés, el de la columna «Área (inglés)» de la hoja Áreas
@@ -107,7 +121,10 @@ export function borradorCorreo({ alumno, oferta, aplicacion, idioma = 'es', firm
   if (!tipo) return null;
   const lang = idioma === 'en' ? 'en' : 'es';
   const T = FRASES[lang];
-  const nombre = limpio(alumno?.nombre), empresa = limpio(oferta?.empresa), puesto = limpio(oferta?.titulo), area = areaEnIdioma(oferta?.area, areas, lang);
+  const nombre = limpio(alumno?.nombre),
+    empresa = limpio(oferta?.empresa),
+    puesto = limpio(oferta?.titulo),
+    area = areaEnIdioma(oferta?.area, areas, lang);
   const d = descripcion(puesto, empresa, lang);
   const firmaLimpia = limpio(firma);
 

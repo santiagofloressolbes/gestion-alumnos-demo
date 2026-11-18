@@ -10,12 +10,20 @@ const SIN_RECORTAR = new Set(['notasEntrevista']);
 export function aObjetos(nombre, { cabecera, filas }, esquema, opcionales = {}) {
   const faltan = Object.keys(esquema).filter(c => !cabecera.includes(c));
   if (faltan.length) throw new Error(`En la hoja ${nombre} falta la columna: ${faltan.join(', ')}`);
-  return filas.map(f => {
-    const o = {};
-    for (const [col, clave] of Object.entries(esquema)) { const v = f[cabecera.indexOf(col)] ?? ''; o[clave] = SIN_RECORTAR.has(clave) ? v : v.trim(); }
-    for (const [col, clave] of Object.entries(opcionales)) { const i = cabecera.indexOf(col); o[clave] = i < 0 ? '' : (f[i] ?? '').trim(); }
-    return o;
-  }).filter(o => o.id);
+  return filas
+    .map(f => {
+      const o = {};
+      for (const [col, clave] of Object.entries(esquema)) {
+        const v = f[cabecera.indexOf(col)] ?? '';
+        o[clave] = SIN_RECORTAR.has(clave) ? v : v.trim();
+      }
+      for (const [col, clave] of Object.entries(opcionales)) {
+        const i = cabecera.indexOf(col);
+        o[clave] = i < 0 ? '' : (f[i] ?? '').trim();
+      }
+      return o;
+    })
+    .filter(o => o.id);
 }
 
 // Hoja Listas: cada columna es una lista de valores (las celdas vacías se ignoran).
@@ -28,15 +36,18 @@ export function aListas({ cabecera, filas }, esquema, alias = {}) {
     const i = indice(col);
     out[clave] = i < 0 ? [] : [...new Set(filas.map(f => (f[i] ?? '').trim()).filter(Boolean))];
   }
-  const ip = indice('Programa'), ic = cabecera.indexOf('Categoría del programa'), ii = cabecera.indexOf('Idioma del programa');
+  const ip = indice('Programa'),
+    ic = cabecera.indexOf('Categoría del programa'),
+    ii = cabecera.indexOf('Idioma del programa');
   const vistos = new Set();
   out.programas = [];
-  if (ip >= 0) for (const f of filas) {
-    const nombre = (f[ip] ?? '').trim();
-    if (!nombre || vistos.has(nombre)) continue;
-    vistos.add(nombre);
-    out.programas.push({ nombre, categoria: ic < 0 ? '' : (f[ic] ?? '').trim(), idioma: ii < 0 ? '' : (f[ii] ?? '').trim() });
-  }
+  if (ip >= 0)
+    for (const f of filas) {
+      const nombre = (f[ip] ?? '').trim();
+      if (!nombre || vistos.has(nombre)) continue;
+      vistos.add(nombre);
+      out.programas.push({ nombre, categoria: ic < 0 ? '' : (f[ic] ?? '').trim(), idioma: ii < 0 ? '' : (f[ii] ?? '').trim() });
+    }
   return out;
 }
 
@@ -51,7 +62,12 @@ export function aReglasMatch(tablas, hojas) {
     out[clave] = [];
     if (!t || !Array.isArray(t.cabecera) || !Array.isArray(t.filas)) continue;
     const cab = t.cabecera.map(h => String(h).trim());
-    const idx = Object.fromEntries(Object.entries(columnas).map(([k, nombre]) => [k, cab.indexOf(nombre) >= 0 || !COLUMNAS_FLEXIBLES.has(k) ? cab.indexOf(nombre) : cab.findIndex(h => norm(h) === norm(nombre))]));
+    const idx = Object.fromEntries(
+      Object.entries(columnas).map(([k, nombre]) => [
+        k,
+        cab.indexOf(nombre) >= 0 || !COLUMNAS_FLEXIBLES.has(k) ? cab.indexOf(nombre) : cab.findIndex(h => norm(h) === norm(nombre))
+      ])
+    );
     const [primera] = Object.keys(columnas);
     if (idx[primera] < 0) continue;
     for (const f of t.filas) {

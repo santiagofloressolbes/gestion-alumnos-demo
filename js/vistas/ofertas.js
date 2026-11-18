@@ -9,7 +9,7 @@ import { tarjetaError } from './error-datos.js';
 import { datosRondas, seccionesRondas, tarjetaQuienHaSolicitado } from './rondas.js';
 import { tarjetaAlumnosQueEncajan } from './match.js';
 
-const e = estadoVacio();   // búsqueda y filtros: se conservan al entrar en una oferta y volver
+const e = estadoVacio(); // búsqueda y filtros: se conservan al entrar en una oferta y volver
 const volverAOfertas = () => el('a', { class: 'volver', href: '#/ofertas' }, 'Ofertas');
 const insignia = estado => el('span', { class: 'insignia' + (estado === 'Abierta' ? ' abierta' : '') }, estado || 'Sin dato');
 
@@ -19,7 +19,13 @@ export async function pintarOfertas(raiz) {
   try {
     [ofertas, listas] = await Promise.all([getOfertas(), getListas()]);
   } catch (err) {
-    reemplazar(raiz, tarjetaError(err, () => { recargar().catch(() => {}); pintarOfertas(raiz); }));
+    reemplazar(
+      raiz,
+      tarjetaError(err, () => {
+        recargar().catch(() => {});
+        pintarOfertas(raiz);
+      })
+    );
     return;
   }
 
@@ -37,40 +43,92 @@ export async function pintarOfertas(raiz) {
   if (e.area && !areas.includes(e.area)) e.area = '';
 
   const campoSelect = (id, etiqueta, valores, clave, todas) => {
-    const s = el('select', { id, onchange: () => { e[clave] = s.value; pintarResultados(); } },
-      el('option', { value: '' }, todas), valores.map(v => el('option', { value: v, selected: v === e[clave] }, v)));
+    const s = el(
+      'select',
+      {
+        id,
+        onchange: () => {
+          e[clave] = s.value;
+          pintarResultados();
+        }
+      },
+      el('option', { value: '' }, todas),
+      valores.map(v => el('option', { value: v, selected: v === e[clave] }, v))
+    );
     return el('div', { class: 'campo-form' }, el('label', { for: id }, etiqueta), s);
   };
 
   const q = el('input', {
-    id: 'of-q', type: 'search', autocomplete: 'off', autocapitalize: 'off', spellcheck: 'false', enterkeyhint: 'search',
-    placeholder: 'Empresa, puesto, ciudad…', value: e.texto,
-    oninput: () => { e.texto = q.value; pintarResultados(); },
-    onkeydown: ev => { if (ev.key === 'Enter') q.blur(); },   // cierra el teclado del móvil
+    id: 'of-q',
+    type: 'search',
+    autocomplete: 'off',
+    autocapitalize: 'off',
+    spellcheck: 'false',
+    enterkeyhint: 'search',
+    placeholder: 'Empresa, puesto, ciudad…',
+    value: e.texto,
+    oninput: () => {
+      e.texto = q.value;
+      pintarResultados();
+    },
+    onkeydown: ev => {
+      if (ev.key === 'Enter') q.blur();
+    } // cierra el teclado del móvil
   });
 
   // Estado: botones siempre a la vista (lo más usado: ver solo las abiertas).
   const opcionesEstado = [['', 'Todas'], ...estados.map(s => [s, s])];
-  const botonesEstado = opcionesEstado.map(([valor, texto]) => el('button', {
-    type: 'button', class: 'opcion', 'aria-pressed': 'false',
-    onclick: () => { e.estado = valor; pintarResultados(); },
-  }, texto));
+  const botonesEstado = opcionesEstado.map(([valor, texto]) =>
+    el(
+      'button',
+      {
+        type: 'button',
+        class: 'opcion',
+        'aria-pressed': 'false',
+        onclick: () => {
+          e.estado = valor;
+          pintarResultados();
+        }
+      },
+      texto
+    )
+  );
 
   const resumen = el('summary', {});
-  const limpiar = el('button', { class: 'secondary', type: 'button', hidden: true, onclick: () => {
-    Object.assign(e, estadoVacio()); q.value = ''; for (const s of raiz.querySelectorAll('select')) s.value = ''; pintarResultados();
-  } }, 'Quitar búsqueda y filtros');
+  const limpiar = el(
+    'button',
+    {
+      class: 'secondary',
+      type: 'button',
+      hidden: true,
+      onclick: () => {
+        Object.assign(e, estadoVacio());
+        q.value = '';
+        for (const s of raiz.querySelectorAll('select')) s.value = '';
+        pintarResultados();
+      }
+    },
+    'Quitar búsqueda y filtros'
+  );
   const cuenta = el('p', { class: 'estado cuenta', role: 'status', 'aria-live': 'polite' });
   const lista = el('ul', { class: 'alumnos', 'aria-label': 'Ofertas' });
-  const vacio = el('div', { class: 'card', hidden: true },
+  const vacio = el(
+    'div',
+    { class: 'card', hidden: true },
     el('h2', {}, 'Ninguna oferta coincide'),
-    el('p', { class: 'sub' }, 'Prueba con menos palabras o quita algún filtro.'));
+    el('p', { class: 'sub' }, 'Prueba con menos palabras o quita algún filtro.')
+  );
 
-  const filtros = desplegable({ class: 'filtros', open: !!(e.tipo || e.area) },
+  const filtros = desplegable(
+    { class: 'filtros', open: !!(e.tipo || e.area) },
     resumen,
-    el('div', { class: 'filtros-cuerpo' },
+    el(
+      'div',
+      { class: 'filtros-cuerpo' },
       campoSelect('of-tipo', 'Prácticas o empleo', tipos, 'tipo', 'Todas'),
-      campoSelect('of-area', 'Área', areas, 'area', 'Todas las áreas')));
+      campoSelect('of-area', 'Área', areas, 'area', 'Todas las áreas')
+    )
+  );
 
   function pintarResultados() {
     const res = filtrar(ofertas, e);
@@ -78,107 +136,188 @@ export async function pintarOfertas(raiz) {
     resumen.textContent = n ? `Filtros (${n} activo${n > 1 ? 's' : ''})` : 'Filtros';
     botonesEstado.forEach((b, i) => b.setAttribute('aria-pressed', opcionesEstado[i][0] === e.estado ? 'true' : 'false'));
     limpiar.hidden = !hayAlgo(e);
-    cuenta.textContent = hayAlgo(e) ? `${res.length} de ${plural(ofertas.length, 'oferta', 'ofertas')}` : plural(ofertas.length, 'oferta', 'ofertas');
+    cuenta.textContent = hayAlgo(e)
+      ? `${res.length} de ${plural(ofertas.length, 'oferta', 'ofertas')}`
+      : plural(ofertas.length, 'oferta', 'ofertas');
     vacio.hidden = res.length > 0 || ofertas.length === 0;
     reemplazar(lista, ...res.map(fila));
   }
 
-  const aviso = navegacion.aviso; navegacion.aviso = '';
+  const aviso = navegacion.aviso;
+  navegacion.aviso = '';
   // replaceChildren convierte un false o un texto vacío en texto visible: los elementos opcionales se filtran antes.
-  reemplazar(raiz, ...[
-    aviso && el('p', { class: 'ok', role: 'status' }, aviso),
-    puedeEscribirOfertas() && el('a', { class: 'primary nueva-oferta', href: '#/oferta/nueva' }, 'Nueva oferta'),
-    estadoEscrituraOfertas() === 'script-antiguo' && el('p', { class: 'aviso', role: 'note' },
-      'No se pueden guardar ofertas ahora mismo. Avisa a quien administra la app.'),
-    el('div', { class: 'card buscador', role: 'search' },
-      el('div', { class: 'campo-form' }, el('label', { for: 'of-q' }, 'Buscar oferta'), q),
-      el('div', { class: 'campo-form' },
-        el('span', { class: 'etiqueta', id: 'of-l-estado' }, 'Estado'),
-        el('div', { class: 'opciones', role: 'group', 'aria-labelledby': 'of-l-estado' }, botonesEstado)),
-      filtros),
-    limpiar, cuenta,
-    el('div', { class: 'card', hidden: ofertas.length > 0 }, el('h2', {}, 'Todavía no hay ofertas'), el('p', { class: 'sub' }, 'Cuando haya ofertas aparecerán aquí.')),
-    vacio, lista].filter(Boolean));
+  reemplazar(
+    raiz,
+    ...[
+      aviso && el('p', { class: 'ok', role: 'status' }, aviso),
+      puedeEscribirOfertas() && el('a', { class: 'primary nueva-oferta', href: '#/oferta/nueva' }, 'Nueva oferta'),
+      estadoEscrituraOfertas() === 'script-antiguo' &&
+        el('p', { class: 'aviso', role: 'note' }, 'No se pueden guardar ofertas ahora mismo. Avisa a quien administra la app.'),
+      el(
+        'div',
+        { class: 'card buscador', role: 'search' },
+        el('div', { class: 'campo-form' }, el('label', { for: 'of-q' }, 'Buscar oferta'), q),
+        el(
+          'div',
+          { class: 'campo-form' },
+          el('span', { class: 'etiqueta', id: 'of-l-estado' }, 'Estado'),
+          el('div', { class: 'opciones', role: 'group', 'aria-labelledby': 'of-l-estado' }, botonesEstado)
+        ),
+        filtros
+      ),
+      limpiar,
+      cuenta,
+      el(
+        'div',
+        { class: 'card', hidden: ofertas.length > 0 },
+        el('h2', {}, 'Todavía no hay ofertas'),
+        el('p', { class: 'sub' }, 'Cuando haya ofertas aparecerán aquí.')
+      ),
+      vacio,
+      lista
+    ].filter(Boolean)
+  );
   pintarResultados();
 }
 
 // Una fila de la lista: puesto, empresa y ciudad, tipo y área, fecha y estado.
 function fila(o) {
   const donde = [o.empresa, o.ubicacion].filter(Boolean).join(' · ');
-  return el('li', {}, el('a', { class: 'alumno oferta', href: '#/oferta/' + encodeURIComponent(o.id) },
-    el('span', { class: 'alumno-texto' },
-      el('b', {}, o.titulo || 'Sin título'),
-      donde && el('span', { class: 'sub' }, donde),
-      el('span', { class: 'sub' }, [o.tipo, o.area].filter(Boolean).join(' · ')),
-      el('span', { class: 'oferta-pie' }, insignia(o.estado), o.fechaRecepcion && el('span', { class: 'sub' }, fechaLarga(o.fechaRecepcion)))),
-    svgFlecha()));
+  return el(
+    'li',
+    {},
+    el(
+      'a',
+      { class: 'alumno oferta', href: '#/oferta/' + encodeURIComponent(o.id) },
+      el(
+        'span',
+        { class: 'alumno-texto' },
+        el('b', {}, o.titulo || 'Sin título'),
+        donde && el('span', { class: 'sub' }, donde),
+        el('span', { class: 'sub' }, [o.tipo, o.area].filter(Boolean).join(' · ')),
+        el(
+          'span',
+          { class: 'oferta-pie' },
+          insignia(o.estado),
+          o.fechaRecepcion && el('span', { class: 'sub' }, fechaLarga(o.fechaRecepcion))
+        )
+      ),
+      svgFlecha()
+    )
+  );
 }
 
 /* ---- Ficha de una oferta ---- */
 
 function campo(etiqueta, valor, { texto = false, vacio = 'Sin dato' } = {}) {
-  return el('div', { class: 'campo' },
+  return el(
+    'div',
+    { class: 'campo' },
     el('dt', {}, etiqueta),
-    el('dd', { class: (valor ? '' : 'vacio ') + (texto ? 'largo' : '') }, valor || vacio));
+    el('dd', { class: (valor ? '' : 'vacio ') + (texto ? 'largo' : '') }, valor || vacio)
+  );
 }
 
 export async function pintarOferta(raiz, id) {
   reemplazar(raiz, el('p', { class: 'estado', role: 'status' }, 'Cargando oferta…'));
   let o, d;
-  try { d = await datosRondas(); o = d.ofertas.find(x => x.id === id) || null; }
-  catch (err) {
-    reemplazar(raiz, volverAOfertas(), tarjetaError(err, () => { recargar().catch(() => {}); pintarOferta(raiz, id); }));
+  try {
+    d = await datosRondas();
+    o = d.ofertas.find(x => x.id === id) || null;
+  } catch (err) {
+    reemplazar(
+      raiz,
+      volverAOfertas(),
+      tarjetaError(err, () => {
+        recargar().catch(() => {});
+        pintarOferta(raiz, id);
+      })
+    );
     return;
   }
   if (!o) {
-    reemplazar(raiz, volverAOfertas(), el('div', { class: 'card' },
-      el('h2', {}, 'Oferta no encontrada'),
-      el('p', { class: 'sub' }, 'Vuelve a la lista y elige otra.')));
+    reemplazar(
+      raiz,
+      volverAOfertas(),
+      el('div', { class: 'card' }, el('h2', {}, 'Oferta no encontrada'), el('p', { class: 'sub' }, 'Vuelve a la lista y elige otra.'))
+    );
     return;
   }
 
   const enlace = enlaceOferta(o.enlace);
-  const aviso = navegacion.aviso; navegacion.aviso = '';
+  const aviso = navegacion.aviso;
+  navegacion.aviso = '';
   // replaceChildren convierte un null en el texto "null": los apartados opcionales se filtran antes.
-  reemplazar(raiz, ...[
-    volverAOfertas(),
-    aviso && el('p', { class: 'ok aviso-ok', role: 'status' }, aviso),
+  reemplazar(
+    raiz,
+    ...[
+      volverAOfertas(),
+      aviso && el('p', { class: 'ok aviso-ok', role: 'status' }, aviso),
 
-    el('section', { class: 'card cabecera cabecera-oferta', 'aria-label': 'Oferta' },
-      el('h2', { class: 'nombre' }, o.titulo || 'Sin título'),
-      el('p', { class: 'sub' }, [o.empresa, o.ubicacion].filter(Boolean).join(' · ')),
-      el('div', { class: 'chips' }, insignia(o.estado), o.tipo && el('span', { class: 'chip' }, o.tipo)),
-      enlace.tipo === 'enlace'
-        ? el('a', { class: 'primary', href: enlace.href, target: '_blank', rel: 'noopener noreferrer' }, 'Abrir la oferta')
-        : null),
+      el(
+        'section',
+        { class: 'card cabecera cabecera-oferta', 'aria-label': 'Oferta' },
+        el('h2', { class: 'nombre' }, o.titulo || 'Sin título'),
+        el('p', { class: 'sub' }, [o.empresa, o.ubicacion].filter(Boolean).join(' · ')),
+        el('div', { class: 'chips' }, insignia(o.estado), o.tipo && el('span', { class: 'chip' }, o.tipo)),
+        enlace.tipo === 'enlace'
+          ? el('a', { class: 'primary', href: enlace.href, target: '_blank', rel: 'noopener noreferrer' }, 'Abrir la oferta')
+          : null
+      ),
 
-    el('section', { class: 'card', 'aria-label': 'Datos' },
-      el('h2', {}, 'La oferta'),
-      el('dl', { class: 'campos' },
-        campo('Empresa', o.empresa),
-        campo('Tipo de organización', o.tipoOrganizacion),
-        campo('Área', o.area),
-        campo('Ubicación', o.ubicacion),
-        campo('Recibida el', fechaLarga(o.fechaRecepcion)),
-        campo('Número de oferta', o.id))),
+      el(
+        'section',
+        { class: 'card', 'aria-label': 'Datos' },
+        el('h2', {}, 'La oferta'),
+        el(
+          'dl',
+          { class: 'campos' },
+          campo('Empresa', o.empresa),
+          campo('Tipo de organización', o.tipoOrganizacion),
+          campo('Área', o.area),
+          campo('Ubicación', o.ubicacion),
+          campo('Recibida el', fechaLarga(o.fechaRecepcion)),
+          campo('Número de oferta', o.id)
+        )
+      ),
 
-    el('section', { class: 'card', 'aria-label': 'Requisitos' },
-      el('h2', {}, 'Requisitos'),
-      el('dl', { class: 'campos' },
-        campo('Nacionalidad', o.requisitoNacionalidad, { vacio: 'Sin requisito de nacionalidad' }),
-        campo('Permiso de trabajo', o.requisitoPermiso))),
+      el(
+        'section',
+        { class: 'card', 'aria-label': 'Requisitos' },
+        el('h2', {}, 'Requisitos'),
+        el(
+          'dl',
+          { class: 'campos' },
+          campo('Nacionalidad', o.requisitoNacionalidad, { vacio: 'Sin requisito de nacionalidad' }),
+          campo('Permiso de trabajo', o.requisitoPermiso)
+        )
+      ),
 
-    enlace.tipo === 'nada' ? null : el('section', { class: 'card', 'aria-label': 'Enlace o descripción' },
-      el('h2', {}, enlace.tipo === 'enlace' ? 'Enlace' : 'Descripción'),
-      el('dl', { class: 'campos' },
-        campo(enlace.tipo === 'ejemplo' ? 'Enlace de ejemplo (no se abre)' : enlace.tipo === 'enlace' ? 'Dirección' : 'Texto', enlace.texto, { texto: true }))),
+      enlace.tipo === 'nada'
+        ? null
+        : el(
+            'section',
+            { class: 'card', 'aria-label': 'Enlace o descripción' },
+            el('h2', {}, enlace.tipo === 'enlace' ? 'Enlace' : 'Descripción'),
+            el(
+              'dl',
+              { class: 'campos' },
+              campo(
+                enlace.tipo === 'ejemplo' ? 'Enlace de ejemplo (no se abre)' : enlace.tipo === 'enlace' ? 'Dirección' : 'Texto',
+                enlace.texto,
+                { texto: true }
+              )
+            )
+          ),
 
-    tarjetaQuienHaSolicitado(o, d),
+      tarjetaQuienHaSolicitado(o, d),
 
-    ...seccionesRondas(o, d),
+      ...seccionesRondas(o, d),
 
-    tarjetaAlumnosQueEncajan(o, d),
+      tarjetaAlumnosQueEncajan(o, d),
 
-    puedeEscribirOfertas() && el('a', { class: 'secondary', id: 'of-editar', href: `#/oferta/${encodeURIComponent(o.id)}/editar` }, 'Editar oferta'),
-  ].filter(Boolean));
+      puedeEscribirOfertas() &&
+        el('a', { class: 'secondary', id: 'of-editar', href: `#/oferta/${encodeURIComponent(o.id)}/editar` }, 'Editar oferta')
+    ].filter(Boolean)
+  );
 }

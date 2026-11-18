@@ -7,50 +7,94 @@ const VERSION_ESPERADA = 1;
 
 // Cómo se nombra cada cosa en los mensajes de "no encontrado" y "repetido".
 const DE = {
-  alumno: { este: 'Este alumno', de: 'de este alumno' }, oferta: { este: 'Esta oferta', de: 'de esta oferta' },
-  ronda: { este: 'Esta ronda', de: 'de esta ronda' }, aplicacion: { este: 'Esta solicitud', de: 'de esta solicitud' },
+  alumno: { este: 'Este alumno', de: 'de este alumno' },
+  oferta: { este: 'Esta oferta', de: 'de esta oferta' },
+  ronda: { este: 'Esta ronda', de: 'de esta ronda' },
+  aplicacion: { este: 'Esta solicitud', de: 'de esta solicitud' }
 };
-const fechaCorta = f => { const m = /^(\d{4})-(\d{2})-(\d{2})$/.exec(f || ''); return m ? `${m[3]}/${m[2]}/${m[1]}` : 'fecha anterior'; };
+const fechaCorta = f => {
+  const m = /^(\d{4})-(\d{2})-(\d{2})$/.exec(f || '');
+  return m ? `${m[3]}/${m[2]}/${m[1]}` : 'fecha anterior';
+};
 
 // Textos para la persona. El script solo envía códigos cortos; los textos están aquí.
 function mensaje(codigo, extra = {}) {
   switch (codigo) {
-    case 'clave': return 'La clave no es correcta. Revísala e inténtalo de nuevo.';
-    case 'bloqueado': return `Demasiados intentos con la clave incorrecta. Espera ${Math.max(1, Math.ceil((Number(extra.segundos) || 900) / 60))} minutos y vuelve a probar.`;
-    case 'config': return 'El acceso no está bien configurado. Avisa a quien administra la app.';
-    case 'hoja': return `Falta la hoja «${extra.hoja}». Avisa a quien administra la app.`;
-    case 'columna': return `Falta la columna «${extra.columna}». Avisa a quien administra la app.`;
-    case 'ocupado': return `Google está ocupado y no se ha guardado nada. Espera unos segundos y vuelve a pulsar.`;
-    case 'servidor': return 'Ha fallado algo en el servidor y no se ha guardado nada. Avisa a quien administra la app.';
-    case 'red': return 'No se ha podido conectar con Google. Vuelve a intentarlo en un momento.';
-    case 'tiempo': return 'Google tarda demasiado en responder. Inténtalo otra vez.';
-    case 'respuesta': return 'Esa dirección no responde como se esperaba. Compruébala o avisa a quien administra la app.';
-    case 'version': return 'La app y los datos no son compatibles. Avisa a quien administra la app.';
-    case 'largo': return 'La nota es demasiado larga: el máximo es de 2.000 caracteres.';
-    case 'html': return 'La nota lleva un «<» seguido de una letra o una barra, y la app lo toma por código. Quítalo o cámbialo y vuelve a guardar.';
-    case 'caracteres': return 'La nota tiene caracteres raros que no se admiten (suelen venir de copiar y pegar).';
-    case 'fecha': return 'Elige una fecha válida.';
-    case 'fecha-futura': return 'La fecha no puede ser futura.';
-    case 'requerido': return 'Falta un dato obligatorio.';
-    case 'lista': return 'Un valor no está en las listas. Elige uno de la lista o avisa a quien administra la app.';
-    case 'enlace': return 'El enlace no puede empezar por http:, javascript:… Usa https://.';
+    case 'clave':
+      return 'La clave no es correcta. Revísala e inténtalo de nuevo.';
+    case 'bloqueado':
+      return `Demasiados intentos con la clave incorrecta. Espera ${Math.max(1, Math.ceil((Number(extra.segundos) || 900) / 60))} minutos y vuelve a probar.`;
+    case 'config':
+      return 'El acceso no está bien configurado. Avisa a quien administra la app.';
+    case 'hoja':
+      return `Falta la hoja «${extra.hoja}». Avisa a quien administra la app.`;
+    case 'columna':
+      return `Falta la columna «${extra.columna}». Avisa a quien administra la app.`;
+    case 'ocupado':
+      return `Google está ocupado y no se ha guardado nada. Espera unos segundos y vuelve a pulsar.`;
+    case 'servidor':
+      return 'Ha fallado algo en el servidor y no se ha guardado nada. Avisa a quien administra la app.';
+    case 'red':
+      return 'No se ha podido conectar con Google. Vuelve a intentarlo en un momento.';
+    case 'tiempo':
+      return 'Google tarda demasiado en responder. Inténtalo otra vez.';
+    case 'respuesta':
+      return 'Esa dirección no responde como se esperaba. Compruébala o avisa a quien administra la app.';
+    case 'version':
+      return 'La app y los datos no son compatibles. Avisa a quien administra la app.';
+    case 'largo':
+      return 'La nota es demasiado larga: el máximo es de 2.000 caracteres.';
+    case 'html':
+      return 'La nota lleva un «<» seguido de una letra o una barra, y la app lo toma por código. Quítalo o cámbialo y vuelve a guardar.';
+    case 'caracteres':
+      return 'La nota tiene caracteres raros que no se admiten (suelen venir de copiar y pegar).';
+    case 'fecha':
+      return 'Elige una fecha válida.';
+    case 'fecha-futura':
+      return 'La fecha no puede ser futura.';
+    case 'requerido':
+      return 'Falta un dato obligatorio.';
+    case 'lista':
+      return 'Un valor no está en las listas. Elige uno de la lista o avisa a quien administra la app.';
+    case 'enlace':
+      return 'El enlace no puede empezar por http:, javascript:… Usa https://.';
     case 'conflicto':
       if (extra.aplicacion) return 'Alguien ha cambiado esta solicitud mientras la editabas.';
       if (extra.ultima !== undefined) return 'Otra persona ha registrado una ronda de esta oferta mientras tanto.';
-      return extra.oferta ? 'Alguien ha cambiado esta oferta mientras la editabas.' : 'Alguien ha cambiado esta entrevista mientras la editabas.';
-    case 'no-encontrado': return `${DE[extra.campo]?.este || 'Este alumno'} ya no existe en los datos. Actualiza los datos y vuelve a mirar.`;
-    case 'id-duplicado': return `Hay dos filas con el mismo número ${DE[extra.campo]?.de || 'de este alumno'}. Avisa a quien administra la app.`;
-    case 'duplicado': return 'Este alumno ya tiene solicitud en esta ronda.';
-    case 'fecha-anterior': return `La fecha no puede ser anterior al ${fechaCorta(extra.desde)}.`;
-    case 'motivo-sobra': return 'El motivo solo se usa cuando el estado es «Descartado».';
-    case 'peticion': case 'accion': return 'La app y los datos no son compatibles. Avisa a quien administra la app.';
-    case 'solo-lectura': return 'Esta conexión no permite guardar.';
-    case 'sin-notas': return 'Escribe una nota.';
-    case 'direccion': return 'La dirección no es válida. Debe empezar por https://script.google.com/macros/s/ y terminar en /exec.';
-    case 'sin-clave': return 'Escribe la clave.';
-    case 'sin-acceso': return 'Todavía no hay acceso configurado.';
-    case 'almacenamiento': return 'Este navegador no deja guardar el acceso. ¿Estás en una ventana privada?';
-    default: return 'Algo ha salido mal. Vuelve a intentarlo. Si sigue igual, avisa a quien administra la app (código: ' + String(codigo).slice(0, 30) + ').';
+      return extra.oferta
+        ? 'Alguien ha cambiado esta oferta mientras la editabas.'
+        : 'Alguien ha cambiado esta entrevista mientras la editabas.';
+    case 'no-encontrado':
+      return `${DE[extra.campo]?.este || 'Este alumno'} ya no existe en los datos. Actualiza los datos y vuelve a mirar.`;
+    case 'id-duplicado':
+      return `Hay dos filas con el mismo número ${DE[extra.campo]?.de || 'de este alumno'}. Avisa a quien administra la app.`;
+    case 'duplicado':
+      return 'Este alumno ya tiene solicitud en esta ronda.';
+    case 'fecha-anterior':
+      return `La fecha no puede ser anterior al ${fechaCorta(extra.desde)}.`;
+    case 'motivo-sobra':
+      return 'El motivo solo se usa cuando el estado es «Descartado».';
+    case 'peticion':
+    case 'accion':
+      return 'La app y los datos no son compatibles. Avisa a quien administra la app.';
+    case 'solo-lectura':
+      return 'Esta conexión no permite guardar.';
+    case 'sin-notas':
+      return 'Escribe una nota.';
+    case 'direccion':
+      return 'La dirección no es válida. Debe empezar por https://script.google.com/macros/s/ y terminar en /exec.';
+    case 'sin-clave':
+      return 'Escribe la clave.';
+    case 'sin-acceso':
+      return 'Todavía no hay acceso configurado.';
+    case 'almacenamiento':
+      return 'Este navegador no deja guardar el acceso. ¿Estás en una ventana privada?';
+    default:
+      return (
+        'Algo ha salido mal. Vuelve a intentarlo. Si sigue igual, avisa a quien administra la app (código: ' +
+        String(codigo).slice(0, 30) +
+        ').'
+      );
   }
 }
 
@@ -70,13 +114,21 @@ const dormir = ms => new Promise(r => setTimeout(r, ms));
 
 // "reintentarRed: false" para lo que no se puede repetir sin riesgo de duplicar (el alta de una oferta).
 export async function llamarScript(acceso, accion, datos = {}, { reintentarRed = true } = {}) {
-  let intentos = 0, reintentosOcupado = 0;
+  let intentos = 0,
+    reintentosOcupado = 0;
   for (;;) {
     intentos++;
-    try { return await unaLlamada(acceso, accion, datos); }
-    catch (e) {
-      if (e.codigo === 'red' && reintentarRed && intentos === 1) { await dormir(ESPERA_RED_MS); continue; }
-      if (e.codigo === 'ocupado' && reintentosOcupado < ESPERAS_OCUPADO_MS.length) { await dormir(ESPERAS_OCUPADO_MS[reintentosOcupado++]); continue; }
+    try {
+      return await unaLlamada(acceso, accion, datos);
+    } catch (e) {
+      if (e.codigo === 'red' && reintentarRed && intentos === 1) {
+        await dormir(ESPERA_RED_MS);
+        continue;
+      }
+      if (e.codigo === 'ocupado' && reintentosOcupado < ESPERAS_OCUPADO_MS.length) {
+        await dormir(ESPERAS_OCUPADO_MS[reintentosOcupado++]);
+        continue;
+      }
       if (e.codigo === 'red' || e.codigo === 'ocupado') throw errorDatos(e.codigo, { ...e.extra, intentos });
       throw e;
     }
@@ -92,17 +144,29 @@ async function unaLlamada({ url, clave }, accion, datos) {
     try {
       r = await fetch(url, {
         method: 'POST',
-        headers: { 'Content-Type': 'text/plain;charset=utf-8' },   // "simple": el navegador no hace petición previa (Apps Script no la admite)
+        headers: { 'Content-Type': 'text/plain;charset=utf-8' }, // "simple": el navegador no hace petición previa (Apps Script no la admite)
         body: JSON.stringify({ ...datos, key: clave, action: accion }),
-        signal: ctl.signal, credentials: 'omit', redirect: 'follow', cache: 'no-store', referrerPolicy: 'no-referrer',
+        signal: ctl.signal,
+        credentials: 'omit',
+        redirect: 'follow',
+        cache: 'no-store',
+        referrerPolicy: 'no-referrer'
       });
-    } catch { throw errorDatos(ctl.signal.aborted ? 'tiempo' : 'red'); }
+    } catch {
+      throw errorDatos(ctl.signal.aborted ? 'tiempo' : 'red');
+    }
     let j;
-    try { j = await r.json(); } catch { throw errorDatos(ctl.signal.aborted ? 'tiempo' : 'respuesta'); }
+    try {
+      j = await r.json();
+    } catch {
+      throw errorDatos(ctl.signal.aborted ? 'tiempo' : 'respuesta');
+    }
     if (!j || typeof j !== 'object') throw errorDatos('respuesta');
     if (j.ok !== true) throw errorDatos(typeof j.error === 'string' ? j.error : 'respuesta', j);
     return j;
-  } finally { clearTimeout(reloj); }
+  } finally {
+    clearTimeout(reloj);
+  }
 }
 
 const esTabla = t => t && Array.isArray(t.cabecera) && Array.isArray(t.filas);
@@ -119,15 +183,18 @@ export function crearFuenteAppsScript(acceso, esquemas) {
         alumnos: aObjetos('Alumnos', j.alumnos, esquemas.ALUMNO, esquemas.ALUMNO_OPC),
         ofertas: aObjetos('Ofertas', j.ofertas, esquemas.OFERTA, esquemas.OFERTA_OPC),
         // Las hojas de reglas del match llegan en j.match (un script antiguo no las envía: entonces se usan las reglas de respaldo).
-        listas: { ...aListas(j.listas, esquemas.LISTAS, esquemas.ALIAS_LISTAS), match: aReglasMatch(j.match && typeof j.match === 'object' ? j.match : {}, esquemas.HOJAS_MATCH) },
+        listas: {
+          ...aListas(j.listas, esquemas.LISTAS, esquemas.ALIAS_LISTAS),
+          match: aReglasMatch(j.match && typeof j.match === 'object' ? j.match : {}, esquemas.HOJAS_MATCH)
+        },
         rondas: conRondas ? aObjetos('Rondas', j.rondas, esquemas.RONDA) : [],
         aplicaciones: conRondas ? aObjetos('Aplicaciones', j.aplicaciones, esquemas.APLICACION) : [],
         historial: conRondas ? aObjetos('Historial', j.historial, esquemas.HISTORIAL) : [],
         conRondas,
         puedeEscribir: j.puedeEscribir === true,
-        soporta: Array.isArray(j.soporta) ? j.soporta.filter(x => typeof x === 'string') : [],   // un script antiguo no lo envía
+        soporta: Array.isArray(j.soporta) ? j.soporta.filter(x => typeof x === 'string') : [] // un script antiguo no lo envía
       };
-    },
+    }
   };
 }
 

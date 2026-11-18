@@ -3,7 +3,7 @@
 
 import { fechaValida } from './ofertas.js';
 
-export const ESTADO_DESCARTE = 'Descartado';   // el único estado que lleva motivo
+export const ESTADO_DESCARTE = 'Descartado'; // el único estado que lleva motivo
 
 export const nombreAlumno = a => `${a.nombre} ${a.apellidos}`.trim();
 const num = x => Number(x) || 0;
@@ -14,7 +14,8 @@ export const rondasDeOferta = (rondas, idOferta) =>
 
 // Las aplicaciones de una ronda, por orden de llegada (fecha y, a igual fecha, ID).
 export const aplicacionesDeRonda = (apps, idOferta, numero) =>
-  apps.filter(a => a.idOferta === idOferta && num(a.numeroRonda) === num(numero))
+  apps
+    .filter(a => a.idOferta === idOferta && num(a.numeroRonda) === num(numero))
     .sort((x, y) => (x.fecha || '').localeCompare(y.fecha || '') || x.id.localeCompare(y.id));
 
 // Las aplicaciones de un alumno, las más recientes primero.
@@ -33,18 +34,30 @@ export function resumenEstados(apps, orden = []) {
 // Orden: de más avanzado a menos (Contratado, Entrevista, Enviada a la empresa, En revisión, Recibida); un estado que no conozca va antes de Descartado; Descartado, al final.
 // Dentro de cada estado, la solicitud más reciente primero. No lee notas ni motivos: solo estado, fecha y ronda.
 const ORDEN_AVANCE = Object.freeze(['Contratado', 'Entrevista', 'Enviada a la empresa', 'En revisión', 'Recibida']);
-const rangoEstado = estado => (estado === ESTADO_DESCARTE ? ORDEN_AVANCE.length + 1 : ORDEN_AVANCE.includes(estado) ? ORDEN_AVANCE.indexOf(estado) : ORDEN_AVANCE.length);
+const rangoEstado = estado =>
+  estado === ESTADO_DESCARTE ? ORDEN_AVANCE.length + 1 : ORDEN_AVANCE.includes(estado) ? ORDEN_AVANCE.indexOf(estado) : ORDEN_AVANCE.length;
 export function solicitantesDeOferta(apps, alumnos, idOferta) {
   const propias = (Array.isArray(apps) ? apps : []).filter(a => a.idOferta === idOferta);
   const porAlumno = new Map();
   for (const a of propias) porAlumno.set(a.idAlumno, [...(porAlumno.get(a.idAlumno) || []), a]);
-  const reciente = (x, y) => (y.fecha || '').localeCompare(x.fecha || '') || num(y.numeroRonda) - num(x.numeroRonda) || y.id.localeCompare(x.id);
+  const reciente = (x, y) =>
+    (y.fecha || '').localeCompare(x.fecha || '') || num(y.numeroRonda) - num(x.numeroRonda) || y.id.localeCompare(x.id);
   const filas = [...porAlumno.entries()].map(([idAlumno, lista]) => {
     const [app, ...resto] = [...lista].sort(reciente);
-    return { idAlumno, alumno: (alumnos || []).find(x => x.id === idAlumno) || null, app, otrasRondas: [...new Set(resto.map(x => num(x.numeroRonda)).filter(n => n !== num(app.numeroRonda)))].sort((p, q) => p - q) };
+    return {
+      idAlumno,
+      alumno: (alumnos || []).find(x => x.id === idAlumno) || null,
+      app,
+      otrasRondas: [...new Set(resto.map(x => num(x.numeroRonda)).filter(n => n !== num(app.numeroRonda)))].sort((p, q) => p - q)
+    };
   });
   const nombre = f => (f.alumno ? nombreAlumno(f.alumno) : f.idAlumno);
-  filas.sort((x, y) => rangoEstado(x.app.estado) - rangoEstado(y.app.estado) || (y.app.fecha || '').localeCompare(x.app.fecha || '') || nombre(x).localeCompare(nombre(y), 'es'));
+  filas.sort(
+    (x, y) =>
+      rangoEstado(x.app.estado) - rangoEstado(y.app.estado) ||
+      (y.app.fecha || '').localeCompare(x.app.fecha || '') ||
+      nombre(x).localeCompare(nombre(y), 'es')
+  );
   const cuenta = new Map();
   for (const f of filas) cuenta.set(f.app.estado || 'Sin dato', (cuenta.get(f.app.estado || 'Sin dato') || 0) + 1);
   const porEstado = [...cuenta.entries()].sort((x, y) => rangoEstado(x[0]) - rangoEstado(y[0])).map(([estado, n]) => ({ estado, n }));
@@ -53,10 +66,16 @@ export function solicitantesDeOferta(apps, alumnos, idOferta) {
 
 // Las líneas del historial de una aplicación, en el orden en que se apuntaron.
 export const historialDe = (historial, idAplicacion) =>
-  historial.filter(h => h.idAplicacion === idAplicacion).sort((x, y) => (x.fecha || '').localeCompare(y.fecha || '') || x.id.localeCompare(y.id));
+  historial
+    .filter(h => h.idAplicacion === idAplicacion)
+    .sort((x, y) => (x.fecha || '').localeCompare(y.fecha || '') || x.id.localeCompare(y.id));
 
 const ISO = /^\d{4}-\d{2}-\d{2}$/;
-const masReciente = fechas => fechas.filter(f => ISO.test(f)).sort().pop() || '';
+const masReciente = fechas =>
+  fechas
+    .filter(f => ISO.test(f))
+    .sort()
+    .pop() || '';
 
 // La fecha de su último movimiento: no se puede apuntar un cambio anterior a ella.
 export const ultimoMovimiento = (app, historial) => masReciente([app.fecha, ...historialDe(historial, app.id).map(h => h.fecha)]);
@@ -83,7 +102,10 @@ export const claseEstado = estado => (estado === 'Contratado' ? ' contratado' : 
 /* ---- Validación de los formularios (las mismas reglas que aplica el script; así los errores se ven antes de enviar) ---- */
 
 export const MAX_NOTAS = 2000;
-export const normalizarTexto = t => String(t ?? '').replace(/\r\n?/g, '\n').trim();
+export const normalizarTexto = t =>
+  String(t ?? '')
+    .replace(/\r\n?/g, '\n')
+    .trim();
 
 // Un texto libre de varias líneas (notas): '' si vale, o el código del problema.
 export function problemaNota(t) {

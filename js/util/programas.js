@@ -4,15 +4,18 @@
 // Los que no tienen categoría o no están en Listas van a un último grupo (otros: true) para que la app no falle y se vea el problema.
 
 const TITULO_OTROS = 'Otros programas';
-const CATEGORIA_PRIMERA = 'MBA';   // La categoría MBA va la primera en Inicio; el resto, en el orden de Listas
+const CATEGORIA_PRIMERA = 'MBA'; // La categoría MBA va la primera en Inicio; el resto, en el orden de Listas
 
 export function agruparProgramas(programas) {
   const grupos = [];
   const otros = { categoria: TITULO_OTROS, otros: true, programas: [], alumnos: 0 };
   for (const p of programas) {
-    if (!p.enLista || !p.categoria) { otros.programas.push(p); continue; }
+    if (!p.enLista || !p.categoria) {
+      otros.programas.push(p);
+      continue;
+    }
     let g = grupos.find(x => x.categoria === p.categoria);
-    if (!g) grupos.push(g = { categoria: p.categoria, otros: false, programas: [], alumnos: 0 });
+    if (!g) grupos.push((g = { categoria: p.categoria, otros: false, programas: [], alumnos: 0 }));
     g.programas.push(p);
   }
   const i = grupos.findIndex(g => g.categoria.trim().toLowerCase() === CATEGORIA_PRIMERA.toLowerCase());

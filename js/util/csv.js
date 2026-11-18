@@ -3,21 +3,33 @@
 export function leerCSV(texto) {
   const t = texto.replace(/^﻿/, '');
   const filas = [];
-  let fila = [], campo = '', entreComillas = false;
+  let fila = [],
+    campo = '',
+    entreComillas = false;
   for (let i = 0; i < t.length; i++) {
     const c = t[i];
     if (entreComillas) {
       if (c === '"') {
-        if (t[i + 1] === '"') { campo += '"'; i++; }
-        else entreComillas = false;
+        if (t[i + 1] === '"') {
+          campo += '"';
+          i++;
+        } else entreComillas = false;
       } else campo += c;
     } else if (c === '"') entreComillas = true;
-    else if (c === ',') { fila.push(campo); campo = ''; }
-    else if (c === '\n' || c === '\r') {
+    else if (c === ',') {
+      fila.push(campo);
+      campo = '';
+    } else if (c === '\n' || c === '\r') {
       if (c === '\r' && t[i + 1] === '\n') i++;
-      fila.push(campo); filas.push(fila); fila = []; campo = '';
+      fila.push(campo);
+      filas.push(fila);
+      fila = [];
+      campo = '';
     } else campo += c;
   }
-  if (campo !== '' || fila.length) { fila.push(campo); filas.push(fila); }
+  if (campo !== '' || fila.length) {
+    fila.push(campo);
+    filas.push(fila);
+  }
   return filas.filter(f => f.some(x => x.trim() !== ''));
 }

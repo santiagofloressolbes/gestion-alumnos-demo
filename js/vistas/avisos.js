@@ -5,7 +5,19 @@ import { avatar } from '../util/avatar.js';
 import { navegacion } from '../util/navegacion.js';
 import { avisoFlotante } from '../util/trabajo.js';
 import { nombreAlumno } from '../util/rondas.js';
-import { TIPOS, TITULO_TIPO, ETIQUETA_CORTA, calcularAvisos, hoyISO, repartir, silenciadoHasta, fechaCorta, avisosDe, contar, estaSilenciado } from '../util/avisos.js';
+import {
+  TIPOS,
+  TITULO_TIPO,
+  ETIQUETA_CORTA,
+  calcularAvisos,
+  hoyISO,
+  repartir,
+  silenciadoHasta,
+  fechaCorta,
+  avisosDe,
+  contar,
+  estaSilenciado
+} from '../util/avisos.js';
 import { leerUmbrales, leerSilencios, silenciar, quitarSilencio } from '../util/preferencias.js';
 import { datosRondas } from './rondas.js';
 import { tarjetaError } from './error-datos.js';
@@ -18,7 +30,15 @@ const TIPOS_VALIDOS = Object.values(TIPOS);
 function estadoAvisos(d, hoy = hoyISO()) {
   if (!d.hay) return null;
   const umbrales = leerUmbrales();
-  const { periodo, avisos } = calcularAvisos({ alumnos: d.alumnos, ofertas: d.ofertas, rondas: d.rondas, aplicaciones: d.aplicaciones, hoy, umbrales, contextoMatch: contextoDe(d.listas) });
+  const { periodo, avisos } = calcularAvisos({
+    alumnos: d.alumnos,
+    ofertas: d.ofertas,
+    rondas: d.rondas,
+    aplicaciones: d.aplicaciones,
+    hoy,
+    umbrales,
+    contextoMatch: contextoDe(d.listas)
+  });
   const silencios = leerSilencios();
   return { hoy, umbrales, periodo, avisos, silencios, ...repartir(avisos, silencios, hoy) };
 }
@@ -41,7 +61,8 @@ const etiquetaTipo = (tipo, texto) => el('span', { class: 'etiqueta-tipo ' + tip
 const programasFuera = masters => masters.filter(m => !m.enLista || !m.categoria);
 
 // Una nota de DATOS suelta (programa fuera de Listas en la lista, la ficha y Otros programas): rojo relleno, icono y la palabra «Datos».
-export const notaDatos = (texto, id) => el('p', { class: 'aviso aviso-alerta', role: 'note', id }, svgAviso('datos'), el('span', {}, el('b', {}, 'Datos: '), texto));
+export const notaDatos = (texto, id) =>
+  el('p', { class: 'aviso aviso-alerta', role: 'note', id }, svgAviso('datos'), el('span', {}, el('b', {}, 'Datos: '), texto));
 
 // Aviso de DATOS. No se puede silenciar: no depende del tiempo, se arregla en los datos. El alumno sigue en «Otros programas».
 function avisoDatos(fuera) {
@@ -53,30 +74,62 @@ function avisoDatos(fuera) {
     d.scrollIntoView({ block: 'start' });
     d.querySelector('summary')?.focus({ preventScroll: true });
   };
-  return el('div', { class: 'aviso-datos', id: 'in-av-datos', role: 'note' },
+  return el(
+    'div',
+    { class: 'aviso-datos', id: 'in-av-datos', role: 'note' },
     etiquetaTipo('datos', 'Datos'),
-    el('ul', { class: 'aviso-datos-lista' }, fuera.map(m => el('li', {},
-      `Programa «${m.nombre}» (${plural(m.alumnos, 'alumno', 'alumnos')}) fuera de la lista de programas.`))),
+    el(
+      'ul',
+      { class: 'aviso-datos-lista' },
+      fuera.map(m => el('li', {}, `Programa «${m.nombre}» (${plural(m.alumnos, 'alumno', 'alumnos')}) fuera de la lista de programas.`))
+    ),
     el('a', { class: 'enlace', id: 'in-av-datos-ver', href: '#/', onclick: abrirOtros }, 'Ver en «Otros programas»'),
-    el('p', { class: 'sub aviso-datos-nota' }, 'Este aviso no se puede silenciar. Avisa a quien administra la app: desaparece cuando el programa esté en la lista.'));
+    el(
+      'p',
+      { class: 'sub aviso-datos-nota' },
+      'Este aviso no se puede silenciar. Avisa a quien administra la app: desaparece cuando el programa esté en la lista.'
+    )
+  );
 }
 
 function contenidoInicio(e, fuera) {
   const fila = tipo => {
-    const activos = contar(e.activos, tipo), sil = contar(e.silenciados, tipo);
-    return el('li', {}, el('a', { class: 'aviso-fila', id: 'in-av-' + tipo, href: '#/avisos/' + tipo, onclick: () => { navegacion.avisosVolver = 'inicio'; } },
-      el('span', { class: 'alumno-texto' },
-        el('b', {}, TITULO_TIPO[tipo]),
-        el('span', { class: 'sub' }, alumnosTexto(activos) + (sil ? ` · ${plural(sil, 'silenciado', 'silenciados')}` : ''))),
-      svgFlecha()));
+    const activos = contar(e.activos, tipo),
+      sil = contar(e.silenciados, tipo);
+    return el(
+      'li',
+      {},
+      el(
+        'a',
+        {
+          class: 'aviso-fila',
+          id: 'in-av-' + tipo,
+          href: '#/avisos/' + tipo,
+          onclick: () => {
+            navegacion.avisosVolver = 'inicio';
+          }
+        },
+        el(
+          'span',
+          { class: 'alumno-texto' },
+          el('b', {}, TITULO_TIPO[tipo]),
+          el('span', { class: 'sub' }, alumnosTexto(activos) + (sil ? ` · ${plural(sil, 'silenciado', 'silenciados')}` : ''))
+        ),
+        svgFlecha()
+      )
+    );
   };
   return [
     el('h2', { id: 'in-av-titulo' }, 'Avisos'),
     fuera.length > 0 && avisoDatos(fuera),
-    e && el('div', { class: 'aviso-seguimiento', id: 'in-av-seguimiento' },
-      etiquetaTipo('seguimiento', 'Seguimiento'),
-      el('p', { class: 'sub' }, 'Son solo avisos. Toca uno para ver a quién afecta y por qué.'),
-      el('ul', { class: 'avisos-resumen', 'aria-label': 'Tipos de aviso' }, TIPOS_VALIDOS.map(fila))),
+    e &&
+      el(
+        'div',
+        { class: 'aviso-seguimiento', id: 'in-av-seguimiento' },
+        etiquetaTipo('seguimiento', 'Seguimiento'),
+        el('p', { class: 'sub' }, 'Son solo avisos. Toca uno para ver a quién afecta y por qué.'),
+        el('ul', { class: 'avisos-resumen', 'aria-label': 'Tipos de aviso' }, TIPOS_VALIDOS.map(fila))
+      )
   ];
 }
 
@@ -85,8 +138,16 @@ function contenidoInicio(e, fuera) {
 export async function pintarAvisosInicio(caja) {
   if (!caja) return;
   let e, fuera;
-  try { e = estadoAvisos(await datosRondas()); } catch { e = null; }
-  try { fuera = programasFuera(await getMasters()); } catch { fuera = []; }
+  try {
+    e = estadoAvisos(await datosRondas());
+  } catch {
+    e = null;
+  }
+  try {
+    fuera = programasFuera(await getMasters());
+  } catch {
+    fuera = [];
+  }
   const hay = !!e || fuera.length > 0;
   caja.hidden = !hay;
   caja.classList.toggle('con-seguimiento', !!e);
@@ -103,7 +164,9 @@ export async function avisosActivosPorAlumno() {
     const e = estadoAvisos(await datosRondas());
     if (!e) return () => [];
     return id => avisosDe(e.activos, id);
-  } catch { return () => []; }
+  } catch {
+    return () => [];
+  }
 }
 export const etiquetaAviso = avisos => (avisos.length ? 'Aviso: ' + avisos.map(a => ETIQUETA_CORTA[a.tipo]).join(' · ') : '');
 
@@ -113,21 +176,59 @@ function bloqueAviso(a, alumno, e, alCambiar, { conEnlace }) {
   const silenciado = estaSilenciado(e.silencios, a.id, e.hoy);
   const nombre = alumno ? nombreAlumno(alumno) : `(alumno ${a.idAlumno}: sin dato)`;
   const boton = silenciado
-    ? el('button', { class: 'secondary', type: 'button', 'data-aviso': a.id, 'aria-label': `Quitar el silencio del aviso de ${nombre}`, onclick: () => { quitarSilencio(a.id); alCambiar(`Silencio quitado: ${nombre}.`); } }, 'Quitar silencio')
-    : el('button', { class: 'secondary', type: 'button', 'data-aviso': a.id, 'aria-label': `Silenciar 30 días el aviso de ${nombre}`, onclick: () => {
-        const hasta = silenciadoHasta(e.hoy);
-        if (!silenciar(a.id, hasta)) { avisoFlotante('No se ha podido guardar el silencio en este móvil. ¿Estás en una ventana privada?'); return; }
-        alCambiar(`Silenciado hasta el ${fechaCorta(hasta)}: ${nombre}.`);
-      } }, 'Silenciar 30 días');
+    ? el(
+        'button',
+        {
+          class: 'secondary',
+          type: 'button',
+          'data-aviso': a.id,
+          'aria-label': `Quitar el silencio del aviso de ${nombre}`,
+          onclick: () => {
+            quitarSilencio(a.id);
+            alCambiar(`Silencio quitado: ${nombre}.`);
+          }
+        },
+        'Quitar silencio'
+      )
+    : el(
+        'button',
+        {
+          class: 'secondary',
+          type: 'button',
+          'data-aviso': a.id,
+          'aria-label': `Silenciar 30 días el aviso de ${nombre}`,
+          onclick: () => {
+            const hasta = silenciadoHasta(e.hoy);
+            if (!silenciar(a.id, hasta)) {
+              avisoFlotante('No se ha podido guardar el silencio en este móvil. ¿Estás en una ventana privada?');
+              return;
+            }
+            alCambiar(`Silenciado hasta el ${fechaCorta(hasta)}: ${nombre}.`);
+          }
+        },
+        'Silenciar 30 días'
+      );
   return [
-    conEnlace && alumno && el('a', { class: 'alumno', href: '#/alumno/' + encodeURIComponent(alumno.id), onclick: () => { navegacion.origen = 'avisos'; navegacion.avisosTipo = a.tipo; } },
-      avatar(alumno),
-      el('span', { class: 'alumno-texto' }, el('b', {}, nombre), el('span', { class: 'sub' }, alumno.master || '')),
-      svgFlecha()),
+    conEnlace &&
+      alumno &&
+      el(
+        'a',
+        {
+          class: 'alumno',
+          href: '#/alumno/' + encodeURIComponent(alumno.id),
+          onclick: () => {
+            navegacion.origen = 'avisos';
+            navegacion.avisosTipo = a.tipo;
+          }
+        },
+        avatar(alumno),
+        el('span', { class: 'alumno-texto' }, el('b', {}, nombre), el('span', { class: 'sub' }, alumno.master || '')),
+        svgFlecha()
+      ),
     !conEnlace && el('b', {}, TITULO_TIPO[a.tipo]),
     el('p', { class: 'sub aviso-motivo' }, a.motivo),
     silenciado && el('p', { class: 'sub aviso-silencio' }, `Silenciado hasta el ${fechaCorta(e.silencios[a.id])}.`),
-    boton,
+    boton
   ];
 }
 
@@ -137,38 +238,80 @@ export async function pintarAvisos(raiz, tipo) {
   reemplazar(raiz, el('p', { class: 'estado', role: 'status' }, 'Cargando avisos…'));
   const volver = el('a', { class: 'volver', href: '#/' }, 'Inicio');
   if (!TIPOS_VALIDOS.includes(tipo)) {
-    reemplazar(raiz, volver, el('div', { class: 'card' }, el('h2', {}, 'Aviso no encontrado'), el('p', { class: 'sub' }, 'Vuelve al inicio y elige uno.')));
+    reemplazar(
+      raiz,
+      volver,
+      el('div', { class: 'card' }, el('h2', {}, 'Aviso no encontrado'), el('p', { class: 'sub' }, 'Vuelve al inicio y elige uno.'))
+    );
     return;
   }
   let d;
-  try { d = await datosRondas(); }
-  catch (err) { reemplazar(raiz, volver, tarjetaError(err, () => { recargar().catch(() => {}); pintarAvisos(raiz, tipo); })); return; }
+  try {
+    d = await datosRondas();
+  } catch (err) {
+    reemplazar(
+      raiz,
+      volver,
+      tarjetaError(err, () => {
+        recargar().catch(() => {});
+        pintarAvisos(raiz, tipo);
+      })
+    );
+    return;
+  }
   const e = estadoAvisos(d);
   if (!e) {
-    reemplazar(raiz, volver, el('div', { class: 'card' }, el('h2', {}, 'Todavía no hay rondas'), el('p', { class: 'sub' }, 'Aún no hay rondas ni solicitudes para calcular avisos.')));
+    reemplazar(
+      raiz,
+      volver,
+      el(
+        'div',
+        { class: 'card' },
+        el('h2', {}, 'Todavía no hay rondas'),
+        el('p', { class: 'sub' }, 'Aún no hay rondas ni solicitudes para calcular avisos.')
+      )
+    );
     return;
   }
   const estado = el('p', { class: 'ok', role: 'status', id: 'av-estado', hidden: true });
   const alumnoDe = id => d.alumnos.find(x => x.id === id);
-  const ordenar = lista => lista.map(a => ({ a, al: alumnoDe(a.idAlumno) })).sort((x, y) => (x.al ? nombreAlumno(x.al) : '~').localeCompare(y.al ? nombreAlumno(y.al) : '~', 'es'));
+  const ordenar = lista =>
+    lista
+      .map(a => ({ a, al: alumnoDe(a.idAlumno) }))
+      .sort((x, y) => (x.al ? nombreAlumno(x.al) : '~').localeCompare(y.al ? nombreAlumno(y.al) : '~', 'es'));
   const delTipo = lista => lista.filter(a => a.tipo === tipo);
-  const alCambiar = async mensaje => { await pintarAvisos(raiz, tipo); const s = raiz.querySelector('#av-estado'); s.textContent = mensaje; s.hidden = false; };
-  const lista = (items, etiqueta) => el('ul', { class: 'alumnos avisos-lista', 'aria-label': etiqueta },
-    ordenar(items).map(({ a, al }) => el('li', { class: 'aviso-item' }, bloqueAviso(a, al, e, alCambiar, { conEnlace: true }))));
+  const alCambiar = async mensaje => {
+    await pintarAvisos(raiz, tipo);
+    const s = raiz.querySelector('#av-estado');
+    s.textContent = mensaje;
+    s.hidden = false;
+  };
+  const lista = (items, etiqueta) =>
+    el(
+      'ul',
+      { class: 'alumnos avisos-lista', 'aria-label': etiqueta },
+      ordenar(items).map(({ a, al }) => el('li', { class: 'aviso-item' }, bloqueAviso(a, al, e, alCambiar, { conEnlace: true })))
+    );
 
-  const activos = delTipo(e.activos), silenciados = delTipo(e.silenciados);
-  reemplazar(raiz, ...[
-    volver,
-    etiquetaTipo('seguimiento', 'Seguimiento'),
-    el('h2', { class: 'seccion' }, `${TITULO_TIPO[tipo]} · ${alumnosTexto(activos.length).toLowerCase()}`),
-    el('p', { class: 'sub', id: 'av-periodo' }, textoPeriodo(e)),
-    el('p', { class: 'sub' }, 'Es solo un aviso. Cada alumno indica el motivo.'),
-    estado,
-    activos.length ? lista(activos, 'Alumnos con este aviso') : el('div', { class: 'card', id: 'av-nadie' }, el('p', { class: 'sub' }, 'Ningún alumno tiene este aviso ahora mismo.')),
-    silenciados.length && el('h3', { class: 'sub-titulo', id: 'av-sil-titulo' }, `Silenciados (${silenciados.length})`),
-    silenciados.length && lista(silenciados, 'Avisos silenciados'),
-    el('p', { class: 'sub' }, 'Puedes cambiar los límites en Ajustes. Los silencios se guardan solo en este móvil.'),
-  ].filter(Boolean));
+  const activos = delTipo(e.activos),
+    silenciados = delTipo(e.silenciados);
+  reemplazar(
+    raiz,
+    ...[
+      volver,
+      etiquetaTipo('seguimiento', 'Seguimiento'),
+      el('h2', { class: 'seccion' }, `${TITULO_TIPO[tipo]} · ${alumnosTexto(activos.length).toLowerCase()}`),
+      el('p', { class: 'sub', id: 'av-periodo' }, textoPeriodo(e)),
+      el('p', { class: 'sub' }, 'Es solo un aviso. Cada alumno indica el motivo.'),
+      estado,
+      activos.length
+        ? lista(activos, 'Alumnos con este aviso')
+        : el('div', { class: 'card', id: 'av-nadie' }, el('p', { class: 'sub' }, 'Ningún alumno tiene este aviso ahora mismo.')),
+      silenciados.length && el('h3', { class: 'sub-titulo', id: 'av-sil-titulo' }, `Silenciados (${silenciados.length})`),
+      silenciados.length && lista(silenciados, 'Avisos silenciados'),
+      el('p', { class: 'sub' }, 'Puedes cambiar los límites en Ajustes. Los silencios se guardan solo en este móvil.')
+    ].filter(Boolean)
+  );
 }
 
 /* ---- Ficha del alumno ---- */
@@ -179,13 +322,18 @@ export function tarjetaAvisosAlumno(alumno, d) {
     const e = estadoAvisos(d);
     const suyos = e ? avisosDe(e.avisos, alumno.id) : [];
     seccion.hidden = !suyos.length;
-    if (!suyos.length) { reemplazar(seccion); return; }
-    reemplazar(seccion, 
+    if (!suyos.length) {
+      reemplazar(seccion);
+      return;
+    }
+    reemplazar(
+      seccion,
       etiquetaTipo('seguimiento', 'Seguimiento'),
       el('h2', { id: 'al-av-titulo' }, suyos.length === 1 ? 'Aviso' : 'Avisos'),
       el('p', { class: 'sub' }, 'Es solo un aviso.'),
       mensaje && el('p', { class: 'ok', role: 'status', id: 'al-av-estado' }, mensaje),
-      ...suyos.map(a => el('div', { class: 'aviso-ficha' }, bloqueAviso(a, alumno, e, pintar, { conEnlace: false }))));
+      ...suyos.map(a => el('div', { class: 'aviso-ficha' }, bloqueAviso(a, alumno, e, pintar, { conEnlace: false })))
+    );
   };
   pintar('');
   return seccion;

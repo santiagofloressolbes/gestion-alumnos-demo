@@ -7,40 +7,80 @@ import { VERSION } from '../version.js';
 import { tarjetaAvisos, tarjetaFirma } from './ajustes-prefs.js';
 import { plegable } from './plegable.js';
 
-export const AVISO_LEGAL = 'Proyecto personal de demostración. Todos los datos son ficticios. No afiliado a LaLiga ni a LaLiga Business School.';
+export const AVISO_LEGAL =
+  'Proyecto personal de demostración. Todos los datos son ficticios. No afiliado a LaLiga ni a LaLiga Business School.';
 
 export function pintarAjustes(raiz) {
   const demo = getModo() === 'demo';
   const resultado = el('p', { class: 'sub', role: 'status', id: 'aj-resultado' });
-  const buscar = el('button', { class: 'secondary', type: 'button', id: 'aj-buscar', onclick: async () => {
-    resultado.textContent = '';
-    const liberar = ocupar([buscar], buscar, 'Buscando…');
-    const r = await buscarActualizacion({ alEncontrar: v => { buscar.textContent = 'Actualizando…'; resultado.textContent = `Hay una versión nueva (${v}). Cargándola…`; } });
-    if (r.estado === 'nueva') return;   // la app se recarga sola
-    liberar();
-    resultado.textContent = r.estado === 'al-dia' ? `Ya tienes la última versión (${r.version}).`
-      : 'No se ha podido comprobar si hay una versión nueva. Inténtalo otra vez en un momento.';
-  } }, 'Buscar actualización');
+  const buscar = el(
+    'button',
+    {
+      class: 'secondary',
+      type: 'button',
+      id: 'aj-buscar',
+      onclick: async () => {
+        resultado.textContent = '';
+        const liberar = ocupar([buscar], buscar, 'Buscando…');
+        const r = await buscarActualizacion({
+          alEncontrar: v => {
+            buscar.textContent = 'Actualizando…';
+            resultado.textContent = `Hay una versión nueva (${v}). Cargándola…`;
+          }
+        });
+        if (r.estado === 'nueva') return; // la app se recarga sola
+        liberar();
+        resultado.textContent =
+          r.estado === 'al-dia'
+            ? `Ya tienes la última versión (${r.version}).`
+            : 'No se ha podido comprobar si hay una versión nueva. Inténtalo otra vez en un momento.';
+      }
+    },
+    'Buscar actualización'
+  );
 
-  reemplazar(raiz, 
-    plegable({ id: 'aj-conexion', clave: 'conexion', idTitulo: 'cx-titulo', titulo: 'Conexión', clase: 'conexion' },
-      el('p', { class: 'sub' }, demo
-        ? 'Estás viendo la demo, con datos de ejemplo de la app. No se puede guardar nada.'
-        : 'Conectado a los datos. La dirección y la clave se guardan solo en este móvil.'),
+  reemplazar(
+    raiz,
+    plegable(
+      { id: 'aj-conexion', clave: 'conexion', idTitulo: 'cx-titulo', titulo: 'Conexión', clase: 'conexion' },
+      el(
+        'p',
+        { class: 'sub' },
+        demo
+          ? 'Estás viendo la demo, con datos de ejemplo de la app. No se puede guardar nada.'
+          : 'Conectado a los datos. La dirección y la clave se guardan solo en este móvil.'
+      ),
       demo
         ? el('a', { class: 'secondary', href: '#/acceso' }, 'Conectar con los datos')
-        : el('button', { class: 'secondary', type: 'button', id: 'aj-olvidar', onclick: () => {
-            if (!confirm('¿Olvidar el acceso en este móvil? Tendrás que volver a escribir la dirección y la clave.')) return;
-            olvidarAcceso();
-            location.replace(location.pathname);
-          } }, 'Olvidar acceso')),
+        : el(
+            'button',
+            {
+              class: 'secondary',
+              type: 'button',
+              id: 'aj-olvidar',
+              onclick: () => {
+                if (!confirm('¿Olvidar el acceso en este móvil? Tendrás que volver a escribir la dirección y la clave.')) return;
+                olvidarAcceso();
+                location.replace(location.pathname);
+              }
+            },
+            'Olvidar acceso'
+          )
+    ),
     tarjetaAvisos(),
     tarjetaFirma(),
-    plegable({ id: 'aj-version-tarjeta', clave: 'version', idTitulo: 'ver-titulo', titulo: 'Versión de la app' },
+    plegable(
+      { id: 'aj-version-tarjeta', clave: 'version', idTitulo: 'ver-titulo', titulo: 'Versión de la app' },
       el('p', { class: 'version', id: 'aj-version' }, 'Versión ' + VERSION),
       el('p', { class: 'sub' }, '¿No ves los últimos cambios? Pulsa aquí para traerlos. No hace falta cerrar la app.'),
-      buscar, resultado),
-    el('section', { class: 'card', 'aria-labelledby': 'av-titulo' },
+      buscar,
+      resultado
+    ),
+    el(
+      'section',
+      { class: 'card', 'aria-labelledby': 'av-titulo' },
       el('h2', { id: 'av-titulo' }, 'Aviso'),
-      el('p', { class: 'sub', id: 'aj-aviso' }, AVISO_LEGAL)));
+      el('p', { class: 'sub', id: 'aj-aviso' }, AVISO_LEGAL)
+    )
+  );
 }

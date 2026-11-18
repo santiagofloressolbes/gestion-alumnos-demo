@@ -10,7 +10,9 @@ async function descargar(url) {
     const r = await fetch(url, { signal: ctl.signal, cache: 'no-cache', referrerPolicy: 'no-referrer' });
     if (!r.ok) throw new Error('HTTP ' + r.status);
     return await r.text();
-  } finally { clearTimeout(reloj); }
+  } finally {
+    clearTimeout(reloj);
+  }
 }
 
 // Devuelve { cabecera: [...], filas: [[...], ...] } de una hoja.
@@ -22,24 +24,39 @@ async function hoja(nombre) {
 
 // Una hoja OPCIONAL: si no se puede leer, es null (la app sigue con las reglas de respaldo).
 async function hojaOpcional(nombre) {
-  try { return await hoja(nombre); } catch { return null; }
+  try {
+    return await hoja(nombre);
+  } catch {
+    return null;
+  }
 }
 
 export function crearFuenteCSV(esquemas) {
   return {
     async cargar() {
       const claves = Object.keys(esquemas.HOJAS_MATCH);
-      const [a, o, l, r, ap, h, ...extra] = await Promise.all([hoja('Alumnos'), hoja('Ofertas'), hoja('Listas'), hoja('Rondas'), hoja('Aplicaciones'), hoja('Historial'), ...claves.map(hojaOpcional)]);
+      const [a, o, l, r, ap, h, ...extra] = await Promise.all([
+        hoja('Alumnos'),
+        hoja('Ofertas'),
+        hoja('Listas'),
+        hoja('Rondas'),
+        hoja('Aplicaciones'),
+        hoja('Historial'),
+        ...claves.map(hojaOpcional)
+      ]);
       return {
         alumnos: aObjetos('Alumnos', a, esquemas.ALUMNO, esquemas.ALUMNO_OPC),
         ofertas: aObjetos('Ofertas', o, esquemas.OFERTA, esquemas.OFERTA_OPC),
-        listas: { ...aListas(l, esquemas.LISTAS, esquemas.ALIAS_LISTAS), match: aReglasMatch(Object.fromEntries(claves.map((k, i) => [k, extra[i]])), esquemas.HOJAS_MATCH) },
+        listas: {
+          ...aListas(l, esquemas.LISTAS, esquemas.ALIAS_LISTAS),
+          match: aReglasMatch(Object.fromEntries(claves.map((k, i) => [k, extra[i]])), esquemas.HOJAS_MATCH)
+        },
         rondas: aObjetos('Rondas', r, esquemas.RONDA),
         aplicaciones: aObjetos('Aplicaciones', ap, esquemas.APLICACION),
         historial: aObjetos('Historial', h, esquemas.HISTORIAL),
         conRondas: true,
-        puedeEscribir: false,
+        puedeEscribir: false
       };
-    },
+    }
   };
 }

@@ -19,7 +19,7 @@ function textoDe(o) {
 const masReciente = (x, y) => (y.fechaRecepcion || '').localeCompare(x.fechaRecepcion || '') || y.id.localeCompare(x.id);
 
 export function filtrar(ofertas, e) {
-  const palabras = norm(e.texto).split(/\s+/).filter(Boolean);   // todas deben aparecer
+  const palabras = norm(e.texto).split(/\s+/).filter(Boolean); // todas deben aparecer
   return ofertas
     .filter(o => palabras.every(p => textoDe(o).includes(p)))
     .filter(o => !e.estado || o.estado === e.estado)
@@ -48,7 +48,7 @@ export const CAMPOS = [
   { clave: 'subarea', etiqueta: 'Subárea', max: 100, perfil: true, obligatorio: false },
   { clave: 'etiquetas', etiqueta: 'Habilidades del puesto', max: 300, perfil: true, obligatorio: false },
   { clave: 'idiomas', etiqueta: 'Idiomas', max: 200, perfil: true, obligatorio: false },
-  { clave: 'nivelFormacion', etiqueta: 'Nivel de formación', max: 40, perfil: true, fijo: true, obligatorio: false },
+  { clave: 'nivelFormacion', etiqueta: 'Nivel de formación', max: 40, perfil: true, fijo: true, obligatorio: false }
 ];
 // Los campos que se envían al script: sin el perfil si el script no sabe guardarlo.
 export const camposActivos = conPerfil => (conPerfil ? CAMPOS : CAMPOS.filter(c => !c.perfil));
@@ -56,17 +56,30 @@ export const camposActivos = conPerfil => (conPerfil ? CAMPOS : CAMPOS.filter(c 
 export const NIVELES_FORMACION = ['Sin requisito', 'Grado', 'Máster', 'Doctorado'];
 export const MAX_ETIQUETAS = 8;
 export const MAX_IDIOMAS = 6;
-const GRUPO_DE_GRUPOS = 'Grupo de países';   // filas de la hoja Países que no son un país (p. ej. «Unión Europea (UE/EEE)»)
+const GRUPO_DE_GRUPOS = 'Grupo de países'; // filas de la hoja Países que no son un país (p. ej. «Unión Europea (UE/EEE)»)
 // Idioma y, si se quiere, nivel (A1–C2 o «nativo»): «Inglés B2». El mismo formato que acepta el script y que entiende el match.
 const IDIOMA = /^([A-Za-zÀ-ÖØ-öø-ÿ][A-Za-zÀ-ÖØ-öø-ÿ .'-]{0,29}?)(?:\s+(A1|A2|B1|B2|C1|C2|nativo))?$/i;
 
 // Una lista escrita en una celda: valores separados por «;» o «,».
-export const partesLista = t => String(t ?? '').split(/[;,]/).map(x => x.trim()).filter(Boolean);
-const unicos = xs => { const vistos = new Set(); return xs.filter(x => { const k = norm(x); if (vistos.has(k)) return false; vistos.add(k); return true; }); };
+export const partesLista = t =>
+  String(t ?? '')
+    .split(/[;,]/)
+    .map(x => x.trim())
+    .filter(Boolean);
+const unicos = xs => {
+  const vistos = new Set();
+  return xs.filter(x => {
+    const k = norm(x);
+    if (vistos.has(k)) return false;
+    vistos.add(k);
+    return true;
+  });
+};
 
 // '' si los idiomas están bien; si no, el código del error ('idiomas' = formato; 'demasiadas').
 function revisarIdiomas(t) {
-  const ps = partesLista(t), vistos = new Set();
+  const ps = partesLista(t),
+    vistos = new Set();
   for (const p of ps) {
     const m = IDIOMA.exec(p);
     if (!m) return 'idiomas';
@@ -88,21 +101,42 @@ export function apoyoPerfil(listas) {
   const subareas = (m.areas || []).filter(a => a.subarea).map(a => ({ area: a.area, subarea: a.subarea }));
   const etiquetas = unicos((m.etiquetas || []).map(e => e.etiqueta ?? e).filter(Boolean)).sort((a, b) => a.localeCompare(b, 'es'));
   // Nacionalidad que pide una oferta: las filas de grupo primero y después países de Países ∪ Listas > Nacionalidad (el script valida contra las dos).
-  const resto = unicos([...paises, ...(listas?.nacionalidades || [])].filter(x => !grupos.some(g => norm(g) === norm(x)))).sort((a, b) => a.localeCompare(b, 'es'));
+  const resto = unicos([...paises, ...(listas?.nacionalidades || [])].filter(x => !grupos.some(g => norm(g) === norm(x)))).sort((a, b) =>
+    a.localeCompare(b, 'es')
+  );
   return { paises, subareas, etiquetas, grupos, nacionalidades: [...grupos, ...resto] };
 }
 
 // Avisos (no bloquean): algo del perfil que no está en la lista de su hoja. Si esa hoja existe, el script lo rechazará al guardar.
 export function avisosPerfil(v, listas) {
-  const a = apoyoPerfil(listas), fuera = [];
+  const a = apoyoPerfil(listas),
+    fuera = [];
   const no = (lista, x) => !lista.some(y => norm(y) === norm(x));
-  if (v.paisOferta && a.paises.length && no(a.paises, v.paisOferta)) fuera.push({ campo: 'paisOferta', texto: `El país «${v.paisOferta}» no está en la lista de países. Elige uno de la lista o avisa a quien administra la app.` });
+  if (v.paisOferta && a.paises.length && no(a.paises, v.paisOferta))
+    fuera.push({
+      campo: 'paisOferta',
+      texto: `El país «${v.paisOferta}» no está en la lista de países. Elige uno de la lista o avisa a quien administra la app.`
+    });
   if (v.subarea && a.subareas.length) {
     const filas = a.subareas.filter(s => norm(s.subarea) === norm(v.subarea));
-    if (!filas.length) fuera.push({ campo: 'subarea', texto: `La subárea «${v.subarea}» no está en la lista de subáreas. Elige una de la lista o avisa a quien administra la app.` });
-    else if (v.area && !filas.some(s => norm(s.area) === norm(v.area))) fuera.push({ campo: 'subarea', texto: `La subárea «${v.subarea}» es de «${filas[0].area}», no de «${v.area}». Se puede guardar, pero conviene revisarlo.` });
+    if (!filas.length)
+      fuera.push({
+        campo: 'subarea',
+        texto: `La subárea «${v.subarea}» no está en la lista de subáreas. Elige una de la lista o avisa a quien administra la app.`
+      });
+    else if (v.area && !filas.some(s => norm(s.area) === norm(v.area)))
+      fuera.push({
+        campo: 'subarea',
+        texto: `La subárea «${v.subarea}» es de «${filas[0].area}», no de «${v.area}». Se puede guardar, pero conviene revisarlo.`
+      });
   }
-  if (a.etiquetas.length) for (const e of partesLista(v.etiquetas)) if (no(a.etiquetas, e)) fuera.push({ campo: 'etiquetas', texto: `La habilidad «${e}» no está en la lista de habilidades. Quítala o avisa a quien administra la app.` });
+  if (a.etiquetas.length)
+    for (const e of partesLista(v.etiquetas))
+      if (no(a.etiquetas, e))
+        fuera.push({
+          campo: 'etiquetas',
+          texto: `La habilidad «${e}» no está en la lista de habilidades. Quítala o avisa a quien administra la app.`
+        });
   return fuera;
 }
 const ETIQUETA = Object.fromEntries(CAMPOS.map(c => [c.clave, c.etiqueta]));
@@ -110,28 +144,45 @@ const MAX = Object.fromEntries(CAMPOS.filter(c => c.max).map(c => [c.clave, c.ma
 const ISO = /^(\d{4})-(\d{2})-(\d{2})$/;
 export const miles = n => String(n).replace(/\B(?=(\d{3})+(?!\d))/g, '.');
 
-export const normalizarTexto = t => String(t ?? '').replace(/\r\n?/g, '\n').trim();
+export const normalizarTexto = t =>
+  String(t ?? '')
+    .replace(/\r\n?/g, '\n')
+    .trim();
 
 // Texto para la persona según el código de error (el mismo que usa el script) y el campo.
 export function mensajeCampo(codigo, clave) {
   const c = `«${ETIQUETA[clave] || 'Un campo'}»`;
   switch (codigo) {
-    case 'requerido': { const f = CAMPOS.find(x => x.clave === clave); return f?.lista || f?.fecha ? `Elige ${c}.` : `Falta ${c}.`; }
-    case 'caracteres': return `${c} no admite saltos de línea ni caracteres raros.`;
-    case 'html': return `${c} lleva un «<» seguido de una letra o una barra, y la app lo toma por código. Quítalo y vuelve a guardar.`;
-    case 'largo': return `${c} es demasiado larga (máximo ${miles(MAX[clave] || 0)} caracteres).`;
+    case 'requerido': {
+      const f = CAMPOS.find(x => x.clave === clave);
+      return f?.lista || f?.fecha ? `Elige ${c}.` : `Falta ${c}.`;
+    }
+    case 'caracteres':
+      return `${c} no admite saltos de línea ni caracteres raros.`;
+    case 'html':
+      return `${c} lleva un «<» seguido de una letra o una barra, y la app lo toma por código. Quítalo y vuelve a guardar.`;
+    case 'largo':
+      return `${c} es demasiado larga (máximo ${miles(MAX[clave] || 0)} caracteres).`;
     case 'lista': {
       const hoja = { paisOferta: 'Países', subarea: 'Áreas', etiquetas: 'Etiquetas' }[clave];
       if (clave === 'nivelFormacion') return `${c}: elige Sin requisito, Grado, Máster o Doctorado.`;
       if (clave === 'requisitoNacionalidad') return `${c}: elige un valor de la lista. Si no está, avisa a quien administra la app.`;
-      return hoja ? `${c}: hay un valor que no está en la lista. Elige uno de la lista o avisa a quien administra la app.` : `${c}: elige un valor de la lista. Si no está, avisa a quien administra la app.`;
+      return hoja
+        ? `${c}: hay un valor que no está en la lista. Elige uno de la lista o avisa a quien administra la app.`
+        : `${c}: elige un valor de la lista. Si no está, avisa a quien administra la app.`;
     }
-    case 'demasiadas': return clave === 'etiquetas' ? `${c}: máximo ${MAX_ETIQUETAS} habilidades.` : `${c}: máximo ${MAX_IDIOMAS} idiomas.`;
-    case 'idiomas': return `${c}: escribe cada idioma con su nivel (A1–C2 o nativo), separados por «;». Por ejemplo: «Inglés B2; Español nativo». No repitas un idioma.`;
-    case 'fecha': return `${c}: elige una fecha válida.`;
-    case 'fecha-futura': return `${c} no puede ser futura.`;
-    case 'enlace': return `${c} no puede empezar por http: ni por otros prefijos raros. Usa https:// o escribe una descripción.`;
-    default: return '';
+    case 'demasiadas':
+      return clave === 'etiquetas' ? `${c}: máximo ${MAX_ETIQUETAS} habilidades.` : `${c}: máximo ${MAX_IDIOMAS} idiomas.`;
+    case 'idiomas':
+      return `${c}: escribe cada idioma con su nivel (A1–C2 o nativo), separados por «;». Por ejemplo: «Inglés B2; Español nativo». No repitas un idioma.`;
+    case 'fecha':
+      return `${c}: elige una fecha válida.`;
+    case 'fecha-futura':
+      return `${c} no puede ser futura.`;
+    case 'enlace':
+      return `${c} no puede empezar por http: ni por otros prefijos raros. Usa https:// o escribe una descripción.`;
+    default:
+      return '';
   }
 }
 
@@ -147,11 +198,19 @@ export function validarOferta(v, listas, hoy) {
   for (const f of CAMPOS) {
     const x = v[f.clave];
     const mal = codigo => ({ campo: f.clave, codigo, mensaje: mensajeCampo(codigo, f.clave) });
-    if (!x) { if (f.obligatorio) return mal('requerido'); continue; }
+    if (!x) {
+      if (f.obligatorio) return mal('requerido');
+      continue;
+    }
     if (/[\u0000-\u001F\u007F]/.test(x)) return mal('caracteres');
     if (/<[\/!?a-zA-Z]/.test(x)) return mal('html');
     if (f.max && x.length > f.max) return mal('largo');
-    if (f.lista && !(listas[f.lista] || []).includes(x) && !(f.clave === 'requisitoNacionalidad' && apoyoPerfil(listas).nacionalidades.includes(x))) return mal('lista');
+    if (
+      f.lista &&
+      !(listas[f.lista] || []).includes(x) &&
+      !(f.clave === 'requisitoNacionalidad' && apoyoPerfil(listas).nacionalidades.includes(x))
+    )
+      return mal('lista');
     if (f.fijo && !NIVELES_FORMACION.includes(x)) return mal('lista');
     if (f.clave === 'idiomas' && revisarIdiomas(x)) return mal(revisarIdiomas(x));
     if (f.clave === 'etiquetas' && revisarEtiquetas(x)) return mal('demasiadas');
@@ -172,7 +231,11 @@ export function enlaceOferta(texto) {
   const t = String(texto ?? '').trim();
   if (!t) return { tipo: 'nada' };
   let url;
-  try { url = new URL(t); } catch { return { tipo: 'texto', texto: t }; }
+  try {
+    url = new URL(t);
+  } catch {
+    return { tipo: 'texto', texto: t };
+  }
   if (url.protocol !== 'https:') return { tipo: 'texto', texto: t };
   if (/(^|\.)example\.(com|org|net)$/i.test(url.hostname)) return { tipo: 'ejemplo', texto: t };
   return { tipo: 'enlace', href: url.href, texto: t };

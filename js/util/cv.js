@@ -4,7 +4,11 @@
 // - Vacío o con otro formato (javascript:, data:...): no hay botón.
 export function enlaceCV(alumno) {
   let url;
-  try { url = new URL(alumno.enlaceCV); } catch { return null; }
+  try {
+    url = new URL(alumno.enlaceCV);
+  } catch {
+    return null;
+  }
   if (url.protocol !== 'https:' && url.protocol !== 'http:') return null;
   if (/(^|\.)example\.(com|org|net)$/i.test(url.hostname)) return { href: '#/cv/' + encodeURIComponent(alumno.id), externo: false };
   return { href: url.href, externo: true };
