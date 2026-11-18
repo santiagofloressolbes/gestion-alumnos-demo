@@ -15,7 +15,7 @@ concurrency:
 
 jobs:
   pruebas:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04   # fijo: Playwright 1.56 no soporta aún la imagen de ubuntu-latest (Ubuntu 26)
     timeout-minutes: 45
     env:
       NAVEGADOR: chromium   # el Chromium que instala Playwright (en local se usa Edge)
