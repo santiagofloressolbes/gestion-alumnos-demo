@@ -1,0 +1,36 @@
+# Integración continua: ejecuta todas las pruebas en cada push y en cada pull request.
+# Las pruebas abren un navegador de verdad contra un Google simulado: no hay claves ni datos reales.
+name: CI
+
+on:
+  push:
+  pull_request:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  pruebas:
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    env:
+      NAVEGADOR: chromium   # el Chromium que instala Playwright (en local se usa Edge)
+      TZ: Europe/Madrid
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: npm
+      - run: npm ci
+      - name: Navegador de Playwright (con caché)
+        uses: actions/cache@v4
+        with:
+          path: ~/.cache/ms-playwright
+          key: playwright-${{ runner.os }}-${{ hashFiles('package-lock.json') }}
+      - run: npx playwright install --with-deps chromium
+      - run: npm test

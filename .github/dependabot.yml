@@ -1,0 +1,13 @@
+# Avisos mensuales de versiones nuevas: acciones de GitHub y dependencias de desarrollo.
+# La app no tiene dependencias de ejecución: todo lo de npm es solo para desarrollo.
+version: 2
+updates:
+  - package-ecosystem: github-actions
+    directory: /
+    schedule:
+      interval: monthly
+  - package-ecosystem: npm
+    directory: /
+    schedule:
+      interval: monthly
+    open-pull-requests-limit: 3
