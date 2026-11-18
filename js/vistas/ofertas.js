@@ -6,7 +6,7 @@ import { desplegable } from './desplegable.js';
 import { filtrar, estadoVacio, filtrosActivos, hayAlgo, enlaceOferta } from '../util/ofertas.js';
 import { fechaLarga } from './entrevista.js';
 import { tarjetaError } from './error-datos.js';
-import { datosRondas, seccionesRondas } from './rondas.js';
+import { datosRondas, seccionesRondas, tarjetaQuienHaSolicitado } from './rondas.js';
 import { tarjetaAlumnosQueEncajan } from './match.js';
 
 const e = estadoVacio();   // búsqueda y filtros: se conservan al entrar en una oferta y volver
@@ -172,6 +172,8 @@ export async function pintarOferta(raiz, id) {
       el('h2', {}, enlace.tipo === 'enlace' ? 'Enlace' : 'Descripción'),
       el('dl', { class: 'campos' },
         campo(enlace.tipo === 'ejemplo' ? 'Enlace de ejemplo (no se abre)' : enlace.tipo === 'enlace' ? 'Dirección' : 'Texto', enlace.texto, { texto: true }))),
+
+    tarjetaQuienHaSolicitado(o, d),
 
     ...seccionesRondas(o, d),
 

@@ -153,6 +153,7 @@ button:disabled{opacity:.7;cursor:progress}
 
 /* ---------- Ofertas ---------- */
 .insignia{display:inline-flex;align-items:center;min-height:1.75rem;padding:0 .75rem;border-radius:6.1875rem;background:var(--inp);color:var(--cink);border:1.5px solid var(--line);font-size:.8125rem;font-weight:700}
+.insignia{max-width:100%;overflow-wrap:anywhere}
 .insignia.abierta{border-color:var(--tab-on);color:var(--tab-on)}   /* el rojo solo como texto/borde, nunca texto sobre rojo */
 .alumno.oferta{align-items:flex-start}
 .oferta .alumno-texto{gap:.125rem}

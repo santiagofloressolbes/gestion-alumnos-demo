@@ -3,7 +3,8 @@ import { getAlumnos, getOfertas, getListas, getRondas, getAplicaciones, getHisto
 import { navegacion } from '../util/navegacion.js';
 import { el, svgFlecha, plural, reemplazar } from '../util/dom.js';
 import { tipoDeEstado } from '../util/correo.js';
-import { rondasDeOferta, aplicacionesDeRonda, aplicacionesDeAlumno, resumenEstados, historialDe, nombreAlumno, claseEstado, ESTADO_DESCARTE } from '../util/rondas.js';
+import { rondasDeOferta, aplicacionesDeRonda, aplicacionesDeAlumno, resumenEstados, historialDe, nombreAlumno, claseEstado, solicitantesDeOferta, ESTADO_DESCARTE } from '../util/rondas.js';
+import { contextoDe, evaluar } from '../util/match.js';
 import { fechaLarga } from './entrevista.js';
 import { tarjetaError } from './error-datos.js';
 
@@ -43,6 +44,47 @@ function filaAplicacion(a, d, desde) {
         a.estado === ESTADO_DESCARTE && a.motivo && el('span', { class: 'sub' }, a.motivo),
         a.fecha && el('span', { class: 'sub' }, fechaLarga(a.fecha)))),
     svgFlecha()));
+}
+
+/* ---- Ficha de la oferta: quién ha solicitado (v32) ---- */
+
+// Una fila por alumno, con su solicitud más reciente. Solo estado, ronda y programa: nunca notas ni motivos de descarte.
+// Quien solicitó pero encaja poco con la oferta sigue aquí (con su marca): el match no esconde a nadie.
+const POR_PAGINA_SOLICITANTES = 15;
+const listaRondas = ns => (ns.length === 1 ? 'la ronda ' + ns[0] : 'las rondas ' + ns.slice(0, -1).join(', ') + ' y ' + ns[ns.length - 1]);
+
+export function tarjetaQuienHaSolicitado(oferta, d) {
+  if (!d.hay) return null;
+  const s = solicitantesDeOferta(d.aplicaciones, d.alumnos, oferta.id);
+  if (!s.totalAlumnos) return null;
+  const ctx = contextoDe(d.listas);
+  const fila = f => {
+    const al = f.alumno, a = f.app;
+    const poco = al && evaluar(al, oferta, ctx).categoria === 'no';
+    return el('li', {}, el('a', { class: 'alumno oferta', href: '#/aplicacion/' + encodeURIComponent(a.id), onclick: mover('oferta') },
+      el('span', { class: 'alumno-texto' },
+        el('b', {}, al ? nombreAlumno(al) : `(alumno ${f.idAlumno}: sin dato)`),
+        al?.master && el('span', { class: 'sub' }, al.master),
+        el('span', { class: 'sub' }, ['Ronda ' + a.numeroRonda, f.otrasRondas.length > 0 && 'también en ' + listaRondas(f.otrasRondas)].filter(Boolean).join(' · ')),
+        el('span', { class: 'oferta-pie' }, insigniaEstado(a.estado), poco && el('span', { class: 'insignia' }, 'Encaja poco'))),
+      svgFlecha()));
+  };
+  const lista = el('ul', { class: 'alumnos', 'aria-label': 'Alumnos que han solicitado' });
+  let pintadas = 0;
+  const mas = el('button', { class: 'secondary', type: 'button', id: 'qs-mas', onclick: () => pintar() });
+  const pintar = () => {
+    for (const f of s.filas.slice(pintadas, pintadas + POR_PAGINA_SOLICITANTES)) lista.append(fila(f));
+    pintadas = Math.min(s.filas.length, pintadas + POR_PAGINA_SOLICITANTES);
+    const quedan = s.filas.length - pintadas;
+    mas.hidden = quedan === 0;
+    mas.textContent = `Ver ${Math.min(quedan, POR_PAGINA_SOLICITANTES)} más`;
+  };
+  pintar();
+  return el('section', { class: 'card', id: 'quien-solicito', 'aria-labelledby': 'qs-titulo' },
+    el('h2', { id: 'qs-titulo' }, 'Quién ha solicitado'),
+    el('p', { class: 'sub' }, `${plural(s.totalSolicitudes, 'solicitud', 'solicitudes')} de ${plural(s.totalAlumnos, 'alumno', 'alumnos')}. Estado actual de cada alumno:`),
+    el('div', { class: 'chips resumen', id: 'qs-resumen' }, s.porEstado.map(x => el('span', { class: 'chip' }, `${x.estado}: ${x.n}`))),
+    lista, mas);
 }
 
 /* ---- Ficha de la oferta: sus rondas ---- */
