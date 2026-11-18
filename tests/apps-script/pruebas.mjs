@@ -7,7 +7,6 @@ let fallos = 0, total = 0;
 const ok = (cond, texto) => { total++; if (!cond) fallos++; console.log((cond ? 'OK  ' : 'MAL ') + texto); };
 const igual = (a, b, texto) => ok(JSON.stringify(a) === JSON.stringify(b), texto + (JSON.stringify(a) === JSON.stringify(b) ? '' : `  → obtenido ${JSON.stringify(a)}, esperado ${JSON.stringify(b)}`));
 const titulo = t => console.log('\n' + t);
-const todasLasRespuestas = [];   // para comprobar al final que ninguna filtra la clave
 
 const base = (m, extra = {}) => ({ key: m.clave, ...extra });
 const guardar = (m, id, notas, fecha, ant = { n: '', f: '' }, extra = {}) =>
