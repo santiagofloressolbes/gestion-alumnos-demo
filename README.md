@@ -93,3 +93,4 @@ Al abrir la app por primera vez, se elige una de las dos:
 | [docs/DECISIONES.md](docs/DECISIONES.md) | Quien mantiene la app | Qué se decidió, por qué, y los riesgos conocidos. |
 | [AVISO-DERECHOS.md](AVISO-DERECHOS.md) | Cualquier persona | Qué se puede y qué no se puede hacer con el código: todos los derechos reservados. |
 | [SECURITY.md](SECURITY.md) | Quien encuentra un fallo de seguridad | Cómo informar de él de forma privada. |
+| [CONTRIBUTING.md](CONTRIBUTING.md) | Quien mantiene la app | Cómo ejecutar las pruebas, convención de commits, estilo del código y cómo subir de versión. |
