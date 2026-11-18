@@ -30,6 +30,28 @@ export function resumenEstados(apps, orden = []) {
   return claves.map(estado => ({ estado, n: cuenta.get(estado) }));
 }
 
+// Quién ha solicitado una oferta (v32): una fila por alumno, con su solicitud MÁS RECIENTE (fecha, y a igual fecha la ronda mayor) y las otras rondas en las que también está.
+// Orden: de más avanzado a menos (Contratado, Entrevista, Enviada a la empresa, En revisión, Recibida); un estado que no conozca va antes de Descartado; Descartado, al final.
+// Dentro de cada estado, la solicitud más reciente primero. No lee notas ni motivos: solo estado, fecha y ronda.
+export const ORDEN_AVANCE = Object.freeze(['Contratado', 'Entrevista', 'Enviada a la empresa', 'En revisión', 'Recibida']);
+const rangoEstado = estado => (estado === ESTADO_DESCARTE ? ORDEN_AVANCE.length + 1 : ORDEN_AVANCE.includes(estado) ? ORDEN_AVANCE.indexOf(estado) : ORDEN_AVANCE.length);
+export function solicitantesDeOferta(apps, alumnos, idOferta) {
+  const propias = (Array.isArray(apps) ? apps : []).filter(a => a.idOferta === idOferta);
+  const porAlumno = new Map();
+  for (const a of propias) porAlumno.set(a.idAlumno, [...(porAlumno.get(a.idAlumno) || []), a]);
+  const reciente = (x, y) => (y.fecha || '').localeCompare(x.fecha || '') || num(y.numeroRonda) - num(x.numeroRonda) || y.id.localeCompare(x.id);
+  const filas = [...porAlumno.entries()].map(([idAlumno, lista]) => {
+    const [app, ...resto] = [...lista].sort(reciente);
+    return { idAlumno, alumno: (alumnos || []).find(x => x.id === idAlumno) || null, app, otrasRondas: [...new Set(resto.map(x => num(x.numeroRonda)).filter(n => n !== num(app.numeroRonda)))].sort((p, q) => p - q) };
+  });
+  const nombre = f => (f.alumno ? nombreAlumno(f.alumno) : f.idAlumno);
+  filas.sort((x, y) => rangoEstado(x.app.estado) - rangoEstado(y.app.estado) || (y.app.fecha || '').localeCompare(x.app.fecha || '') || nombre(x).localeCompare(nombre(y), 'es'));
+  const cuenta = new Map();
+  for (const f of filas) cuenta.set(f.app.estado || 'Sin dato', (cuenta.get(f.app.estado || 'Sin dato') || 0) + 1);
+  const porEstado = [...cuenta.entries()].sort((x, y) => rangoEstado(x[0]) - rangoEstado(y[0])).map(([estado, n]) => ({ estado, n }));
+  return { totalSolicitudes: propias.length, totalAlumnos: filas.length, porEstado, filas };
+}
+
 // Las líneas del historial de una aplicación, en el orden en que se apuntaron.
 export const historialDe = (historial, idAplicacion) =>
   historial.filter(h => h.idAplicacion === idAplicacion).sort((x, y) => (x.fecha || '').localeCompare(y.fecha || '') || x.id.localeCompare(y.id));
