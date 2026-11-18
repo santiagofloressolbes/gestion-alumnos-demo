@@ -196,7 +196,7 @@ Cada valor escrito se guarda como **texto plano** (formato de celda texto). Si u
 | **Ningún secreto en el repositorio:** ni la clave ni la dirección del script. `Code.gs` público es una plantilla; cualquier otro `Code.gs` está en `.gitignore`. | Repo |
 | **Política de seguridad del contenido (CSP)** en `index.html`: solo código de la propia web; las únicas conexiones externas permitidas son `script.google.com` y `script.googleusercontent.com`; imágenes solo por https; sin formularios hacia fuera. | `index.html` |
 | **Ningún `innerHTML` ni estilos en línea:** todo texto de los datos se escribe como texto. Un valor con código HTML no se ejecuta. | Todo `js/` |
-| **Enlaces:** solo `https://` se abre, en otra pestaña y sin enviar de dónde vienes. `http:`, `javascript:` y similares se muestran como texto. | `js/util/ofertas.js`, `cv.js` |
+| **Enlaces:** solo `https://` se abre, en otra pestaña y sin enviar de dónde vienes, y sin usuario ni contraseña dentro de la dirección. `http:`, `javascript:` y similares se muestran como texto. Un único validador (`js/util/enlaces.js`) lo decide para el CV, las ofertas y compartir perfiles. | `js/util/enlaces.js`, `ofertas.js`, `cv.js`, `compartir.js` |
 | **Sin datos en el teléfono:** los datos solo están en memoria; lo escrito en un formulario no se guarda hasta pulsar Guardar. Una clave que el script rechaza se borra del teléfono. | `js/data/` |
 | **Aviso antes de perder cambios** al salir de un formulario. | `js/app.js` |
 | **Sin indexar:** `noindex` y `robots.txt`. (No hace la app privada.) | `index.html` |
@@ -244,6 +244,7 @@ Todos son aceptables **solo porque los datos son ficticios**.
 | La app: el match en pantalla (puntuación, «datos incompletos», aviso fijo, hojas que faltan o con filas raras, regla vieja) | 37 | (incluido en `npm test`) |
 | La app: CSV para importar al Sheet (iguales a los de la demo, columnas con su nombre exacto, todo lo usado está en las listas, todo en `sw.js`) | 36 | (incluido en `npm test`) |
 | La app: compartir perfiles (texto, "canarios" que nunca deben salir, vista previa = lo que se envía, Compartir, Copiar, sin menú, 320 px) | 81 | (incluido en `npm test`) |
+| La app: enlaces (solo https y sin usuario@, el CV, las ofertas y compartir usan el mismo validador; 3 roturas a propósito detectadas) | 60 | (incluido en `npm test`) |
 | La app: lectura de rondas y solicitudes | 108 | (incluido en `npm test`) |
 | La app: registrar rondas, añadir solicitudes y cambiar su estado | 156 | (incluido en `npm test`) |
 | La app: fallos al guardar (primer intento fallido, script ocupado, doble pulsación, botones "Guardando…", aviso flotante, pantalla que sube tras guardar) | 68 | (incluido en `npm test`) |

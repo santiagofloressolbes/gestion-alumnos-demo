@@ -1,5 +1,6 @@
 // Búsqueda, filtros y orden sobre la lista de ofertas (funciones puras: no tocan la pantalla).
 import { norm } from './texto.js';
+import { enlaceHttps, esDeEjemplo } from './enlaces.js';
 
 export const estadoVacio = () => ({ texto: '', estado: '', tipo: '', area: '' });
 
@@ -226,17 +227,12 @@ export function validarOferta(v, listas, hoy) {
 // Cómo se enseña el enlace de una oferta:
 // - https:// de ejemplo (example.com/.org/.net, los de los datos de prueba): solo texto, no se abre.
 // - https:// real: botón que se abre en otra pestaña, sin enviar de dónde vienes.
-// - Cualquier otro texto (una descripción, o un enlace http:, javascript:...): solo texto, nunca un enlace.
+// - Cualquier otro texto (una descripción, o un enlace http:, javascript:, con usuario@...): solo texto, nunca un enlace.
 export function enlaceOferta(texto) {
   const t = String(texto ?? '').trim();
   if (!t) return { tipo: 'nada' };
-  let url;
-  try {
-    url = new URL(t);
-  } catch {
-    return { tipo: 'texto', texto: t };
-  }
-  if (url.protocol !== 'https:') return { tipo: 'texto', texto: t };
-  if (/(^|\.)example\.(com|org|net)$/i.test(url.hostname)) return { tipo: 'ejemplo', texto: t };
-  return { tipo: 'enlace', href: url.href, texto: t };
+  const href = enlaceHttps(t);
+  if (!href) return { tipo: 'texto', texto: t };
+  if (esDeEjemplo(href)) return { tipo: 'ejemplo', texto: t };
+  return { tipo: 'enlace', href, texto: t };
 }

@@ -14,6 +14,7 @@ const FILES = [
   './js/vistas/alumno.js',
   './js/util/avatar.js',
   './js/util/cv.js',
+  './js/util/enlaces.js',
   './js/vistas/cv.js',
   './js/vistas/buscar.js',
   './js/util/texto.js',

@@ -2,6 +2,7 @@
 // Lo que no debe salir NUNCA (notas de entrevista, historial, motivos de descarte, claves) se comprueba con "canarios":
 // textos inventados metidos en esos campos, que no pueden aparecer en ningún texto, marquen lo que marquen.
 import * as C from '../../js/util/compartir.js';
+import { enlaceHttps } from '../../js/util/enlaces.js';
 import { nuevo, chk, terminar, BASE, URL_OK, CLAVE_PRUEBA } from './ayudas.mjs';
 
 const igual = (a, b, t) => chk(JSON.stringify(a) === JSON.stringify(b), t + (JSON.stringify(a) === JSON.stringify(b) ? '' : ` → obtenido ${JSON.stringify(a)}, esperado ${JSON.stringify(b)}`));
@@ -27,7 +28,7 @@ console.log('1. El texto (funciones puras)');
   igual(C.MAX_PERFILES, 10, 'el máximo es 10');
   chk(C.textoPerfiles({ alumnos: [a], campos: ['nombre'], oferta: { titulo: 'Becario/a', empresa: 'Club B' } }).split('\n')[1] === 'Oferta: Becario/a · Club B', 'desde una oferta, la nombra');
   // CV: solo https
-  for (const [u, esperado] of [['https://x.org/cv', 'https://x.org/cv'], ['http://x.org/cv', ''], ['javascript:alert(1)', ''], ['data:text/html,x', ''], ['ftp://x.org', ''], ['', ''], ['no es un enlace', ''], ['  https://x.org/a b  ', 'https://x.org/a%20b']]) igual(C.enlaceHttps(u), esperado, `CV "${u}" → "${esperado}"`);
+  for (const [u, esperado] of [['https://x.org/cv', 'https://x.org/cv'], ['http://x.org/cv', ''], ['javascript:alert(1)', ''], ['data:text/html,x', ''], ['ftp://x.org', ''], ['', ''], ['no es un enlace', ''], ['  https://x.org/a b  ', 'https://x.org/a%20b']]) igual(enlaceHttps(u), esperado, `CV "${u}" → "${esperado}"`);
   chk(!C.textoPerfiles({ alumnos: [{ ...a, enlaceCV: 'http://x.org/cv' }], campos: ['cv'] }).includes('http'), 'un CV con http no se incluye');
   igual(C.cvSinHttps([a, { ...a, nombre: 'Berta', enlaceCV: 'http://x.org' }], ['cv']), ['Berta Quintero'], 'avisa de a quién se le deja fuera el CV');
   // líneas inventadas desde el Sheet

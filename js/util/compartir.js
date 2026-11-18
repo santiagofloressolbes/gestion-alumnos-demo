@@ -3,6 +3,7 @@
 // no hay forma de que acaben en el texto, ni marcando casillas.
 
 import { historia, linea } from './historia.js';
+import { enlaceHttps } from './enlaces.js';
 
 export const MAX_PERFILES = 10;
 
@@ -29,15 +30,7 @@ export const CAMPOS_EXTRA = [
   }
 ];
 
-// El enlace al CV solo se incluye si es una dirección https válida; si no, se deja fuera (nunca http, javascript:, data:…).
-export function enlaceHttps(t) {
-  try {
-    const u = new URL(String(t ?? '').trim());
-    return u.protocol === 'https:' ? u.href : '';
-  } catch {
-    return '';
-  }
-}
+// El enlace al CV solo se incluye si es una dirección https válida (ver util/enlaces.js); si no, se deja fuera.
 
 export const nombreCompleto = a => linea(`${a.nombre ?? ''} ${a.apellidos ?? ''}`);
 
