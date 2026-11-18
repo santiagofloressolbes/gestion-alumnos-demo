@@ -1,6 +1,6 @@
 // Service worker: deja la app disponible sin conexión.
 // Cada cambio en los archivos de la app: subir CACHE para que el móvil cargue la versión nueva.
-const CACHE = 'gestion-alumnos-demo-v32';
+const CACHE = 'gestion-alumnos-demo-v33';
 const FILES = [
   './',
   './index.html',
