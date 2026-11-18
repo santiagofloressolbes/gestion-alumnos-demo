@@ -74,7 +74,7 @@ console.log('2. Qué campos lee');
   igual([...leidos].sort(), [...H.CAMPOS_HISTORIA].sort(), 'y se leen todos');
   igual(H.CAMPOS_HISTORIA, ['subareasExperiencia', 'etiquetas', 'idiomas', 'formacionPrevia'], 'la lista blanca es exactamente: subáreas, etiquetas, idiomas y formación');
   // el código (sin comentarios) no nombra ningún campo sensible
-  const codigo = fs.readFileSync(new URL('../../js/util/historia.js', import.meta.url), 'utf8').split('\n').map(l => l.replace(/\/\/.*$/, '')).join('\n');
+  const codigo = fs.readFileSync(new URL('../../js/util/historia.js', import.meta.url), 'utf8').split(/\r?\n/).map(l => l.replace(/\/\/.*$/, '')).join('\n');
   const prohibidos = ['porQue', 'notasEntrevista', 'situacionTrabajo', 'nacionalidad', 'resumenExperiencia', 'enlaceCV', 'areaExperiencia', 'historial', 'motivo', 'estado', 'disponibilidad', 'nombre', 'apellidos'];
   igual(prohibidos.filter(p => codigo.includes(p)), [], 'el código de historia.js no menciona ningún campo sensible');
   chk(!/\b(fetch|XMLHttpRequest|localStorage|import\s)/.test(codigo), 'historia.js no hace peticiones, no guarda nada y no importa nada');
