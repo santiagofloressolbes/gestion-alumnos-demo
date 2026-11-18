@@ -1,0 +1,15 @@
+{
+  "name": "gestion-alumnos-demo",
+  "private": true,
+  "type": "module",
+  "description": "Gestión de alumnos (demo). La app es HTML, CSS y JavaScript sin compilar y no usa npm: este archivo es solo para las herramientas de desarrollo (pruebas en un navegador real contra un Google simulado).",
+  "engines": {
+    "node": ">=24"
+  },
+  "scripts": {
+    "test": "node tests/ejecutar-pruebas.mjs"
+  },
+  "devDependencies": {
+    "playwright": "1.56.1"
+  }
+}

@@ -231,7 +231,7 @@ Todos son aceptables **solo porque los datos son ficticios**.
 | Qué | Comprobaciones | Cómo ejecutarlas |
 |---|---|---|
 | El script (`Code.gs`) contra un simulador de Google | 439 | `node tests/apps-script/pruebas.mjs` |
-| La app en un navegador real: acceso y clave | 72 | `cd tests/app`, `npm install` (una vez), `npm test` |
+| La app en un navegador real: acceso y clave | 72 | `npm install` (una vez, en la raíz), `npm test` (todas las pruebas y la del script, con resumen) |
 | La app: notas de entrevista | 63 | (incluido en `npm test`) |
 | La app: lista y ficha de ofertas | 106 | (incluido en `npm test`) |
 | La app: formulario de ofertas | 123 | (incluido en `npm test`) |
