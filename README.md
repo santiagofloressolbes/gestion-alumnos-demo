@@ -73,6 +73,10 @@ Al abrir la app por primera vez, se elige una de las dos:
 - **Los datos de los alumnos no se guardan en el teléfono.** Se piden cada vez y solo se muestran. En el teléfono solo quedan la dirección y la clave del acceso y tus ajustes (firma, umbrales y avisos silenciados). Lo que escribes en un formulario tampoco se guarda hasta que pulsas Guardar.
 - Para usarla con datos reales habría que montarla de nuevo dentro de la organización, con inicio de sesión personal, protección de datos y la aprobación del equipo de informática. Todo eso está explicado en el documento técnico.
 
+## Derechos de uso
+
+**Todos los derechos reservados.** El código se publica solo para consulta y evaluación; no se concede ninguna licencia de uso. Está explicado en [AVISO-DERECHOS.md](AVISO-DERECHOS.md). Para informar de un problema de seguridad, mira [SECURITY.md](SECURITY.md).
+
 ## Quién lee qué
 
 | Documento | Para quién | Qué cuenta |
@@ -87,3 +91,5 @@ Al abrir la app por primera vez, se elige una de las dos:
 | [docs/PREGUNTAS-TI.md](docs/PREGUNTAS-TI.md) | Equipo de TI | Las preguntas que hay que contestar antes de usar datos reales: primero las 11 que bloquean el inicio. |
 | [docs/VISIBILIDAD-REPO.md](docs/VISIBILIDAD-REPO.md) | Quien mantiene la app | Dos opciones para el repositorio (seguir público con datos ficticios o pasar a privado) y qué cambia con cada una. Preparado, sin ejecutar. |
 | [DECISIONES.md](DECISIONES.md) | Quien mantiene la app | Qué se decidió, por qué, y los riesgos conocidos. |
+| [AVISO-DERECHOS.md](AVISO-DERECHOS.md) | Cualquier persona | Qué se puede y qué no se puede hacer con el código: todos los derechos reservados. |
+| [SECURITY.md](SECURITY.md) | Quien encuentra un fallo de seguridad | Cómo informar de él de forma privada. |
