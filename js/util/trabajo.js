@@ -27,7 +27,7 @@ export function avisoFlotante(texto, ms = 6000) {
   document.body.append(flotante);
   relojFlotante = setTimeout(quitarFlotante, ms);
 }
-export function quitarFlotante() {
+function quitarFlotante() {
   clearTimeout(relojFlotante);
   flotante?.remove();
   flotante = null;
@@ -55,7 +55,7 @@ export async function copiarTexto(texto) {
   const area = document.createElement('textarea');
   area.setAttribute('aria-hidden', 'true'); area.setAttribute('tabindex', '-1'); area.readOnly = true; area.className = 'cp-oculto';
   area.value = t; document.body.append(area); area.select();
-  let bien = false;
+  let bien;
   try { bien = document.execCommand('copy'); } catch { bien = false; }
   area.remove();
   return bien;

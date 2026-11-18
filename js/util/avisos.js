@@ -20,7 +20,7 @@ export const TIPOS = Object.freeze({ sinSolicitudes: 'sin-solicitudes', aplicaTo
 export const TITULO_TIPO = Object.freeze({ 'sin-solicitudes': 'Sin solicitudes', 'aplica-a-todo': 'Ha solicitado casi todas las ofertas' });
 // Nombre corto para la marca de la lista de alumnos (cabe en 320 px).
 export const ETIQUETA_CORTA = Object.freeze({ 'sin-solicitudes': 'sin solicitudes', 'aplica-a-todo': 'ha solicitado casi todo' });
-export const DIAS_SILENCIO = 30;
+const DIAS_SILENCIO = 30;
 const ESTADO_CONTRATADO = 'Contratado';
 
 /* ---- Fechas (texto AAAA-MM-DD; sin horas, para que no importen las zonas horarias) ---- */

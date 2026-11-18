@@ -12,10 +12,10 @@ import { tarjetaError } from './error-datos.js';
 import { recargar, getMasters } from '../data/index.js';
 import { contextoDe } from '../util/match.js';
 
-export const TIPOS_VALIDOS = Object.values(TIPOS);
+const TIPOS_VALIDOS = Object.values(TIPOS);
 
 // Todo lo que hace falta para pintar avisos, o null si el Sheet (o la demo) no tiene rondas. Se recalcula cada vez: es barato.
-export function estadoAvisos(d, hoy = hoyISO()) {
+function estadoAvisos(d, hoy = hoyISO()) {
   if (!d.hay) return null;
   const umbrales = leerUmbrales();
   const { periodo, avisos } = calcularAvisos({ alumnos: d.alumnos, ofertas: d.ofertas, rondas: d.rondas, aplicaciones: d.aplicaciones, hoy, umbrales, contextoMatch: contextoDe(d.listas) });
@@ -24,7 +24,7 @@ export function estadoAvisos(d, hoy = hoyISO()) {
 }
 
 // Una frase que dice qué periodo se está mirando (para que se entienda de dónde salen los números).
-export function textoPeriodo(e) {
+function textoPeriodo(e) {
   if (!e.periodo) return '';
   const { desde, hasta, ofertas, recortado } = e.periodo;
   return `${recortado ? 'Se revisa desde la primera ronda registrada' : `Se revisan los últimos ${e.umbrales.dias} días`} (del ${fechaCorta(desde)} al ${fechaCorta(hasta)}). En ese tiempo se ${ofertas === 1 ? 'envió 1 oferta' : `enviaron ${ofertas} ofertas`}.`;
@@ -35,10 +35,10 @@ const alumnosTexto = n => (n === 0 ? 'Ningún alumno' : plural(n, 'alumno', 'alu
 /* ---- Inicio ---- */
 
 // Etiqueta de tipo: icono + palabra. «Datos» = algo está mal en el Sheet (rojo, relleno). «Seguimiento» = algo que mirar con el tiempo (naranja, solo borde).
-export const etiquetaTipo = (tipo, texto) => el('span', { class: 'etiqueta-tipo ' + tipo }, svgAviso(tipo), el('span', {}, texto));
+const etiquetaTipo = (tipo, texto) => el('span', { class: 'etiqueta-tipo ' + tipo }, svgAviso(tipo), el('span', {}, texto));
 
 // Programas que un alumno tiene pero no están en Listas (o no tienen categoría): son los mismos que van a «Otros programas».
-export const programasFuera = masters => masters.filter(m => !m.enLista || !m.categoria);
+const programasFuera = masters => masters.filter(m => !m.enLista || !m.categoria);
 
 // Una nota de DATOS suelta (programa fuera de Listas en la lista, la ficha y Otros programas): rojo relleno, icono y la palabra «Datos».
 export const notaDatos = (texto, id) => el('p', { class: 'aviso aviso-alerta', role: 'note', id }, svgAviso('datos'), el('span', {}, el('b', {}, 'Datos: '), texto));
@@ -84,7 +84,7 @@ function contenidoInicio(e, fuera) {
 // los de SEGUIMIENTO, solo si hay rondas. Si no hay ninguno, la tarjeta no se enseña. Si algo falla, Inicio sigue igual.
 export async function pintarAvisosInicio(caja) {
   if (!caja) return;
-  let e = null, fuera = [];
+  let e, fuera;
   try { e = estadoAvisos(await datosRondas()); } catch { e = null; }
   try { fuera = programasFuera(await getMasters()); } catch { fuera = []; }
   const hay = !!e || fuera.length > 0;

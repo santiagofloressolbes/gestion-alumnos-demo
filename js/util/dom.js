@@ -32,7 +32,7 @@ export function svgFlecha() {
 
 export const plural = (n, uno, varios) => `${n} ${n === 1 ? uno : varios}`;
 
-// Iconos de los dos tipos de aviso (v27). El color nunca es lo único que los distingue: la forma y la palabra («Datos» / «Seguimiento») también.
+// Iconos de los dos tipos de aviso. El color nunca es lo único que los distingue: la forma y la palabra («Datos» / «Seguimiento») también.
 //   'datos'       → triángulo con «!» (algo está mal en el Sheet).
 //   'seguimiento' → reloj (algo que mirar con el tiempo).
 export function svgAviso(tipo) {

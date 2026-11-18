@@ -1,5 +1,5 @@
 // Rondas de difusión y aplicaciones, solo lectura: el apartado de la ficha de la oferta, el del alumno y el detalle de una aplicación.
-import { getAlumnos, getOfertas, getListas, getRondas, getAplicaciones, getHistorial, hayRondas, recargar, getEstadoFuente, puedeEscribirRondas, estadoEscrituraRondas } from '../data/index.js';
+import { getAlumnos, getOfertas, getListas, getRondas, getAplicaciones, getHistorial, hayRondas, recargar, getEstadoFuente, puedeEscribirRondas } from '../data/index.js';
 import { navegacion } from '../util/navegacion.js';
 import { el, svgFlecha, plural, reemplazar } from '../util/dom.js';
 import { tipoDeEstado } from '../util/correo.js';
@@ -18,7 +18,7 @@ export async function datosRondas() {
 }
 
 // Por qué no hay botones de rondas (null = sí los hay, o es la demo, que ya tiene su banner).
-export function notaSinEscritura() {
+function notaSinEscritura() {
   const e = getEstadoFuente();
   if (e.modo !== 'script' || !e.puedeEscribir || puedeEscribirRondas()) return null;
   return el('p', { class: 'aviso', role: 'note' }, e.conRondas
@@ -46,7 +46,7 @@ function filaAplicacion(a, d, desde) {
     svgFlecha()));
 }
 
-/* ---- Ficha de la oferta: quién ha solicitado (v32) ---- */
+/* ---- Ficha de la oferta: quién ha solicitado ---- */
 
 // Una fila por alumno, con su solicitud más reciente. Solo estado, ronda y programa: nunca notas ni motivos de descarte.
 // Quien solicitó pero encaja poco con la oferta sigue aquí (con su marca): el match no esconde a nadie.

@@ -10,7 +10,7 @@ const CAMPOS = [
   { clave: 'solicitudes', etiqueta: 'Solicitudes (mínimo)', ayuda: 'Solicitudes necesarias para avisar de «Ha solicitado casi todas las ofertas».' },
   { clave: 'porcentaje', etiqueta: 'Porcentaje de ofertas solicitadas (%)', ayuda: 'Qué parte de las ofertas enviadas ha solicitado.' },
 ];
-export const mensajeUmbral = (codigo, clave) => {
+const mensajeUmbral = (codigo, clave) => {
   const [min, max] = LIMITES[clave];
   return codigo === 'vacio' ? 'Escribe un número.'
     : codigo === 'entero' ? 'Escribe un número entero, sin decimales, signos ni letras.'

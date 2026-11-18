@@ -12,7 +12,7 @@ import { norm } from './texto.js';
 export const IDIOMAS = Object.freeze([{ clave: 'es', etiqueta: 'Español' }, { clave: 'en', etiqueta: 'English' }]);
 // Estados en los que hay borrador. "Contratado" y cualquier otro no tienen.
 export const ESTADOS_EN_PROCESO = Object.freeze(['Recibida', 'En revisión', 'Enviada a la empresa', 'Entrevista']);
-export const ESTADO_DESCARTADO = 'Descartado';
+const ESTADO_DESCARTADO = 'Descartado';
 export const TIPOS_CORREO = Object.freeze({ enProceso: 'en-proceso', descartado: 'descartado' });
 export const MAX_MAILTO = 1800;   // los enlaces mailto muy largos se cortan en algunas apps de correo
 

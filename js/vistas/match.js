@@ -10,7 +10,7 @@ import { MAX_PERFILES } from '../util/compartir.js';
 const POR_PAGINA = 15;   // filas que se pintan de golpe en cada grupo (con "Ver más")
 const NOTA = 'Cada fila dice por qué.';
 // Aviso fijo: el match orienta y ordena; si alguien puede trabajar o no lo decide siempre una persona.
-export const AVISO_ORIENTATIVO = 'Es una ayuda, no una decisión. Nadie queda fuera de la lista. La decisión sobre si puede trabajar en una oferta la toma siempre una persona.';
+const AVISO_ORIENTATIVO = 'Es una ayuda, no una decisión. Nadie queda fuera de la lista. La decisión sobre si puede trabajar en una oferta la toma siempre una persona.';
 const TITULO = { area: 'Área', subarea: 'Subárea', etiquetas: 'Habilidades', idiomas: 'Idiomas', nivel: 'Formación', tipo: 'Prácticas o empleo', nacionalidad: 'Nacionalidad', permiso: 'Permiso de trabajo' };
 
 // Cómo se dice cada criterio: el símbolo y la palabra van siempre en texto (el color nunca es lo único que lo dice).
@@ -24,14 +24,14 @@ const num = n => String(Math.round(n * 10) / 10).replace('.', ',');
 const puntosDe = c => (c.noAplica ? 'no cuenta' : c.sinDatos ? 'no suma' : `${num(c.peso * c.factor)} de ${c.peso} puntos`);
 
 // La línea de la puntuación de una fila: «Encaje 82 %» y, si faltan datos, «datos incompletos».
-// En «No encaja» (v28) se llama «Afinidad» y va en gris: el % no dice si la persona puede ocupar la oferta, solo cuánto se parece su perfil.
-export function textoPuntuacion(p, categoria) {
+// En «No encaja» se llama «Afinidad» y va en gris: el % no dice si la persona puede ocupar la oferta, solo cuánto se parece su perfil.
+function textoPuntuacion(p, categoria) {
   if (p.porcentaje == null) return 'Sin puntuación: faltan datos' + (p.incompleto ? ' · datos incompletos' : '');
   return `${categoria === 'no' ? 'Afinidad' : 'Encaje'} ${p.porcentaje} %` + (p.incompleto ? ' · datos incompletos' : '');
 }
 
 // Aviso corto dentro de cada «Por qué» (el aviso completo está arriba, en la tarjeta): la decisión sobre si se puede trabajar la toma siempre una persona.
-export const AVISO_CORTO = 'Orientativo: comprueba la situación real.';
+const AVISO_CORTO = 'Orientativo: comprueba la situación real.';
 
 // Un texto largo se acorta con «ver más» (y «ver menos»). Solo se usa donde el texto puede ser muy largo (la razón de nacionalidad y de permiso).
 const MAX_TEXTO = 110;
@@ -71,19 +71,19 @@ function porQue(r) {
 // El criterio que decide el grupo (o, en «Encaja», el primero que cuenta).
 // Primero lo que decide el grupo (un «no» en área, tipo, nacionalidad o permiso); después lo que hay que verificar de nacionalidad y permiso
 // (lo legal se ve siempre arriba); después cualquier otro «no», lo que hay que revisar, lo que no tiene datos, y si no, el primer criterio que cuenta.
-export function criterioDecisivo(r) {
+function criterioDecisivo(r) {
   const c = r.criterios, legal = x => x.grupo === 'requisito' && x.estado !== 'ok';
   const malo = c.find(x => x.estado === 'no' && NUCLEO.includes(x.id)) || c.find(x => legal(x) && !x.sinDatos) || c.find(legal) || c.find(x => x.estado === 'no')
     || c.find(x => x.estado === 'revisar' && !x.sinDatos) || c.find(x => x.estado === 'revisar');
   return malo || c.find(x => !x.noAplica) || c[0];
 }
 
-// Los criterios que fallan, con nombre corto, para la línea de la fila (v28).
+// Los criterios que fallan, con nombre corto, para la línea de la fila.
 //   «No encaja»: los «no» de área, tipo, nacionalidad y permiso (los que deciden el grupo).
 //   «Encaja con reservas»: los «no» (de perfil) y lo que hay que revisar (incluye lo que no tiene datos).
-// v29: un solo nombre por criterio: el de la fila sale del mismo que el del detalle («Por qué»), en minúscula («Permiso de trabajo» se abrevia a «permiso»).
+// Un solo nombre por criterio: el de la fila sale del mismo que el del detalle («Por qué»), en minúscula («Permiso de trabajo» se abrevia a «permiso»).
 const NOMBRE_CORTO = Object.fromEntries(Object.entries(TITULO).map(([id, t]) => [id, id === 'permiso' ? 'permiso' : t.toLowerCase()]));
-export function criteriosQueFallan(r) {
+function criteriosQueFallan(r) {
   const c = r.criterios.filter(x => !x.noAplica);
   if (r.categoria === 'no') return { no: c.filter(x => x.estado === 'no' && NUCLEO.includes(x.id)), revisar: [] };
   if (r.categoria === 'reservas') return { no: c.filter(x => x.estado === 'no'), revisar: c.filter(x => x.estado === 'revisar') };

@@ -11,7 +11,7 @@ let construida = false;   // la pantalla se construye una vez: así se conservan
 let ultimoEstado = null;  // el estado de la búsqueda al construirse (para no perderlo al actualizar los datos)
 let recuperar = null;     // lo escrito y los filtros que se ponen de nuevo al reconstruir tras "Actualizar datos"
 
-// "Actualizar datos" (v28): la pantalla se vuelve a construir con los alumnos nuevos, pero conservando el texto y los filtros.
+// "Actualizar datos": la pantalla se vuelve a construir con los alumnos nuevos, pero conservando el texto y los filtros.
 export function reiniciarBuscar() {
   if (construida && ultimoEstado) recuperar = { ...ultimoEstado };
   construida = false;

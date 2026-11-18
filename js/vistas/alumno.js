@@ -1,5 +1,5 @@
 // Ficha completa de un alumno, con el botón al CV.
-import { getAlumnos, recargar } from '../data/index.js';
+import { recargar } from '../data/index.js';
 import { tarjetaError } from './error-datos.js';
 import { tarjetaEntrevista } from './entrevista.js';
 import { datosRondas, tarjetaAplicaciones } from './rondas.js';
@@ -25,7 +25,7 @@ const tarjeta = (titulo, ...campos) =>
 
 export async function pintarAlumno(raiz, id) {
   reemplazar(raiz, el('p', { class: 'estado', role: 'status' }, 'Cargando ficha…'));
-  let a = null, d = null;
+  let a = null, d;
   try { d = await datosRondas(); a = d.alumnos.find(x => x.id === id) || null; }
   catch (e) {
     reemplazar(raiz, el('a', { class: 'volver', href: '#/' }, 'Inicio'),

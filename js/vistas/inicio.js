@@ -61,7 +61,7 @@ export async function pintarInicio(raiz) {
   const guardadas = abiertasGuardadas();
 
   const cajaAvisos = cajaAvisosInicio();
-  // v27: primero los programas (MBA, el primero) y debajo la tarjeta de Avisos.
+  // Primero los programas (MBA, el primero) y debajo la tarjeta de Avisos.
   reemplazar(raiz,
     el('h2', { class: 'seccion' }, 'Elige un programa'),
     el('div', { class: 'grupos', id: 'grupos' },

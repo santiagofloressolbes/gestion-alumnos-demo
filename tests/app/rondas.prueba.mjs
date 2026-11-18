@@ -171,7 +171,7 @@ function location_ok(h, re) { return re.test(h); }
   await alumno(pg, 'A004');
   chk(/oferta O777: sin dato/.test(await pg.innerText('#v-alumno [aria-label=Solicitudes]')), 'en la ficha del alumno también');
   chk(await limpio(pg, '#v-alumno'), 'sin "null" ni "undefined"');
-  m6: {
+  {
     const { pg: p2, ctx: c2 } = await entrar('script', m => { m.hojas.Rondas.m.push(['R006', 'O004', '1', '2026-10-28']); });
     await oferta(p2, 'O004');
     chk(/Aún no hay solicitudes/.test(await p2.innerText('#v-oferta .ronda')) && !/0 solicitudes/.test(await p2.innerText('#v-oferta .ronda')) && (await p2.$$('#v-oferta .ronda .resumen')).length === 0, 'una ronda sin aplicaciones: "Aún no hay solicitudes", sin resumen vacío');

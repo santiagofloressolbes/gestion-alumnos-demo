@@ -10,7 +10,7 @@ export const ALUMNO = {
   'Notas de entrevista': 'notasEntrevista', 'Fecha última entrevista': 'fechaUltimaEntrevista',
   'Disponibilidad': 'disponibilidad',
 };
-// Columnas NUEVAS de la 3E (perfil para el match). Son OPCIONALES: si el Sheet no las tiene todavía, la app funciona igual
+// Columnas del perfil para el match (añadidas más tarde). Son OPCIONALES: si el Sheet no las tiene todavía, la app funciona igual
 // y esos datos se tratan como «sin datos» (nunca rompen nada ni cuentan como «no cumple»).
 export const ALUMNO_OPC = {
   'Etiquetas': 'etiquetas', 'Idiomas': 'idiomas', 'Formación previa': 'formacionPrevia', 'Subáreas de experiencia': 'subareasExperiencia',
@@ -37,11 +37,9 @@ export const HISTORIAL = {
   'Motivo de descarte': 'motivo', 'Fecha': 'fecha', 'Nota': 'nota',
 };
 // Hoja Listas: cada columna es una lista de valores (las celdas vacías se ignoran).
-// Programas (v23): la hoja Listas puede llamar «Máster» a la columna de programas (nombre de antes) o «Programa»; la app acepta las dos.
+// Programas: la hoja Listas puede llamar «Máster» a la columna de programas (nombre de antes) o «Programa»; la app acepta las dos.
 // «Categoría del programa» e «Idioma del programa» van en la MISMA FILA que su programa. Son opcionales.
 export const ALIAS_LISTAS = { 'Programa': ['Máster'] };
-export const COLUMNA_CATEGORIA = 'Categoría del programa';
-export const COLUMNA_IDIOMA = 'Idioma del programa';
 export const LISTAS = {
   'Programa': 'masters', 'Área': 'areas', 'Tipo de organización': 'tiposOrganizacion',
   'Nacionalidad': 'nacionalidades', 'Situación de trabajo en España': 'situaciones',
@@ -50,7 +48,7 @@ export const LISTAS = {
   'Estado de la aplicación': 'estadosAplicacion', 'Motivo de descarte': 'motivosDescarte',
 };
 
-// Hojas OPCIONALES con las reglas del match (3E). Cada una: nombre de la hoja en el Sheet y sus columnas. Si falta, la app usa las reglas de respaldo del código.
+// Hojas OPCIONALES con las reglas del match. Cada una: nombre de la hoja en el Sheet y sus columnas. Si falta, la app usa las reglas de respaldo del código.
 export const HOJAS_MATCH = {
   paises: { hoja: 'Países', columnas: { pais: 'País', grupo: 'Grupo' } },
   areas: { hoja: 'Áreas', columnas: { area: 'Área', subarea: 'Subárea', areaEn: 'Área (inglés)' } },   // «Área (inglés)» es opcional: nombre del área para el correo en inglés

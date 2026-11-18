@@ -43,7 +43,7 @@ export const CAMPOS = [
   { clave: 'fechaRecepcion', etiqueta: 'Fecha de recepción', fecha: true, obligatorio: true },
   { clave: 'estado', etiqueta: 'Estado', lista: 'estadosOferta', obligatorio: true },
   { clave: 'enlace', etiqueta: 'Enlace o descripción', max: 500, enlace: true, obligatorio: false },
-  // Perfil del puesto (3E-2): lo que el match compara con cada alumno. Todos opcionales.
+  // Perfil del puesto: lo que el match compara con cada alumno. Todos opcionales.
   { clave: 'paisOferta', etiqueta: 'País de la oferta', max: 100, perfil: true, obligatorio: false },
   { clave: 'subarea', etiqueta: 'Subárea', max: 100, perfil: true, obligatorio: false },
   { clave: 'etiquetas', etiqueta: 'Habilidades del puesto', max: 300, perfil: true, obligatorio: false },
@@ -56,7 +56,7 @@ export const camposActivos = conPerfil => (conPerfil ? CAMPOS : CAMPOS.filter(c 
 export const NIVELES_FORMACION = ['Sin requisito', 'Grado', 'Máster', 'Doctorado'];
 export const MAX_ETIQUETAS = 8;
 export const MAX_IDIOMAS = 6;
-export const GRUPO_DE_GRUPOS = 'Grupo de países';   // filas de la hoja Países que no son un país (p. ej. «Unión Europea (UE/EEE)»)
+const GRUPO_DE_GRUPOS = 'Grupo de países';   // filas de la hoja Países que no son un país (p. ej. «Unión Europea (UE/EEE)»)
 // Idioma y, si se quiere, nivel (A1–C2 o «nativo»): «Inglés B2». El mismo formato que acepta el script y que entiende el match.
 const IDIOMA = /^([A-Za-zÀ-ÖØ-öø-ÿ][A-Za-zÀ-ÖØ-öø-ÿ .'-]{0,29}?)(?:\s+(A1|A2|B1|B2|C1|C2|nativo))?$/i;
 
@@ -65,7 +65,7 @@ export const partesLista = t => String(t ?? '').split(/[;,]/).map(x => x.trim())
 const unicos = xs => { const vistos = new Set(); return xs.filter(x => { const k = norm(x); if (vistos.has(k)) return false; vistos.add(k); return true; }); };
 
 // '' si los idiomas están bien; si no, el código del error ('idiomas' = formato; 'demasiadas').
-export function revisarIdiomas(t) {
+function revisarIdiomas(t) {
   const ps = partesLista(t), vistos = new Set();
   for (const p of ps) {
     const m = IDIOMA.exec(p);
@@ -76,7 +76,7 @@ export function revisarIdiomas(t) {
   }
   return ps.length > MAX_IDIOMAS ? 'demasiadas' : '';
 }
-export const revisarEtiquetas = t => (unicos(partesLista(t)).length > MAX_ETIQUETAS ? 'demasiadas' : '');
+const revisarEtiquetas = t => (unicos(partesLista(t)).length > MAX_ETIQUETAS ? 'demasiadas' : '');
 
 // Las listas de apoyo (hojas Países, Áreas y Etiquetas) tal como las usa el formulario. Una lista vacía = esa hoja no está: el campo es de texto.
 export function apoyoPerfil(listas) {

@@ -3,8 +3,8 @@
 // Salida: grupos en el orden en que aparece cada categoría en Listas (salvo MBA, que va la primera); todos los programas de Listas salen aunque tengan 0 alumnos.
 // Los que no tienen categoría o no están en Listas van a un último grupo (otros: true) para que la app no falle y se vea el problema.
 
-export const TITULO_OTROS = 'Otros programas';
-export const CATEGORIA_PRIMERA = 'MBA';   // v27: la categoría MBA va la primera en Inicio; el resto, en el orden de Listas
+const TITULO_OTROS = 'Otros programas';
+const CATEGORIA_PRIMERA = 'MBA';   // La categoría MBA va la primera en Inicio; el resto, en el orden de Listas
 
 export function agruparProgramas(programas) {
   const grupos = [];

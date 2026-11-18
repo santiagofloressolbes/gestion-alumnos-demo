@@ -3,7 +3,6 @@
 
 import { fechaValida } from './ofertas.js';
 
-export const ESTADO_INICIAL = 'Recibida';
 export const ESTADO_DESCARTE = 'Descartado';   // el único estado que lleva motivo
 
 export const nombreAlumno = a => `${a.nombre} ${a.apellidos}`.trim();
@@ -30,10 +29,10 @@ export function resumenEstados(apps, orden = []) {
   return claves.map(estado => ({ estado, n: cuenta.get(estado) }));
 }
 
-// Quién ha solicitado una oferta (v32): una fila por alumno, con su solicitud MÁS RECIENTE (fecha, y a igual fecha la ronda mayor) y las otras rondas en las que también está.
+// Quién ha solicitado una oferta: una fila por alumno, con su solicitud MÁS RECIENTE (fecha, y a igual fecha la ronda mayor) y las otras rondas en las que también está.
 // Orden: de más avanzado a menos (Contratado, Entrevista, Enviada a la empresa, En revisión, Recibida); un estado que no conozca va antes de Descartado; Descartado, al final.
 // Dentro de cada estado, la solicitud más reciente primero. No lee notas ni motivos: solo estado, fecha y ronda.
-export const ORDEN_AVANCE = Object.freeze(['Contratado', 'Entrevista', 'Enviada a la empresa', 'En revisión', 'Recibida']);
+const ORDEN_AVANCE = Object.freeze(['Contratado', 'Entrevista', 'Enviada a la empresa', 'En revisión', 'Recibida']);
 const rangoEstado = estado => (estado === ESTADO_DESCARTE ? ORDEN_AVANCE.length + 1 : ORDEN_AVANCE.includes(estado) ? ORDEN_AVANCE.indexOf(estado) : ORDEN_AVANCE.length);
 export function solicitantesDeOferta(apps, alumnos, idOferta) {
   const propias = (Array.isArray(apps) ? apps : []).filter(a => a.idOferta === idOferta);

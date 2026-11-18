@@ -14,7 +14,7 @@
   --card:#222228; --cink:#F5F5F7; --cmuted:#A1A1AA; --line:#34343C; --inp:#17171B;
   --act-bg:#D63B45; --act-fg:#FFFFFF; --focus:#FF6B73;
   --tab-bg:#101013; --tab-ink:#A1A1AA; --tab-on:#FF6B73; --tab-line:#26262C;
-  /* v27: colores de significado. Cada uno se acompaña SIEMPRE de un símbolo y una palabra (el color nunca es lo único que dice algo).
+  /* Colores de significado. Cada uno se acompaña SIEMPRE de un símbolo y una palabra (el color nunca es lo único que dice algo).
      --seg: naranja de «seguimiento» (7,5:1 sobre --card). Los de grupo del match valen como TEXTO sobre --inp/--card (≥ 7:1). Los avisos de DATOS usan --act-bg (rojo) como fondo. */
   --seg:#FF9F43; --g-encaja:#4ADE80; --g-reservas:#F5B73B; --g-no:#E8868C;
   --sans:"Open Sans",system-ui,-apple-system,"Segoe UI",sans-serif;
@@ -38,7 +38,7 @@ main:focus{outline:none}
 #app{background:var(--bg);display:flex;flex-direction:column;position:fixed;top:0;bottom:0;left:0;right:0;width:100%;max-width:560px;margin:0 auto;padding-left:var(--sal);padding-right:var(--sar)}
 header{flex:none;display:flex;align-items:center;min-height:calc(var(--sat) + 3rem);padding:calc(var(--sat) + .25rem) 24px 0}
 header h1{font:700 1.25rem/1.3 var(--sans);margin:0;letter-spacing:-.01em;min-width:0;overflow-wrap:anywhere;display:-webkit-box;-webkit-box-orient:vertical;-webkit-line-clamp:2;line-clamp:2;overflow:hidden}
-/* v28: botón «Actualizar datos». Se ve pequeño (icono de 20 px) pero se toca en 44 px. */
+/* Botón «Actualizar datos». Se ve pequeño (icono de 20 px) pero se toca en 44 px. */
 .refrescar{flex:none;display:flex;align-items:center;justify-content:center;width:2.75rem;height:2.75rem;margin:0 -10px 0 auto;border-radius:1rem;color:var(--tab-ink)}
 .refrescar svg{width:1.25rem;height:1.25rem;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
 .refrescar.girando{color:var(--ink);opacity:.85}
@@ -47,7 +47,7 @@ header h1{font:700 1.25rem/1.3 var(--sans);margin:0;letter-spacing:-.01em;min-wi
 .refrescar-aviso{flex:none;display:flex;align-items:center;justify-content:space-between;gap:.5rem;margin:.5rem 24px 0;padding:.5rem .5rem .5rem 1rem;border-radius:1rem;background:var(--card);border:1.5px solid var(--line);font-size:.875rem;color:var(--cink)}
 .refrescar-aviso.mal{border-color:var(--tab-on)}
 .refrescar-aviso span{min-width:0;overflow-wrap:anywhere}
-.refrescar-cerrar{flex:none;min-height:2.75rem;min-width:2.75rem;padding:0 .75rem;border-radius:1rem;font-weight:700;font-size:.875rem;color:var(--tab-on)}   /* v29: «Cerrar» del error, zona táctil de 44 px */
+.refrescar-cerrar{flex:none;min-height:2.75rem;min-width:2.75rem;padding:0 .75rem;border-radius:1rem;font-weight:700;font-size:.875rem;color:var(--tab-on)}   /* «Cerrar» del error, zona táctil de 44 px */
 main{flex:1;min-height:0;overflow-y:auto;overflow-x:hidden;-webkit-overflow-scrolling:touch;overscroll-behavior:contain;padding:.5rem 24px 24px}
 .view{display:none} .view.on{display:block}
 
@@ -107,7 +107,7 @@ button:disabled{opacity:.7;cursor:progress}
 .enlace{display:inline-flex;align-items:center;min-height:2.75rem;color:var(--tab-on);font-weight:700;text-decoration:underline}
 
 /* ---------- Lista de alumnos ---------- */
-.volver{position:sticky;top:-.5rem;z-index:6;display:flex;align-items:center;gap:.5rem;min-height:2.75rem;margin:0 -24px .5rem;padding:0 24px;background:var(--bg);box-shadow:0 1px 0 var(--line);color:var(--tab-on);font-weight:700;text-decoration:none}   /* v27: la flecha de volver queda fija arriba al hacer scroll */
+.volver{position:sticky;top:-.5rem;z-index:6;display:flex;align-items:center;gap:.5rem;min-height:2.75rem;margin:0 -24px .5rem;padding:0 24px;background:var(--bg);box-shadow:0 1px 0 var(--line);color:var(--tab-on);font-weight:700;text-decoration:none}   /* La flecha de volver queda fija arriba al hacer scroll */
 .volver::before{content:"";width:.625rem;height:.625rem;border-left:2.2px solid currentColor;border-bottom:2.2px solid currentColor;transform:rotate(45deg);margin-right:.25rem}
 .alumnos{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:.5rem}
 .alumno{display:flex;align-items:center;gap:1rem;min-height:4.5rem;padding:1rem;border-radius:1.5rem;background:var(--card);color:var(--cink);text-decoration:none}
@@ -241,10 +241,10 @@ button:disabled{opacity:.7;cursor:progress}
 .crit.no{color:var(--cmuted)}
 .crit.na{color:var(--cmuted)}
 .crit-puntos{color:var(--cmuted)}
-.match-punt{font-weight:700}   /* v27: el color lo pone el grupo (verde, ámbar o rojo suave), nunca el rojo de acento para todo */
+.match-punt{font-weight:700}   /* El color lo pone el grupo (verde, ámbar o rojo suave), nunca el rojo de acento para todo */
 .match-punt.g-encaja{color:var(--g-encaja)}
 .match-punt.g-reservas{color:var(--g-reservas)}
-.match-punt.g-no{color:var(--cmuted)}   /* v28: en «No encaja» es «Afinidad», en gris: no mide si puede ocupar la oferta */
+.match-punt.g-no{color:var(--cmuted)}   /* En «No encaja» es «Afinidad», en gris: no mide si puede ocupar la oferta */
 .porque-punt,.porque-aviso{margin:0;padding:0 .5rem .5rem;font-size:.875rem}
 .aviso-orientativo{margin:.5rem 0}
 
@@ -262,7 +262,7 @@ button:disabled{opacity:.7;cursor:progress}
 .card .vista-previa+.primary,.card .ok+.primary,.card .error+.primary{margin-top:.5rem}
 .cp-oculto{position:fixed;opacity:0;pointer-events:none}
 
-/* ---------- Avisos de alumnos (v20) ---------- */
+/* ---------- Avisos de alumnos ---------- */
 #in-avisos{margin-top:1.5rem}
 .avisos-resumen{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:.5rem}
 .aviso-fila{display:flex;align-items:center;gap:1rem;min-height:4.5rem;padding:1rem;border-radius:1.5rem;background:var(--inp);color:var(--cink);text-decoration:none}
@@ -280,19 +280,19 @@ button:disabled{opacity:.7;cursor:progress}
 .aviso-ficha .secondary{width:100%}
 
 
-/* ---------- Desplegable comun (v22): una sola flecha estandar que gira, zona tactil de al menos 44 px; el estado va en aria-expanded, sin texto ---------- */
+/* ---------- Desplegable comun: una sola flecha estandar que gira, zona tactil de al menos 44 px; el estado va en aria-expanded, sin texto ---------- */
 .desplegable>summary{display:flex;align-items:center;justify-content:space-between;gap:1rem;min-height:2.75rem;cursor:pointer;list-style:none}
 .desplegable>summary::-webkit-details-marker{display:none}
 .desplegable>summary::after{content:"";flex:none;width:.625rem;height:.625rem;border-right:2.2px solid var(--tab-on);border-bottom:2.2px solid var(--tab-on);transform:rotate(45deg);margin:0 .25rem;transition:transform .15s}
 .desplegable[open]>summary::after{transform:rotate(-135deg)}
 
-/* ---------- Secciones plegables de Ajustes (v21) ---------- */
+/* ---------- Secciones plegables de Ajustes ---------- */
 .plegable-tarjeta{padding:0}
 .plegable>summary{padding:.5rem 1.5rem;border-radius:1.5rem;min-height:3.5rem}
 .plegable>summary>h2{margin:0;min-width:0;overflow-wrap:anywhere}
 .plegable-cuerpo{padding:0 1.5rem 1.5rem}
 
-/* ---------- Programas agrupados en Inicio (v23): secciones con el desplegable comun ---------- */
+/* ---------- Programas agrupados en Inicio: secciones con el desplegable comun ---------- */
 .grupos{display:flex;flex-direction:column;gap:1rem}
 .grupo-programas{background:var(--card);border-radius:1.5rem}
 .grupo-programas>summary{padding:.5rem 1.5rem;min-height:4rem;border-radius:1.5rem}
@@ -303,9 +303,9 @@ button:disabled{opacity:.7;cursor:progress}
 .grupo-cuerpo .aviso-alerta{margin:1rem 0 0}
 .grupo-cuerpo .master{background:var(--bg)}
 
-/* ---------- Aviso llamativo (v24): programa que no esta en Listas (Inicio, lista del programa y ficha). Rojo de acento como FONDO con texto blanco: 4,59:1 ---------- */
+/* ---------- Aviso llamativo: programa que no esta en Listas (Inicio, lista del programa y ficha). Rojo de acento como FONDO con texto blanco: 4,59:1 ---------- */
 .aviso.aviso-alerta{margin:1rem 0 0;background:var(--act-bg);border-color:var(--act-bg);color:var(--act-fg);font-weight:700;overflow-wrap:anywhere}
-/* Formulario de oferta: perfil del puesto (3E-2) */
+/* Formulario de oferta: perfil del puesto */
 .sub-seccion{font-size:1rem;font-weight:700;margin:1.5rem 0 .25rem;color:var(--cink)}
 .campo-form fieldset{border:0;margin:0;padding:0;min-width:0}
 .campo-form fieldset legend{padding:0}
@@ -313,7 +313,7 @@ button:disabled{opacity:.7;cursor:progress}
 
 
 
-/* ---------- v27: avisos de DATOS (rojo, relleno, triángulo) y de SEGUIMIENTO (naranja, borde, reloj) ---------- */
+/* ---------- Avisos de DATOS (rojo, relleno, triángulo) y de SEGUIMIENTO (naranja, borde, reloj) ---------- */
 .icono-aviso{flex:none;width:1.25rem;height:1.25rem;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
 .etiqueta-tipo{display:inline-flex;align-items:center;gap:.5rem;margin:0 0 .5rem;font-size:.8125rem;font-weight:700;letter-spacing:.04em;text-transform:uppercase}
 .etiqueta-tipo.seguimiento{color:var(--seg)}
@@ -331,7 +331,7 @@ button:disabled{opacity:.7;cursor:progress}
 .aviso-item{border-left:4px solid var(--seg)}
 
 
-/* ---------- v27, parte B: tarjetas del match que respetan el ancho, motivo en una línea, «ver más» y casillas con la paleta ---------- */
+/* ---------- Tarjetas del match que respetan el ancho, motivo en una línea, «ver más» y casillas con la paleta ---------- */
 #match-alumnos,#match-ofertas{padding:1rem .75rem}
 #match-alumnos>h2,#match-alumnos>.sub,#match-alumnos>.aviso,#match-ofertas>h2,#match-ofertas>.sub,#match-ofertas>.aviso,#match-alumnos>.compartir-barra{margin-left:.25rem;margin-right:.25rem}
 .grupo-match{min-width:0;max-width:100%;overflow:hidden}
@@ -347,7 +347,7 @@ button:disabled{opacity:.7;cursor:progress}
 .motivo.no b{color:var(--g-no)}
 .motivo.revisar b{color:var(--g-reservas)}
 .motivo.ok b{color:var(--g-encaja)}
-.motivo b.m-revisar{color:var(--g-reservas)}   /* v28: con varios fallos, cada trozo lleva su color */
+.motivo b.m-revisar{color:var(--g-reservas)}   /* Con varios fallos, cada trozo lleva su color */
 .ver-mas{display:inline-flex;align-items:center;min-height:2.75rem;padding:0 .5rem;color:var(--tab-on);font-weight:700;font-size:.875rem;text-decoration:underline}
 .porque-punt,.porque-aviso{padding-left:.5rem;padding-right:.5rem}
 
@@ -359,7 +359,7 @@ input.casilla[type=radio]:checked{background-image:radial-gradient(circle,#FFFFF
 .crit.ok{margin:0;font-weight:400}
 input.casilla:disabled{opacity:.45;cursor:not-allowed}
 
-/* ---------- v28: móvil en horizontal (poca altura). El título grande se oculta (sigue ahí para los lectores de pantalla) y la cabecera
+/* ---------- Móvil en horizontal (poca altura). El título grande se oculta (sigue ahí para los lectores de pantalla) y la cabecera
    deja de ocupar una fila: el botón de actualizar flota arriba a la derecha y el contenido deja libre ese hueco. La barra inferior no se toca. ---------- */
 @media (orientation:landscape) and (max-height:500px){
   header{position:absolute;top:var(--sat);right:calc(var(--sar) + 12px);z-index:7;min-height:0;padding:0}

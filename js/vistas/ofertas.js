@@ -124,7 +124,7 @@ function campo(etiqueta, valor, { texto = false, vacio = 'Sin dato' } = {}) {
 
 export async function pintarOferta(raiz, id) {
   reemplazar(raiz, el('p', { class: 'estado', role: 'status' }, 'Cargando oferta…'));
-  let o = null, d = null;
+  let o, d;
   try { d = await datosRondas(); o = d.ofertas.find(x => x.id === id) || null; }
   catch (err) {
     reemplazar(raiz, volverAOfertas(), tarjetaError(err, () => { recargar().catch(() => {}); pintarOferta(raiz, id); }));

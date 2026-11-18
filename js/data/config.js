@@ -10,7 +10,7 @@ export const CONFIG = {
     Rondas: new URL('../../datos-mock/Rondas.csv', import.meta.url).href,
     Aplicaciones: new URL('../../datos-mock/Aplicaciones.csv', import.meta.url).href,
     Historial: new URL('../../datos-mock/Historial.csv', import.meta.url).href,
-    // Hojas opcionales con las reglas del match (3E)
+    // Hojas opcionales con las reglas del match
     paises: new URL('../../datos-mock/Paises.csv', import.meta.url).href,
     areas: new URL('../../datos-mock/Areas.csv', import.meta.url).href,
     afinidad: new URL('../../datos-mock/Afinidad.csv', import.meta.url).href,

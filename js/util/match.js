@@ -14,8 +14,8 @@
 import { norm } from './texto.js';
 
 export const UE_EEE = 'Unión Europea (UE/EEE)';   // valor que puede pedir una oferta (fila de la lista Nacionalidad del Sheet)
-export const SITUACION_UE = 'Ciudadano UE o español';
-export const SUIZA = 'Suiza';
+const SITUACION_UE = 'Ciudadano UE o español';
+const SUIZA = 'Suiza';
 const PIDE_PERMISO = 'Permiso de trabajo en vigor';
 
 // Pesos fijos de cada criterio (suman 100). Documentados en docs/REGLAS-MATCH.md.
@@ -50,7 +50,7 @@ const COMODIN = new Set(['', '*', 'cualquiera', 'cualquier', 'todas', 'todos']);
 const claveParAreas = (a, b) => [norm(a), norm(b)].sort().join('|');
 
 // Reglas de respaldo (las de siempre) por si la hoja «Reglas migratorias» no existe o no tiene filas válidas.
-export const REGLAS_POR_DEFECTO = [
+const REGLAS_POR_DEFECTO = [
   { situacion: SITUACION_UE, tipo: '', lugar: '', resultado: 'Cumple', motivo: 'Pide permiso de trabajo en vigor y es ciudadano de la UE o español.', fecha: '' },
   { situacion: 'Residente con permiso de trabajo', tipo: '', lugar: '', resultado: 'Cumple', motivo: 'Pide permiso de trabajo en vigor y es residente con permiso.', fecha: '' },
   { situacion: 'Permiso de estudiante', tipo: '', lugar: '', resultado: 'Revisar', motivo: 'La oferta pide permiso de trabajo en vigor y {alumno} aparece como «Permiso de estudiante». Un permiso de estudiante puede valer para unas prácticas: conviene revisarlo.', fecha: '' },
@@ -301,7 +301,7 @@ export function criterioIdiomas(alumno, oferta) {
   if (!medidos) return sinDatos('idiomas', `No hay dato de los niveles de idioma: ${partes.join('; ')}.`);
   const frac = suma / medidos;
   const estado = frac === 0 ? 'no' : frac === 1 && !sinNivel ? 'ok' : 'revisar';
-  return crit('idiomas', estado, `${partes.join('; ')}.`, { factor: frac });   // v28: sin el «Idiomas:» del principio (el rótulo «Idiomas · Revisar:» ya lo dice)
+  return crit('idiomas', estado, `${partes.join('; ')}.`, { factor: frac });   // Sin el «Idiomas:» del principio (el rótulo «Idiomas · Revisar:» ya lo dice)
 }
 
 // Nivel de formación: lo que pide la oferta (Grado, Máster, Doctorado) frente a la «Formación previa» del alumno (texto libre: se buscan esas palabras).

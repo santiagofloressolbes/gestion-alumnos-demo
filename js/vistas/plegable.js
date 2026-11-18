@@ -5,7 +5,7 @@ import { el } from '../util/dom.js';
 import { desplegable } from './desplegable.js';
 
 const K = 'gad.ajustes';
-export const ABIERTAS_POR_DEFECTO = Object.freeze(['conexion']);
+const ABIERTAS_POR_DEFECTO = Object.freeze(['conexion']);
 const CLAVE_VALIDA = /^[a-z-]{1,20}$/;
 
 export function abiertas() {

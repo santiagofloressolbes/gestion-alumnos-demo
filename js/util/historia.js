@@ -5,7 +5,7 @@
 
 export const CAMPOS_HISTORIA = ['subareasExperiencia', 'etiquetas', 'idiomas', 'formacionPrevia'];
 
-// v27: la historia es corta y solo dice lo que NO sale ya en las líneas de debajo del perfil. El programa, el área a la que quiere ir, el área de experiencia
+// La historia es corta y solo dice lo que NO sale ya en las líneas de debajo del perfil. El programa, el área a la que quiere ir, el área de experiencia
 // y qué busca ya tienen su propia línea («Programa», «Quiere ir a», «Experiencia en», «Busca»), así que aquí no se repiten ni se leen.
 const MAX_SUBAREAS = 3, MAX_ETIQUETAS = 6, MAX_IDIOMAS = 5, MAX_FORMACION = 120;
 

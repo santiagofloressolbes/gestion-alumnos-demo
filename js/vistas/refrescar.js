@@ -1,24 +1,24 @@
-// Botón "Actualizar datos" (v28): arriba a la derecha de la cabecera. Vuelve a leer el Sheet sin cerrar la app.
+// Botón "Actualizar datos": arriba a la derecha de la cabecera. Vuelve a leer el Sheet sin cerrar la app.
 // Se oculta donde se podría perder lo que se está escribiendo (formularios, notas de entrevista, borrador de correo) y en la demo.
 // Mientras carga gira; si falla, dice por qué y los datos anteriores se quedan. No guarda nada en el móvil. Sin recarga automática.
 import { refrescar, getModo } from '../data/index.js';
 import { navegacion } from '../util/navegacion.js';
 
 // Pantallas de formulario: nunca se enseña el botón.
-export const VISTAS_SIN_BOTON = ['acceso', 'oferta-form', 'ronda-form', 'aplicacion-form', 'estado-form'];
+const VISTAS_SIN_BOTON = ['acceso', 'oferta-form', 'ronda-form', 'aplicacion-form', 'estado-form'];
 const AVISO_OK_MS = 3000;
 
 // ¿Hay algo escrito (o por escribir) en la pantalla visible? Notas de entrevista, borrador de correo, formularios o cambios sin guardar.
-export function hayFormularioAbierto(doc = document) {
+function hayFormularioAbierto(doc = document) {
   return navegacion.sinGuardar || !!doc.querySelector('#main .view.on textarea, #main .view.on form');
 }
 
 // "vista" = la pantalla actual (p. ej. 'inicio'); devuelve si el botón debe verse.
-export function botonVisible(vista, doc = document) {
+function botonVisible(vista, doc = document) {
   return getModo() === 'script' && !VISTAS_SIN_BOTON.includes(vista) && !hayFormularioAbierto(doc);
 }
 
-// El texto del error (v29): siempre dos frases cortas, sin repetir «no se ha podido»; los datos de antes se siguen viendo.
+// El texto del error: siempre dos frases cortas, sin repetir «no se ha podido»; los datos de antes se siguen viendo.
 export function textoError(e) {
   if (e?.codigo === 'red') return 'Sin conexión: se siguen viendo los datos anteriores. Vuelve a intentarlo cuando tengas internet.';
   if (e?.codigo === 'tiempo') return 'Google tarda demasiado en responder: se siguen viendo los datos anteriores. Vuelve a intentarlo en un momento.';

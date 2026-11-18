@@ -4,7 +4,7 @@ import { VERSION } from '../version.js';
 const ESPERA_ACTIVAR_MS = 20000;
 
 // La versión que hay publicada ahora: se lee de sw.js, siempre de la red (nunca de la copia guardada).
-export async function versionPublicada() {
+async function versionPublicada() {
   const r = await fetch('sw.js?comprobar=' + Date.now(), { cache: 'no-store', credentials: 'omit', referrerPolicy: 'no-referrer' });
   if (!r.ok) throw new Error('http');
   const m = /gestion-alumnos-demo-v(\d+)/.exec(await r.text());
