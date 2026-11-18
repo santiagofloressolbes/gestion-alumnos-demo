@@ -3,7 +3,7 @@
 import { el, svgFlecha, plural } from '../util/dom.js';
 import { desplegable } from './desplegable.js';
 import { emparejar, ofertasParaAlumno, contextoDe, CATEGORIAS, NUCLEO } from '../util/match.js';
-import { nombreAlumno } from '../util/rondas.js';
+import { nombreAlumno, claseEstado, solicitantesDeOferta } from '../util/rondas.js';
 import { navegacion } from '../util/navegacion.js';
 import { MAX_PERFILES } from '../util/compartir.js';
 
@@ -146,7 +146,7 @@ function avisosDeTarjeta(ctx) {
 export function tarjetaAlumnosQueEncajan(oferta, d) {
   const ctx = contextoDe(d.listas);
   const res = emparejar(d.alumnos, oferta, ctx);
-  const yaTiene = new Set(d.aplicaciones.filter(a => a.idOferta === oferta.id).map(a => a.idAlumno));
+  const solicito = new Map(solicitantesDeOferta(d.aplicaciones, d.alumnos, oferta.id).filas.map(f => [f.idAlumno, f.app]));   // su solicitud más reciente en esta oferta
 
   // Alumnos marcados para compartir su perfil (solo en memoria; al cambiar de oferta se empieza de cero).
   const sel = new Set(navegacion.compartir?.idOferta === oferta.id ? navegacion.compartir.ids.filter(id => d.alumnos.some(a => a.id === id)) : []);
@@ -176,7 +176,8 @@ export function tarjetaAlumnosQueEncajan(oferta, d) {
         el('a', { class: 'alumno oferta', href: '#/alumno/' + encodeURIComponent(a.id) },
           el('span', { class: 'alumno-texto' },
             el('b', {}, nombreAlumno(a)),
-            el('span', { class: 'sub' }, [a.master, yaTiene.has(a.id) && 'ya tiene solicitud en esta oferta'].filter(Boolean).join(' · ')),
+            el('span', { class: 'sub' }, a.master || ''),
+            solicito.has(a.id) && el('span', { class: 'oferta-pie marca-solicito' }, el('span', { class: 'insignia' + claseEstado(solicito.get(a.id).estado) }, 'Solicitó · ' + (solicito.get(a.id).estado || 'Sin dato'))),
             el('span', { class: 'sub match-punt g-' + r.categoria }, textoPuntuacion(r.puntuacion, r.categoria)),
             motivo(r)),
           svgFlecha()),

@@ -1,6 +1,6 @@
 // v32: «Quién ha solicitado» en la ficha de la oferta y la marca «Solicitó · estado» en «Alumnos que encajan».
 // Demo, oferta O002: 5 solicitudes de 4 alumnos en 2 rondas (Mateo Ferrer en Entrevista, Lucía Quintero En revisión y con match «Encaja poco»,
-// Paula Marín en dos rondas —Descartada en la 1 y Recibida en la 2— y Adrián O'Connor Descartado). Con canarios en un motivo de descarte y en unas notas.
+// Adrián O'Connor en dos rondas —Descartado en la 1 y Recibida en la 2— y Paula Marín Descartada). Con canarios en un motivo de descarte y en unas notas.
 import { nuevo, chk, terminar, BASE } from './ayudas.mjs';
 
 const entrar = async ({ ancho = 390, alto = 800 } = {}) => {
@@ -61,21 +61,42 @@ console.log('2. Sin solicitudes: la tarjeta no aparece');
   await ctx.close();
 }
 
-console.log('3. A 320 px: nada se sale');
+console.log('3. La marca «Solicitó · estado» en «Alumnos que encajan»');
+{
+  const { pg, ctx } = await entrar();
+  await ir(pg, '#/oferta/O002', '#match-alumnos');
+  await pg.evaluate(() => document.querySelectorAll('#match-alumnos details').forEach(d => { d.open = true; }));
+  const marcas = await pg.evaluate(() => [...document.querySelectorAll('#match-alumnos .fila-match')].filter(f => f.querySelector('.marca-solicito')).map(f => f.querySelector('b').textContent + ' → ' + f.querySelector('.marca-solicito').textContent + ' [' + f.closest('details').dataset.grupo + ']'));
+  chk(marcas.length === 4, 'cuatro alumnos llevan la marca: ' + marcas.join(' · '));
+  chk(marcas.some(m => /Lucía Quintero → Solicitó · En revisión \[no\]/.test(m)), 'Lucía Quintero: «Solicitó · En revisión», dentro de «Encaja poco»');
+  chk(marcas.some(m => /Adrián O.Connor → Solicitó · Recibida/.test(m)), 'Adrián O’Connor (en dos rondas): su estado más reciente, «Solicitó · Recibida»');
+  chk(marcas.some(m => /Mateo Ferrer → Solicitó · Entrevista/.test(m)) && marcas.some(m => /Paula Marín → Solicitó · Descartado/.test(m)), 'Entrevista y Descartado también');
+  chk(!/ya tiene solicitud/.test(await pg.innerText('#match-alumnos')), 'ya no sale el texto antiguo «ya tiene solicitud en esta oferta»');
+  chk(!/CANARIO|Escribió|eligió/.test(await pg.innerText('#match-alumnos')), 'la marca no lleva motivos ni notas');
+  const sinMarca = await pg.evaluate(() => [...document.querySelectorAll('#match-alumnos .fila-match')].filter(f => !f.querySelector('.marca-solicito')).length);
+  chk(sinMarca >= 20, 'el resto de alumnos no lleva marca (' + sinMarca + ')');
+  await ctx.close();
+}
+
+console.log('4. A 320 px: nada se sale');
 {
   const { pg, ctx } = await entrar({ ancho: 320, alto: 700 });
   await ir(pg, '#/oferta/O002', '#quien-solicito');
   chk(await sinScrollLateral(pg), 'la ficha de la oferta, sin scroll lateral');
   const caben = await pg.evaluate(() => {
     const raiz = document.querySelector('#main').getBoundingClientRect();
-    const fuera = [...document.querySelectorAll('#quien-solicito *')].filter(e => { const r = e.getBoundingClientRect(); return r.width > 0 && (r.right > raiz.right + 1 || r.left < raiz.left - 1); });
+    const fuera = [...document.querySelectorAll('#quien-solicito *, #match-alumnos .marca-solicito, #match-alumnos .marca-solicito *')].filter(e => { const r = e.getBoundingClientRect(); return r.width > 0 && (r.right > raiz.right + 1 || r.left < raiz.left - 1); });
     return fuera.map(e => e.tagName + '.' + e.className);
   });
-  chk(caben.length === 0, 'ningún elemento de la tarjeta se sale de la pantalla' + (caben.length ? ': ' + caben.slice(0, 4) : ''));
+  chk(caben.length === 0, 'ningún elemento de la tarjeta ni de las marcas se sale de la pantalla' + (caben.length ? ': ' + caben.slice(0, 4) : ''));
+  await pg.evaluate(() => document.querySelectorAll('#match-alumnos details').forEach(d => { d.open = true; }));
+  // la marca más larga posible: «Solicitó · Enviada a la empresa»
+  await pg.evaluate(() => { const b = document.querySelector('#match-alumnos .marca-solicito .insignia'); b.textContent = 'Solicitó · Enviada a la empresa'; });
+  chk(await sinScrollLateral(pg), 'con «Solicitó · Enviada a la empresa» (la marca más larga), sin scroll lateral');
   await ctx.close();
 }
 
-console.log('4. Muchos alumnos y varias rondas («Ver más»)');
+console.log('5. Muchos alumnos y varias rondas («Ver más»)');
 {
   const { pg, ctx } = await entrar({ ancho: 320, alto: 700 });
   await ir(pg, '#/', '#main');
